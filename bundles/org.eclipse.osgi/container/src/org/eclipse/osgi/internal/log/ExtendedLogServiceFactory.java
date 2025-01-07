@@ -10,15 +10,22 @@
  ******************************************************************************/
 package org.eclipse.osgi.internal.log;
 
+import static org.eclipse.osgi.internal.log.EquinoxLogServices.EQUINOX_LOGGER_NAME;
+import static org.eclipse.osgi.internal.log.EquinoxLogServices.PERF_LOGGER_NAME;
+
 import java.security.AccessController;
 import java.security.Permission;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.eclipse.equinox.log.ExtendedLogService;
 import org.eclipse.equinox.log.LogPermission;
 import org.eclipse.osgi.framework.util.SecureAction;
+import org.eclipse.osgi.internal.debug.Debug;
+import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
+import org.eclipse.osgi.service.debug.DebugOptions;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
@@ -38,15 +45,25 @@ public class ExtendedLogServiceFactory implements ServiceFactory<ExtendedLogServ
 	final ExtendedLogReaderServiceFactory logReaderServiceFactory;
 	private final LoggerAdmin loggerAdmin = new EquinoxLoggerAdmin();
 	private final boolean captureLogEntryLocation;
+	final EquinoxConfiguration equinoxConfiguration;
+	final ExtendedLogServiceImpl systemBundleLog;
 
 	public ExtendedLogServiceFactory(ExtendedLogReaderServiceFactory logReaderServiceFactory,
-			boolean captureLogEntryLocation) {
+			EquinoxConfiguration equinoxConfiguration, Bundle systemBundle) {
 		this.logReaderServiceFactory = logReaderServiceFactory;
-		this.captureLogEntryLocation = captureLogEntryLocation;
+		this.equinoxConfiguration = equinoxConfiguration;
+		String captureEntryLocationConfigProp = equinoxConfiguration
+				.getConfiguration(EquinoxConfiguration.PROP_LOG_CAPTURE_ENTRY_LOCATION, "true"); //$NON-NLS-1$
+		this.captureLogEntryLocation = "true".equals(captureEntryLocationConfigProp); //$NON-NLS-1$
+		this.systemBundleLog = getLogService(systemBundle);
 	}
 
 	boolean captureLogEntryLocation() {
 		return captureLogEntryLocation;
+	}
+
+	EquinoxConfiguration getConfiguration() {
+		return equinoxConfiguration;
 	}
 
 	@Override
@@ -191,8 +208,15 @@ public class ExtendedLogServiceFactory implements ServiceFactory<ExtendedLogServ
 			}
 		}
 
+		Map<String, LogLevel> getEffectiveLogLevels() {
+			Map<String, LogLevel> effectiveLogLevels = loggerContextTargetMap.getRootLoggerContext().getLogLevels();
+			effectiveLogLevels.putAll(getLogLevels());
+			return effectiveLogLevels;
+		}
+
 		@Override
 		public void setLogLevels(Map<String, LogLevel> logLevels) {
+			EquinoxLoggerContext systemBundleLoggerContext = null;
 			boolean readLocked = false;
 			try {
 				contextsLock.writeLock().lock();
@@ -205,12 +229,43 @@ public class ExtendedLogServiceFactory implements ServiceFactory<ExtendedLogServ
 				} finally {
 					contextsLock.writeLock().unlock();
 				}
-				loggerContextTargetMap.applyLogLevels(this);
+				systemBundleLoggerContext = loggerContextTargetMap.applyLogLevels(this);
 			} finally {
 				if (readLocked) {
 					contextsLock.readLock().unlock();
 				}
 			}
+			// enable outside of any locks to avoid deadlock on the contextsLock
+			enableEquinoxTrace(systemBundleLoggerContext);
+		}
+
+		private void enableEquinoxTrace(EquinoxLoggerContext systemBundleLoggerContext) {
+			if (systemBundleLoggerContext == null) {
+				return;
+			}
+			Map<String, LogLevel> logLevels = systemBundleLoggerContext.getEffectiveLogLevels();
+			LogLevel equinoxTrace = logLevels.remove(Debug.EQUINOX_TRACE);
+			if (equinoxTrace != LogLevel.TRACE) {
+				return;
+			}
+			DebugOptions debugOptions = getConfiguration().getDebugOptions();
+			Map<String, String> options = debugOptions.getOptions();
+			options.clear();
+			boolean enable = false;
+			for (Entry<String, LogLevel> level : logLevels.entrySet()) {
+				if (level.getValue() == LogLevel.TRACE
+						&& !(EQUINOX_LOGGER_NAME.equals(level.getKey()) || PERF_LOGGER_NAME.equals(level.getKey()))) {
+					options.put(level.getKey(), Boolean.TRUE.toString());
+					enable = true;
+				}
+			}
+			debugOptions.setOptions(options);
+			if (enable) {
+				equinoxConfiguration.getDebug().setLogService(systemBundleLog);
+			} else {
+				equinoxConfiguration.getDebug().setLogService(null);
+			}
+			debugOptions.setDebugEnabled(enable);
 		}
 
 		@Override
@@ -227,6 +282,10 @@ public class ExtendedLogServiceFactory implements ServiceFactory<ExtendedLogServ
 				contextsLock.readLock().unlock();
 			}
 		}
+	}
+
+	ExtendedLogServiceImpl getSystemBundleLog() {
+		return systemBundleLog;
 	}
 
 }

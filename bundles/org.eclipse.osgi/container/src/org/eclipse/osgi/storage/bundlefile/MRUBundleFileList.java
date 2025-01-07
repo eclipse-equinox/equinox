@@ -14,6 +14,8 @@
 
 package org.eclipse.osgi.storage.bundlefile;
 
+import static org.eclipse.osgi.internal.debug.Debug.OPTION_DEBUG_BUNDLE_FILE;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
@@ -228,7 +230,8 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 			int pendingNum = pending.get();
 			if (pendingNum > fileLimit) {
 				if (debug.DEBUG_BUNDLE_FILE) {
-					Debug.println("MRUBundleFileList: Applying back pressure before opening: " + toString()); //$NON-NLS-1$
+					debug.trace(OPTION_DEBUG_BUNDLE_FILE,
+							"MRUBundleFileList: Applying back pressure before opening: " + toString()); //$NON-NLS-1$
 				}
 				// delay to allow the closer to catchup
 				try {
@@ -246,7 +249,7 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 		if (toRemove == null)
 			return;
 		if (debug.DEBUG_BUNDLE_FILE) {
-			Debug.println("MRUBundleFileList: about to close bundle file: " + toRemove); //$NON-NLS-1$
+			debug.trace(OPTION_DEBUG_BUNDLE_FILE, "MRUBundleFileList: about to close bundle file: " + toRemove); //$NON-NLS-1$
 		}
 		try {
 			/* queue to hold set of listeners */
@@ -260,7 +263,7 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 			// failing to queue a bundle close should not cause an error (bug 283797)
 			// TODO should consider logging
 			if (debug.DEBUG_BUNDLE_FILE) {
-				Debug.printStackTrace(t);
+				debug.traceThrowable(OPTION_DEBUG_BUNDLE_FILE, t);
 			}
 		}
 	}

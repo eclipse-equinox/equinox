@@ -15,6 +15,7 @@
 
 package org.eclipse.osgi.storage;
 
+import static org.eclipse.osgi.internal.debug.Debug.OPTION_DEBUG_STORAGE;
 import static org.eclipse.osgi.service.environment.Constants.OS_ZOS;
 
 import java.io.File;
@@ -34,7 +35,6 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Set;
 import java.util.stream.Stream;
-
 import org.eclipse.osgi.framework.internal.reliablefile.ReliableFile;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.osgi.framework.BundleContext;
@@ -90,7 +90,7 @@ public class StorageUtil {
 	 * @param file file or directory to delete
 	 * @return false is the specified files still exists, true otherwise.
 	 */
-	public static boolean rm(File file, boolean DEBUG) {
+	public static boolean rm(File file, Debug debug) {
 		Path path = file.toPath();
 		if (!Files.exists(path)) {
 			return true;
@@ -99,23 +99,23 @@ public class StorageUtil {
 			Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
 				@Override
 				public FileVisitResult visitFile(Path f, BasicFileAttributes attrs) {
-					return delete(f, DEBUG);
+					return delete(f);
 				}
 
 				@Override
 				public FileVisitResult postVisitDirectory(Path dir, IOException exc) {
-					return delete(dir, DEBUG);
+					return delete(dir);
 				}
 
-				private FileVisitResult delete(Path pathToDelete, boolean debug) {
+				private FileVisitResult delete(Path pathToDelete) {
 					try {
-						if (debug) {
-							Debug.println("rm " + pathToDelete); //$NON-NLS-1$
+						if (debug.DEBUG_STORAGE) {
+							debug.trace(OPTION_DEBUG_STORAGE, "rm " + pathToDelete); //$NON-NLS-1$
 						}
 						Files.delete(pathToDelete);
 					} catch (IOException e) {
-						if (debug) {
-							Debug.println("  rm failed:" + e.getMessage()); //$NON-NLS-1$
+						if (debug.DEBUG_STORAGE) {
+							debug.trace(OPTION_DEBUG_STORAGE, "  rm failed:" + e.getMessage()); //$NON-NLS-1$
 						}
 					}
 					return FileVisitResult.CONTINUE;
@@ -218,21 +218,21 @@ public class StorageUtil {
 		return classbytes;
 	}
 
-	public static void move(File from, File to, boolean DEBUG) throws IOException {
+	public static void move(File from, File to, Debug debug) throws IOException {
 		try {
 			Files.move(from.toPath(), to.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
 		} catch (IOException e) {
-			if (DEBUG) {
-				Debug.println("Failed to move atomically: " + from + " to " + to); //$NON-NLS-1$ //$NON-NLS-2$
+			if (debug.DEBUG_STORAGE) {
+				debug.trace(OPTION_DEBUG_STORAGE, "Failed to move atomically: " + from + " to " + to); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			// remove in case it failed because the target to non-empty directory or
 			// the target type does not match the from
-			rm(to, DEBUG);
+			rm(to, debug);
 			// also, try without atomic operation
 			Files.move(from.toPath(), to.toPath(), StandardCopyOption.REPLACE_EXISTING);
 		}
-		if (DEBUG) {
-			Debug.println("Successfully moved file: " + from + " to " + to); //$NON-NLS-1$ //$NON-NLS-2$
+		if (debug.DEBUG_STORAGE) {
+			debug.trace(OPTION_DEBUG_STORAGE, "Successfully moved file: " + from + " to " + to); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 

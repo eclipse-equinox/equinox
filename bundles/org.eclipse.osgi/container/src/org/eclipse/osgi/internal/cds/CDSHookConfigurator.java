@@ -22,8 +22,9 @@
 
 package org.eclipse.osgi.internal.cds;
 
-import java.util.function.Supplier;
+import static org.eclipse.osgi.internal.debug.Debug.OPTION_DEBUG_LOADER_CDS;
 
+import java.util.function.Supplier;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
@@ -40,7 +41,7 @@ public class CDSHookConfigurator implements HookConfigurator {
 
 	static void print(Debug debug, Supplier<String> msg) {
 		if (debug.DEBUG_LOADER_CDS) {
-			Debug.println(msg.get());
+			debug.trace(OPTION_DEBUG_LOADER_CDS, msg.get());
 		}
 	}
 	@Override

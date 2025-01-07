@@ -14,15 +14,31 @@
  *******************************************************************************/
 package org.eclipse.core.runtime.adaptor;
 
-import java.io.*;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Method;
-import java.net.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
-import org.eclipse.core.runtime.internal.adaptor.*;
+import org.eclipse.core.runtime.internal.adaptor.ConsoleManager;
+import org.eclipse.core.runtime.internal.adaptor.DefaultStartupMonitor;
+import org.eclipse.core.runtime.internal.adaptor.EclipseAppLauncher;
 import org.eclipse.osgi.container.Module;
 import org.eclipse.osgi.container.ModuleRevision;
 import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
@@ -44,7 +60,18 @@ import org.eclipse.osgi.service.runnable.StartupMonitor;
 import org.eclipse.osgi.storage.url.reference.Handler;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleEvent;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.BundleListener;
+import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.FrameworkListener;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.SynchronousBundleListener;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.startlevel.FrameworkStartLevel;
@@ -397,8 +424,9 @@ public class EclipseStarter {
 			try {
 				return Integer.parseInt(level);
 			} catch (NumberFormatException e) {
-				if (debug)
+				if (debug) {
 					Debug.println("Start level = " + level + "  parsed. Using hardcoded default: 6"); //$NON-NLS-1$ //$NON-NLS-2$
+				}
 			}
 		return DEFAULT_INITIAL_STARTLEVEL;
 	}
@@ -655,8 +683,9 @@ public class EclipseStarter {
 		Bundle[] lazyInitBundles = lazyActivationBundles.toArray(new Bundle[lazyActivationBundles.size()]);
 		startBundles(startInitBundles, lazyInitBundles);
 
-		if (debug)
+		if (debug) {
 			Debug.println("Time to load bundles: " + (System.currentTimeMillis() - startTime)); //$NON-NLS-1$
+		}
 		return startInitBundles;
 	}
 

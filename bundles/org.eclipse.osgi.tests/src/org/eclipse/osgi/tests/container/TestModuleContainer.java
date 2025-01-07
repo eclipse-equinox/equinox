@@ -27,7 +27,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -82,7 +81,6 @@ import org.eclipse.osgi.container.builders.OSGiManifestBuilderFactory;
 import org.eclipse.osgi.container.namespaces.EclipsePlatformNamespace;
 import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
 import org.eclipse.osgi.framework.util.ThreadInfoReport;
-import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.report.resolution.ResolutionReport;
 import org.eclipse.osgi.tests.container.dummys.DummyCollisionHook;
@@ -1879,20 +1877,15 @@ public class TestModuleContainer extends AbstractTest {
 		ModuleWire dynamicWire = container.resolveDynamic("uses1", uses_c_dynamic.getCurrentRevision());
 		assertNotNull("No dynamic wire.", dynamicWire);
 
-		PrintStream originalOut = Debug.out;
-		ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
-		PrintStream testOut = new PrintStream(bytesOut);
-		Debug.out = testOut;
-		try {
-			dynamicWire = container.resolveDynamic("uses2", uses_c_dynamic.getCurrentRevision());
-			assertNull("Dynamic wire found.", dynamicWire);
-		} finally {
-			Debug.out = originalOut;
-			testOut.close();
-		}
-		String traceOutput = bytesOut.toString();
-		assertTrue("Wrong traceOutput: " + traceOutput,
-				traceOutput.startsWith("org.apache.felix.resolver.reason.ReasonException"));
+		dynamicWire = container.resolveDynamic("uses2", uses_c_dynamic.getCurrentRevision());
+		assertNull("Dynamic wire found.", dynamicWire);
+
+		List<String> messages = adaptor.getTraceMessages();
+		assertEquals("Did not expect messages", 0, messages.size());
+		List<Throwable> throwables = adaptor.getTraceThrowables();
+		assertEquals("Expected a resolution exception.", 1, throwables.size());
+		assertEquals("Expected a resolution exception.", "org.apache.felix.resolver.reason.ReasonException",
+				throwables.get(0).getClass().getName());
 	}
 
 	/*

@@ -15,6 +15,10 @@
 
 package org.eclipse.osgi.storage.bundlefile;
 
+import static org.eclipse.osgi.internal.debug.Debug.OPTION_DEBUG_BUNDLE_FILE;
+import static org.eclipse.osgi.internal.debug.Debug.OPTION_DEBUG_BUNDLE_FILE_CLOSE;
+import static org.eclipse.osgi.internal.debug.Debug.OPTION_DEBUG_BUNDLE_FILE_OPEN;
+
 import java.io.File;
 import java.io.FilterInputStream;
 import java.io.IOException;
@@ -146,7 +150,7 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 				doOpen();
 				closed = false;
 				if (debug.DEBUG_BUNDLE_FILE_OPEN) {
-					Debug.println("OPENED bundle file - " + toString()); //$NON-NLS-1$
+					debug.trace(OPTION_DEBUG_BUNDLE_FILE_OPEN, "OPENED bundle file - " + toString()); //$NON-NLS-1$
 				}
 			}
 		} else {
@@ -211,7 +215,7 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 					if (nested.exists()) {
 						/* the entry is already cached */
 						if (debug.DEBUG_BUNDLE_FILE)
-							Debug.println("File already present: " + nested.getPath()); //$NON-NLS-1$
+							debug.trace(OPTION_DEBUG_BUNDLE_FILE, "File already present: " + nested.getPath()); //$NON-NLS-1$
 						if (nested.isDirectory())
 							// must ensure the complete directory is extracted (bug 182585)
 							extractDirectory(bEntry.getName());
@@ -220,7 +224,8 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 							nested.mkdirs();
 							if (!nested.isDirectory()) {
 								if (debug.DEBUG_BUNDLE_FILE)
-									Debug.println("Unable to create directory: " + nested.getPath()); //$NON-NLS-1$
+									debug.trace(OPTION_DEBUG_BUNDLE_FILE,
+											"Unable to create directory: " + nested.getPath()); //$NON-NLS-1$
 								throw new IOException(
 										NLS.bind(Msg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION, nested.getAbsolutePath()));
 							}
@@ -237,7 +242,7 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 				}
 			} catch (IOException | StorageException e) {
 				if (debug.DEBUG_BUNDLE_FILE)
-					Debug.printStackTrace(e);
+					debug.traceThrowable(Debug.OPTION_DEBUG_BUNDLE_FILE, e);
 				generation.getBundleInfo().getStorage().getLogServices().log(EquinoxContainer.NAME,
 						FrameworkLogEntry.ERROR,
 						"Unable to extract content: " + generation.getRevision() + ": " + entry, e); //$NON-NLS-1$ //$NON-NLS-2$
@@ -379,7 +384,7 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 				mruListRemove();
 				postClose();
 				if (debug.DEBUG_BUNDLE_FILE_CLOSE) {
-					Debug.println("CLOSED bundle file - " + toString()); //$NON-NLS-1$
+					debug.trace(OPTION_DEBUG_BUNDLE_FILE_CLOSE, "CLOSED bundle file - " + toString()); //$NON-NLS-1$
 				}
 			}
 		} finally {

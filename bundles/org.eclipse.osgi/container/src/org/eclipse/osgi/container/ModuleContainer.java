@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.container;
 
+import static org.eclipse.osgi.internal.debug.Debug.OPTION_DEBUG_STARTLEVEL;
+
 import java.io.Closeable;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -86,7 +88,6 @@ import org.osgi.resource.Requirement;
 import org.osgi.resource.Resource;
 import org.osgi.resource.Wire;
 import org.osgi.service.resolver.ResolutionException;
-
 /**
  * A container for installing, updating, uninstalling and resolve modules.
  * 
@@ -1828,7 +1829,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 
 		void setDebugOptions() {
 			DebugOptions options = getAdaptor().getDebugOptions();
-			debugStartLevel = options == null ? false : options.getBooleanOption(Debug.OPTION_DEBUG_STARTLEVEL, false);
+			debugStartLevel = options == null ? false : options.getBooleanOption(OPTION_DEBUG_STARTLEVEL, false);
 		}
 
 		@Override
@@ -1881,7 +1882,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 				throw new IllegalStateException(Msg.ModuleContainer_SystemNotActiveError);
 			}
 			if (debugStartLevel) {
-				Debug.println("StartLevel: setStartLevel: " + startlevel); //$NON-NLS-1$
+				getAdaptor().trace(OPTION_DEBUG_STARTLEVEL, "StartLevel: setStartLevel: " + startlevel); //$NON-NLS-1$
 			}
 			// queue start level operation in the background
 			// notice that we only do one start level operation at a time
@@ -1916,14 +1917,16 @@ public final class ModuleContainer implements DebugOptionsListener {
 				break;
 			case MODULE_STARTLEVEL:
 				if (debugStartLevel) {
-					Debug.println("StartLevel: changing bundle startlevel; " + toString(module) + "; newSL=" //$NON-NLS-1$ //$NON-NLS-2$
+					getAdaptor().trace(OPTION_DEBUG_STARTLEVEL,
+							"StartLevel: changing bundle startlevel; " + toString(module) + "; newSL=" //$NON-NLS-1$ //$NON-NLS-2$
 							+ startlevel + "; activeSL=" + getStartLevel()); //$NON-NLS-1$
 				}
 				try {
 					if (getStartLevel() < startlevel) {
 						if (Module.ACTIVE_SET.contains(module.getState())) {
 							if (debugStartLevel) {
-								Debug.println("StartLevel: stopping bundle; " + toString(module) + "; with startLevel=" //$NON-NLS-1$ //$NON-NLS-2$
+								getAdaptor().trace(OPTION_DEBUG_STARTLEVEL,
+										"StartLevel: stopping bundle; " + toString(module) + "; with startLevel=" //$NON-NLS-1$ //$NON-NLS-2$
 										+ startlevel);
 							}
 							// Note that we don't need to hold the state change lock
@@ -1934,7 +1937,8 @@ public final class ModuleContainer implements DebugOptionsListener {
 						}
 					} else {
 						if (debugStartLevel) {
-							Debug.println("StartLevel: resuming bundle; " + toString(module) + "; with startLevel=" //$NON-NLS-1$ //$NON-NLS-2$
+							getAdaptor().trace(OPTION_DEBUG_STARTLEVEL,
+									"StartLevel: resuming bundle; " + toString(module) + "; with startLevel=" //$NON-NLS-1$ //$NON-NLS-2$
 									+ startlevel);
 						}
 						module.start(StartOptions.TRANSIENT_IF_AUTO_START, StartOptions.TRANSIENT_RESUME);
@@ -1979,7 +1983,8 @@ public final class ModuleContainer implements DebugOptionsListener {
 							int toStartLevel = i + 1;
 							activeStartLevel.set(toStartLevel);
 							if (debugStartLevel) {
-								Debug.println("StartLevel: incremented active start level to; " + toStartLevel); //$NON-NLS-1$
+								getAdaptor().trace(OPTION_DEBUG_STARTLEVEL,
+										"StartLevel: incremented active start level to; " + toStartLevel); //$NON-NLS-1$
 							}
 							if (sorted == null || currentTimestamp != moduleDatabase.getTimestamp()) {
 								moduleDatabase.readLock();
@@ -2003,7 +2008,8 @@ public final class ModuleContainer implements DebugOptionsListener {
 							int toStartLevel = i - 1;
 							activeStartLevel.set(toStartLevel);
 							if (debugStartLevel) {
-								Debug.println("StartLevel: decremented active start level to " + toStartLevel); //$NON-NLS-1$
+								getAdaptor().trace(OPTION_DEBUG_STARTLEVEL,
+										"StartLevel: decremented active start level to " + toStartLevel); //$NON-NLS-1$
 							}
 							if (sorted == null || currentTimestamp != moduleDatabase.getTimestamp()) {
 								moduleDatabase.readLock();
@@ -2098,7 +2104,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 					public void run() {
 						try {
 							if (debugStartLevel) {
-								Debug.println(
+								getAdaptor().trace(OPTION_DEBUG_STARTLEVEL,
 										"StartLevel: resuming bundle; " + ContainerStartLevel.this.toString(module) //$NON-NLS-1$
 												+ "; with startLevel=" + toStartLevel); //$NON-NLS-1$
 							}
@@ -2137,7 +2143,8 @@ public final class ModuleContainer implements DebugOptionsListener {
 					try {
 						if (Module.ACTIVE_SET.contains(module.getState())) {
 							if (debugStartLevel) {
-								Debug.println("StartLevel: stopping bundle; " + toString(module) + "; with startLevel=" //$NON-NLS-1$ //$NON-NLS-2$
+								getAdaptor().trace(OPTION_DEBUG_STARTLEVEL,
+										"StartLevel: stopping bundle; " + toString(module) + "; with startLevel=" //$NON-NLS-1$ //$NON-NLS-2$
 										+ moduleStartLevel);
 							}
 							// Note that we don't need to hold the state change lock

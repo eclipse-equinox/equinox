@@ -13,9 +13,13 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.container.dummys;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledExecutorService;
@@ -44,6 +48,8 @@ public class DummyContainerAdaptor extends ModuleContainerAdaptor {
 	private final DebugOptions debugOptions;
 	private final AtomicReference<CountDownLatch> startLatch = new AtomicReference<>();
 	private final AtomicReference<CountDownLatch> stopLatch = new AtomicReference<>();
+	private final Queue<String> traceMessages = new ConcurrentLinkedQueue<>();
+	private final Queue<Throwable> traceThrowables = new ConcurrentLinkedQueue<>();
 	private volatile Executor resolverExecutor;
 	private volatile ScheduledExecutorService timeoutExecutor;
 
@@ -170,4 +176,21 @@ public class DummyContainerAdaptor extends ModuleContainerAdaptor {
 		this.stopLatch.set(stopLatch);
 	}
 
+	@Override
+	public void trace(String topic, String message) {
+		traceMessages.add(message);
+	}
+
+	@Override
+	public void traceThrowable(String topic, Throwable t) {
+		traceThrowables.add(t);
+	}
+
+	public List<String> getTraceMessages() {
+		return new ArrayList<>(traceMessages);
+	}
+
+	public List<Throwable> getTraceThrowables() {
+		return new ArrayList<>(traceThrowables);
+	}
 }

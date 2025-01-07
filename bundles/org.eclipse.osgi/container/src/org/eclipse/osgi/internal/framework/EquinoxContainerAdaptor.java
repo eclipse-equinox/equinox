@@ -40,6 +40,7 @@ import org.eclipse.osgi.container.ModuleRevisionBuilder;
 import org.eclipse.osgi.container.ModuleWiring;
 import org.eclipse.osgi.container.SystemModule;
 import org.eclipse.osgi.internal.container.AtomicLazyInitializer;
+import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.hookregistry.ClassLoaderHook;
 import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.eclipse.osgi.internal.loader.FragmentLoader;
@@ -56,6 +57,7 @@ import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 import org.osgi.framework.wiring.BundleRevision;
 
 public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
+	private final Debug debug;
 	private final EquinoxContainer container;
 	private final Storage storage;
 	private final OSGiFrameworkHooks hooks;
@@ -71,6 +73,7 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 
 	public EquinoxContainerAdaptor(EquinoxContainer container, Storage storage, Map<Long, Generation> initial) {
 		this.container = container;
+		this.debug = container.getConfiguration().getDebug();
 		this.storage = storage;
 		this.hooks = new OSGiFrameworkHooks(container, storage);
 		this.initial = initial;
@@ -430,5 +433,15 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 			ModuleRevisionBuilder builder, Object revisionInfo) {
 		Generation generation = (Generation) revisionInfo;
 		return generation.adaptModuleRevisionBuilder(operation, origin, builder);
+	}
+
+	@Override
+	public void trace(String topic, String message) {
+		debug.trace(topic, message);
+	}
+
+	@Override
+	public void traceThrowable(String topic, Throwable t) {
+		debug.traceThrowable(topic, t);
 	}
 }

@@ -13,6 +13,9 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.framework;
 
+import static org.eclipse.osgi.internal.debug.Debug.OPTION_DEBUG_SYSTEM_BUNDLE;
+import static org.eclipse.osgi.internal.debug.Debug.OPTION_MONITOR_ACTIVATION;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -226,7 +229,8 @@ public class EquinoxBundle implements Bundle, BundleReference {
 
 			void asyncStop() throws BundleException {
 				if (getEquinoxContainer().getConfiguration().getDebug().DEBUG_SYSTEM_BUNDLE) {
-					Debug.printStackTrace(new Exception("Framework has been requested to stop.")); //$NON-NLS-1$
+					getEquinoxContainer().getConfiguration().getDebug().traceThrowable(OPTION_DEBUG_SYSTEM_BUNDLE,
+							new Exception("Framework has been requested to stop.")); //$NON-NLS-1$
 				}
 				lockStateChange(ModuleEvent.STOPPED);
 				try {
@@ -253,7 +257,8 @@ public class EquinoxBundle implements Bundle, BundleReference {
 
 			void asyncUpdate() throws BundleException {
 				if (getEquinoxContainer().getConfiguration().getDebug().DEBUG_SYSTEM_BUNDLE) {
-					Debug.printStackTrace(new Exception("Framework has been requested to update (restart).")); //$NON-NLS-1$
+					getEquinoxContainer().getConfiguration().getDebug().traceThrowable(OPTION_DEBUG_SYSTEM_BUNDLE,
+							new Exception("Framework has been requested to update (restart).")); //$NON-NLS-1$
 				}
 				lockStateChange(ModuleEvent.UPDATED);
 				try {
@@ -288,14 +293,16 @@ public class EquinoxBundle implements Bundle, BundleReference {
 
 		@Override
 		public void init(FrameworkListener... listeners) throws BundleException {
+			Debug debug = getEquinoxContainer().getConfiguration().getDebug();
 			if (listeners != null) {
-				if (getEquinoxContainer().getConfiguration().getDebug().DEBUG_SYSTEM_BUNDLE) {
-					Debug.println("Initializing framework with framework listeners: " + listeners); //$NON-NLS-1$
+				if (debug.DEBUG_SYSTEM_BUNDLE) {
+					debug.trace(OPTION_DEBUG_SYSTEM_BUNDLE,
+							"Initializing framework with framework listeners: " + listeners); //$NON-NLS-1$
 				}
 				initListeners.addAll(Arrays.asList(listeners));
 			} else {
-				if (getEquinoxContainer().getConfiguration().getDebug().DEBUG_SYSTEM_BUNDLE) {
-					Debug.println("Initializing framework with framework no listeners"); //$NON-NLS-1$
+				if (debug.DEBUG_SYSTEM_BUNDLE) {
+					debug.trace(OPTION_DEBUG_SYSTEM_BUNDLE, "Initializing framework with framework no listeners"); //$NON-NLS-1$
 				}
 			}
 			try {
@@ -458,7 +465,8 @@ public class EquinoxBundle implements Bundle, BundleReference {
 	@Override
 	public void start(int options) throws BundleException {
 		if (options == 0 && equinoxContainer.getConfiguration().getDebug().MONITOR_ACTIVATION) {
-			Debug.printStackTrace(new Exception("A persistent start has been called on bundle: " + this)); //$NON-NLS-1$
+			equinoxContainer.getConfiguration().getDebug().traceThrowable(OPTION_MONITOR_ACTIVATION,
+					new Exception("A persistent start has been called on bundle: " + this)); //$NON-NLS-1$
 		}
 		module.start(getStartOptions(options));
 	}
@@ -485,7 +493,8 @@ public class EquinoxBundle implements Bundle, BundleReference {
 	@Override
 	public void stop(int options) throws BundleException {
 		if (options == 0 && equinoxContainer.getConfiguration().getDebug().MONITOR_ACTIVATION) {
-			Debug.printStackTrace(new Exception("A persistent stop has been called on bundle: " + this)); //$NON-NLS-1$
+			equinoxContainer.getConfiguration().getDebug().traceThrowable(OPTION_MONITOR_ACTIVATION,
+					new Exception("A persistent stop has been called on bundle: " + this)); //$NON-NLS-1$
 		}
 		module.stop(getStopOptions(options));
 	}

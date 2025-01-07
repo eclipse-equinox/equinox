@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.framework;
 
+import static org.eclipse.osgi.internal.debug.Debug.OPTION_DEBUG_HOOKS;
+
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
@@ -111,7 +113,7 @@ class OSGiFrameworkHooks {
 		void notifyCollisionHooksPriviledged(final int operationType, final Bundle target,
 				final Collection<Bundle> collisionCandidates) {
 			if (debug.DEBUG_HOOKS) {
-				Debug.println(
+				debug.trace(OPTION_DEBUG_HOOKS,
 						"notifyCollisionHooks(" + operationType + ", " + target + ", " + collisionCandidates + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			}
 			ServiceRegistry registry = container.getServiceRegistry();
@@ -159,9 +161,9 @@ class OSGiFrameworkHooks {
 
 		void handleHookException(Throwable t, Object hook, String method) {
 			if (debug.DEBUG_HOOKS) {
-				Debug.println(hook.getClass().getName() + "." + method + "() exception:"); //$NON-NLS-1$ //$NON-NLS-2$
+				debug.trace(OPTION_DEBUG_HOOKS, hook.getClass().getName() + "." + method + "() exception:"); //$NON-NLS-1$ //$NON-NLS-2$
 				if (t != null)
-					Debug.printStackTrace(t);
+					debug.traceThrowable(OPTION_DEBUG_HOOKS, t);
 			}
 			String message = NLS.bind(Msg.SERVICE_FACTORY_EXCEPTION, hook.getClass().getName(), method);
 			throw new RuntimeException(message, new BundleException(message, BundleException.REJECTED_BY_HOOK, t));
@@ -186,7 +188,7 @@ class OSGiFrameworkHooks {
 		@Override
 		public ResolverHook begin(Collection<BundleRevision> triggers) {
 			if (debug.DEBUG_HOOKS) {
-				Debug.println("ResolverHook.begin"); //$NON-NLS-1$
+				debug.trace(OPTION_DEBUG_HOOKS, "ResolverHook.begin"); //$NON-NLS-1$
 			}
 			ModuleContainer mContainer = storage.getModuleContainer();
 			Module systemModule = mContainer == null ? null : mContainer.getModule(0);
@@ -237,7 +239,7 @@ class OSGiFrameworkHooks {
 			@Override
 			public void filterResolvable(Collection<BundleRevision> candidates) {
 				if (debug.DEBUG_HOOKS) {
-					Debug.println("ResolverHook.filterResolvable(" + candidates + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+					debug.trace(OPTION_DEBUG_HOOKS, "ResolverHook.filterResolvable(" + candidates + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				if (isBootInit()) {
 					// only allow the system bundle and its fragments resolve during boot up and
@@ -281,7 +283,7 @@ class OSGiFrameworkHooks {
 			public void filterSingletonCollisions(BundleCapability singleton,
 					Collection<BundleCapability> collisionCandidates) {
 				if (debug.DEBUG_HOOKS) {
-					Debug.println(
+					debug.trace(OPTION_DEBUG_HOOKS,
 							"ResolverHook.filterSingletonCollisions(" + singleton + ", " + collisionCandidates + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
 				if (hooks.isEmpty())
@@ -303,7 +305,8 @@ class OSGiFrameworkHooks {
 			@Override
 			public void filterMatches(BundleRequirement requirement, Collection<BundleCapability> candidates) {
 				if (debug.DEBUG_HOOKS) {
-					Debug.println("ResolverHook.filterMatches(" + requirement + ", " + candidates + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					debug.trace(OPTION_DEBUG_HOOKS,
+							"ResolverHook.filterMatches(" + requirement + ", " + candidates + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
 				if (hooks.isEmpty())
 					return;
@@ -324,7 +327,7 @@ class OSGiFrameworkHooks {
 			@Override
 			public void end() {
 				if (debug.DEBUG_HOOKS) {
-					Debug.println("ResolverHook.end"); //$NON-NLS-1$
+					debug.trace(OPTION_DEBUG_HOOKS, "ResolverHook.end"); //$NON-NLS-1$
 				}
 				if (hooks.isEmpty())
 					return;

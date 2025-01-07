@@ -14,6 +14,10 @@
 
 package org.eclipse.osgi.internal.serviceregistry;
 
+import static org.eclipse.osgi.internal.debug.Debug.OPTION_DEBUG_EVENTS;
+import static org.eclipse.osgi.internal.debug.Debug.OPTION_DEBUG_HOOKS;
+import static org.eclipse.osgi.internal.debug.Debug.OPTION_DEBUG_SERVICES;
+
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.security.ProtectionDomain;
@@ -221,7 +225,7 @@ public class ServiceRegistry {
 			Dictionary<String, ?> properties) {
 		if (service == null) {
 			if (debug.DEBUG_SERVICES) {
-				Debug.println("Service object is null"); //$NON-NLS-1$
+				debug.trace(OPTION_DEBUG_SERVICES, "Service object is null"); //$NON-NLS-1$
 			}
 
 			throw new IllegalArgumentException(Msg.SERVICE_ARGUMENT_NULL_EXCEPTION);
@@ -231,7 +235,7 @@ public class ServiceRegistry {
 
 		if (size == 0) {
 			if (debug.DEBUG_SERVICES) {
-				Debug.println("Classes array is empty"); //$NON-NLS-1$
+				debug.trace(OPTION_DEBUG_SERVICES, "Classes array is empty"); //$NON-NLS-1$
 			}
 
 			throw new IllegalArgumentException(Msg.SERVICE_EMPTY_CLASS_LIST_EXCEPTION);
@@ -260,7 +264,7 @@ public class ServiceRegistry {
 			String invalidService = checkServiceClass(clazzes, service);
 			if (invalidService != null) {
 				if (debug.DEBUG_SERVICES) {
-					Debug.println("Service object is not an instanceof " + invalidService); //$NON-NLS-1$
+					debug.trace(OPTION_DEBUG_SERVICES, "Service object is not an instanceof " + invalidService); //$NON-NLS-1$
 				}
 				throw new IllegalArgumentException(
 						NLS.bind(Msg.SERVICE_NOT_INSTANCEOF_CLASS_EXCEPTION, invalidService));
@@ -389,7 +393,8 @@ public class ServiceRegistry {
 	public ServiceReferenceImpl<?>[] getServiceReferences(final BundleContextImpl context, final String clazz,
 			final String filterstring, final boolean allservices) throws InvalidSyntaxException {
 		if (debug.DEBUG_SERVICES) {
-			Debug.println((allservices ? "getAllServiceReferences(" : "getServiceReferences(") + clazz + ", \"" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			debug.trace(OPTION_DEBUG_SERVICES,
+					(allservices ? "getAllServiceReferences(" : "getServiceReferences(") + clazz + ", \"" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					+ filterstring + "\")"); //$NON-NLS-1$
 		}
 		Filter filter = (filterstring == null) ? null : context.createFilter(filterstring);
@@ -461,7 +466,7 @@ public class ServiceRegistry {
 	 */
 	public ServiceReferenceImpl<?> getServiceReference(BundleContextImpl context, String clazz) {
 		if (debug.DEBUG_SERVICES) {
-			Debug.println("getServiceReference(" + clazz + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+			debug.trace(OPTION_DEBUG_SERVICES, "getServiceReference(" + clazz + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
 		try {
@@ -474,9 +479,9 @@ public class ServiceRegistry {
 				return references[0];
 			}
 		} catch (InvalidSyntaxException e) {
-			if (debug.DEBUG_GENERAL) {
-				Debug.println("InvalidSyntaxException w/ null filter" + e.getMessage()); //$NON-NLS-1$
-				Debug.printStackTrace(e);
+			if (debug.DEBUG_SERVICES) {
+				debug.trace(OPTION_DEBUG_SERVICES, "InvalidSyntaxException w/ null filter" + e.getMessage()); //$NON-NLS-1$
+				debug.traceThrowable(OPTION_DEBUG_SERVICES, e);
 			}
 		}
 
@@ -772,7 +777,7 @@ public class ServiceRegistry {
 			registrations = new ArrayList<>(servicesInUse.keySet());
 		}
 		if (debug.DEBUG_SERVICES) {
-			Debug.println("Releasing services"); //$NON-NLS-1$
+			debug.trace(OPTION_DEBUG_SERVICES, "Releasing services"); //$NON-NLS-1$
 		}
 		for (ServiceRegistrationImpl<?> registration : registrations) {
 			registration.releaseService(context);
@@ -792,7 +797,7 @@ public class ServiceRegistry {
 		if (debug.DEBUG_EVENTS) {
 			String listenerName = listener.getClass().getName() + "@" //$NON-NLS-1$
 					+ Integer.toHexString(System.identityHashCode(listener));
-			Debug.println(
+			debug.trace(OPTION_DEBUG_EVENTS,
 					"addServiceListener[" + context.getBundleImpl() + "](" + listenerName + ", \"" + filter + "\")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
 
@@ -828,7 +833,8 @@ public class ServiceRegistry {
 		if (debug.DEBUG_EVENTS) {
 			String listenerName = listener.getClass().getName() + "@" //$NON-NLS-1$
 					+ Integer.toHexString(System.identityHashCode(listener));
-			Debug.println("removeServiceListener[" + context.getBundleImpl() + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			debug.trace(OPTION_DEBUG_EVENTS,
+					"removeServiceListener[" + context.getBundleImpl() + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
 		FilteredServiceListener oldFilteredListener;
@@ -1296,7 +1302,8 @@ public class ServiceRegistry {
 	void notifyFindHooksPrivileged(final BundleContextImpl context, final String clazz, final String filterstring,
 			final boolean allservices, final Collection<ServiceReference<?>> result) {
 		if (debug.DEBUG_HOOKS) {
-			Debug.println("notifyServiceFindHooks(" + context.getBundleImpl() + "," + clazz + "," + filterstring + "," //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			debug.trace(OPTION_DEBUG_HOOKS,
+					"notifyServiceFindHooks(" + context.getBundleImpl() + "," + clazz + "," + filterstring + "," //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 					+ allservices + "," + result + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		notifyHooksPrivileged(FindHook.class, "find", //$NON-NLS-1$
@@ -1316,7 +1323,8 @@ public class ServiceRegistry {
 	@SuppressWarnings("deprecation")
 	private void notifyEventHooksPrivileged(final ServiceEvent event, final Collection<BundleContext> result) {
 		if (debug.DEBUG_HOOKS) {
-			Debug.println("notifyServiceEventHooks(" + event.getType() + ":" + event.getServiceReference() + "," //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			debug.trace(OPTION_DEBUG_HOOKS,
+					"notifyServiceEventHooks(" + event.getType() + ":" + event.getServiceReference() + "," //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					+ result + ")"); //$NON-NLS-1$
 		}
 		notifyHooksPrivileged(org.osgi.framework.hooks.service.EventHook.class, "event", //$NON-NLS-1$
@@ -1336,7 +1344,8 @@ public class ServiceRegistry {
 	private void notifyEventListenerHooksPrivileged(final ServiceEvent event,
 			final Map<BundleContext, Collection<ListenerInfo>> result) {
 		if (debug.DEBUG_HOOKS) {
-			Debug.println("notifyServiceEventListenerHooks(" + event.getType() + ":" + event.getServiceReference() + "," //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			debug.trace(OPTION_DEBUG_HOOKS,
+					"notifyServiceEventListenerHooks(" + event.getType() + ":" + event.getServiceReference() + "," //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					+ result + ")"); //$NON-NLS-1$
 		}
 		notifyHooksPrivileged(EventListenerHook.class, "event", (hook, r) -> hook.event(event, result)); //$NON-NLS-1$
@@ -1387,11 +1396,11 @@ public class ServiceRegistry {
 			hookContext.call(hook, registration);
 		} catch (Throwable t) {
 			if (debug.DEBUG_HOOKS) {
-				Debug.println(hook.getClass().getName() + "." + serviceMethod + "() exception: " + t.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
-				Debug.printStackTrace(t);
+				debug.trace(OPTION_DEBUG_HOOKS,
+						hook.getClass().getName() + "." + serviceMethod + "() exception: " + t.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
+				debug.traceThrowable(OPTION_DEBUG_HOOKS, t);
 			}
-			// allow the adaptor to handle this unexpected error
-			container.handleRuntimeError(t);
+
 			ServiceException se = new ServiceException(
 					NLS.bind(Msg.SERVICE_FACTORY_EXCEPTION, hook.getClass().getName(), serviceMethod), t);
 			container.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, registration.getBundle(), se);
@@ -1421,7 +1430,7 @@ public class ServiceRegistry {
 
 	void notifyNewListenerHookPrivileged(ServiceRegistrationImpl<?> registration) {
 		if (debug.DEBUG_HOOKS) {
-			Debug.println("notifyServiceNewListenerHook(" + registration + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+			debug.trace(OPTION_DEBUG_HOOKS, "notifyServiceNewListenerHook(" + registration + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
 		// snapshot the listeners
@@ -1473,7 +1482,8 @@ public class ServiceRegistry {
 	void notifyListenerHooksPrivileged(final Collection<ListenerInfo> listeners, final boolean added) {
 		assert !listeners.isEmpty();
 		if (debug.DEBUG_HOOKS) {
-			Debug.println("notifyServiceListenerHooks(" + listeners + "," + (added ? "added" : "removed") + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+			debug.trace(OPTION_DEBUG_HOOKS,
+					"notifyServiceListenerHooks(" + listeners + "," + (added ? "added" : "removed") + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		}
 
 		notifyHooksPrivileged(ListenerHook.class, added ? "added" : "removed", (hook, hookRegistration) -> { //$NON-NLS-1$ //$NON-NLS-2$

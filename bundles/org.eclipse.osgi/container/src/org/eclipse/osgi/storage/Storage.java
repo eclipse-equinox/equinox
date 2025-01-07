@@ -15,6 +15,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.storage;
 
+import static org.eclipse.osgi.internal.debug.Debug.OPTION_DEBUG_STORAGE;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -72,7 +74,6 @@ import org.eclipse.osgi.framework.util.FilePath;
 import org.eclipse.osgi.framework.util.ObjectPool;
 import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.internal.container.InternalUtils;
-import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.framework.EquinoxContainerAdaptor;
@@ -571,7 +572,7 @@ public class Storage {
 	}
 
 	private void cleanOSGiStorage(Location location, File root) {
-		if (location.isReadOnly() || !StorageUtil.rm(root, getConfiguration().getDebug().DEBUG_STORAGE)) {
+		if (location.isReadOnly() || !StorageUtil.rm(root, getConfiguration().getDebug())) {
 			equinoxContainer.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR,
 					"The -clean (osgi.clean) option was not successful. Unable to clean the storage area: " //$NON-NLS-1$
 							+ root.getAbsolutePath(),
@@ -1055,7 +1056,7 @@ public class Storage {
 			}
 			contentFile = new File(generationRoot, BUNDLE_FILE_NAME);
 			try {
-				StorageUtil.move(staged, contentFile, getConfiguration().getDebug().DEBUG_STORAGE);
+				StorageUtil.move(staged, contentFile, getConfiguration().getDebug());
 			} catch (IOException e) {
 				throw new BundleException("Error while renaming bundle file to final location: " + contentFile, //$NON-NLS-1$
 						BundleException.READ_ERROR, e);
@@ -1270,7 +1271,7 @@ public class Storage {
 
 	private void compact(File directory) {
 		if (getConfiguration().getDebug().DEBUG_STORAGE)
-			Debug.println("compact(" + directory.getPath() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+			getConfiguration().getDebug().trace(OPTION_DEBUG_STORAGE, "compact(" + directory.getPath() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 		String list[] = directory.list();
 		if (list == null)
 			return;
@@ -1290,7 +1291,8 @@ public class Storage {
 					deleteFlaggedDirectory(target);
 				} catch (IOException e) {
 					if (getConfiguration().getDebug().DEBUG_STORAGE) {
-						Debug.println("Unable to write " + delete.getPath() + ": " + e.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
+						getConfiguration().getDebug().trace(OPTION_DEBUG_STORAGE,
+								"Unable to write " + delete.getPath() + ": " + e.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 				}
 			} else {
@@ -1317,7 +1319,7 @@ public class Storage {
 	}
 
 	private void deleteFlaggedDirectory(File delete) throws IOException {
-		if (!StorageUtil.rm(delete, getConfiguration().getDebug().DEBUG_STORAGE)) {
+		if (!StorageUtil.rm(delete, getConfiguration().getDebug())) {
 			ensureDeleteFlagFileExists(delete.toPath());
 		}
 	}
@@ -2290,8 +2292,9 @@ public class Storage {
 			sManager.open(!isReadOnly());
 		} catch (IOException ex) {
 			if (getConfiguration().getDebug().DEBUG_STORAGE) {
-				Debug.println("Error reading framework.info: " + ex.getMessage()); //$NON-NLS-1$
-				Debug.printStackTrace(ex);
+				getConfiguration().getDebug().trace(OPTION_DEBUG_STORAGE,
+						"Error reading framework.info: " + ex.getMessage()); //$NON-NLS-1$
+				getConfiguration().getDebug().traceThrowable(OPTION_DEBUG_STORAGE, ex);
 			}
 			String message = NLS.bind(Msg.ECLIPSE_STARTUP_FILEMANAGER_OPEN_ERROR, ex.getMessage());
 			equinoxContainer.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, message, ex);
@@ -2311,8 +2314,9 @@ public class Storage {
 			storageStream = storageManager.getInputStream(FRAMEWORK_INFO);
 		} catch (IOException ex) {
 			if (getConfiguration().getDebug().DEBUG_STORAGE) {
-				Debug.println("Error reading framework.info: " + ex.getMessage()); //$NON-NLS-1$
-				Debug.printStackTrace(ex);
+				getConfiguration().getDebug().trace(OPTION_DEBUG_STORAGE,
+						"Error reading framework.info: " + ex.getMessage()); //$NON-NLS-1$
+				getConfiguration().getDebug().traceThrowable(OPTION_DEBUG_STORAGE, ex);
 			}
 		} finally {
 			storageManager.close();

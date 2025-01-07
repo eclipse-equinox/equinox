@@ -14,6 +14,8 @@
 
 package org.eclipse.osgi.internal.loader;
 
+import static org.eclipse.osgi.internal.debug.Debug.OPTION_DEBUG_LOADER;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
@@ -314,7 +316,8 @@ public class BundleLoader extends ModuleLoader {
 				// this is necessary in case re-entry by a hook.classLoaderCreated method
 				result = classLoaderCreated;
 				if (debug.DEBUG_LOADER) {
-					Debug.println("BundleLoader[" + this + "].getModuleClassLoader() - created duplicate classloader"); //$NON-NLS-1$ //$NON-NLS-2$
+					debug.trace(OPTION_DEBUG_LOADER,
+							"BundleLoader[" + this + "].getModuleClassLoader() - created duplicate classloader"); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}
 		}
@@ -407,14 +410,15 @@ public class BundleLoader extends ModuleLoader {
 	public Class<?> findLocalClass(String name) throws ClassNotFoundException {
 		long start = 0;
 		if (debug.DEBUG_LOADER) {
-			Debug.println("BundleLoader[" + this + "].findLocalClass(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			debug.trace(OPTION_DEBUG_LOADER, "BundleLoader[" + this + "].findLocalClass(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			start = System.currentTimeMillis();
 		}
 		try {
 			Class<?> clazz = getModuleClassLoader().findLocalClass(name);
 			if (debug.DEBUG_LOADER && clazz != null) {
 				long time = System.currentTimeMillis() - start;
-				Debug.println("BundleLoader[" + this + "] found local class " + name + " " + time + "ms"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				debug.trace(OPTION_DEBUG_LOADER,
+						"BundleLoader[" + this + "] found local class " + name + " " + time + "ms"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			}
 			return clazz;
 		} catch (ClassNotFoundException e) {
@@ -466,7 +470,7 @@ public class BundleLoader extends ModuleLoader {
 		}
 
 		if (debug.DEBUG_LOADER)
-			Debug.println("BundleLoader[" + this + "].findClass(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			debug.trace(OPTION_DEBUG_LOADER, "BundleLoader[" + this + "].findClass(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 		String pkgName = getPackageName(name);
 		boolean bootDelegation = false;
@@ -493,7 +497,7 @@ public class BundleLoader extends ModuleLoader {
 		PackageSource source = findImportedSource(pkgName, null);
 		if (source != null) {
 			if (debug.DEBUG_LOADER) {
-				Debug.println("BundleLoader[" + this + "] loading from import package: " + source); //$NON-NLS-1$ //$NON-NLS-2$
+				debug.trace(OPTION_DEBUG_LOADER, "BundleLoader[" + this + "] loading from import package: " + source); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			// 3) found import source terminate search at the source
 			result = source.loadClass(name);
@@ -510,7 +514,8 @@ public class BundleLoader extends ModuleLoader {
 		source = findRequiredSource(pkgName, null);
 		if (source != null) {
 			if (debug.DEBUG_LOADER) {
-				Debug.println("BundleLoader[" + this + "] loading from required bundle package: " + source); //$NON-NLS-1$ //$NON-NLS-2$
+				debug.trace(OPTION_DEBUG_LOADER,
+						"BundleLoader[" + this + "] loading from required bundle package: " + source); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			// 4) attempt to load from source but continue on failure
 			result = source.loadClass(name);
@@ -561,8 +566,7 @@ public class BundleLoader extends ModuleLoader {
 		if (generate) {
 			ClassNotFoundException e = new ClassNotFoundException(name + " cannot be found by " + this); //$NON-NLS-1$
 			if (debug.DEBUG_LOADER) {
-				Debug.println("BundleLoader[" + this + "].loadClass(" + name + ") failed."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				Debug.printStackTrace(e);
+				debug.trace(OPTION_DEBUG_LOADER, "BundleLoader[" + this + "].loadClass(" + name + ") failed."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 			throw e;
 		}
@@ -667,7 +671,7 @@ public class BundleLoader extends ModuleLoader {
 	 */
 	public URL findResource(String name) {
 		if (debug.DEBUG_LOADER)
-			Debug.println("BundleLoader[" + this + "].findResource(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			debug.trace(OPTION_DEBUG_LOADER, "BundleLoader[" + this + "].findResource(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		if ((name.length() > 1) && (name.charAt(0) == '/')) /* if name has a leading slash */
 			name = name.substring(1); /* remove leading slash before search */
 		String pkgName = getResourcePackageName(name);
@@ -704,7 +708,7 @@ public class BundleLoader extends ModuleLoader {
 		PackageSource source = findImportedSource(pkgName, null);
 		if (source != null) {
 			if (debug.DEBUG_LOADER) {
-				Debug.println("BundleLoader[" + this + "] loading from import package: " + source); //$NON-NLS-1$ //$NON-NLS-2$
+				debug.trace(OPTION_DEBUG_LOADER, "BundleLoader[" + this + "] loading from import package: " + source); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			// 3) found import source terminate search at the source
 			return source.getResource(name);
@@ -713,7 +717,8 @@ public class BundleLoader extends ModuleLoader {
 		source = findRequiredSource(pkgName, null);
 		if (source != null) {
 			if (debug.DEBUG_LOADER) {
-				Debug.println("BundleLoader[" + this + "] loading from required bundle package: " + source); //$NON-NLS-1$ //$NON-NLS-2$
+				debug.trace(OPTION_DEBUG_LOADER,
+						"BundleLoader[" + this + "] loading from required bundle package: " + source); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			// 4) attempt to load from source but continue on failure
 			result = source.getResource(name);
@@ -760,7 +765,7 @@ public class BundleLoader extends ModuleLoader {
 	 */
 	public Enumeration<URL> findResources(String name) throws IOException {
 		if (debug.DEBUG_LOADER)
-			Debug.println("BundleLoader[" + this + "].findResources(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			debug.trace(OPTION_DEBUG_LOADER, "BundleLoader[" + this + "].findResources(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		// do not delegate to parent because ClassLoader#getResources already did and it
 		// is final!!
 		if ((name.length() > 1) && (name.charAt(0) == '/')) /* if name has a leading slash */
@@ -797,7 +802,7 @@ public class BundleLoader extends ModuleLoader {
 		PackageSource source = findImportedSource(pkgName, null);
 		if (source != null) {
 			if (debug.DEBUG_LOADER) {
-				Debug.println("BundleLoader[" + this + "] loading from import package: " + source); //$NON-NLS-1$ //$NON-NLS-2$
+				debug.trace(OPTION_DEBUG_LOADER, "BundleLoader[" + this + "] loading from import package: " + source); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			// 3) found import source terminate search at the source
 			return compoundEnumerations(result, source.getResources(name));
@@ -806,7 +811,8 @@ public class BundleLoader extends ModuleLoader {
 		source = findRequiredSource(pkgName, null);
 		if (source != null) {
 			if (debug.DEBUG_LOADER) {
-				Debug.println("BundleLoader[" + this + "] loading from required bundle package: " + source); //$NON-NLS-1$ //$NON-NLS-2$
+				debug.trace(OPTION_DEBUG_LOADER,
+						"BundleLoader[" + this + "] loading from required bundle package: " + source); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			// 4) attempt to load from source but continue on failure
 			result = compoundEnumerations(result, source.getResources(name));
@@ -1263,7 +1269,8 @@ public class BundleLoader extends ModuleLoader {
 	private PackageSource findDynamicSource(String pkgName) {
 		if (!isExportedPackage(pkgName) && isDynamicallyImported(pkgName)) {
 			if (debug.DEBUG_LOADER) {
-				Debug.println("BundleLoader[" + this + "] attempting to resolve dynamic package: " + pkgName); //$NON-NLS-1$ //$NON-NLS-2$
+				debug.trace(OPTION_DEBUG_LOADER,
+						"BundleLoader[" + this + "] attempting to resolve dynamic package: " + pkgName); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			ModuleRevision revision = wiring.getRevision();
 			ModuleWire dynamicWire = revision.getRevisions().getModule().getContainer().resolveDynamic(pkgName,
@@ -1271,7 +1278,8 @@ public class BundleLoader extends ModuleLoader {
 			if (dynamicWire != null) {
 				PackageSource source = createExportPackageSource(dynamicWire, null);
 				if (debug.DEBUG_LOADER) {
-					Debug.println("BundleLoader[" + this + "] using dynamic import source: " + source); //$NON-NLS-1$ //$NON-NLS-2$
+					debug.trace(OPTION_DEBUG_LOADER,
+							"BundleLoader[" + this + "] using dynamic import source: " + source); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				synchronized (importedSources) {
 					importedSources.put(source.getId(), source);

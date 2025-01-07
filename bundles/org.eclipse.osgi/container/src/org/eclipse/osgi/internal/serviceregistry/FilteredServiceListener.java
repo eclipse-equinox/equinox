@@ -14,6 +14,8 @@
 
 package org.eclipse.osgi.internal.serviceregistry;
 
+import static org.eclipse.osgi.internal.debug.Debug.OPTION_DEBUG_EVENTS;
+
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.BundleContextImpl;
 import org.eclipse.osgi.internal.framework.FilterImpl;
@@ -65,8 +67,7 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 			this.filter = null;
 			this.objectClass = null;
 		} else {
-			FilterImpl filterImpl = FilterImpl.newInstance(filterstring,
-					context.getContainer().getConfiguration().getDebug().DEBUG_FILTER);
+			FilterImpl filterImpl = FilterImpl.newInstance(filterstring);
 			String clazz = filterImpl.getRequiredObjectClass();
 			if (unfiltered || (clazz == null)) {
 				this.objectClass = null;
@@ -115,7 +116,7 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 
 		if (debug.DEBUG_EVENTS) {
 			String listenerName = this.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(this)); //$NON-NLS-1$
-			Debug.println("filterServiceEvent(" + listenerName + ", \"" + getFilter() + "\", " //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			debug.trace(OPTION_DEBUG_EVENTS, "filterServiceEvent(" + listenerName + ", \"" + getFilter() + "\", " //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					+ reference.getRegistration().getProperties() + ")"); //$NON-NLS-1$
 		}
 
@@ -127,7 +128,7 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 			if (debug.DEBUG_EVENTS) {
 				String listenerName = listener.getClass().getName() + "@" //$NON-NLS-1$
 						+ Integer.toHexString(System.identityHashCode(listener));
-				Debug.println("dispatchFilteredServiceEvent(" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+				debug.trace(OPTION_DEBUG_EVENTS, "dispatchFilteredServiceEvent(" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 
 			listener.serviceChanged(event);

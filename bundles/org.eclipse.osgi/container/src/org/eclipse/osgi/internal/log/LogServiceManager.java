@@ -24,6 +24,7 @@ import org.eclipse.equinox.log.ExtendedLogReaderService;
 import org.eclipse.equinox.log.ExtendedLogService;
 import org.eclipse.equinox.log.LogFilter;
 import org.eclipse.osgi.internal.framework.BundleContextImpl;
+import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.osgi.framework.AllServiceListener;
 import org.osgi.framework.Bundle;
@@ -63,11 +64,12 @@ public class LogServiceManager implements SynchronousBundleListener, FrameworkLi
 	private EventAdminAdapter eventAdminAdapter;
 	private ConfigAdminListener configAdminListener;
 
-	public LogServiceManager(int maxHistory, LogLevel defaultLevel, boolean captureLogEntryLocation,
+	public LogServiceManager(int maxHistory, LogLevel defaultLevel, EquinoxConfiguration equinoxConfiguration,
 			LogListener... systemListeners) {
 		logReaderServiceFactory = new ExtendedLogReaderServiceFactory(maxHistory, defaultLevel);
-		logServiceFactory = new ExtendedLogServiceFactory(logReaderServiceFactory, captureLogEntryLocation);
-		systemBundleLog = logServiceFactory.getLogService(new MockSystemBundle());
+		logServiceFactory = new ExtendedLogServiceFactory(logReaderServiceFactory, equinoxConfiguration,
+				new MockSystemBundle());
+		systemBundleLog = logServiceFactory.getSystemBundleLog();
 		for (LogListener logListener : systemListeners) {
 			if (logListener instanceof LogFilter)
 				logReaderServiceFactory.addLogListener(logListener, (LogFilter) logListener);

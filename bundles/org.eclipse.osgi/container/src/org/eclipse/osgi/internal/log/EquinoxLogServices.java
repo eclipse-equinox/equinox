@@ -100,9 +100,7 @@ public class EquinoxLogServices {
 			// ignore and use LogLevel.WARN
 		}
 
-		boolean captureLogEntryLocation = "true" //$NON-NLS-1$
-				.equals(environmentInfo.getConfiguration(EquinoxConfiguration.PROP_LOG_CAPTURE_ENTRY_LOCATION, "true")); //$NON-NLS-1$
-		logServiceManager = new LogServiceManager(logHistoryMax, defaultLevel, captureLogEntryLocation, logWriter,
+		logServiceManager = new LogServiceManager(logHistoryMax, defaultLevel, environmentInfo, logWriter,
 				perfWriter);
 		eclipseLogFactory = new EquinoxLogFactory(logWriter, logServiceManager);
 		rootFrameworkLog = eclipseLogFactory.createFrameworkLog(null, logWriter);

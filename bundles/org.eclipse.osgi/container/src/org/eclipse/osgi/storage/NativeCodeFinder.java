@@ -14,6 +14,8 @@
 
 package org.eclipse.osgi.storage;
 
+import static org.eclipse.osgi.internal.debug.Debug.OPTION_DEBUG_LOADER;
+
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.attribute.PosixFilePermission;
@@ -150,7 +152,7 @@ public class NativeCodeFinder {
 	private String findBundleNativeCode(String libname, String mappedName, String[] altMappedNames) {
 		String path = null;
 		if (debug.DEBUG_LOADER)
-			Debug.println("  mapped library name: " + mappedName); //$NON-NLS-1$
+			debug.trace(OPTION_DEBUG_LOADER, "  mapped library name: " + mappedName); //$NON-NLS-1$
 		List<String> nativePaths = getNativePaths();
 		if (nativePaths.isEmpty()) {
 			return null;
@@ -162,11 +164,11 @@ public class NativeCodeFinder {
 		}
 		if (path == null) {
 			if (debug.DEBUG_LOADER)
-				Debug.println("  library does not exist: " + mappedName); //$NON-NLS-1$
+				debug.trace(OPTION_DEBUG_LOADER, "  library does not exist: " + mappedName); //$NON-NLS-1$
 			path = findNativePath(nativePaths, libname);
 		}
 		if (debug.DEBUG_LOADER)
-			Debug.println("  returning library: " + path); //$NON-NLS-1$
+			debug.trace(OPTION_DEBUG_LOADER, "  returning library: " + path); //$NON-NLS-1$
 		return path;
 	}
 

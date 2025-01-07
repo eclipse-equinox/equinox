@@ -13,11 +13,20 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.framework;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Map.Entry;
-import org.eclipse.osgi.internal.debug.Debug;
+import java.util.Set;
 import org.eclipse.osgi.internal.util.Tokenizer;
 
 /**
@@ -153,7 +162,8 @@ public class AliasMapper {
 			}
 			aliasTable.putAll(multiMasterAliases);
 		} catch (IOException e) {
-			Debug.printStackTrace(e);
+			// this is really unexpected and will crash the framework
+			new UncheckedIOException(e);
 		}
 		return aliasTable;
 	}

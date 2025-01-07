@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.framework;
 
+import static org.eclipse.osgi.internal.debug.Debug.OPTION_DEBUG_HOOKS;
+
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Collection;
@@ -251,8 +253,10 @@ public class EquinoxEventPublisher {
 	}
 
 	private void notifyEventHooksPrivileged(final BundleEvent event, final Collection<BundleContext> result) {
-		if (container.getConfiguration().getDebug().DEBUG_HOOKS) {
-			Debug.println("notifyBundleEventHooks(" + event.getType() + ":" + event.getBundle() + ", " + result + " )"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		Debug debug = container.getConfiguration().getDebug();
+		if (debug.DEBUG_HOOKS) {
+			debug.trace(OPTION_DEBUG_HOOKS,
+					"notifyBundleEventHooks(" + event.getType() + ":" + event.getBundle() + ", " + result + " )"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
 
 		ServiceRegistry serviceRegistry = container.getServiceRegistry();

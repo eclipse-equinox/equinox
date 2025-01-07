@@ -34,7 +34,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import org.eclipse.osgi.framework.util.CaseInsensitiveDictionaryMap;
-import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.internal.serviceregistry.ServiceReferenceImpl;
 import org.eclipse.osgi.util.NLS;
@@ -172,11 +171,7 @@ public abstract class FilterImpl implements Filter {
 	 *                                filter string that cannot be parsed.
 	 */
 	public static FilterImpl newInstance(String filterString) throws InvalidSyntaxException {
-		return newInstance(filterString, false);
-	}
-
-	public static FilterImpl newInstance(String filterString, boolean debug) throws InvalidSyntaxException {
-		return new Parser(filterString, debug).parse();
+		return new Parser(filterString).parse();
 	}
 
 	FilterImpl() {
@@ -468,13 +463,10 @@ public abstract class FilterImpl implements Filter {
 	}
 
 	static abstract class Item extends FilterImpl {
-		/** debug mode */
-		final boolean debug;
 		final String attr;
 
-		Item(String attr, boolean debug) {
+		Item(String attr) {
 			this.attr = attr;
-			this.debug = debug;
 		}
 
 		@Override
@@ -487,13 +479,6 @@ public abstract class FilterImpl implements Filter {
 		abstract String value();
 
 		private boolean compare(Object value1) {
-			if (debug) {
-				if (value1 == null) {
-					Debug.println("compare(" + value1 + "," + value() + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				} else if (!(value1.getClass().isArray() || (value1 instanceof Collection<?>))) {
-					Debug.println(operation() + "(" + value1 + "," + value() + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-			}
 			if (value1 == null) {
 				return false;
 			}
@@ -561,9 +546,6 @@ public abstract class FilterImpl implements Filter {
 			if (Integer.TYPE.isAssignableFrom(type)) {
 				int[] array = (int[]) primarray;
 				for (int value1 : array) {
-					if (debug) {
-						Debug.println(operation() + "(" + value1 + "," + value() + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					}
 					if (compare_Long(value1)) {
 						return true;
 					}
@@ -573,9 +555,6 @@ public abstract class FilterImpl implements Filter {
 			if (Long.TYPE.isAssignableFrom(type)) {
 				long[] array = (long[]) primarray;
 				for (long value1 : array) {
-					if (debug) {
-						Debug.println(operation() + "(" + value1 + "," + value() + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					}
 					if (compare_Long(value1)) {
 						return true;
 					}
@@ -585,9 +564,6 @@ public abstract class FilterImpl implements Filter {
 			if (Byte.TYPE.isAssignableFrom(type)) {
 				byte[] array = (byte[]) primarray;
 				for (byte value1 : array) {
-					if (debug) {
-						Debug.println(operation() + "(" + value1 + "," + value() + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					}
 					if (compare_Long(value1)) {
 						return true;
 					}
@@ -597,9 +573,6 @@ public abstract class FilterImpl implements Filter {
 			if (Short.TYPE.isAssignableFrom(type)) {
 				short[] array = (short[]) primarray;
 				for (short value1 : array) {
-					if (debug) {
-						Debug.println(operation() + "(" + value1 + "," + value() + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					}
 					if (compare_Long(value1)) {
 						return true;
 					}
@@ -609,9 +582,6 @@ public abstract class FilterImpl implements Filter {
 			if (Character.TYPE.isAssignableFrom(type)) {
 				char[] array = (char[]) primarray;
 				for (char value1 : array) {
-					if (debug) {
-						Debug.println(operation() + "(" + value1 + "," + value() + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					}
 					if (compare_Character(value1)) {
 						return true;
 					}
@@ -621,9 +591,6 @@ public abstract class FilterImpl implements Filter {
 			if (Float.TYPE.isAssignableFrom(type)) {
 				float[] array = (float[]) primarray;
 				for (float value1 : array) {
-					if (debug) {
-						Debug.println(operation() + "(" + value1 + "," + value() + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					}
 					if (compare_Float(value1)) {
 						return true;
 					}
@@ -633,9 +600,6 @@ public abstract class FilterImpl implements Filter {
 			if (Double.TYPE.isAssignableFrom(type)) {
 				double[] array = (double[]) primarray;
 				for (double value1 : array) {
-					if (debug) {
-						Debug.println(operation() + "(" + value1 + "," + value() + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					}
 					if (compare_Double(value1)) {
 						return true;
 					}
@@ -645,9 +609,6 @@ public abstract class FilterImpl implements Filter {
 			if (Boolean.TYPE.isAssignableFrom(type)) {
 				boolean[] array = (boolean[]) primarray;
 				for (boolean value1 : array) {
-					if (debug) {
-						Debug.println(operation() + "(" + value1 + "," + value() + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					}
 					if (compare_Boolean(value1)) {
 						return true;
 					}
@@ -728,15 +689,12 @@ public abstract class FilterImpl implements Filter {
 	}
 
 	static final class Present extends Item {
-		Present(String attr, boolean debug) {
-			super(attr, debug);
+		Present(String attr) {
+			super(attr);
 		}
 
 		@Override
 		boolean matches0(Map<String, ?> map) {
-			if (debug) {
-				Debug.println("PRESENT(" + attr + ")"); //$NON-NLS-1$ //$NON-NLS-2$
-			}
 			return map.get(attr) != null;
 		}
 
@@ -759,8 +717,8 @@ public abstract class FilterImpl implements Filter {
 	static final class Substring extends Item {
 		final String[] substrings;
 
-		Substring(String attr, String[] substrings, boolean debug) {
-			super(attr, debug);
+		Substring(String attr, String[] substrings) {
+			super(attr);
 			this.substrings = substrings;
 		}
 
@@ -785,9 +743,6 @@ public abstract class FilterImpl implements Filter {
 						if (substr2 == null) /* ** */
 							continue; /* ignore first star */
 						/* xxx */
-						if (debug) {
-							Debug.println("indexOf(\"" + substr2 + "\"," + pos + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-						}
 						int index = string.indexOf(substr2, pos);
 						if (index == -1) {
 							return false;
@@ -802,9 +757,6 @@ public abstract class FilterImpl implements Filter {
 							i++;
 					} else /* xxx */ {
 						int len = substr.length();
-						if (debug) {
-							Debug.println("regionMatches(" + pos + ",\"" + substr + "\")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-						}
 						if (string.regionMatches(pos, substr, 0, len)) {
 							pos += len;
 						} else {
@@ -816,9 +768,6 @@ public abstract class FilterImpl implements Filter {
 						return true;
 					}
 					/* xxx */
-					if (debug) {
-						Debug.println("regionMatches(" + pos + "," + substr + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					}
 					return string.endsWith(substr);
 				}
 			}
@@ -847,8 +796,8 @@ public abstract class FilterImpl implements Filter {
 		final String value;
 		private Object cached;
 
-		Equal(String attr, String value, boolean debug) {
-			super(attr, debug);
+		Equal(String attr, String value) {
+			super(attr);
 			this.value = value;
 		}
 
@@ -1060,8 +1009,8 @@ public abstract class FilterImpl implements Filter {
 	}
 
 	static final class LessEqual extends Equal {
-		LessEqual(String attr, String value, boolean debug) {
-			super(attr, value, debug);
+		LessEqual(String attr, String value) {
+			super(attr, value);
 		}
 
 		@Override
@@ -1115,8 +1064,8 @@ public abstract class FilterImpl implements Filter {
 	}
 
 	static final class GreaterEqual extends Equal {
-		GreaterEqual(String attr, String value, boolean debug) {
-			super(attr, value, debug);
+		GreaterEqual(String attr, String value) {
+			super(attr, value);
 		}
 
 		@Override
@@ -1172,8 +1121,8 @@ public abstract class FilterImpl implements Filter {
 	static final class Approx extends Equal {
 		final String approx;
 
-		Approx(String attr, String value, boolean debug) {
-			super(attr, value, debug);
+		Approx(String attr, String value) {
+			super(attr, value);
 			this.approx = approxString(value);
 		}
 
@@ -1321,13 +1270,11 @@ public abstract class FilterImpl implements Filter {
 	 * string and builds a tree of FilterImpl objects rooted at the parent.
 	 */
 	static private final class Parser {
-		private final boolean debug;
 		private final String filterstring;
 		private final char[] filterChars;
 		private int pos;
 
-		Parser(String filterstring, boolean debug) {
-			this.debug = debug;
+		Parser(String filterstring) {
 			this.filterstring = filterstring;
 			filterChars = filterstring.toCharArray();
 			pos = 0;
@@ -1458,21 +1405,21 @@ public abstract class FilterImpl implements Filter {
 			case '~': {
 				if (filterChars[pos + 1] == '=') {
 					pos += 2;
-					return new FilterImpl.Approx(attr, parse_value(), debug);
+					return new FilterImpl.Approx(attr, parse_value());
 				}
 				break;
 			}
 			case '>': {
 				if (filterChars[pos + 1] == '=') {
 					pos += 2;
-					return new FilterImpl.GreaterEqual(attr, parse_value(), debug);
+					return new FilterImpl.GreaterEqual(attr, parse_value());
 				}
 				break;
 			}
 			case '<': {
 				if (filterChars[pos + 1] == '=') {
 					pos += 2;
-					return new FilterImpl.LessEqual(attr, parse_value(), debug);
+					return new FilterImpl.LessEqual(attr, parse_value());
 				}
 				break;
 			}
@@ -1482,7 +1429,7 @@ public abstract class FilterImpl implements Filter {
 					pos += 2;
 					skipWhiteSpace();
 					if (filterChars[pos] == ')') {
-						return new FilterImpl.Present(attr, debug);
+						return new FilterImpl.Present(attr);
 					}
 					pos = oldpos;
 				}
@@ -1492,15 +1439,15 @@ public abstract class FilterImpl implements Filter {
 
 				int length = substrings.length;
 				if (length == 0) {
-					return new FilterImpl.Equal(attr, "", debug); //$NON-NLS-1$
+					return new FilterImpl.Equal(attr, ""); //$NON-NLS-1$
 				}
 				if (length == 1) {
 					String single = substrings[0];
 					if (single != null) {
-						return new FilterImpl.Equal(attr, single, debug);
+						return new FilterImpl.Equal(attr, single);
 					}
 				}
-				return new FilterImpl.Substring(attr, substrings, debug);
+				return new FilterImpl.Substring(attr, substrings);
 			}
 			}
 

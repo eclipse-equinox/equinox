@@ -316,6 +316,31 @@ public abstract class ModuleContainerAdaptor {
 	}
 
 	/**
+	 * Log a trace message.
+	 * 
+	 * @param topic   the topic of the trace message
+	 * @param message the trace message
+	 * @since 3.23
+	 */
+	public void trace(String topic, String message) {
+		System.out.println(message);
+	}
+
+	/**
+	 * Log a trace exception
+	 * 
+	 * @param topic the topic of the trace exception
+	 * @param t     the exception to trace
+	 * @since 3.23
+	 */
+	public void traceThrowable(String topic, Throwable t) {
+		if (t == null) {
+			return;
+		}
+		t.printStackTrace(System.out);
+	}
+
+	/**
 	 * Returns the executor used to perform resolve operations
 	 * 
 	 * @return the executor used to perform resolve operations

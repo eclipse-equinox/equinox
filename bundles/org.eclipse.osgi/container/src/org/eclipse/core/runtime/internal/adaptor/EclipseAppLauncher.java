@@ -24,8 +24,14 @@ import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.messages.Msg;
-import org.eclipse.osgi.service.runnable.*;
-import org.osgi.framework.*;
+import org.eclipse.osgi.service.runnable.ApplicationLauncher;
+import org.eclipse.osgi.service.runnable.ApplicationRunnable;
+import org.eclipse.osgi.service.runnable.ParameterizedRunnable;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.launch.Framework;
 
 public class EclipseAppLauncher implements ApplicationLauncher {

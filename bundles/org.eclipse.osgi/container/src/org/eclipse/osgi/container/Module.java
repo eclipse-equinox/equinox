@@ -13,6 +13,9 @@
  *******************************************************************************/
 package org.eclipse.osgi.container;
 
+import static org.eclipse.osgi.internal.debug.Debug.OPTION_DEBUG_BUNDLE_START_TIME;
+import static org.eclipse.osgi.internal.debug.Debug.OPTION_MONITOR_LAZY;
+
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
@@ -22,7 +25,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
 import org.eclipse.osgi.framework.util.ThreadInfoReport;
 import org.eclipse.osgi.internal.container.EquinoxReentrantLock;
-import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.report.resolution.ResolutionReport;
 import org.eclipse.osgi.util.NLS;
@@ -517,7 +519,8 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 			// only print bundleTime information if we actually fired an event for this
 			// bundle
 			if (container.DEBUG_BUNDLE_START_TIME) {
-				Debug.println(TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime)
+				container.getAdaptor().trace(OPTION_DEBUG_BUNDLE_START_TIME,
+						TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime)
 						+ " ms for total start time event " + event + " - " + this); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
@@ -613,7 +616,8 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 				// continue on to normal starting
 			}
 			if (getContainer().DEBUG_MONITOR_LAZY) {
-				Debug.printStackTrace(new Exception("Module is being lazy activated: " + this)); //$NON-NLS-1$
+				getContainer().getAdaptor().traceThrowable(OPTION_MONITOR_LAZY,
+						new Exception("Module is being lazy activated: " + this)); //$NON-NLS-1$
 			}
 		} else {
 			if (isLazyActivate(options) && !isTriggerSet()) {
