@@ -20,7 +20,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.eclipse.equinox.internal.transforms.LazyInputStream.InputStreamProvider;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
-import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.eclipse.osgi.storage.StorageUtil;
@@ -38,7 +37,6 @@ public class TransformedBundleFile extends BundleFileWrapper {
 	private final TransformerHook transformerHook;
 	private final BundleFile delegate;
 	private final Generation generation;
-	private final Debug debug;
 
 	/**
 	 * Create a wrapped bundle file. Requests into this file will be compared to the
@@ -54,7 +52,6 @@ public class TransformedBundleFile extends BundleFileWrapper {
 		this.transformerHook = transformerHook;
 		this.generation = generation;
 		this.delegate = delegate;
-		this.debug = generation.getBundleInfo().getStorage().getConfiguration().getDebug();
 	}
 
 	Generation getGeneration() {
@@ -148,9 +145,6 @@ public class TransformedBundleFile extends BundleFileWrapper {
 			File nested = getExtractFile(path);
 			if (nested != null) {
 				if (nested.exists()) {
-					/* the entry is already cached */
-					if (debug.DEBUG_GENERAL)
-						Debug.println("File already present: " + nested.getPath()); //$NON-NLS-1$
 					if (nested.isDirectory())
 						// must ensure the complete directory is extracted (bug
 						// 182585)
@@ -165,10 +159,7 @@ public class TransformedBundleFile extends BundleFileWrapper {
 						InputStream in = getEntry(path).getInputStream();
 						if (in == null)
 							return null;
-						// if (in instanceof )
 						/* the entry has not been cached */
-						if (debug.DEBUG_GENERAL)
-							Debug.println("Creating file: " + nested.getPath()); //$NON-NLS-1$
 						/* create the necessary directories */
 						File dir = new File(nested.getParent());
 						if (!dir.exists() && !dir.mkdirs()) {
@@ -185,8 +176,7 @@ public class TransformedBundleFile extends BundleFileWrapper {
 				return nested;
 			}
 		} catch (IOException e) {
-			if (debug.DEBUG_GENERAL)
-				Debug.printStackTrace(e);
+			// consider logging
 		}
 		return null;
 	}
