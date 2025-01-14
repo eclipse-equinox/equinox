@@ -55,7 +55,9 @@ import java.util.stream.Collectors;
 import junit.framework.AssertionFailedError;
 import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.eclipse.osgi.internal.loader.ModuleClassLoader;
+import org.eclipse.osgi.storage.StorageUtil;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
+import org.eclipse.osgi.tests.bundles.classes.ExternalClassPathActivator;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
@@ -2509,6 +2511,47 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 			}
 			if (frag != null) {
 				frag.uninstall();
+			}
+		}
+	}
+
+	@Test
+	public void testExternalClasspath() throws Exception {
+
+		File outputDir = OSGiTestsActivator.getContext().getDataFile(getName()); // $NON-NLS-1$
+		outputDir.mkdirs();
+
+		Map<String, String> hostHeaders = new HashMap<>();
+		hostHeaders.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		hostHeaders.put(Constants.BUNDLE_SYMBOLICNAME, "testClassPathHost");
+		hostHeaders.put(Constants.BUNDLE_CLASSPATH, "., external:$TEST_CLASS_PATH_EXTERNAL$");
+		hostHeaders.put(Constants.BUNDLE_ACTIVATOR, ExternalClassPathActivator.class.getName());
+		hostHeaders.put(Constants.IMPORT_PACKAGE, "org.osgi.framework, org.osgi.framework.wiring");
+
+		Map<String, byte[]> hostEntries = new HashMap<>();
+		String activatorResourcePath = ExternalClassPathActivator.class.getName().replace('.', '/') + ".class";
+		hostEntries.put(activatorResourcePath, StorageUtil
+				.getBytes(OSGiTestsActivator.getBundle().getResource(activatorResourcePath).openStream(), -1, 4000));
+		File hostFile = SystemBundleTests.createBundleWithBytes(outputDir, "host", hostHeaders, hostEntries);
+
+		Map<String, String> externalHeaders = new HashMap<>();
+		Map<String, byte[]> externalEntries = new HashMap<>();
+		externalEntries.put("lib/", null);
+		externalEntries.put("lib/resource.txt", "Some Text".getBytes());
+		File externalFile = SystemBundleTests.createBundleWithBytes(outputDir, "external", externalHeaders,
+				externalEntries);
+
+		System.setProperty("TEST_CLASS_PATH_EXTERNAL", externalFile.getAbsolutePath());
+		Bundle host = null;
+		try {
+			host = getContext().installBundle(hostFile.toURI().toASCIIString());
+			host.start();
+			URL resource = host.adapt(BundleWiring.class).getClassLoader().getResource("lib/resource.txt");
+			assertNotNull("No resources found.", resource);
+			assertEquals("Wrong content for resource", "Some Text", readURL(resource));
+		} finally {
+			if (host != null) {
+				host.uninstall();
 			}
 		}
 	}
