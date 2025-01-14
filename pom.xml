@@ -189,6 +189,7 @@
 		    <module>bundles/org.eclipse.equinox.coordinator</module>
 		    <module>bundles/org.eclipse.equinox.device</module>
 		    <module>bundles/org.eclipse.equinox.event</module>
+		    <module>bundles/org.eclipse.equinox.slf4j</module>
 		
 		    <module>bundles/org.eclipse.equinox.http.service.api</module>
 		    <module>bundles/org.eclipse.equinox.http.jetty</module>
