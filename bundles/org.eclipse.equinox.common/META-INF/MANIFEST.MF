@@ -15,7 +15,7 @@ Export-Package: org.eclipse.core.internal.boot;x-friends:="org.eclipse.core.reso
    org.eclipse.core.filesystem,
    org.eclipse.equinox.security",
  org.eclipse.core.runtime;common=split;version="3.7.0";mandatory:=common,
- org.eclipse.core.text;version="3.13.0",
+ org.eclipse.core.text;version="3.14.0",
  org.eclipse.equinox.events;version="1.0.0"
 Bundle-Vendor: %providerName
 Bundle-Activator: org.eclipse.core.internal.runtime.Activator
