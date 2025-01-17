@@ -290,7 +290,8 @@
       </targlet>
     </setupTask>
     <setupTask
-        xsi:type="setup.workingsets:WorkingSetTask">
+        xsi:type="setup.workingsets:WorkingSetTask"
+        id="p2.workingsets">
       <workingSet
           name="Equinox p2">
         <predicate
@@ -300,7 +301,7 @@
               project="org.eclipse.equinox.p2.core"/>
           <operand
               xsi:type="workingsets:ExclusionPredicate"
-              excludedWorkingSet="//@projects[name='p2']/@setupTasks.5/@workingSets[name='Equinox%20p2%20Tests'] //@projects[name='p2']/@setupTasks.5/@workingSets[name='Equinox%20p2%20Examples']"/>
+              excludedWorkingSet="//'p2.workingsets'/@workingSets[name='Equinox%20p2%20Tests']"/>
         </predicate>
       </workingSet>
       <workingSet
@@ -313,18 +314,6 @@
           <operand
               xsi:type="predicates:NamePredicate"
               pattern=".*test($|s.*)"/>
-        </predicate>
-      </workingSet>
-      <workingSet
-          name="Equinox p2 Examples">
-        <predicate
-            xsi:type="predicates:AndPredicate">
-          <operand
-              xsi:type="predicates:RepositoryPredicate"
-              project="org.eclipse.equinox.p2.core"/>
-          <operand
-              xsi:type="predicates:NamePredicate"
-              pattern=".*examples.*"/>
         </predicate>
       </workingSet>
     </setupTask>
