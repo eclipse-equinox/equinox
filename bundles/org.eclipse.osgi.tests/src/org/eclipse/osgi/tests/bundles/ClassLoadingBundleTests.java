@@ -55,12 +55,14 @@ import java.util.stream.Collectors;
 import junit.framework.AssertionFailedError;
 import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.eclipse.osgi.internal.loader.ModuleClassLoader;
+import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.storage.StorageUtil;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.bundles.classes.ExternalClassPathActivator;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.BundleReference;
@@ -82,6 +84,7 @@ import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleWire;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.framework.wiring.FrameworkWiring;
+import org.osgi.resource.Namespace;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
@@ -2553,6 +2556,69 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 			if (host != null) {
 				host.uninstall();
 			}
+		}
+	}
+
+	@Test
+	public void testDynamicImportStarXInternal() throws Exception {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName());
+
+		Map<String, String> headersExportHeaders = new HashMap<>();
+		headersExportHeaders.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		headersExportHeaders.put(Constants.BUNDLE_SYMBOLICNAME, getName() + "Export");
+		headersExportHeaders.put(Constants.EXPORT_PACKAGE,
+				"test.internal.pkg1; x-internal:=true, test.friends.pkg1; x-friends:=nobody");
+
+		Map<String, String> headersImportHeaders = new HashMap<>();
+		headersImportHeaders.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		headersImportHeaders.put(Constants.BUNDLE_SYMBOLICNAME, getName() + "Import");
+		headersImportHeaders.put(Constants.DYNAMICIMPORT_PACKAGE, "*");
+
+		config.mkdirs();
+
+		File bundleExportFile = SystemBundleTests.createBundle(config, getName() + "Export", headersExportHeaders);
+		File bundleImportFile = SystemBundleTests.createBundle(config, getName() + "Import", headersImportHeaders);
+
+		Map<String, String> fwkConfig = new HashMap<>();
+		fwkConfig.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		Equinox equinox = new Equinox(fwkConfig);
+		try {
+			equinox.start();
+			BundleContext systemContext = equinox.getBundleContext();
+
+			Bundle bundleExport = systemContext.installBundle(bundleExportFile.toURI().toString());
+			bundleExport.start();
+
+			Bundle bundleImport = systemContext.installBundle(bundleImportFile.toURI().toString());
+			bundleImport.start();
+
+			// trigger internal load
+			assertThrows(ClassNotFoundException.class,
+					() -> bundleImport.loadClass("test.internal.pkg1.DoesNotExistTest"));
+
+			// should have a wire established
+			BundleWiring importWiring = bundleImport.adapt(BundleWiring.class);
+			assertNotNull("No wiring", importWiring);
+			List<BundleWire> importWires = importWiring.getRequiredWires(PackageNamespace.PACKAGE_NAMESPACE);
+			assertEquals("Expected 1 import", 1, importWires.size());
+			BundleWire testWire = importWires.get(0);
+			assertEquals("Expected a dynamic wire", PackageNamespace.RESOLUTION_DYNAMIC,
+					testWire.getRequirement().getDirectives().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE));
+			assertEquals("Wrong package wired", "test.internal.pkg1",
+					testWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+
+			// trigger friends load
+			assertThrows(ClassNotFoundException.class,
+					() -> bundleImport.loadClass("test.friends.pkg1.DoesNotExistTest"));
+			importWires = importWiring.getRequiredWires(PackageNamespace.PACKAGE_NAMESPACE);
+			assertEquals("Expected 2 imports", 2, importWires.size());
+			testWire = importWires.get(1);
+			assertEquals("Expected a dynamic wire", PackageNamespace.RESOLUTION_DYNAMIC,
+					testWire.getRequirement().getDirectives().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE));
+			assertEquals("Wrong package wired", "test.friends.pkg1",
+					testWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+		} finally {
+			stopQuietly(equinox);
 		}
 	}
 
