@@ -18,8 +18,8 @@ Import-Package: org.eclipse.osgi.framework.log,
  org.eclipse.osgi.service.debug,
  org.eclipse.osgi.service.environment,
  org.eclipse.osgi.util,
- org.osgi.framework,
+ org.osgi.framework;version="[1.10.0,2)",
  org.osgi.service.packageadmin,
- org.osgi.util.tracker
+ org.osgi.util.tracker;version="[1.5.0,2)"
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Automatic-Module-Name: org.eclipse.equinox.preferences
