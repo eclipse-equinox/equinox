@@ -6,8 +6,8 @@ Bundle-SymbolicName: org.eclipse.equinox.transforms.xslt
 Bundle-Version: 1.3.200.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Import-Package: org.eclipse.osgi.framework.log;version="1.0.0",
- org.osgi.framework;version="1.3.0",
- org.osgi.util.tracker;version="1.0"
+ org.osgi.framework;version="[1.6.0,2)",
+ org.osgi.util.tracker;version="[1.5.0,2)"
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: bundle
 Export-Package: org.eclipse.equinox.internal.transforms;x-internal:=true,
