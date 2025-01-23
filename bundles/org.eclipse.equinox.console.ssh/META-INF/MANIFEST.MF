@@ -28,9 +28,9 @@ Import-Package: javax.security.auth;resolution:=optional,
  org.apache.sshd.server.shell;version="2.4.0";resolution:=optional,
  org.eclipse.equinox.console.common,
  org.eclipse.equinox.console.common.terminal,
- org.osgi.framework,
+ org.osgi.framework;version="[1.6.0,2)",
  org.osgi.service.cm;version="[1.4,2.0)";resolution:=optional,
- org.osgi.util.tracker
+ org.osgi.util.tracker;version="[1.5.0,2)"
 Export-Package: org.eclipse.equinox.console.internal.ssh;x-internal:=true,
  org.eclipse.equinox.console.jaas,
  org.eclipse.equinox.console.ssh;x-internal:=true,
