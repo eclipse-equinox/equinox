@@ -160,8 +160,7 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 				try {
 					Object storage = element.createExecutableExtension(ATTRIBUTE_STORAGE);
 					ScopeDescriptor descriptor = new ScopeDescriptor((AbstractPreferenceStorage) storage);
-					EclipsePreferences result = new EclipsePreferences(parent, name);
-					result.setDescriptor(descriptor);
+					EclipsePreferences result = new EclipsePreferences(parent, name, descriptor);
 					return result;
 				} catch (ClassCastException e) {
 					RuntimeLog.log(Status.error(PrefsMessages.preferences_classCastStorage, e));
