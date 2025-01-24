@@ -56,6 +56,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	protected static final String EMPTY_STRING = ""; //$NON-NLS-1$
 	private static final String BACKUP_FILE_EXTENSION = ".bak"; //$NON-NLS-1$
 
+	/** not synchronized, but each thread would create the same result **/
 	private String cachedPath;
 	/** synchronized by childAndPropertyLock */
 	private ImmutableMap properties = ImmutableMap.EMPTY;
@@ -65,16 +66,16 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	 * Protects write access to properties and children.
 	 */
 	private final Object childAndPropertyLock = new Object();
-	protected boolean dirty = false;
-	protected boolean loading = false;
+	protected volatile boolean dirty;
+	protected volatile boolean loading;
 	protected final String name;
 	// the parent of an EclipsePreference node is always an EclipsePreference node.
 	// (or null)
 	protected final EclipsePreferences parent;
-	protected boolean removed = false;
+	protected volatile boolean removed;
 	private final ListenerList<INodeChangeListener> nodeChangeListeners = new ListenerList<>();
 	private final ListenerList<IPreferenceChangeListener> preferenceChangeListeners = new ListenerList<>();
-	private ScopeDescriptor descriptor;
+	private final ScopeDescriptor descriptor;
 
 	public static final boolean DEBUG_PREFERENCE_GENERAL;
 	public static final boolean DEBUG_PREFERENCE_SET;
@@ -91,9 +92,14 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	}
 
 	protected EclipsePreferences(EclipsePreferences parent, String name) {
+		this(parent, name, null);
+	}
+
+	EclipsePreferences(EclipsePreferences parent, String name, ScopeDescriptor descriptor) {
 		this.parent = parent;
 		this.name = name;
 		this.cachedPath = null; // make sure the cached path is cleared after setting the parent
+		this.descriptor = descriptor;
 	}
 
 	@Override
@@ -579,8 +585,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	}
 
 	protected EclipsePreferences internalCreate(EclipsePreferences nodeParent, String nodeName, Object context) {
-		EclipsePreferences result = new EclipsePreferences(nodeParent, nodeName);
-		result.descriptor = this.descriptor;
+		EclipsePreferences result = new EclipsePreferences(nodeParent, nodeName, descriptor);
 		return result;
 	}
 
@@ -1139,10 +1144,6 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	@Override
 	public String toString() {
 		return absolutePath();
-	}
-
-	void setDescriptor(ScopeDescriptor descriptor) {
-		this.descriptor = descriptor;
 	}
 
 	protected IEclipsePreferences getOrCreate(String scope) {
