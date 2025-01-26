@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServlet;
  * @deprecated No longer required.
  * @since 1.3
  */
+@Deprecated(forRemoval = true)
 public class HttpServiceMultipartServlet extends HttpServlet {
 	private static final long serialVersionUID = 2281118780429323631L;
 }
