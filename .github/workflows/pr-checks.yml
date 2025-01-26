@@ -19,4 +19,5 @@ jobs:
     with:
       botName: Eclipse Equinox Bot
       botMail: equinox-bot@eclipse.org
-      extra-maven-args: '-f bundles'
+      extra-setup-command: 'git clone --depth 1 https://github.com/eclipse-equinox/equinox.binaries.git binaries'
+      extra-maven-args: '-Dequinox.binaries.loc=$(pwd)/binaries'
