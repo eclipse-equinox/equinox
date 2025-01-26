@@ -3,6 +3,9 @@ bin_test
 /bundles/archived/*/bin/
 .DS_Store
 
+# Ignore clone of equinox.binaries repo created in version-check/increment workflow
+/binaries/
+
 # maven
 target/
 # files generated (temporary) by the tycho maven builds
