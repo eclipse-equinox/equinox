@@ -826,7 +826,7 @@ public class ReliableFile {
 		return buffer;
 	}
 
-	private class CacheInfo {
+	private static class CacheInfo {
 		int filetype;
 		Checksum checksum;
 		long timeStamp;
