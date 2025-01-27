@@ -42,6 +42,7 @@ public class FutureProgressMonitor extends ProgressMonitorWrapper {
 		super(progressMonitor);
 	}
 
+	@Override
 	public void beginTask(String name, int totalWork) {
 		super.beginTask(name, totalWork);
 		synchronized (lock) {
@@ -50,6 +51,7 @@ public class FutureProgressMonitor extends ProgressMonitorWrapper {
 		}
 	}
 
+	@Override
 	public void done() {
 		super.done();
 		synchronized (lock) {
@@ -58,6 +60,7 @@ public class FutureProgressMonitor extends ProgressMonitorWrapper {
 		}
 	}
 
+	@Override
 	public void internalWorked(double work) {
 		super.internalWorked(work);
 		synchronized (lock) {
@@ -66,6 +69,7 @@ public class FutureProgressMonitor extends ProgressMonitorWrapper {
 		}
 	}
 
+	@Override
 	public void setCanceled(boolean value) {
 		super.setCanceled(value);
 		synchronized (lock) {
@@ -74,6 +78,7 @@ public class FutureProgressMonitor extends ProgressMonitorWrapper {
 		}
 	}
 
+	@Override
 	public void setTaskName(String name) {
 		super.setTaskName(name);
 		synchronized (lock) {
@@ -82,6 +87,7 @@ public class FutureProgressMonitor extends ProgressMonitorWrapper {
 		}
 	}
 
+	@Override
 	public void subTask(String name) {
 		super.subTask(name);
 		synchronized (lock) {
@@ -90,6 +96,7 @@ public class FutureProgressMonitor extends ProgressMonitorWrapper {
 		}
 	}
 
+	@Override
 	public void worked(int work) {
 		super.worked(work);
 		synchronized (lock) {

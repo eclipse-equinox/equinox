@@ -23,8 +23,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
  */
 public abstract class AbstractExecutor implements IRunnableExecutor, IExecutor {
 
+	@Override
 	public void execute(final Runnable runnable) {
 		execute(new IProgressRunnable<Object>() {
+			@Override
 			public Object run(IProgressMonitor monitor) throws Exception {
 				runnable.run();
 				return null;
@@ -32,6 +34,7 @@ public abstract class AbstractExecutor implements IRunnableExecutor, IExecutor {
 		}, null);
 	}
 
+	@Override
 	public abstract <ResultType> IFuture<ResultType> execute(IProgressRunnable<? extends ResultType> runnable,
 			IProgressMonitor monitor);
 

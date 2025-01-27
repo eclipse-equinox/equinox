@@ -46,6 +46,7 @@ public class SingleOperationListenableFuture<ResultType> extends SingleOperation
 		super(progressMonitor);
 	}
 
+	@Override
 	public void addListener(IExecutor executor, IProgressRunnable<ResultType> progressRunnable,
 			IProgressMonitor monitor) {
 		Assert.isNotNull(executor);
@@ -67,6 +68,7 @@ public class SingleOperationListenableFuture<ResultType> extends SingleOperation
 		Assert.isNotNull(runnable);
 		if (!isCanceled()) {
 			SafeRunner.run(new ISafeRunnable() {
+				@Override
 				public void handleException(Throwable exception) {
 					synchronized (SingleOperationListenableFuture.this) {
 						if (!isCanceled())
@@ -75,6 +77,7 @@ public class SingleOperationListenableFuture<ResultType> extends SingleOperation
 					}
 				}
 
+				@Override
 				public void run() throws Exception {
 					@SuppressWarnings("unchecked")
 					ResultType result = (ResultType) runnable.run(getProgressMonitor());

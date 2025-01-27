@@ -45,6 +45,7 @@ public class SingleOperationFuture<ResultType> extends AbstractFuture<ResultType
 				(progressMonitor == null) ? new NullProgressMonitor() : progressMonitor);
 	}
 
+	@Override
 	public synchronized ResultType get() throws InterruptedException, OperationCanceledException {
 		throwIfCanceled();
 		while (!isDone())
@@ -53,6 +54,7 @@ public class SingleOperationFuture<ResultType> extends AbstractFuture<ResultType
 		return resultValue;
 	}
 
+	@Override
 	public synchronized ResultType get(long waitTimeInMillis)
 			throws InterruptedException, TimeoutException, OperationCanceledException {
 		// If waitTime out of bounds then throw illegal argument exception
@@ -84,6 +86,7 @@ public class SingleOperationFuture<ResultType> extends AbstractFuture<ResultType
 		}
 	}
 
+	@Override
 	public synchronized boolean isDone() {
 		return (status != null);
 	}
@@ -94,10 +97,12 @@ public class SingleOperationFuture<ResultType> extends AbstractFuture<ResultType
 	 * 
 	 * @noreference
 	 */
+	@Override
 	public void runWithProgress(final IProgressRunnable<?> runnable) {
 		Assert.isNotNull(runnable);
 		if (!isCanceled()) {
 			SafeRunner.run(new ISafeRunnable() {
+				@Override
 				public void handleException(Throwable exception) {
 					synchronized (SingleOperationFuture.this) {
 						if (!isCanceled())
@@ -105,6 +110,7 @@ public class SingleOperationFuture<ResultType> extends AbstractFuture<ResultType
 					}
 				}
 
+				@Override
 				public void run() throws Exception {
 					@SuppressWarnings("unchecked")
 					ResultType result = (ResultType) runnable.run(getProgressMonitor());
@@ -117,16 +123,19 @@ public class SingleOperationFuture<ResultType> extends AbstractFuture<ResultType
 		}
 	}
 
+	@Override
 	public synchronized IStatus getStatus() {
 		return status;
 	}
 
+	@Override
 	public boolean hasValue() {
 		// for a single operation future, hasValue means that the single
 		// operation has completed, and there will be no more.
 		return isDone();
 	}
 
+	@Override
 	public synchronized boolean cancel() {
 		if (isDone())
 			return false;
@@ -168,10 +177,12 @@ public class SingleOperationFuture<ResultType> extends AbstractFuture<ResultType
 		}
 	}
 
+	@Override
 	public synchronized IProgressMonitor getProgressMonitor() {
 		return progressMonitor;
 	}
 
+	@Override
 	public synchronized boolean isCanceled() {
 		return getProgressMonitor().isCanceled();
 	}

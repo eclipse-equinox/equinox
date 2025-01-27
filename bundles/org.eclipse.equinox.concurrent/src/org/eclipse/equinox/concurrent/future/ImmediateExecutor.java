@@ -36,11 +36,13 @@ import org.eclipse.core.runtime.IProgressMonitor;
  */
 public class ImmediateExecutor extends AbstractExecutor {
 
+	@Override
 	@SuppressWarnings("rawtypes")
 	protected AbstractFuture<?> createFuture(IProgressMonitor monitor) {
 		return new SingleOperationListenableFuture(monitor);
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public <ResultType> IFuture<ResultType> execute(IProgressRunnable<? extends ResultType> runnable,
 			IProgressMonitor monitor) {

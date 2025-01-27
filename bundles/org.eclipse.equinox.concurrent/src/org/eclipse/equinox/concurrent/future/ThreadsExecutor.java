@@ -55,6 +55,7 @@ public class ThreadsExecutor extends AbstractExecutor {
 	 */
 	protected Runnable createRunnable(final ISafeProgressRunner runner, final IProgressRunnable<?> progressRunnable) {
 		return new Runnable() {
+			@Override
 			public void run() {
 				runner.runWithProgress(progressRunnable);
 			}
@@ -79,11 +80,13 @@ public class ThreadsExecutor extends AbstractExecutor {
 	 * @param monitor a progress monitor to associate with the future. May be
 	 *                <code>null</code>.
 	 */
+	@Override
 	@SuppressWarnings("rawtypes")
 	protected AbstractFuture<?> createFuture(IProgressMonitor monitor) {
 		return new SingleOperationListenableFuture(monitor);
 	}
 
+	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public synchronized <ResultType> IFuture<ResultType> execute(IProgressRunnable<? extends ResultType> runnable,
 			IProgressMonitor monitor) throws IllegalThreadStateException {
