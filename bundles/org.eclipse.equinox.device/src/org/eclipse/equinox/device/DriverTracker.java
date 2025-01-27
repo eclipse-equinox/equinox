@@ -89,6 +89,7 @@ public class DriverTracker extends ServiceTracker {
 	 * @return The service object to be tracked for the ServiceReference or
 	 *         <code>null</code> if the ServiceReference should not be tracked.
 	 */
+	@Override
 	public Object addingService(ServiceReference reference) {
 		if (Activator.DEBUG) {
 			log.debug(reference, this + " adding service"); //$NON-NLS-1$
@@ -134,6 +135,7 @@ public class DriverTracker extends ServiceTracker {
 	 * @param reference Reference to service that has been modified.
 	 * @param service   The service object for the modified service.
 	 */
+	@Override
 	public void modifiedService(ServiceReference reference, Object service) {
 		if (Activator.DEBUG) {
 			log.debug(reference, this + " modified service"); //$NON-NLS-1$
@@ -160,6 +162,7 @@ public class DriverTracker extends ServiceTracker {
 	 * @param reference Reference to service that has been removed.
 	 * @param service   The service object for the removed service.
 	 */
+	@Override
 	public void removedService(ServiceReference reference, Object service) {
 		if (Activator.DEBUG) {
 			log.debug(reference, this + " removing service"); //$NON-NLS-1$
@@ -408,6 +411,7 @@ public class DriverTracker extends ServiceTracker {
 		driverReferrals.put(device, referral);
 	}
 
+	@Override
 	public String toString() {
 		return "DriverTracker"; //$NON-NLS-1$
 	}
@@ -438,6 +442,7 @@ public class DriverTracker extends ServiceTracker {
 			}
 		}
 
+		@Override
 		public void run() {
 			// 1. Wait for some time
 			// 2. if bundle registers Driver; terminate
@@ -462,6 +467,7 @@ public class DriverTracker extends ServiceTracker {
 			}
 		}
 
+		@Override
 		public void serviceChanged(ServiceEvent event) {
 			if ((event.getType() == ServiceEvent.REGISTERED)
 					&& bundle.equals(event.getServiceReference().getBundle())) {
@@ -473,6 +479,7 @@ public class DriverTracker extends ServiceTracker {
 			}
 		}
 
+		@Override
 		public void bundleChanged(BundleEvent event) {
 			if ((event.getType() == Bundle.UNINSTALLED) && bundle.equals(event.getBundle())) {
 				contxt.removeBundleListener(this);
