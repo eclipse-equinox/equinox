@@ -105,6 +105,7 @@ public class TransformerList extends ServiceTracker<Object, Object> {
 		}
 	}
 
+	@Override
 	public Object addingService(ServiceReference<Object> reference) {
 		try {
 			return super.addingService(reference);
@@ -113,11 +114,13 @@ public class TransformerList extends ServiceTracker<Object, Object> {
 		}
 	}
 
+	@Override
 	public void modifiedService(ServiceReference<Object> reference, Object service) {
 		super.modifiedService(reference, service);
 		stale = true;
 	}
 
+	@Override
 	public void removedService(ServiceReference<Object> reference, Object service) {
 		super.removedService(reference, service);
 		stale = true;

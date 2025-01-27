@@ -47,6 +47,7 @@ public class TransformedBundleEntry extends BundleEntry {
 		timestamp = System.currentTimeMillis();
 	}
 
+	@Override
 	@SuppressWarnings("deprecation")
 	public URL getFileURL() {
 		try {
@@ -59,14 +60,17 @@ public class TransformedBundleEntry extends BundleEntry {
 		return null;
 	}
 
+	@Override
 	public InputStream getInputStream() {
 		return stream;
 	}
 
+	@Override
 	public URL getLocalURL() {
 		return getFileURL();
 	}
 
+	@Override
 	public String getName() {
 		return original.getName();
 	}
@@ -76,6 +80,7 @@ public class TransformedBundleEntry extends BundleEntry {
 	 * does not support marks the stream is drained and a copy is retained for later
 	 * use.
 	 */
+	@Override
 	public long getSize() {
 		ByteArrayOutputStream tempBuffer = new ByteArrayOutputStream(1024);
 		byte[] buffer = new byte[1024];
@@ -104,6 +109,7 @@ public class TransformedBundleEntry extends BundleEntry {
 
 	}
 
+	@Override
 	public long getTime() {
 		return timestamp;
 	}
