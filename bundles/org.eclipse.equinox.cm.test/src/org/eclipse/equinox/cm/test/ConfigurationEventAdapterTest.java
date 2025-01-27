@@ -27,12 +27,14 @@ public class ConfigurationEventAdapterTest extends AbstractCMTest {
 	boolean locked = false;
 	Object lock = new Object();
 
+	@Override
 	@Before
 	public void setUp() throws Exception {
 		getBundle("org.eclipse.equinox.event").start();
 		super.setUp();
 	}
 
+	@Override
 	@After
 	public void tearDown() throws Exception {
 		super.tearDown();

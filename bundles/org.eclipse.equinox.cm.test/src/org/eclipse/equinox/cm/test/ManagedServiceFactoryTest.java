@@ -37,6 +37,7 @@ public class ManagedServiceFactoryTest extends AbstractCMTest {
 		updateCount = 0;
 		ManagedServiceFactory msf = new ManagedServiceFactory() {
 
+			@Override
 			public void deleted(String pid) {
 				synchronized (lock) {
 					locked = false;
@@ -45,10 +46,12 @@ public class ManagedServiceFactoryTest extends AbstractCMTest {
 				}
 			}
 
+			@Override
 			public String getName() {
 				return null;
 			}
 
+			@Override
 			public void updated(String pid, Dictionary<String, ?> properties) {
 				synchronized (lock) {
 					locked = false;
@@ -86,6 +89,7 @@ public class ManagedServiceFactoryTest extends AbstractCMTest {
 		updateCount = 0;
 		ManagedServiceFactory msf = new ManagedServiceFactory() {
 
+			@Override
 			public void deleted(String pid) {
 				synchronized (lock) {
 					locked = false;
@@ -94,10 +98,12 @@ public class ManagedServiceFactoryTest extends AbstractCMTest {
 				}
 			}
 
+			@Override
 			public String getName() {
 				return null;
 			}
 
+			@Override
 			public void updated(String pid, Dictionary<String, ?> properties) {
 				synchronized (lock) {
 					locked = false;
