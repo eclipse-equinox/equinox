@@ -311,7 +311,7 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 		return (IExtensionPoint target) -> id.equals(target.getNamespaceIdentifier());
 	}
 
-	private class HandlerWrapper {
+	private static class HandlerWrapper {
 		IExtensionChangeHandler handler;
 		IFilter filter;
 

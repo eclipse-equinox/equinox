@@ -121,6 +121,7 @@ public interface IExtensionPoint {
 	 *             fall into this category.
 	 *             </p>
 	 */
+	@Deprecated
 	public String getNamespace() throws InvalidRegistryObjectException;
 
 	/**
