@@ -52,6 +52,7 @@ public class UserAdminEventAdapterTest {
 	public void testUserAdminEvent() throws Exception {
 
 		EventHandler handler = new EventHandler() {
+			@Override
 			public void handleEvent(Event event) {
 				synchronized (lock) {
 					locked = false;

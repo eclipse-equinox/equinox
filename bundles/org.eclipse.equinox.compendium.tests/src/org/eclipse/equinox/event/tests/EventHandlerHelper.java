@@ -25,6 +25,7 @@ public class EventHandlerHelper implements EventHandler {
 		return result;
 	}
 
+	@Override
 	public void handleEvent(Event event) {
 		lastEvent = event;
 	}

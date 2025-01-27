@@ -37,6 +37,7 @@ public class Activator implements BundleActivator {
 	 * 
 	 * @see org.eclipse.core.runtime.Plugins#start(org.osgi.framework.BundleContext)
 	 */
+	@Override
 	public void start(BundleContext bc) throws Exception {
 		plugin = this;
 		packageAdminTracker = new ServiceTracker(bc, PackageAdmin.class.getName(), null);
@@ -49,6 +50,7 @@ public class Activator implements BundleActivator {
 	 * 
 	 * @see org.eclipse.core.runtime.Plugin#stop(org.osgi.framework.BundleContext)
 	 */
+	@Override
 	public void stop(BundleContext bc) throws Exception {
 		if (packageAdminTracker != null) {
 			packageAdminTracker.close();
