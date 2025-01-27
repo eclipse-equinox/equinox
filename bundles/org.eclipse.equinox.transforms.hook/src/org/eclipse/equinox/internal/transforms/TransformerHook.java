@@ -32,18 +32,21 @@ public class TransformerHook
 	private volatile TransformInstanceListData templates;
 	private EquinoxLogServices logServices;
 
+	@Override
 	public BundleFileWrapper wrapBundleFile(BundleFile bundleFile, Generation generation, boolean base) {
 		if (transformers == null || templates == null)
 			return null;
 		return new TransformedBundleFile(this, generation, bundleFile);
 	}
 
+	@Override
 	public void addHooks(HookRegistry hookRegistry) {
 		hookRegistry.addActivatorHookFactory(this);
 		hookRegistry.addBundleFileWrapperFactoryHook(this);
 		logServices = hookRegistry.getContainer().getLogServices();
 	}
 
+	@Override
 	public void start(BundleContext context) throws BundleException {
 		try {
 			ReplaceTransformer.register(context, this);
@@ -62,6 +65,7 @@ public class TransformerHook
 
 	}
 
+	@Override
 	public void stop(BundleContext context) {
 		transformers.close();
 		templates.close();
@@ -76,6 +80,7 @@ public class TransformerHook
 		logServices.log(EquinoxContainer.NAME, severity, msg, t);
 	}
 
+	@Override
 	public BundleActivator createActivator() {
 		return this;
 	}

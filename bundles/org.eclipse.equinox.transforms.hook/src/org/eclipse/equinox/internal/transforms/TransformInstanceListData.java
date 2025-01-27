@@ -164,6 +164,7 @@ public class TransformInstanceListData extends ServiceTracker<URL, URL> {
 		}
 	}
 
+	@Override
 	public URL addingService(ServiceReference<URL> reference) {
 		try {
 			return super.addingService(reference);
@@ -172,11 +173,13 @@ public class TransformInstanceListData extends ServiceTracker<URL, URL> {
 		}
 	}
 
+	@Override
 	public void modifiedService(ServiceReference<URL> reference, URL service) {
 		super.modifiedService(reference, service);
 		stale = true;
 	}
 
+	@Override
 	public void removedService(ServiceReference<URL> reference, URL service) {
 		super.removedService(reference, service);
 		stale = true;

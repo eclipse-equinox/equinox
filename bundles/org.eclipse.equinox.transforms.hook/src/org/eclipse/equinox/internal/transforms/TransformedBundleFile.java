@@ -58,10 +58,12 @@ public class TransformedBundleFile extends BundleFileWrapper {
 		return generation;
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		return delegate.equals(obj);
 	}
 
+	@Override
 	public BundleEntry getEntry(String path) {
 
 		final BundleEntry original = delegate.getEntry(path);
@@ -134,6 +136,7 @@ public class TransformedBundleFile extends BundleFileWrapper {
 	 * This file is a copy of {@link ZipBundleFile#getFile(String, boolean)} with
 	 * modifications.
 	 */
+	@Override
 	public File getFile(String path, boolean nativeCode) {
 		File originalFile = delegate.getFile(path, nativeCode);
 
@@ -228,10 +231,12 @@ public class TransformedBundleFile extends BundleFileWrapper {
 		return generation.getExtractFile(path);
 	}
 
+	@Override
 	public int hashCode() {
 		return delegate.hashCode();
 	}
 
+	@Override
 	public String toString() {
 		return delegate.toString();
 	}
