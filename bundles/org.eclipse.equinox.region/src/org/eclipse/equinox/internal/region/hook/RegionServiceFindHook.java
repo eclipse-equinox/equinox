@@ -38,6 +38,7 @@ public final class RegionServiceFindHook implements FindHook {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void find(BundleContext context, String name, String filter, boolean allServices,
 			Collection<ServiceReference<?>> references) {
 		Bundle finderBundle = RegionBundleFindHook.getBundle(context);

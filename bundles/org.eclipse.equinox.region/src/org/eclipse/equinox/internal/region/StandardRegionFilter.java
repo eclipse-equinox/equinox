@@ -109,6 +109,7 @@ public final class StandardRegionFilter implements RegionFilter {
 		return false;
 	}
 
+	@Override
 	public boolean isAllowed(ServiceReference<?> service) {
 		if (match(filters.get(VISIBLE_OSGI_SERVICE_NAMESPACE), service))
 			return true;

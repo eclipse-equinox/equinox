@@ -64,6 +64,7 @@ public interface RegionFilter {
 	 * @deprecated use the {@link RegionFilter#VISIBLE_OSGI_SERVICE_NAMESPACE
 	 *             osgi.service} namespace instead.
 	 */
+	@Deprecated
 	public static final String VISIBLE_SERVICE_NAMESPACE = "org.eclipse.equinox.allow.service"; //$NON-NLS-1$
 
 	/**

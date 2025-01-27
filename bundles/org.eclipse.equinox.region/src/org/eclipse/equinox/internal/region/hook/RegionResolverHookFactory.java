@@ -37,6 +37,7 @@ public final class RegionResolverHookFactory implements ResolverHookFactory {
 		this.regionDigraph = regionDigraph;
 	}
 
+	@Override
 	public ResolverHook begin(Collection<BundleRevision> triggers) {
 		return new RegionResolverHook(this.regionDigraph);
 	}

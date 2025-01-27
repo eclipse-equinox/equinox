@@ -53,6 +53,7 @@ public final class RegionManager implements BundleActivator {
 
 	private StandardManageableRegionDigraph digraphMBean;
 
+	@Override
 	public void start(BundleContext bc) throws BundleException, IOException, InvalidSyntaxException {
 		this.bundleContext = bc;
 		this.domain = bc.getProperty(REGION_DOMAIN_PROP);
@@ -85,6 +86,7 @@ public final class RegionManager implements BundleActivator {
 		}
 	}
 
+	@Override
 	public void stop(BundleContext bc) throws IOException {
 		if (digraphMBean != null) {
 			digraphMBean.unregisterMbean();
