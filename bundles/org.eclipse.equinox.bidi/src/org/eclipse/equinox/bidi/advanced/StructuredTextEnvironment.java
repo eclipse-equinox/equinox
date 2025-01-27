@@ -182,6 +182,7 @@ public class StructuredTextEnvironment {
 	 * 
 	 * @deprecated let users control bidi processing independent of the locale
 	 */
+	@Deprecated
 	public boolean isProcessingNeeded() {
 		if (processingNeeded == null) {
 			String osName = StructuredTextActivator.getProperty("os.name"); //$NON-NLS-1$ /
