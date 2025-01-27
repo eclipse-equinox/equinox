@@ -28,6 +28,7 @@ public class Activator implements BundleActivator {
 	private ServiceRegistration<Object> registration;
 	private ServiceTracker<FrameworkLog, FrameworkLog> logTracker;
 
+	@Override
 	public void start(BundleContext context) throws Exception {
 		logTracker = new ServiceTracker<>(context, FrameworkLog.class, null);
 		logTracker.open();
@@ -40,6 +41,7 @@ public class Activator implements BundleActivator {
 
 	}
 
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		if (registration != null)
 			registration.unregister();
