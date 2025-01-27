@@ -113,6 +113,7 @@ public class CoordinatorImpl implements Coordinator {
 		this.maxTimeout = maxTimeout;
 	}
 
+	@Override
 	public boolean addParticipant(Participant participant) throws CoordinationException {
 		CoordinationWeakReference.processOrphanedCoordinations();
 		Coordination coordination = peek();
@@ -122,12 +123,14 @@ public class CoordinatorImpl implements Coordinator {
 		return true;
 	}
 
+	@Override
 	public Coordination begin(String name, long timeout) {
 		Coordination coordination = create(name, timeout);
 		coordination.push();
 		return coordination;
 	}
 
+	@Override
 	public Coordination create(String name, long timeout) {
 		CoordinationWeakReference.processOrphanedCoordinations();
 		// This method requires the INITIATE permission. No bundle check is done.
@@ -167,6 +170,7 @@ public class CoordinatorImpl implements Coordinator {
 		return referent;
 	}
 
+	@Override
 	public boolean fail(Throwable reason) {
 		CoordinationWeakReference.processOrphanedCoordinations();
 		Coordination coordination = peek();
@@ -175,6 +179,7 @@ public class CoordinatorImpl implements Coordinator {
 		return coordination.fail(reason);
 	}
 
+	@Override
 	public Coordination getCoordination(long id) {
 		CoordinationWeakReference.processOrphanedCoordinations();
 		CoordinationReferent result = null;
@@ -195,6 +200,7 @@ public class CoordinatorImpl implements Coordinator {
 		return result;
 	}
 
+	@Override
 	public Collection<Coordination> getCoordinations() {
 		CoordinationWeakReference.processOrphanedCoordinations();
 		ArrayList<Coordination> result;
@@ -218,6 +224,7 @@ public class CoordinatorImpl implements Coordinator {
 		return result;
 	}
 
+	@Override
 	public Coordination peek() {
 		CoordinationWeakReference.processOrphanedCoordinations();
 		CoordinationImpl c = coordinationStack.get().peek();
@@ -226,6 +233,7 @@ public class CoordinatorImpl implements Coordinator {
 		return c.getReferent();
 	}
 
+	@Override
 	public Coordination pop() {
 		CoordinationWeakReference.processOrphanedCoordinations();
 		CoordinationImpl c = coordinationStack.get().peek();

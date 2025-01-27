@@ -29,62 +29,77 @@ public class CoordinationReferent implements Coordination {
 		this.coordination = coordination;
 	}
 
+	@Override
 	public long getId() {
 		return coordination.getId();
 	}
 
+	@Override
 	public String getName() {
 		return coordination.getName();
 	}
 
+	@Override
 	public void end() {
 		coordination.end();
 	}
 
+	@Override
 	public boolean fail(Throwable cause) {
 		return coordination.fail(cause);
 	}
 
+	@Override
 	public Throwable getFailure() {
 		return coordination.getFailure();
 	}
 
+	@Override
 	public boolean isTerminated() {
 		return coordination.isTerminated();
 	}
 
+	@Override
 	public void addParticipant(Participant participant) {
 		coordination.addParticipant(participant);
 	}
 
+	@Override
 	public List<Participant> getParticipants() {
 		return coordination.getParticipants();
 	}
 
+	@Override
 	public Map<Class<?>, Object> getVariables() {
 		return coordination.getVariables();
 	}
 
+	@Override
 	public long extendTimeout(long timeMillis) {
 		return coordination.extendTimeout(timeMillis);
 	}
 
+	@Override
 	public void join(long timeMillis) throws InterruptedException {
 		coordination.join(timeMillis);
 	}
 
+	@Override
 	public Coordination push() {
 		return coordination.push();
 	}
 
+	@Override
 	public Thread getThread() {
 		return coordination.getThread();
 	}
 
+	@Override
 	public Bundle getBundle() {
 		return coordination.getBundle();
 	}
 
+	@Override
 	public Coordination getEnclosingCoordination() {
 		return coordination.getEnclosingCoordination();
 	}
