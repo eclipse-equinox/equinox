@@ -34,7 +34,7 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.FrameworkUtil;
 
 public class StaleObjects {
-	private class HandleCatcher implements IRegistryChangeListener {
+	private static class HandleCatcher implements IRegistryChangeListener {
 		private IExtension extensionFromTheListener;
 
 		public HandleCatcher() {

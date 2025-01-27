@@ -51,7 +51,7 @@ public class InputErrorTest {
 	 * Use customized registry strategy to both check error processing and to remove
 	 * expected error messages from test log.
 	 */
-	private class RegistryStrategyLog extends RegistryStrategyOSGI {
+	private static class RegistryStrategyLog extends RegistryStrategyOSGI {
 
 		public String msg = null;
 
