@@ -99,7 +99,7 @@ public class ReferenceHashSet<T> {
 		}
 	}
 
-	private class StrongReference<U> implements HashedReference<U> {
+	private static class StrongReference<U> implements HashedReference<U> {
 		private U referent;
 
 		public StrongReference(U referent, ReferenceQueue<? super U> queue) {
