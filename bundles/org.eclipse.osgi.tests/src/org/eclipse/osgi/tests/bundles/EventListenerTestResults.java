@@ -16,10 +16,12 @@ package org.eclipse.osgi.tests.bundles;
 import org.osgi.framework.*;
 
 public class EventListenerTestResults extends TestResults implements BundleListener, FrameworkListener {
+	@Override
 	public void bundleChanged(BundleEvent event) {
 		addEvent(event);
 	}
 
+	@Override
 	public void frameworkEvent(FrameworkEvent event) {
 		addEvent(event);
 	}

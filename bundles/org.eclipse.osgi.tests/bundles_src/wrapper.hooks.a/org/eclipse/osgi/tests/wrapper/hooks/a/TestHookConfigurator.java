@@ -28,6 +28,7 @@ import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 import org.eclipse.osgi.storage.bundlefile.BundleFileWrapper;
 
 public class TestHookConfigurator implements HookConfigurator {
+	@Override
 	public void addHooks(HookRegistry hookRegistry) {
 
 		BundleFileWrapperFactoryHook modifyContent = (bundleFile, generation,

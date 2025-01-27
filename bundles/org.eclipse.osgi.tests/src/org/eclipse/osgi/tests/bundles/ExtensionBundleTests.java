@@ -113,6 +113,7 @@ public class ExtensionBundleTests extends AbstractBundleTests {
 		}
 	}
 
+	@Override
 	public void tearDown() throws Exception {
 		super.tearDown();
 		events.clear();

@@ -31,6 +31,7 @@ public class StateUsesPerformanceTest extends BasePerformanceTest {
 		final State originalState = buildRandomState(stateSize);
 		addUsesBundles(originalState);
 		PerformanceTestRunner runner = new PerformanceTestRunner() {
+			@Override
 			protected void test() {
 				originalState.resolve(false);
 			}

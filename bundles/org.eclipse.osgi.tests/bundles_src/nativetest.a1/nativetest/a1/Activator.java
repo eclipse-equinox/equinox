@@ -30,6 +30,7 @@ public class Activator implements BundleActivator {
 		throw new NoSuchMethodException(method);
 	}
 
+	@Override
 	public void start(BundleContext context) throws Exception {
 		Method findLibrary = findDeclaredMethod(this.getClass().getClassLoader().getClass(), "findLibrary",
 				String.class);
@@ -38,6 +39,7 @@ public class Activator implements BundleActivator {
 				.addEvent(findLibrary.invoke(this.getClass().getClassLoader(), new Object[] { "nativefile1.txt" }));
 	}
 
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		// TODO Auto-generated method stub
 

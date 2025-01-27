@@ -61,18 +61,22 @@ public class BasicTest extends AbstractResourceTest {
 			this.directives = directives;
 		}
 
+		@Override
 		public String getNamespace() {
 			return namespace;
 		}
 
+		@Override
 		public Map getDirectives() {
 			return directives;
 		}
 
+		@Override
 		public Map getAttributes() {
 			return attributes;
 		}
 
+		@Override
 		public Resource getResource() {
 			return null;
 		}

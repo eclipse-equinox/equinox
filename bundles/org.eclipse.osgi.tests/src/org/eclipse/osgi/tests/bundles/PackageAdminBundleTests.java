@@ -46,6 +46,7 @@ public class PackageAdminBundleTests extends AbstractBundleTests {
 	public class TestListener implements SynchronousBundleListener {
 		ArrayList events = new ArrayList();
 
+		@Override
 		public synchronized void bundleChanged(BundleEvent event) {
 			events.add(event);
 		}
@@ -72,6 +73,7 @@ public class PackageAdminBundleTests extends AbstractBundleTests {
 			expectedEvents.addAll(Arrays.asList(events));
 		}
 
+		@Override
 		public synchronized void bundleChanged(BundleEvent event) {
 			BundleEvent expected = expectedEvents.size() == 0 ? null : (BundleEvent) expectedEvents.remove(0);
 			try {

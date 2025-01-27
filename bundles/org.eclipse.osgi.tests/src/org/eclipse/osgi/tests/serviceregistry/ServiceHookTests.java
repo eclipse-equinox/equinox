@@ -420,6 +420,7 @@ public class ServiceHookTests extends AbstractBundleTests {
 		final int[] hookCalled = new int[] { 0, 0 };
 
 		ListenerHook hook1 = new ListenerHook() {
+			@Override
 			public void added(Collection<ListenerHook.ListenerInfo> listeners) {
 				synchronized (hookCalled) {
 					hookCalled[0]++;
@@ -427,6 +428,7 @@ public class ServiceHookTests extends AbstractBundleTests {
 				result.addAll(listeners);
 			}
 
+			@Override
 			public void removed(Collection<ListenerHook.ListenerInfo> listeners) {
 				synchronized (hookCalled) {
 					hookCalled[1]++;
@@ -515,6 +517,7 @@ public class ServiceHookTests extends AbstractBundleTests {
 		final int[] hookCalled = new int[] { 0, 0 };
 
 		ListenerHook hook1 = new ListenerHook() {
+			@Override
 			public void added(Collection<ListenerHook.ListenerInfo> listeners) {
 				synchronized (hookCalled) {
 					hookCalled[0]++;
@@ -522,6 +525,7 @@ public class ServiceHookTests extends AbstractBundleTests {
 				result.addAll(listeners);
 			}
 
+			@Override
 			public void removed(Collection<ListenerHook.ListenerInfo> listeners) {
 				synchronized (hookCalled) {
 					hookCalled[1]++;

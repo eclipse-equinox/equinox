@@ -93,6 +93,7 @@ public class BaseSecurityTest extends TestCase {
 		trustReg = OSGiTestsActivator.getContext().registerService(TrustEngine.class.getName(), dummyTE, properties);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		if (trustReg != null)
 			trustReg.unregister();

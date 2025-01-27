@@ -23,6 +23,7 @@ import test.link.a.params.AParam;
 
 public class Activator implements BundleActivator {
 
+	@Override
 	public void start(BundleContext context) throws Exception {
 		SomeAPI api = new SomeAPI();
 		api.getBundleID(context.getBundle());
@@ -49,6 +50,7 @@ public class Activator implements BundleActivator {
 			throw new RuntimeException("Should not have found resource: " + notExist.getPath()); //$NON-NLS-1$
 	}
 
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		// nothing
 	}

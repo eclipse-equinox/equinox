@@ -20,6 +20,7 @@ import org.osgi.framework.BundleEvent;
 
 public class Activator implements BundleActivator, Runnable {
 
+	@Override
 	public void start(BundleContext context) throws Exception {
 		Thread thread = new Thread(this, "thread.locktest");
 		System.out.println("about to start thread");
@@ -30,6 +31,7 @@ public class Activator implements BundleActivator, Runnable {
 		AbstractBundleTests.simpleResults.addEvent(new BundleEvent(BundleEvent.STARTED, context.getBundle()));
 	}
 
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		AbstractBundleTests.simpleResults.addEvent(new BundleEvent(BundleEvent.STOPPED, context.getBundle()));
 	}

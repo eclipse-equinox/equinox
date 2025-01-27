@@ -20,6 +20,7 @@ import org.osgi.framework.BundleContext;
 
 public class Activator implements BundleActivator {
 
+	@Override
 	public void start(BundleContext context) throws Exception {
 		Enumeration urls = context.getBundle().findEntries("resources", "frag.a.txt", false); //$NON-NLS-1$//$NON-NLS-2$
 		if (urls == null || !urls.hasMoreElements())
@@ -31,6 +32,7 @@ public class Activator implements BundleActivator {
 		}
 	}
 
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		// nothing
 	}

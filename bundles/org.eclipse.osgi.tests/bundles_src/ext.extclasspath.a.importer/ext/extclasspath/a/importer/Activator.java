@@ -22,6 +22,7 @@ import org.osgi.framework.BundleContext;
 
 public class Activator implements BundleActivator {
 
+	@Override
 	public void start(BundleContext context) throws Exception {
 		AbstractBundleTests.simpleResults.addEvent(new ExtClasspathExtTest().toString());
 		AbstractBundleTests.simpleResults
@@ -34,6 +35,7 @@ public class Activator implements BundleActivator {
 		}
 	}
 
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		// nothing
 	}

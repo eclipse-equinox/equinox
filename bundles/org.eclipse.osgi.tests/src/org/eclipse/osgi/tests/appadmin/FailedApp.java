@@ -18,10 +18,12 @@ import org.eclipse.equinox.app.IApplicationContext;
 
 public class FailedApp implements IApplication {
 
+	@Override
 	public Object start(IApplicationContext context) throws Exception {
 		throw new Exception("Generated Exception"); //$NON-NLS-1$
 	}
 
+	@Override
 	public void stop() {
 		// nothing
 	}

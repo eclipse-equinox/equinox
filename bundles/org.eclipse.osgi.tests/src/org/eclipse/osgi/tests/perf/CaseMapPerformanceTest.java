@@ -99,6 +99,7 @@ public class CaseMapPerformanceTest {
 
 	private void doTestMap(final Map<String, Object> map, final int numKeys) throws Exception {
 		new PerformanceTestRunner() {
+			@Override
 			protected void test() {
 				fillMap(map, numKeys);
 				doMapGet(map, numKeys);
@@ -110,6 +111,7 @@ public class CaseMapPerformanceTest {
 	public void testCommonKeyMap() throws Exception {
 		final Map<String, Object> map = new CaseInsensitiveDictionaryMap<>(34);
 		new PerformanceTestRunner() {
+			@Override
 			protected void test() {
 				fillCommonKeyMap(map);
 				doCommonKeyMapGet(map);
@@ -121,6 +123,7 @@ public class CaseMapPerformanceTest {
 	public void testCommonHashMap() throws Exception {
 		final Map<String, Object> map = new HashMap<>(34);
 		new PerformanceTestRunner() {
+			@Override
 			protected void test() {
 				fillCommonKeyMap(map);
 				doCommonKeyMapGet(map);

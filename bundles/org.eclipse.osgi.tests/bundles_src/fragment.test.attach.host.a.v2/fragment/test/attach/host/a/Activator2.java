@@ -18,10 +18,12 @@ import org.osgi.framework.*;
 
 public class Activator2 implements BundleActivator {
 
+	@Override
 	public void start(BundleContext context) throws Exception {
 		AbstractBundleTests.simpleResults.addEvent(new BundleEvent(BundleEvent.STARTED, context.getBundle()));
 	}
 
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		AbstractBundleTests.simpleResults.addEvent(new BundleEvent(BundleEvent.STOPPED, context.getBundle()));
 	}

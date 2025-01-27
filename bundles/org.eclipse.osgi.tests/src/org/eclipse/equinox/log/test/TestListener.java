@@ -29,6 +29,7 @@ public class TestListener implements LogListener {
 		this.testBundleLoc = testBundleLoc == null ? OSGiTestsActivator.getBundle().getLocation() : testBundleLoc;
 	}
 
+	@Override
 	public synchronized void logged(LogEntry e) {
 		if (!testBundleLoc.equals(e.getBundle().getLocation())) {
 			return; // discard logs from all other bundles

@@ -22,6 +22,7 @@ public class SimpleApp implements IApplication {
 	private boolean active = true;
 	private boolean stopped = false;
 
+	@Override
 	public synchronized Object start(IApplicationContext context) {
 		System.out.println("started simple app");
 		System.out.flush();
@@ -43,6 +44,7 @@ public class SimpleApp implements IApplication {
 		return context.getArguments();
 	}
 
+	@Override
 	public synchronized void stop() {
 		active = false;
 		notifyAll();

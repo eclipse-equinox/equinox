@@ -40,6 +40,7 @@ public class TextProcessorSessionTest extends ConfigurationSessionTestSuite {
 	 * 
 	 * @see org.eclipse.core.tests.session.SessionTestSuite#newSetup()
 	 */
+	@Override
 	protected Setup newSetup() throws SetupException {
 		Setup base = super.newSetup();
 		// the base implementation will have set this to the host configuration

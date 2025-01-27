@@ -38,6 +38,7 @@ public class TestHookConfigurator implements HookConfigurator {
 		}
 	};
 
+	@Override
 	public void addHooks(HookRegistry hookRegistry) {
 		hookRegistry.addClassLoaderHook(new ClassLoaderHook() {
 

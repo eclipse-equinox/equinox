@@ -138,6 +138,7 @@ public class LoggingTests extends AbstractBundleTests {
 			super(context);
 		}
 
+		@Override
 		public void logging(IStatus status, String plugin) {
 			checkContext(status);
 		}
@@ -151,6 +152,7 @@ public class LoggingTests extends AbstractBundleTests {
 
 		List entries = new ArrayList();
 
+		@Override
 		public void logged(LogEntry entry) {
 			entries.add(entry);
 			Object check = ((ExtendedLogEntry) entry).getContext();
@@ -164,6 +166,7 @@ public class LoggingTests extends AbstractBundleTests {
 			return entries;
 		}
 
+		@Override
 		public boolean isLoggable(Bundle bundle, String loggerName, int logLevel) {
 			return EQUINOX_LOGGER.equals(loggerName);
 		}

@@ -265,14 +265,17 @@ public class ApplicationAdminTest extends TestCase {
 		ApplicationDescriptor app = getApplication(PI_OSGI_TESTS + ".exitValueApp"); //$NON-NLS-1$
 		final Object[] result = new Object[1];
 		ServiceTrackerCustomizer trackerCustomizer = new ServiceTrackerCustomizer() {
+			@Override
 			public Object addingService(ServiceReference reference) {
 				return getContext().getService(reference);
 			}
 
+			@Override
 			public void modifiedService(ServiceReference reference, Object service) {
 				// nothing
 			}
 
+			@Override
 			public void removedService(ServiceReference reference, Object service) {
 				try {
 					result[0] = ((ApplicationHandle) service).getExitValue(10000);
@@ -315,10 +318,12 @@ public class ApplicationAdminTest extends TestCase {
 		ApplicationDescriptor app = getApplication(PI_OSGI_TESTS + ".exitValueApp"); //$NON-NLS-1$
 		final Object[] result = new Object[1];
 		ServiceTrackerCustomizer trackerCustomizer = new ServiceTrackerCustomizer() {
+			@Override
 			public Object addingService(ServiceReference reference) {
 				return getContext().getService(reference);
 			}
 
+			@Override
 			public void modifiedService(ServiceReference reference, Object service) {
 				if (!"org.eclipse.equinox.app.stopped" //$NON-NLS-1$
 						.equals(reference.getProperty(ApplicationHandle.APPLICATION_STATE)))
@@ -330,6 +335,7 @@ public class ApplicationAdminTest extends TestCase {
 				}
 			}
 
+			@Override
 			public void removedService(ServiceReference reference, Object service) {
 				// nothing
 			}
@@ -1090,16 +1096,19 @@ public class ApplicationAdminTest extends TestCase {
 		HashMap args = getArguments();
 		HashMap results = (HashMap) args.get(testResults);
 		ServiceTrackerCustomizer trackerCustomizer = new ServiceTrackerCustomizer() {
+			@Override
 			public Object addingService(ServiceReference reference) {
 				ApplicationHandle handle = (ApplicationHandle) getContext().getService(reference);
 				handle.destroy();
 				return handle;
 			}
 
+			@Override
 			public void modifiedService(ServiceReference reference, Object service) {
 				// nothing
 			}
 
+			@Override
 			public void removedService(ServiceReference reference, Object service) {
 				// nothing
 			}
@@ -1126,16 +1135,19 @@ public class ApplicationAdminTest extends TestCase {
 		HashMap args = getArguments();
 		HashMap results = (HashMap) args.get(testResults);
 		ServiceTrackerCustomizer trackerCustomizer = new ServiceTrackerCustomizer() {
+			@Override
 			public Object addingService(ServiceReference reference) {
 				ApplicationHandle handle = (ApplicationHandle) getContext().getService(reference);
 				handle.destroy();
 				return handle;
 			}
 
+			@Override
 			public void modifiedService(ServiceReference reference, Object service) {
 				// nothing
 			}
 
+			@Override
 			public void removedService(ServiceReference reference, Object service) {
 				// nothing
 			}
@@ -1199,6 +1211,7 @@ public class ApplicationAdminTest extends TestCase {
 			this.bc = bc;
 		}
 
+		@Override
 		public synchronized Object addingService(ServiceReference reference) {
 			String instance = (String) reference.getProperty(ApplicationHandle.APPLICATION_PID);
 			String state = (String) reference.getProperty(ApplicationHandle.APPLICATION_STATE);
@@ -1208,6 +1221,7 @@ public class ApplicationAdminTest extends TestCase {
 			return result;
 		}
 
+		@Override
 		public synchronized void modifiedService(ServiceReference reference, Object service) {
 			String instance = (String) reference.getProperty(ApplicationHandle.APPLICATION_PID);
 			String state = (String) reference.getProperty(ApplicationHandle.APPLICATION_STATE);
@@ -1215,6 +1229,7 @@ public class ApplicationAdminTest extends TestCase {
 			notifyAll();
 		}
 
+		@Override
 		public synchronized void removedService(ServiceReference reference, Object service) {
 			String instance = (String) reference.getProperty(ApplicationHandle.APPLICATION_PID);
 			events.add(new String[] { instance, REMOVED });
@@ -1277,6 +1292,7 @@ public class ApplicationAdminTest extends TestCase {
 			this.bc = bc;
 		}
 
+		@Override
 		public synchronized Object addingService(ServiceReference reference) {
 			String pid = (String) reference.getProperty(ApplicationDescriptor.APPLICATION_PID);
 			Boolean locked = (Boolean) reference.getProperty(ApplicationDescriptor.APPLICATION_LOCKED);
@@ -1287,6 +1303,7 @@ public class ApplicationAdminTest extends TestCase {
 			return result;
 		}
 
+		@Override
 		public synchronized void modifiedService(ServiceReference reference, Object service) {
 			String pid = (String) reference.getProperty(ApplicationDescriptor.APPLICATION_PID);
 			Boolean locked = (Boolean) reference.getProperty(ApplicationDescriptor.APPLICATION_LOCKED);
@@ -1295,6 +1312,7 @@ public class ApplicationAdminTest extends TestCase {
 			notifyAll();
 		}
 
+		@Override
 		public synchronized void removedService(ServiceReference reference, Object service) {
 			String pid = (String) reference.getProperty(ApplicationDescriptor.APPLICATION_PID);
 			Boolean locked = (Boolean) reference.getProperty(ApplicationDescriptor.APPLICATION_LOCKED);

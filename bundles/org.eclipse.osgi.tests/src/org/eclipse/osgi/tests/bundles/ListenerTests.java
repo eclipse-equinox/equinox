@@ -42,6 +42,7 @@ public class ListenerTests extends AbstractBundleTests {
 	private Equinox equinox;
 	private BundleContext bundleContext;
 
+	@Override
 	public void setUp() throws Exception {
 		super.setUp();
 		methodName = getName();
@@ -61,6 +62,7 @@ public class ListenerTests extends AbstractBundleTests {
 		}
 	}
 
+	@Override
 	public void tearDown() throws Exception {
 		super.tearDown();
 		simpleResults = null;
@@ -183,6 +185,7 @@ public class ListenerTests extends AbstractBundleTests {
 	private BundleListener createBundleListener() {
 
 		BundleListener bundleListener = new BundleListener() {
+			@Override
 			public void bundleChanged(BundleEvent event) {
 				simpleResults.addEvent(this);
 			}
@@ -193,6 +196,7 @@ public class ListenerTests extends AbstractBundleTests {
 	private BundleListener createSynchronousBundleListener() {
 
 		SynchronousBundleListener bundleListener = new SynchronousBundleListener() {
+			@Override
 			public void bundleChanged(BundleEvent event) {
 				simpleResults.addEvent(this);
 			}

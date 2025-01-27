@@ -18,6 +18,7 @@ import org.osgi.framework.*;
 
 public class Activator implements BundleActivator {
 
+	@Override
 	public void start(BundleContext context) {
 		try {
 			AbstractBundleTests.installer.getBundle("circularity.test").loadClass("circularity.test.TestCircularity");
@@ -27,6 +28,7 @@ public class Activator implements BundleActivator {
 		}
 	}
 
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		AbstractBundleTests.simpleResults.addEvent(new BundleEvent(BundleEvent.STOPPED, context.getBundle()));
 	}
