@@ -31,6 +31,7 @@ public class StructuredTextMath extends StructuredTextTypeHandler {
 		super("+-/*()="); //$NON-NLS-1$
 	}
 
+	@Override
 	public int getDirection(IStructuredTextExpert expert, String text) {
 		return getDirection(expert, text, new StructuredTextCharTypes(expert, text));
 	}
@@ -47,6 +48,7 @@ public class StructuredTextMath extends StructuredTextTypeHandler {
 	 *         </ul>
 	 *         Otherwise, returns {@link IStructuredTextExpert#DIR_LTR DIR_LTR}.
 	 */
+	@Override
 	public int getDirection(IStructuredTextExpert expert, String text, StructuredTextCharTypes charTypes) {
 		String language = expert.getEnvironment().getLanguage();
 		if (!language.equals("ar")) //$NON-NLS-1$
