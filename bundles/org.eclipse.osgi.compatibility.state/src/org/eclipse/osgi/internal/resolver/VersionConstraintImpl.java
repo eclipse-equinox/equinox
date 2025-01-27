@@ -38,6 +38,7 @@ abstract class VersionConstraintImpl implements VersionConstraint {
 	private BaseDescription supplier;
 	private volatile Object userObject;
 
+	@Override
 	public String getName() {
 		synchronized (this.monitor) {
 			if (Constants.SYSTEM_BUNDLE_SYMBOLICNAME.equals(name)) {
@@ -48,6 +49,7 @@ abstract class VersionConstraintImpl implements VersionConstraint {
 		}
 	}
 
+	@Override
 	public VersionRange getVersionRange() {
 		synchronized (this.monitor) {
 			if (versionRange == null)
@@ -56,24 +58,28 @@ abstract class VersionConstraintImpl implements VersionConstraint {
 		}
 	}
 
+	@Override
 	public BundleDescription getBundle() {
 		synchronized (this.monitor) {
 			return bundle;
 		}
 	}
 
+	@Override
 	public boolean isResolved() {
 		synchronized (this.monitor) {
 			return supplier != null;
 		}
 	}
 
+	@Override
 	public BaseDescription getSupplier() {
 		synchronized (this.monitor) {
 			return supplier;
 		}
 	}
 
+	@Override
 	public boolean isSatisfiedBy(BaseDescription candidate) {
 		synchronized (this.monitor) {
 			return false;
@@ -112,6 +118,7 @@ abstract class VersionConstraintImpl implements VersionConstraint {
 
 	protected abstract boolean hasMandatoryAttributes(String[] mandatory);
 
+	@Override
 	public BundleRequirement getRequirement() {
 		String namespace = getInternalNameSpace();
 		if (namespace == null)
@@ -119,10 +126,12 @@ abstract class VersionConstraintImpl implements VersionConstraint {
 		return new BundleRequirementImpl(namespace);
 	}
 
+	@Override
 	public Object getUserObject() {
 		return userObject;
 	}
 
+	@Override
 	public void setUserObject(Object userObject) {
 		this.userObject = userObject;
 	}
@@ -134,22 +143,27 @@ abstract class VersionConstraintImpl implements VersionConstraint {
 			this.namespace = namespace;
 		}
 
+		@Override
 		public String getNamespace() {
 			return namespace;
 		}
 
+		@Override
 		public Map<String, String> getDirectives() {
 			return Collections.unmodifiableMap(getInternalDirectives());
 		}
 
+		@Override
 		public Map<String, Object> getAttributes() {
 			return Collections.unmodifiableMap(getInteralAttributes());
 		}
 
+		@Override
 		public BundleRevision getRevision() {
 			return getBundle();
 		}
 
+		@Override
 		public boolean matches(BundleCapability capability) {
 			return isSatisfiedBy(((BaseCapability) capability).getBaseDescription());
 		}
@@ -193,6 +207,7 @@ abstract class VersionConstraintImpl implements VersionConstraint {
 			return hasMandatoryAttributes(ManifestElement.getArrayFromList(capability.getDirectives().get(AbstractWiringNamespace.CAPABILITY_MANDATORY_DIRECTIVE)));
 		}
 
+		@Override
 		public BundleRevision getResource() {
 			return getRevision();
 		}

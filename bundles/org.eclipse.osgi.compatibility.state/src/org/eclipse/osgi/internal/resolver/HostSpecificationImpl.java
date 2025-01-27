@@ -85,6 +85,7 @@ public class HostSpecificationImpl extends VersionConstraintImpl implements Host
 		return false;
 	}
 
+	@Override
 	public BundleDescription[] getHosts() {
 		synchronized (this.monitor) {
 			return hosts == null ? BundleDescriptionImpl.EMPTY_BUNDLEDESCS : hosts;
@@ -135,6 +136,7 @@ public class HostSpecificationImpl extends VersionConstraintImpl implements Host
 		}
 	}
 
+	@Override
 	public boolean isMultiHost() {
 		synchronized (this.monitor) {
 			return multihost;

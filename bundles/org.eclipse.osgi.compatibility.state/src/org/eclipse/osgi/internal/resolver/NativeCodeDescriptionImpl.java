@@ -39,10 +39,12 @@ public class NativeCodeDescriptionImpl extends BaseDescriptionImpl implements Na
 	private BundleDescription supplier;
 	private volatile boolean invalidNativePaths = false;
 
+	@Override
 	public Filter getFilter() {
 		return filter;
 	}
 
+	@Override
 	public String[] getLanguages() {
 		synchronized (this.monitor) {
 			if (languages == null)
@@ -51,6 +53,7 @@ public class NativeCodeDescriptionImpl extends BaseDescriptionImpl implements Na
 		}
 	}
 
+	@Override
 	public String[] getNativePaths() {
 		synchronized (this.monitor) {
 			if (nativePaths == null)
@@ -59,6 +62,7 @@ public class NativeCodeDescriptionImpl extends BaseDescriptionImpl implements Na
 		}
 	}
 
+	@Override
 	public String[] getOSNames() {
 		synchronized (this.monitor) {
 			if (osNames == null)
@@ -67,6 +71,7 @@ public class NativeCodeDescriptionImpl extends BaseDescriptionImpl implements Na
 		}
 	}
 
+	@Override
 	public VersionRange[] getOSVersions() {
 		synchronized (this.monitor) {
 			if (osVersions == null)
@@ -75,6 +80,7 @@ public class NativeCodeDescriptionImpl extends BaseDescriptionImpl implements Na
 		}
 	}
 
+	@Override
 	public String[] getProcessors() {
 		synchronized (this.monitor) {
 			if (processors == null)
@@ -83,10 +89,12 @@ public class NativeCodeDescriptionImpl extends BaseDescriptionImpl implements Na
 		}
 	}
 
+	@Override
 	public BundleDescription getSupplier() {
 		return supplier;
 	}
 
+	@Override
 	public int compareTo(NativeCodeDescription otherDesc) {
 		State containingState = getSupplier().getContainingState();
 		if (containingState == null)
@@ -107,6 +115,7 @@ public class NativeCodeDescriptionImpl extends BaseDescriptionImpl implements Na
 		return (getLanguages().length == 0 ? 0 : 1) - (otherDesc.getLanguages().length == 0 ? 0 : 1);
 	}
 
+	@Override
 	public boolean hasInvalidNativePaths() {
 		return invalidNativePaths;
 	}
@@ -219,10 +228,12 @@ public class NativeCodeDescriptionImpl extends BaseDescriptionImpl implements Na
 		this.supplier = supplier;
 	}
 
+	@Override
 	public Map<String, String> getDeclaredDirectives() {
 		return Collections.emptyMap();
 	}
 
+	@Override
 	public Map<String, Object> getDeclaredAttributes() {
 		return Collections.emptyMap();
 	}

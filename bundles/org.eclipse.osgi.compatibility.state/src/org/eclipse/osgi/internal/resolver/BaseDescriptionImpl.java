@@ -31,10 +31,12 @@ public abstract class BaseDescriptionImpl implements BaseDescription {
 
 	private volatile Object userObject;
 
+	@Override
 	public String getName() {
 		return name;
 	}
 
+	@Override
 	public Version getVersion() {
 		synchronized (this.monitor) {
 			if (version == null)
@@ -94,6 +96,7 @@ public abstract class BaseDescriptionImpl implements BaseDescription {
 		return null;
 	}
 
+	@Override
 	public BundleCapability getCapability() {
 		return getCapability(null);
 	}
@@ -109,10 +112,12 @@ public abstract class BaseDescriptionImpl implements BaseDescription {
 		return new BaseCapability(namespace);
 	}
 
+	@Override
 	public Object getUserObject() {
 		return userObject;
 	}
 
+	@Override
 	public void setUserObject(Object userObject) {
 		this.userObject = userObject;
 	}
@@ -125,18 +130,22 @@ public abstract class BaseDescriptionImpl implements BaseDescription {
 			this.namespace = namespace;
 		}
 
+		@Override
 		public BundleRevision getRevision() {
 			return getSupplier();
 		}
 
+		@Override
 		public String getNamespace() {
 			return namespace;
 		}
 
+		@Override
 		public Map<String, String> getDirectives() {
 			return getDeclaredDirectives();
 		}
 
+		@Override
 		public Map<String, Object> getAttributes() {
 			Map<String, Object> attrs = getDeclaredAttributes();
 			String internalName = BaseDescriptionImpl.this.getInternalNameSpace();
@@ -173,6 +182,7 @@ public abstract class BaseDescriptionImpl implements BaseDescription {
 			return getNamespace() + BaseDescriptionImpl.toString(getAttributes(), false) + BaseDescriptionImpl.toString(getDirectives(), true);
 		}
 
+		@Override
 		public BundleRevision getResource() {
 			return getRevision();
 		}

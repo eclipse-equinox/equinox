@@ -194,6 +194,7 @@ public abstract class StateImpl implements State {
 		return true;
 	}
 
+	@Override
 	public boolean addBundle(BundleDescription description) {
 		synchronized (this.monitor) {
 			if (!basicAddBundle(description))
@@ -228,6 +229,7 @@ public abstract class StateImpl implements State {
 		}
 	}
 
+	@Override
 	public boolean updateBundle(BundleDescription newDescription) {
 		synchronized (this.monitor) {
 			BundleDescriptionImpl existing = (BundleDescriptionImpl) bundleDescriptions.get(newDescription.getBundleId());
@@ -274,6 +276,7 @@ public abstract class StateImpl implements State {
 		}
 	}
 
+	@Override
 	public BundleDescription removeBundle(long bundleId) {
 		synchronized (this.monitor) {
 			BundleDescription toRemove = getBundle(bundleId);
@@ -283,6 +286,7 @@ public abstract class StateImpl implements State {
 		}
 	}
 
+	@Override
 	public boolean removeBundle(BundleDescription toRemove) {
 		synchronized (this.monitor) {
 			toRemove = bundleDescriptions.get(toRemove.getBundleId());
@@ -320,6 +324,7 @@ public abstract class StateImpl implements State {
 		return bundle.getDependents().length > 0;
 	}
 
+	@Override
 	public StateDelta getChanges() {
 		synchronized (this.monitor) {
 			return getDelta();
@@ -332,6 +337,7 @@ public abstract class StateImpl implements State {
 		return changes;
 	}
 
+	@Override
 	public BundleDescription[] getBundles(String symbolicName) {
 		synchronized (this.monitor) {
 			if (Constants.SYSTEM_BUNDLE_SYMBOLICNAME.equals(symbolicName))
@@ -344,12 +350,14 @@ public abstract class StateImpl implements State {
 		}
 	}
 
+	@Override
 	public BundleDescription[] getBundles() {
 		synchronized (this.monitor) {
 			return bundleDescriptions.values().toArray(new BundleDescription[0]);
 		}
 	}
 
+	@Override
 	public BundleDescription getBundle(long id) {
 		synchronized (this.monitor) {
 			BundleDescription result = bundleDescriptions.get(id);
@@ -364,6 +372,7 @@ public abstract class StateImpl implements State {
 		}
 	}
 
+	@Override
 	public BundleDescription getBundle(String name, Version version) {
 		synchronized (this.monitor) {
 			BundleDescription[] allBundles = getBundles(name);
@@ -402,18 +411,21 @@ public abstract class StateImpl implements State {
 		}
 	}
 
+	@Override
 	public long getTimeStamp() {
 		synchronized (this.monitor) {
 			return timeStamp;
 		}
 	}
 
+	@Override
 	public boolean isResolved() {
 		synchronized (this.monitor) {
 			return resolved || isEmpty();
 		}
 	}
 
+	@Override
 	public void resolveConstraint(VersionConstraint constraint, BaseDescription supplier) {
 		((VersionConstraintImpl) constraint).setSupplier(supplier);
 	}
@@ -421,6 +433,7 @@ public abstract class StateImpl implements State {
 	/**
 	 * @deprecated
 	 */
+	@Override
 	@Deprecated
 	public void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports) {
 		resolveBundle(bundle, status, hosts, selectedExports, null, resolvedRequires, resolvedImports);
@@ -429,11 +442,13 @@ public abstract class StateImpl implements State {
 	/**
 	 * @deprecated
 	 */
+	@Override
 	@Deprecated
 	public void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, ExportPackageDescription[] substitutedExports, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports) {
 		resolveBundle(bundle, status, hosts, selectedExports, substitutedExports, null, resolvedRequires, resolvedImports, null, null);
 	}
 
+	@Override
 	public void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, ExportPackageDescription[] substitutedExports, GenericDescription[] selectedCapabilities, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports, GenericDescription[] resolvedCapabilities, Map<String, List<StateWire>> resolvedWires) {
 		synchronized (this.monitor) {
 			if (!resolving)
@@ -462,6 +477,7 @@ public abstract class StateImpl implements State {
 		}
 	}
 
+	@Override
 	public void removeBundleComplete(BundleDescription bundle) {
 		synchronized (this.monitor) {
 			if (!resolving)
@@ -651,29 +667,35 @@ public abstract class StateImpl implements State {
 		resolvedBundles.clear();
 	}
 
+	@Override
 	public StateDelta resolve() {
 		return resolve(true, null, null);
 	}
 
+	@Override
 	public StateDelta resolve(boolean incremental) {
 		return resolve(incremental, null, null);
 	}
 
+	@Override
 	public StateDelta resolve(BundleDescription[] reResolve) {
 		return resolve(true, reResolve, null);
 	}
 
+	@Override
 	public StateDelta resolve(BundleDescription[] resolve, boolean discard) {
 		BundleDescription[] reResolve = discard ? resolve : new BundleDescription[0];
 		BundleDescription[] triggers = discard ? null : resolve;
 		return resolve(true, reResolve, triggers);
 	}
 
+	@Override
 	@SuppressWarnings("deprecation")
 	public void setOverrides(Object value) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public void setResolverHookFactory(ResolverHookFactory hookFactory) {
 		synchronized (this.monitor) {
 			if (this.hookFactory != null)
@@ -706,12 +728,14 @@ public abstract class StateImpl implements State {
 		}
 	}
 
+	@Override
 	public BundleDescription[] getResolvedBundles() {
 		synchronized (this.monitor) {
 			return resolvedBundles.values().toArray(new BundleDescription[0]);
 		}
 	}
 
+	@Override
 	public boolean isEmpty() {
 		synchronized (this.monitor) {
 			return bundleDescriptions.isEmpty();
@@ -751,6 +775,7 @@ public abstract class StateImpl implements State {
 		}
 	}
 
+	@Override
 	public ExportPackageDescription[] getExportedPackages() {
 		fullyLoad();
 		synchronized (this.monitor) {
@@ -796,6 +821,7 @@ public abstract class StateImpl implements State {
 		return fragments.toArray(new BundleDescription[fragments.size()]);
 	}
 
+	@Override
 	public void setTimeStamp(long newTimeStamp) {
 		synchronized (this.monitor) {
 			timeStamp = newTimeStamp;
@@ -810,6 +836,7 @@ public abstract class StateImpl implements State {
 		}
 	}
 
+	@Override
 	public StateObjectFactory getFactory() {
 		return factory;
 	}
@@ -818,6 +845,7 @@ public abstract class StateImpl implements State {
 		this.factory = factory;
 	}
 
+	@Override
 	public BundleDescription getBundleByLocation(String location) {
 		synchronized (this.monitor) {
 			for (BundleDescription current : bundleDescriptions.values()) {
@@ -828,12 +856,14 @@ public abstract class StateImpl implements State {
 		}
 	}
 
+	@Override
 	public Resolver getResolver() {
 		synchronized (this.monitor) {
 			return resolver;
 		}
 	}
 
+	@Override
 	public void setResolver(Resolver newResolver) {
 		if (resolver == newResolver)
 			return;
@@ -850,10 +880,12 @@ public abstract class StateImpl implements State {
 		resolver.setState(this);
 	}
 
+	@Override
 	public boolean setPlatformProperties(Dictionary<?, ?> platformProperties) {
 		return setPlatformProperties(new Dictionary[] {platformProperties});
 	}
 
+	@Override
 	public boolean setPlatformProperties(Dictionary<?, ?>[] platformProperties) {
 		return setPlatformProperties(platformProperties, true);
 	}
@@ -1035,6 +1067,7 @@ public abstract class StateImpl implements State {
 		}
 	}
 
+	@Override
 	public Dictionary<Object, Object>[] getPlatformProperties() {
 		return platformProperties;
 	}
@@ -1077,6 +1110,7 @@ public abstract class StateImpl implements State {
 		return symbolicName != null ? symbolicName : EquinoxContainer.NAME;
 	}
 
+	@Override
 	public BundleDescription[] getRemovalPending() {
 		synchronized (this.monitor) {
 			return removalPendings.toArray(new BundleDescription[removalPendings.size()]);
@@ -1090,6 +1124,7 @@ public abstract class StateImpl implements State {
 		}
 	}
 
+	@Override
 	public Collection<BundleDescription> getDependencyClosure(Collection<BundleDescription> bundles) {
 		BundleDescription[] removals = getRemovalPending();
 		Set<BundleDescription> result = new HashSet<>();
@@ -1128,6 +1163,7 @@ public abstract class StateImpl implements State {
 		}
 	}
 
+	@Override
 	public ExportPackageDescription linkDynamicImport(BundleDescription importingBundle, String requestedPackage) {
 		if (resolver == null)
 			throw new IllegalStateException("no resolver set"); //$NON-NLS-1$
@@ -1166,6 +1202,7 @@ public abstract class StateImpl implements State {
 
 	}
 
+	@Override
 	public void addDynamicImportPackages(BundleDescription importingBundle, ImportPackageSpecification[] dynamicImports) {
 		synchronized (this.monitor) {
 			((BundleDescriptionImpl) importingBundle).addDynamicImportPackages(dynamicImports);
@@ -1219,6 +1256,7 @@ public abstract class StateImpl implements State {
 		}
 	}
 
+	@Override
 	public ExportPackageDescription[] getSystemPackages() {
 		synchronized (this.monitor) {
 			List<ExportPackageDescription> result = new ArrayList<>();
@@ -1242,6 +1280,7 @@ public abstract class StateImpl implements State {
 		}
 	}
 
+	@Override
 	public ResolverError[] getResolverErrors(BundleDescription bundle) {
 		synchronized (this.monitor) {
 			if (bundle.isResolved())
@@ -1251,6 +1290,7 @@ public abstract class StateImpl implements State {
 		}
 	}
 
+	@Override
 	public void addResolverError(BundleDescription bundle, int type, String data, VersionConstraint unsatisfied) {
 		synchronized (this.monitor) {
 			if (!resolving)
@@ -1264,6 +1304,7 @@ public abstract class StateImpl implements State {
 		}
 	}
 
+	@Override
 	public void removeResolverErrors(BundleDescription bundle) {
 		synchronized (this.monitor) {
 			if (!resolving)
@@ -1284,6 +1325,7 @@ public abstract class StateImpl implements State {
 		}
 	}
 
+	@Override
 	public StateHelper getStateHelper() {
 		return StateHelperImpl.getInstance();
 	}
@@ -1304,22 +1346,26 @@ public abstract class StateImpl implements State {
 		}
 	}
 
+	@Override
 	public long getHighestBundleId() {
 		synchronized (this.monitor) {
 			return highestBundleId;
 		}
 	}
 
+	@Override
 	public void setNativePathsInvalid(NativeCodeDescription nativeCodeDescription, boolean hasInvalidNativePaths) {
 		((NativeCodeDescriptionImpl) nativeCodeDescription).setInvalidNativePaths(hasInvalidNativePaths);
 	}
 
+	@Override
 	public BundleDescription[] getDisabledBundles() {
 		synchronized (this.monitor) {
 			return disabledBundles.keySet().toArray(new BundleDescription[0]);
 		}
 	}
 
+	@Override
 	public void addDisabledInfo(DisabledInfo disabledInfo) {
 		synchronized (this.monitor) {
 			if (getBundle(disabledInfo.getBundle().getBundleId()) != disabledInfo.getBundle())
@@ -1342,6 +1388,7 @@ public abstract class StateImpl implements State {
 		}
 	}
 
+	@Override
 	public void removeDisabledInfo(DisabledInfo disabledInfo) {
 		synchronized (this.monitor) {
 			List<DisabledInfo> currentInfos = disabledBundles.get(disabledInfo.getBundle());
@@ -1355,6 +1402,7 @@ public abstract class StateImpl implements State {
 		}
 	}
 
+	@Override
 	public DisabledInfo getDisabledInfo(BundleDescription bundle, String policyName) {
 		synchronized (this.monitor) {
 			List<DisabledInfo> currentInfos = disabledBundles.get(bundle);
@@ -1369,6 +1417,7 @@ public abstract class StateImpl implements State {
 		}
 	}
 
+	@Override
 	public DisabledInfo[] getDisabledInfos(BundleDescription bundle) {
 		synchronized (this.monitor) {
 			List<DisabledInfo> currentInfos = disabledBundles.get(bundle);

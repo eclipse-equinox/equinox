@@ -41,12 +41,14 @@ public class BundleSpecificationImpl extends VersionConstraintImpl implements Bu
 		}
 	}
 
+	@Override
 	public boolean isExported() {
 		synchronized (this.monitor) {
 			return exported;
 		}
 	}
 
+	@Override
 	public boolean isOptional() {
 		synchronized (this.monitor) {
 			return optional;

@@ -30,18 +30,22 @@ public final class ResolverErrorImpl implements ResolverError {
 		this.unsatisfied = unsatisfied;
 	}
 
+	@Override
 	public BundleDescription getBundle() {
 		return bundle;
 	}
 
+	@Override
 	public int getType() {
 		return type;
 	}
 
+	@Override
 	public String getData() {
 		return data;
 	}
 
+	@Override
 	public VersionConstraint getUnsatisfiedConstraint() {
 		return unsatisfied;
 	}

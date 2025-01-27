@@ -34,6 +34,7 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 	private Map<String, Object> attributes;
 	private Map<String, String> arbitraryDirectives;
 
+	@Override
 	public Map<String, Object> getDirectives() {
 		synchronized (this.monitor) {
 			Map<String, Object> result = new HashMap<>(5);
@@ -43,6 +44,7 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 		}
 	}
 
+	@Override
 	public Object getDirective(String key) {
 		synchronized (this.monitor) {
 			if (key.equals(Constants.RESOLUTION_DIRECTIVE))
@@ -80,6 +82,7 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 		}
 	}
 
+	@Override
 	public String getBundleSymbolicName() {
 		synchronized (this.monitor) {
 			if (Constants.SYSTEM_BUNDLE_SYMBOLICNAME.equals(symbolicName)) {
@@ -90,6 +93,7 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 		}
 	}
 
+	@Override
 	public VersionRange getBundleVersionRange() {
 		synchronized (this.monitor) {
 			if (bundleVersionRange == null)
@@ -98,6 +102,7 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 		}
 	}
 
+	@Override
 	public Map<String, Object> getAttributes() {
 		synchronized (this.monitor) {
 			return attributes;

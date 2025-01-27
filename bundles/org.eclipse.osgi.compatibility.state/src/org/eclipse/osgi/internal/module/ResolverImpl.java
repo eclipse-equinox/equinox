@@ -444,6 +444,7 @@ public class ResolverImpl implements Resolver {
 		return true;
 	}
 
+	@Override
 	public synchronized void resolve(BundleDescription[] reRefresh, Dictionary<Object, Object>[] platformProperties) {
 		if (DEBUG)
 			ResolverImpl.log("*** BEGIN RESOLUTION ***"); //$NON-NLS-1$
@@ -2058,6 +2059,7 @@ public class ResolverImpl implements Resolver {
 	}
 
 	// Resolve dynamic import
+	@Override
 	public synchronized ExportPackageDescription resolveDynamicImport(BundleDescription importingBundle, String requestedPackage) {
 		if (state == null)
 			throw new IllegalStateException("RESOLVER_NO_STATE"); //$NON-NLS-1$
@@ -2156,6 +2158,7 @@ public class ResolverImpl implements Resolver {
 		return null;
 	}
 
+	@Override
 	public void bundleAdded(BundleDescription bundle) {
 		if (!initialized)
 			return;
@@ -2173,6 +2176,7 @@ public class ResolverImpl implements Resolver {
 		}
 	}
 
+	@Override
 	public void bundleRemoved(BundleDescription bundle, boolean pending) {
 		ResolverBundle rb = initialized ? (ResolverBundle) bundleMapping.get(bundle) : null;
 		if (rb != null)
@@ -2246,11 +2250,13 @@ public class ResolverImpl implements Resolver {
 		}
 	}
 
+	@Override
 	public void bundleUpdated(BundleDescription newDescription, BundleDescription existingDescription, boolean pending) {
 		internalBundleRemoved(existingDescription, pending);
 		bundleAdded(newDescription);
 	}
 
+	@Override
 	public void flush() {
 		resolverExports = null;
 		resolverBundles = null;
@@ -2264,10 +2270,12 @@ public class ResolverImpl implements Resolver {
 		initialized = false;
 	}
 
+	@Override
 	public State getState() {
 		return state;
 	}
 
+	@Override
 	public void setState(State newState) {
 		if (this.state != null) {
 			throw new IllegalStateException("Cannot change the State of a Resolver"); //$NON-NLS-1$
@@ -2365,10 +2373,12 @@ public class ResolverImpl implements Resolver {
 		return resolverExports;
 	}
 
+	@Override
 	public void setSelectionPolicy(Comparator<BaseDescription> selectionPolicy) {
 		this.selectionPolicy = selectionPolicy;
 	}
 
+	@Override
 	public Comparator<BaseDescription> getSelectionPolicy() {
 		return selectionPolicy;
 	}

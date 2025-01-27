@@ -38,6 +38,7 @@ public class GenericSpecificationImpl extends VersionConstraintImpl implements G
 	 */
 	public static final int RESOLUTION_FROM_BREE = 0x04;
 
+	@Override
 	public String getMatchingFilter() {
 		synchronized (this.monitor) {
 			return matchingFilter == null ? null : matchingFilter.toString();
@@ -86,6 +87,7 @@ public class GenericSpecificationImpl extends VersionConstraintImpl implements G
 		return sb.toString();
 	}
 
+	@Override
 	public String getType() {
 		synchronized (this.monitor) {
 			return type;
@@ -101,6 +103,7 @@ public class GenericSpecificationImpl extends VersionConstraintImpl implements G
 		}
 	}
 
+	@Override
 	public int getResolution() {
 		synchronized (this.monitor) {
 			return resolution;
@@ -143,6 +146,7 @@ public class GenericSpecificationImpl extends VersionConstraintImpl implements G
 		}
 	}
 
+	@Override
 	public GenericDescription[] getSuppliers() {
 		synchronized (this.monitor) {
 			return suppliers;

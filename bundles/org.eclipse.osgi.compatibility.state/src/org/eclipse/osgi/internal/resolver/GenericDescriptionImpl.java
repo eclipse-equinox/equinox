@@ -56,12 +56,14 @@ public class GenericDescriptionImpl extends BaseDescriptionImpl implements Gener
 		this.fragmentDeclaration = fragmentDeclaration;
 	}
 
+	@Override
 	public Dictionary<String, Object> getAttributes() {
 		synchronized (this.monitor) {
 			return attributes;
 		}
 	}
 
+	@Override
 	public BundleDescription getSupplier() {
 		return supplier;
 	}
@@ -94,6 +96,7 @@ public class GenericDescriptionImpl extends BaseDescriptionImpl implements Gener
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
 	@Override
 	public String getName() {
 		synchronized (this.monitor) {
@@ -102,6 +105,7 @@ public class GenericDescriptionImpl extends BaseDescriptionImpl implements Gener
 		}
 	}
 
+	@Override
 	public String getType() {
 		return type;
 	}
@@ -116,12 +120,14 @@ public class GenericDescriptionImpl extends BaseDescriptionImpl implements Gener
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
 	@Override
 	public Version getVersion() {
 		Object version = attributes != null ? attributes.get(Constants.VERSION_ATTRIBUTE) : null;
 		return version instanceof Version ? (Version) version : super.getVersion();
 	}
 
+	@Override
 	public Map<String, String> getDeclaredDirectives() {
 		synchronized (this.monitor) {
 			if (directives == null)
@@ -130,6 +136,7 @@ public class GenericDescriptionImpl extends BaseDescriptionImpl implements Gener
 		}
 	}
 
+	@Override
 	public Map<String, Object> getDeclaredAttributes() {
 		synchronized (this.monitor) {
 			Map<String, Object> result = new HashMap<>(5);

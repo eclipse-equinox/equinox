@@ -31,10 +31,12 @@ final class BundleDeltaImpl implements BundleDelta {
 		this.type = type;
 	}
 
+	@Override
 	public BundleDescription getBundle() {
 		return bundleDescription;
 	}
 
+	@Override
 	public int getType() {
 		return type;
 	}
@@ -75,6 +77,7 @@ final class BundleDeltaImpl implements BundleDelta {
 		return typeStr.toString();
 	}
 
+	@Override
 	public int compareTo(BundleDelta obj) {
 		long idcomp = getBundle().getBundleId() - obj.getBundle().getBundleId();
 		return (idcomp < 0L) ? -1 : ((idcomp > 0L) ? 1 : 0);

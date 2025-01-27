@@ -51,10 +51,13 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
+	@Override
 	public BundleDescription createBundleDescription(Dictionary<String, String> manifest, String location, long id) throws BundleException {
 		return createBundleDescription(null, manifest, location, id);
 	}
 
+	@Override
 	public BundleDescription createBundleDescription(State state, Dictionary<String, String> manifest, String location, long id) throws BundleException {
 		BundleDescriptionImpl result = (BundleDescriptionImpl) StateBuilder.createBundleDescription((StateImpl) state, manifest, location);
 		result.setBundleId(id);
@@ -64,6 +67,8 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
+	@Override
 	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, String[] providedPackages, boolean singleton) {
 		return createBundleDescription(id, symbolicName, version, location, required, host, imports, exports, providedPackages, singleton, true, true, null, null, null, null);
 	}
@@ -71,15 +76,19 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
+	@Override
 	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, String[] providedPackages, boolean singleton, boolean attachFragments, boolean dynamicFragments, String platformFilter, String executionEnvironment, GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities) {
 		// bug 154137 we need to parse the executionEnvironment param; no need to check for null, ManifestElement does that for us.
 		return createBundleDescription(id, symbolicName, version, location, required, host, imports, exports, singleton, attachFragments, dynamicFragments, platformFilter, ManifestElement.getArrayFromList(executionEnvironment), genericRequires, genericCapabilities);
 	}
 
+	@Override
 	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, boolean singleton, boolean attachFragments, boolean dynamicFragments, String platformFilter, String[] executionEnvironments, GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities) {
 		return createBundleDescription(id, symbolicName, version, location, required, host, imports, exports, singleton, attachFragments, dynamicFragments, platformFilter, executionEnvironments, genericRequires, genericCapabilities, null);
 	}
 
+	@Override
 	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, boolean singleton, boolean attachFragments, boolean dynamicFragments, String platformFilter, String[] executionEnvironments, GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities, NativeCodeSpecification nativeCode) {
 		BundleDescriptionImpl bundle = new BundleDescriptionImpl();
 		bundle.setBundleId(id);
@@ -101,6 +110,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		return bundle;
 	}
 
+	@Override
 	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, String platformFilter, String[] executionEnvironments, GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities, NativeCodeSpecification nativeCode) {
 		BundleDescriptionImpl bundle = new BundleDescriptionImpl();
 		bundle.setBundleId(id);
@@ -154,6 +164,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		return bundle;
 	}
 
+	@Override
 	public BundleDescription createBundleDescription(BundleDescription original) {
 		BundleDescriptionImpl bundle = new BundleDescriptionImpl();
 		bundle.setBundleId(original.getBundleId());
@@ -257,6 +268,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		return result;
 	}
 
+	@Override
 	public BundleSpecification createBundleSpecification(String requiredSymbolicName, VersionRange requiredVersionRange, boolean export, boolean optional) {
 		BundleSpecificationImpl bundleSpec = new BundleSpecificationImpl();
 		bundleSpec.setName(requiredSymbolicName);
@@ -266,6 +278,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		return bundleSpec;
 	}
 
+	@Override
 	public BundleSpecification createBundleSpecification(BundleSpecification original) {
 		BundleSpecificationImpl bundleSpec = new BundleSpecificationImpl();
 		bundleSpec.setName(original.getName());
@@ -279,6 +292,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		return bundleSpec;
 	}
 
+	@Override
 	public HostSpecification createHostSpecification(String hostSymbolicName, VersionRange versionRange) {
 		HostSpecificationImpl hostSpec = new HostSpecificationImpl();
 		hostSpec.setName(hostSymbolicName);
@@ -286,6 +300,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		return hostSpec;
 	}
 
+	@Override
 	public HostSpecification createHostSpecification(HostSpecification original) {
 		HostSpecificationImpl hostSpec = new HostSpecificationImpl();
 		hostSpec.setName(original.getName());
@@ -297,6 +312,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		return hostSpec;
 	}
 
+	@Override
 	public ImportPackageSpecification createImportPackageSpecification(String packageName, VersionRange versionRange, String bundleSymbolicName, VersionRange bundleVersionRange, Map<String, ?> directives, Map<String, ?> attributes, BundleDescription importer) {
 		ImportPackageSpecificationImpl packageSpec = new ImportPackageSpecificationImpl();
 		packageSpec.setName(packageName);
@@ -309,6 +325,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		return packageSpec;
 	}
 
+	@Override
 	public ImportPackageSpecification createImportPackageSpecification(ImportPackageSpecification original) {
 		ImportPackageSpecificationImpl packageSpec = new ImportPackageSpecificationImpl();
 		packageSpec.setName(original.getName());
@@ -323,6 +340,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		return packageSpec;
 	}
 
+	@Override
 	public ExportPackageDescription createExportPackageDescription(ExportPackageDescription original) {
 		ExportPackageDescriptionImpl exportPackage = new ExportPackageDescriptionImpl();
 		exportPackage.setName(original.getName());
@@ -333,6 +351,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		return exportPackage;
 	}
 
+	@Override
 	public ExportPackageDescription createExportPackageDescription(String packageName, Version version, Map<String, ?> directives, Map<String, ?> attributes, boolean root, BundleDescription exporter) {
 		ExportPackageDescriptionImpl exportPackage = new ExportPackageDescriptionImpl();
 		exportPackage.setName(packageName);
@@ -346,10 +365,13 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
+	@Override
 	public GenericDescription createGenericDescription(String name, String type, Version version, Map<String, ?> attributes) {
 		return createGenericDescription(name, type, version, attributes, null, null);
 	}
 
+	@Override
 	public GenericDescription createGenericDescription(String type, Map<String, ?> attributes, Map<String, String> directives, BundleDescription supplier) {
 		return createGenericDescription(null, type, null, attributes, directives, supplier);
 	}
@@ -374,6 +396,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		return result;
 	}
 
+	@Override
 	public GenericSpecification createGenericSpecification(String name, String type, String matchingFilter, boolean optional, boolean multiple) throws InvalidSyntaxException {
 		GenericSpecificationImpl result = new GenericSpecificationImpl();
 		result.setName(name);
@@ -388,6 +411,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		return result;
 	}
 
+	@Override
 	public NativeCodeDescription createNativeCodeDescription(String[] nativePaths, String[] processors, String[] osNames, VersionRange[] osVersions, String[] languages, String filter) throws InvalidSyntaxException {
 		NativeCodeDescriptionImpl result = new NativeCodeDescriptionImpl();
 		result.setName(Constants.BUNDLE_NATIVECODE);
@@ -400,6 +424,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		return result;
 	}
 
+	@Override
 	public NativeCodeSpecification createNativeCodeSpecification(NativeCodeDescription[] nativeCodeDescriptions, boolean optional) {
 		NativeCodeSpecificationImpl result = new NativeCodeSpecificationImpl();
 		result.setName(Constants.BUNDLE_NATIVECODE);
@@ -411,10 +436,13 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
+	@Override
 	public State createState() {
 		return internalCreateState();
 	}
 
+	@Override
 	public State createState(boolean createResolver) {
 		State result = internalCreateState();
 		if (createResolver)
@@ -422,6 +450,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		return result;
 	}
 
+	@Override
 	public State createState(State original) {
 		StateImpl newState = internalCreateState();
 		newState.setTimeStamp(original.getTimeStamp());
@@ -448,6 +477,8 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
+	@Override
 	public State readState(InputStream stream) throws IOException {
 		return internalReadStateDeprecated(internalCreateState(), new DataInputStream(stream), -1);
 	}
@@ -455,10 +486,13 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
+	@Override
 	public State readState(DataInputStream stream) throws IOException {
 		return internalReadStateDeprecated(internalCreateState(), stream, -1);
 	}
 
+	@Override
 	public State readState(File stateDirectory) throws IOException {
 		return internalReadState(internalCreateState(), stateDirectory, -1);
 	}
@@ -498,10 +532,13 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
+	@Override
 	public void writeState(State state, DataOutputStream stream) throws IOException {
 		internalWriteStateDeprecated(state, stream);
 	}
 
+	@Override
 	public void writeState(State state, File stateDirectory) throws IOException {
 		if (stateDirectory == null)
 			throw new IOException();
@@ -514,6 +551,8 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
+	@Override
 	public void writeState(State state, OutputStream stream) throws IOException {
 		internalWriteStateDeprecated(state, new DataOutputStream(stream));
 	}
@@ -530,6 +569,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		writer.saveStateDeprecated((StateImpl) state, stream);
 	}
 
+	@Override
 	public List<BundleSpecification> createBundleSpecifications(String declaration) {
 		try {
 			ManifestElement[] elements = ManifestElement.parseHeader(Constants.REQUIRE_BUNDLE, declaration);
@@ -544,6 +584,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		}
 	}
 
+	@Override
 	public List<HostSpecification> createHostSpecifications(String declaration) {
 		try {
 			ManifestElement[] elements = ManifestElement.parseHeader(Constants.FRAGMENT_HOST, declaration);
@@ -558,6 +599,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		}
 	}
 
+	@Override
 	public List<ImportPackageSpecification> createImportPackageSpecifications(String declaration) {
 		try {
 			ManifestElement[] elements = ManifestElement.parseHeader(Constants.IMPORT_PACKAGE, declaration);
@@ -572,6 +614,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		}
 	}
 
+	@Override
 	public List<GenericDescription> createGenericDescriptions(String declaration) {
 		try {
 			ManifestElement[] elements = ManifestElement.parseHeader(Constants.PROVIDE_CAPABILITY, declaration);
@@ -583,6 +626,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		}
 	}
 
+	@Override
 	public List<GenericSpecification> createGenericSpecifications(String declaration) {
 		try {
 			ManifestElement[] elements = ManifestElement.parseHeader(Constants.REQUIRE_CAPABILITY, declaration);
@@ -594,6 +638,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		}
 	}
 
+	@Override
 	public List<ExportPackageDescription> createExportPackageDescriptions(String declaration) {
 		try {
 			ManifestElement[] elements = ManifestElement.parseHeader(Constants.IMPORT_PACKAGE, declaration);
