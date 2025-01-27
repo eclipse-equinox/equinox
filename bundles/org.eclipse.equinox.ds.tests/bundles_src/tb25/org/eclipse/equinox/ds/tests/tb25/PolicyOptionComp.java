@@ -55,6 +55,7 @@ public class PolicyOptionComp implements PropertiesProvider {
 		registerMethodCall("bind1n", properties);
 	}
 
+	@Override
 	public synchronized Dictionary getProperties() {
 		if (ctxt == null) {
 			return null;

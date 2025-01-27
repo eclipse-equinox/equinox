@@ -36,10 +36,12 @@ public class AnotherComponent implements BundleContextProvider {
 		return ctxt;
 	}
 
+	@Override
 	public BundleContext getBundleContext() {
 		return Activator.getContext();
 	}
 
+	@Override
 	public Dictionary getProperties() {
 		return null;
 	}

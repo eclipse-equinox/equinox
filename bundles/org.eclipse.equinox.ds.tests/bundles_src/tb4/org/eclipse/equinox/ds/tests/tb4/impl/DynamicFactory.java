@@ -27,13 +27,16 @@ public class DynamicFactory implements DynamicService, ComponentContextProvider 
 		this.ctxt = componentContext;
 	}
 
+	@Override
 	public void doNothing() {
 	}
 
+	@Override
 	public ComponentContext getComponentContext() {
 		return ctxt;
 	}
 
+	@Override
 	public Dictionary getProperties() {
 		return null;
 	}

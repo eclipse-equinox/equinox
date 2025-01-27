@@ -125,6 +125,7 @@ public class CallRegistrator implements ComponentContextProvider {
 		setDataBits(DEACT_CC_BC_MAP_INT | reason << 16);
 	}
 
+	@Override
 	public Dictionary getProperties() {
 		return properties;
 	}
@@ -143,6 +144,7 @@ public class CallRegistrator implements ComponentContextProvider {
 		return "name.unknown";
 	}
 
+	@Override
 	public ComponentContext getComponentContext() {
 		return ctxt;
 	}

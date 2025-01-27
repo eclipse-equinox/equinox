@@ -32,10 +32,12 @@ public class ContextExp implements ComponentContextProvider {
 
 	}
 
+	@Override
 	public ComponentContext getComponentContext() {
 		return ctxt;
 	}
 
+	@Override
 	public Dictionary getProperties() {
 		return properties;
 	}

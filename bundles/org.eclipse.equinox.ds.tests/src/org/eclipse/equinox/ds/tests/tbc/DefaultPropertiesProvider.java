@@ -24,6 +24,7 @@ public class DefaultPropertiesProvider implements PropertiesProvider {
 		this.properties = properties;
 	}
 
+	@Override
 	public Dictionary getProperties() {
 		return properties;
 	}

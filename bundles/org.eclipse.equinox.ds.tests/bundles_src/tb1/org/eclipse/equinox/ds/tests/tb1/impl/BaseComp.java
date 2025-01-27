@@ -27,10 +27,12 @@ public class BaseComp implements ComponentContextProvider {
 		this.ctxt = ctxt;
 	}
 
+	@Override
 	public ComponentContext getComponentContext() {
 		return ctxt;
 	}
 
+	@Override
 	public Dictionary getProperties() {
 		return null;
 	}

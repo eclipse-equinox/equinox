@@ -46,10 +46,12 @@ public class TargetProperties implements PropertiesProvider, ComponentContextPro
 		}
 	}
 
+	@Override
 	public Dictionary getProperties() {
 		return properties;
 	}
 
+	@Override
 	public ComponentContext getComponentContext() {
 		return ctxt;
 	}

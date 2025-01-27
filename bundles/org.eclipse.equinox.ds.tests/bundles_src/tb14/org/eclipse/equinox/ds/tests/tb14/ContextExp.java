@@ -21,10 +21,12 @@ import org.osgi.service.component.ComponentContext;
 
 public class ContextExp implements ComponentContextProvider {
 
+	@Override
 	public ComponentContext getComponentContext() {
 		return null;
 	}
 
+	@Override
 	public Dictionary getProperties() {
 		return null;
 	}

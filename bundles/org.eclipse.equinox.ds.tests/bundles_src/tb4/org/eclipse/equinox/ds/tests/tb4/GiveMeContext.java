@@ -31,10 +31,12 @@ public class GiveMeContext implements ComponentContextProvider {
 		this.ctxt = null;
 	}
 
+	@Override
 	public ComponentContext getComponentContext() {
 		return ctxt;
 	}
 
+	@Override
 	public Dictionary getProperties() {
 		return null;
 	}

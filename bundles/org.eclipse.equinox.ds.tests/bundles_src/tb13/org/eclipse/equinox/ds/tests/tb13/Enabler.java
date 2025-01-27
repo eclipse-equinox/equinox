@@ -30,6 +30,7 @@ public class Enabler implements ComponentManager {
 		this.ctxt = null;
 	}
 
+	@Override
 	public void enableComponent(String name, boolean flag) {
 		if (flag)
 			ctxt.enableComponent(name);
@@ -37,6 +38,7 @@ public class Enabler implements ComponentManager {
 			ctxt.disableComponent(name);
 	}
 
+	@Override
 	public Dictionary getProperties() {
 		return ctxt.getProperties();
 	}
