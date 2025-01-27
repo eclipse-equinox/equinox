@@ -34,6 +34,7 @@ public class NativeCodeSpecificationImpl extends VersionConstraintImpl implement
 	private NativeCodeDescription[] possibleSuppliers;
 	private boolean optional;
 
+	@Override
 	public NativeCodeDescription[] getPossibleSuppliers() {
 		synchronized (this.monitor) {
 			if (possibleSuppliers == null)
@@ -48,6 +49,7 @@ public class NativeCodeSpecificationImpl extends VersionConstraintImpl implement
 		}
 	}
 
+	@Override
 	public boolean isOptional() {
 		synchronized (this.monitor) {
 			return optional;

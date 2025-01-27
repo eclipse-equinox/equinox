@@ -51,6 +51,7 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 		this.fragmentDeclaration = fragmentDeclaration;
 	}
 
+	@Override
 	public Map<String, Object> getDirectives() {
 		synchronized (this.monitor) {
 			Map<String, Object> result = new HashMap<>(7);
@@ -70,6 +71,7 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 		}
 	}
 
+	@Override
 	public Map<String, String> getDeclaredDirectives() {
 		Map<String, String> result = new HashMap<>(6);
 		synchronized (this.monitor) {
@@ -92,6 +94,7 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 		}
 	}
 
+	@Override
 	public Map<String, Object> getDeclaredAttributes() {
 		Map<String, Object> result = new HashMap<>(2);
 		synchronized (this.monitor) {
@@ -122,6 +125,7 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 		return buffer.toString();
 	}
 
+	@Override
 	public Object getDirective(String key) {
 		synchronized (this.monitor) {
 			if (key.equals(Constants.USES_DIRECTIVE))
@@ -191,16 +195,19 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 		}
 	}
 
+	@Override
 	public Map<String, Object> getAttributes() {
 		synchronized (this.monitor) {
 			return attributes;
 		}
 	}
 
+	@Override
 	public BundleDescription getSupplier() {
 		return getExporter();
 	}
 
+	@Override
 	public BundleDescription getExporter() {
 		return exporter;
 	}
@@ -208,6 +215,8 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
+	@Override
 	public boolean isRoot() {
 		return true;
 	}

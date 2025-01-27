@@ -45,6 +45,7 @@ public class UserState extends StateImpl {
 		return true;
 	}
 
+	@Override
 	public StateDelta compare(State baseState) {
 		BundleDescription[] currentBundles = this.getBundles();
 		StateDeltaImpl delta = new StateDeltaImpl(this);

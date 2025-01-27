@@ -56,6 +56,7 @@ public final class StateHelperImpl implements StateHelper {
 	/**
 	 * @see StateHelper
 	 */
+	@Override
 	public BundleDescription[] getDependentBundles(BundleDescription[] bundles) {
 		if (bundles == null || bundles.length == 0)
 			return new BundleDescription[0];
@@ -80,6 +81,7 @@ public final class StateHelperImpl implements StateHelper {
 		}
 	}
 
+	@Override
 	public BundleDescription[] getPrerequisites(BundleDescription[] bundles) {
 		if (bundles == null || bundles.length == 0)
 			return new BundleDescription[0];
@@ -182,6 +184,7 @@ public final class StateHelperImpl implements StateHelper {
 
 	}
 
+	@Override
 	public VersionConstraint[] getUnsatisfiedLeaves(BundleDescription[] bundles) {
 		if (bundles.length == 0)
 			return new VersionConstraint[0];
@@ -205,6 +208,7 @@ public final class StateHelperImpl implements StateHelper {
 	/**
 	 * @see StateHelper
 	 */
+	@Override
 	public VersionConstraint[] getUnsatisfiedConstraints(BundleDescription bundle) {
 		ResolverHook hook = beginHook(bundle.getContainingState(), Arrays.asList(new BundleRevision[] {bundle}));
 		try {
@@ -279,6 +283,7 @@ public final class StateHelperImpl implements StateHelper {
 	/**
 	 * @see StateHelper
 	 */
+	@Override
 	public boolean isResolvable(ImportPackageSpecification constraint) {
 		ResolverHook hook = beginHook(constraint.getBundle().getContainingState(), Arrays.asList(new BundleRevision[] {constraint.getBundle()}));
 		try {
@@ -305,6 +310,7 @@ public final class StateHelperImpl implements StateHelper {
 	/**
 	 * @see StateHelper
 	 */
+	@Override
 	public boolean isResolvable(BundleSpecification specification) {
 		return isBundleConstraintResolvable(specification, null);
 	}
@@ -312,6 +318,7 @@ public final class StateHelperImpl implements StateHelper {
 	/**
 	 * @see StateHelper
 	 */
+	@Override
 	public boolean isResolvable(HostSpecification specification) {
 		return isBundleConstraintResolvable(specification, BundleRevision.HOST_NAMESPACE);
 	}
@@ -334,6 +341,7 @@ public final class StateHelperImpl implements StateHelper {
 		return getPossibleCandidates(constraint, availableBundles, namespace, hook, true).size() > 0;
 	}
 
+	@Override
 	public Object[][] sortBundles(BundleDescription[] toSort) {
 		List<Object[]> references = new ArrayList<>(toSort.length);
 		for (BundleDescription toAddReference : toSort) {
@@ -421,10 +429,12 @@ public final class StateHelperImpl implements StateHelper {
 		references.add(new Object[] {description, reference});
 	}
 
+	@Override
 	public ExportPackageDescription[] getVisiblePackages(BundleDescription bundle) {
 		return getVisiblePackages(bundle, 0);
 	}
 
+	@Override
 	public ExportPackageDescription[] getVisiblePackages(BundleDescription bundle, int options) {
 		StateImpl state = (StateImpl) bundle.getContainingState();
 		boolean strict = false;
@@ -548,6 +558,7 @@ public final class StateHelperImpl implements StateHelper {
 		return false;
 	}
 
+	@Override
 	public int getAccessCode(BundleDescription bundle, ExportPackageDescription export) {
 		if (((Boolean) export.getDirective(StateImpl.INTERNAL_DIRECTIVE)).booleanValue())
 			return ACCESS_DISCOURAGED;

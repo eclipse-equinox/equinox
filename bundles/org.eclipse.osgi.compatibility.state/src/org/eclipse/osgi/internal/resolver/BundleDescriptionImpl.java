@@ -94,18 +94,22 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		//
 	}
 
+	@Override
 	public long getBundleId() {
 		return bundleId;
 	}
 
+	@Override
 	public String getSymbolicName() {
 		return getName();
 	}
 
+	@Override
 	public BundleDescription getSupplier() {
 		return this;
 	}
 
+	@Override
 	public String getLocation() {
 		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
@@ -113,6 +117,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		}
 	}
 
+	@Override
 	public String getPlatformFilter() {
 		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
@@ -120,6 +125,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		}
 	}
 
+	@Override
 	public String[] getExecutionEnvironments() {
 		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
@@ -129,6 +135,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		}
 	}
 
+	@Override
 	public ImportPackageSpecification[] getImportPackages() {
 		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
@@ -138,6 +145,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		}
 	}
 
+	@Override
 	public ImportPackageSpecification[] getAddedDynamicImportPackages() {
 		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
@@ -147,6 +155,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		}
 	}
 
+	@Override
 	public BundleSpecification[] getRequiredBundles() {
 		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
@@ -156,6 +165,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		}
 	}
 
+	@Override
 	public GenericSpecification[] getGenericRequires() {
 		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
@@ -165,6 +175,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		}
 	}
 
+	@Override
 	public GenericDescription[] getGenericCapabilities() {
 		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
@@ -174,6 +185,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		}
 	}
 
+	@Override
 	public NativeCodeSpecification getNativeCodeSpecification() {
 		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
@@ -181,6 +193,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		}
 	}
 
+	@Override
 	public ExportPackageDescription[] getExportPackages() {
 		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
@@ -188,14 +201,17 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		}
 	}
 
+	@Override
 	public boolean isResolved() {
 		return (stateBits & RESOLVED) != 0;
 	}
 
+	@Override
 	public State getContainingState() {
 		return containingState;
 	}
 
+	@Override
 	public BundleDescription[] getFragments() {
 		if (host != null)
 			return EMPTY_BUNDLEDESCS;
@@ -205,30 +221,37 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		return currentState.getFragments(this);
 	}
 
+	@Override
 	public HostSpecification getHost() {
 		return host;
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return (stateBits & SINGLETON) != 0;
 	}
 
+	@Override
 	public boolean isRemovalPending() {
 		return (stateBits & REMOVAL_PENDING) != 0;
 	}
 
+	@Override
 	public boolean hasDynamicImports() {
 		return (stateBits & HAS_DYNAMICIMPORT) != 0;
 	}
 
+	@Override
 	public boolean attachFragments() {
 		return (stateBits & ATTACH_FRAGMENTS) != 0;
 	}
 
+	@Override
 	public boolean dynamicFragments() {
 		return (stateBits & DYNAMIC_FRAGMENTS) != 0;
 	}
 
+	@Override
 	public ExportPackageDescription[] getSelectedExports() {
 		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
@@ -238,6 +261,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		}
 	}
 
+	@Override
 	public GenericDescription[] getSelectedGenericCapabilities() {
 		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
@@ -247,6 +271,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		}
 	}
 
+	@Override
 	public ExportPackageDescription[] getSubstitutedExports() {
 		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
@@ -256,6 +281,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		}
 	}
 
+	@Override
 	public BundleDescription[] getResolvedRequires() {
 		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
@@ -265,6 +291,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		}
 	}
 
+	@Override
 	public ExportPackageDescription[] getResolvedImports() {
 		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
@@ -274,6 +301,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		}
 	}
 
+	@Override
 	public GenericDescription[] getResolvedGenericRequires() {
 		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
@@ -529,10 +557,12 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		return getSymbolicName() + "_" + getVersion(); //$NON-NLS-1$
 	}
 
+	@Override
 	public Object getKey() {
 		return Long.valueOf(bundleId);
 	}
 
+	@Override
 	public boolean compare(KeyedElement other) {
 		if (!(other instanceof BundleDescriptionImpl))
 			return false;
@@ -540,6 +570,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		return bundleId == otherBundleDescription.bundleId;
 	}
 
+	@Override
 	public int getKeyHashCode() {
 		return (int) (bundleId ^ (bundleId >>> 32));
 	}
@@ -623,6 +654,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		}
 	}
 
+	@Override
 	public BundleDescription[] getDependents() {
 		synchronized (this.monitor) {
 			if (dependents == null)
@@ -815,7 +847,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			lazyData = new LazyData();
 	}
 
-	final class LazyData {
+	static final class LazyData {
 		String location;
 		String platformFilter;
 
@@ -840,6 +872,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		List<ImportPackageSpecification> addedDynamicImports;
 	}
 
+	@Override
 	public Map<String, Object> getAttributes() {
 		synchronized (this.monitor) {
 			return attributes;
@@ -889,6 +922,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		}
 	}
 
+	@Override
 	public Map<String, String> getDeclaredDirectives() {
 		Map<String, String> result = new HashMap<>(2);
 		Map<String, String> arbitrary = getArbitraryDirectives();
@@ -910,6 +944,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		return Collections.unmodifiableMap(result);
 	}
 
+	@Override
 	public Map<String, Object> getDeclaredAttributes() {
 		Map<String, Object> result = new HashMap<>(1);
 		synchronized (this.monitor) {
@@ -921,6 +956,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		return Collections.unmodifiableMap(result);
 	}
 
+	@Override
 	public List<BundleRequirement> getDeclaredRequirements(String namespace) {
 		List<BundleRequirement> result = new ArrayList<>();
 		if (namespace == null || BundleRevision.BUNDLE_NAMESPACE.equals(namespace)) {
@@ -945,6 +981,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		return Collections.unmodifiableList(result);
 	}
 
+	@Override
 	public List<BundleCapability> getDeclaredCapabilities(String namespace) {
 		List<BundleCapability> result = new ArrayList<>();
 		if (host == null) {
@@ -973,10 +1010,12 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		return Collections.unmodifiableList(result);
 	}
 
+	@Override
 	public int getTypes() {
 		return getHost() != null ? BundleRevision.TYPE_FRAGMENT : 0;
 	}
 
+	@Override
 	public Bundle getBundle() {
 		Object ref = getUserObject();
 		if (ref instanceof BundleReference)
@@ -989,6 +1028,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		return BundleRevision.BUNDLE_NAMESPACE;
 	}
 
+	@Override
 	public BundleWiring getWiring() {
 		synchronized (this.monitor) {
 			if (bundleWiring != null || !isResolved())
@@ -1014,18 +1054,22 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			this.requirer = wire.getRequirementHost().getWiring();
 		}
 
+		@Override
 		public BundleCapability getCapability() {
 			return capability;
 		}
 
+		@Override
 		public BundleRequirement getRequirement() {
 			return requirement;
 		}
 
+		@Override
 		public BundleWiring getProviderWiring() {
 			return provider;
 		}
 
+		@Override
 		public BundleWiring getRequirerWiring() {
 			return requirer;
 		}
@@ -1052,10 +1096,12 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			return getRequirement() + " -> " + getCapability(); //$NON-NLS-1$
 		}
 
+		@Override
 		public BundleRevision getProvider() {
 			return provider.getRevision();
 		}
 
+		@Override
 		public BundleRevision getRequirer() {
 			return requirer.getRevision();
 		}
@@ -1098,10 +1144,12 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	class DescriptionWiring implements BundleWiring {
 		private volatile boolean valid = true;
 
+		@Override
 		public Bundle getBundle() {
 			return BundleDescriptionImpl.this.getBundle();
 		}
 
+		@Override
 		public boolean isInUse() {
 			return valid && (isCurrent() || BundleDescriptionImpl.this.hasDependents());
 		}
@@ -1110,10 +1158,12 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			valid = false;
 		}
 
+		@Override
 		public boolean isCurrent() {
 			return valid && !BundleDescriptionImpl.this.isRemovalPending();
 		}
 
+		@Override
 		public List<BundleCapability> getCapabilities(String namespace) {
 			if (!isInUse())
 				return null;
@@ -1141,10 +1191,12 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			return result;
 		}
 
+		@Override
 		public List<Capability> getResourceCapabilities(String namespace) {
 			return asListCapability(getCapabilities(namespace));
 		}
 
+		@Override
 		public List<BundleRequirement> getRequirements(String namespace) {
 			List<BundleWire> requiredWires = getRequiredWires(namespace);
 			if (requiredWires == null)
@@ -1178,10 +1230,12 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			return requirements;
 		}
 
+		@Override
 		public List<Requirement> getResourceRequirements(String namespace) {
 			return asListRequirement(getRequirements(namespace));
 		}
 
+		@Override
 		public List<BundleWire> getProvidedWires(String namespace) {
 			if (!isInUse())
 				return null;
@@ -1209,10 +1263,12 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			return orderedResult;
 		}
 
+		@Override
 		public List<Wire> getProvidedResourceWires(String namespace) {
 			return asListWire(getProvidedWires(namespace));
 		}
 
+		@Override
 		public List<BundleWire> getRequiredWires(String namespace) {
 			if (!isInUse())
 				return null;
@@ -1237,26 +1293,32 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			return result;
 		}
 
+		@Override
 		public List<Wire> getRequiredResourceWires(String namespace) {
 			return asListWire(getRequiredWires(namespace));
 		}
 
+		@Override
 		public BundleRevision getRevision() {
 			return BundleDescriptionImpl.this;
 		}
 
+		@Override
 		public BundleRevision getResource() {
 			return getRevision();
 		}
 
+		@Override
 		public ClassLoader getClassLoader() {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public List<URL> findEntries(String path, String filePattern, int options) {
 			return null;
 		}
 
+		@Override
 		public Collection<String> listResources(String path, String filePattern, int options) {
 			return null;
 		}
@@ -1267,10 +1329,12 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		}
 	}
 
+	@Override
 	public List<Capability> getCapabilities(String namespace) {
 		return asListCapability(getDeclaredCapabilities(namespace));
 	}
 
+	@Override
 	public List<Requirement> getRequirements(String namespace) {
 		return asListRequirement(getDeclaredRequirements(namespace));
 	}

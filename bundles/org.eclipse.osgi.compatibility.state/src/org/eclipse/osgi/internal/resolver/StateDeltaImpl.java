@@ -31,12 +31,14 @@ final class StateDeltaImpl implements StateDelta {
 		this.state = state;
 	}
 
+	@Override
 	public BundleDelta[] getChanges() {
 		synchronized (this.changes) {
 			return changes.values().toArray(new BundleDelta[changes.size()]);
 		}
 	}
 
+	@Override
 	public BundleDelta[] getChanges(int mask, boolean exact) {
 		synchronized (this.changes) {
 			List<BundleDelta> result = new ArrayList<>();
@@ -48,10 +50,12 @@ final class StateDeltaImpl implements StateDelta {
 		}
 	}
 
+	@Override
 	public State getState() {
 		return state;
 	}
 
+	@Override
 	public ResolverHookException getResovlerHookException() {
 		return error;
 	}
