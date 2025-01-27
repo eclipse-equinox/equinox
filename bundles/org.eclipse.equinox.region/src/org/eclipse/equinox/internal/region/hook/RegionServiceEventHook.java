@@ -44,6 +44,7 @@ public final class RegionServiceEventHook implements EventHook {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void event(ServiceEvent event, Collection<BundleContext> contexts) {
 		ServiceReference<?> eventService = event.getServiceReference();
 		Map<Region, Boolean> regionAccess = new HashMap<>();

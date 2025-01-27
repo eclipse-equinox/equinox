@@ -96,7 +96,7 @@ public final class RegionBundleCollisionHook implements CollisionHook {
 		collisionCandidates.retainAll(collisions);
 	}
 
-	class VisitorFromTarget extends RegionDigraphVisitorBase<Bundle> {
+	static class VisitorFromTarget extends RegionDigraphVisitorBase<Bundle> {
 
 		VisitorFromTarget(Collection<Bundle> candidates) {
 			super(candidates);
@@ -120,7 +120,7 @@ public final class RegionBundleCollisionHook implements CollisionHook {
 
 	}
 
-	class VisitorFromCandidate extends RegionDigraphVisitorBase<Bundle> {
+	static class VisitorFromCandidate extends RegionDigraphVisitorBase<Bundle> {
 		private final Region targetRegion;
 
 		VisitorFromCandidate(Collection<Bundle> candidates, Region targetRegion) {
