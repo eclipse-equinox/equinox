@@ -44,6 +44,7 @@ public class CachingServicePlugin implements BundleActivator {
 	/**
 	 * This method is called upon plug-in activation
 	 */
+	@Override
 	public void start(final BundleContext context) throws Exception {
 		if (CachingServicePlugin.DEBUG)
 			System.out.println("> CachingServicePlugin.start() context=" + context);
@@ -69,6 +70,7 @@ public class CachingServicePlugin implements BundleActivator {
 	/**
 	 * This method is called when the plug-in is stopped
 	 */
+	@Override
 	public void stop(final BundleContext context) throws Exception {
 	}
 
