@@ -49,6 +49,7 @@ public class Component1 implements PropertiesProvider, ComponentContextProvider 
 		properties.put("config.base.data", Integer.valueOf(deactPos));
 	}
 
+	@Override
 	public Dictionary getProperties() {
 		return properties;
 	}
@@ -57,6 +58,7 @@ public class Component1 implements PropertiesProvider, ComponentContextProvider 
 		return deactPos;
 	}
 
+	@Override
 	public ComponentContext getComponentContext() {
 		return ctxt;
 	}

@@ -25,6 +25,7 @@ public class CountFactory implements BoundCountProvider {
 
 	private List boundServices = new ArrayList();
 
+	@Override
 	public int getBoundServiceCount(String service) {
 		return boundServices.size();
 	}
@@ -37,6 +38,7 @@ public class CountFactory implements BoundCountProvider {
 		boundServices.remove(ref);
 	}
 
+	@Override
 	public Dictionary getProperties() {
 		return null;
 	}

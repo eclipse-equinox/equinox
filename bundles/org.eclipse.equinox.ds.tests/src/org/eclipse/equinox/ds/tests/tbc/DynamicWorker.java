@@ -18,6 +18,7 @@ import java.util.Dictionary;
 
 public class DynamicWorker implements PropertiesProvider {
 
+	@Override
 	public Dictionary getProperties() {
 		return null;
 	}

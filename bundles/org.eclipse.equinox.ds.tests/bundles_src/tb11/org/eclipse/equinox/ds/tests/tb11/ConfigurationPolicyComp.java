@@ -30,6 +30,7 @@ public class ConfigurationPolicyComp implements PropertiesProvider {
 
 	}
 
+	@Override
 	public Dictionary getProperties() {
 		if (ctxt == null)
 			return null;

@@ -40,6 +40,7 @@ public class BindUnbindSuccessor extends BindUnbind implements ComponentManager,
 		return ctxt;
 	}
 
+	@Override
 	public void enableComponent(String name, boolean flag) {
 		if (flag)
 			ctxt.enableComponent(name);
@@ -52,6 +53,7 @@ public class BindUnbindSuccessor extends BindUnbind implements ComponentManager,
 		return ctxt.getProperties();
 	}
 
+	@Override
 	public ComponentContext getComponentContext() {
 		return ctxt;
 	}

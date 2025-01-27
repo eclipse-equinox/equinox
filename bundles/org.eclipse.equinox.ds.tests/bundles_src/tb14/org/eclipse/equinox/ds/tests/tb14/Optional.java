@@ -33,10 +33,12 @@ public class Optional implements PropertiesProvider, ComponentContextProvider {
 
 	}
 
+	@Override
 	public Dictionary getProperties() {
 		return properties;
 	}
 
+	@Override
 	public ComponentContext getComponentContext() {
 		return ctxt;
 	}

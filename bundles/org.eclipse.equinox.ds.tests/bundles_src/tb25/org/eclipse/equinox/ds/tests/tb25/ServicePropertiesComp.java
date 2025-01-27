@@ -60,6 +60,7 @@ public class ServicePropertiesComp implements PropertiesProvider {
 		newProps.put("serviceUpdatedDynamic", Boolean.TRUE);
 	}
 
+	@Override
 	public synchronized Dictionary getProperties() {
 		if (ctxt == null) {
 			return null;

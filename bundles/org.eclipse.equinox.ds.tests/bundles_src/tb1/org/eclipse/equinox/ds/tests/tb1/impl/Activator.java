@@ -26,10 +26,12 @@ public class Activator implements BundleActivator {
 		Activator.instance = this;
 	}
 
+	@Override
 	public void start(BundleContext context) throws Exception {
 		this.ctx = context;
 	}
 
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		this.ctx = null;
 	}

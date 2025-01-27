@@ -62,6 +62,7 @@ public class BindRegistrator implements ComponentContextProvider {
 		setDataBits(UNBIND);
 	}
 
+	@Override
 	public Dictionary getProperties() {
 		return properties;
 	}
@@ -75,6 +76,7 @@ public class BindRegistrator implements ComponentContextProvider {
 		properties.put("config.base.data", Integer.valueOf(data | value));
 	}
 
+	@Override
 	public ComponentContext getComponentContext() {
 		return ctxt;
 	}

@@ -66,6 +66,7 @@ public class DSEvent implements Comparable {
 	 * 
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
+	@Override
 	public int compareTo(Object var0) {
 		DSEvent event = (DSEvent) var0;
 		if (event.time > this.time) {

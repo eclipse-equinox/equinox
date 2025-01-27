@@ -37,18 +37,22 @@ public class BindUnbind implements BoundTester {
 		}
 	}
 
+	@Override
 	public Dictionary getProperties() {
 		return null;
 	}
 
+	@Override
 	public int getBoundObjectsCount() {
 		return boundObjects.size();
 	}
 
+	@Override
 	public ServiceReference getBoundServiceRef(int index) {
 		return (ServiceReference) boundObjects.elementAt(index);
 	}
 
+	@Override
 	public Object getBoundService(int index) {
 		return null;
 	}

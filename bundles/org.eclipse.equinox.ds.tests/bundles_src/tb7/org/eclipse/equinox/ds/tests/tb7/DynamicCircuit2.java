@@ -31,10 +31,12 @@ public class DynamicCircuit2 implements BoundTester {
 	public void deactivate(ComponentContext ctxt) {
 	}
 
+	@Override
 	public int getBoundObjectsCount() {
 		return (service != null ? 1 : 0);
 	}
 
+	@Override
 	public Object getBoundService(int index) {
 		if (!isBoundServiceActivated()) {
 			System.err.println("The bound service must be active at the time of the bind operation");
@@ -43,10 +45,12 @@ public class DynamicCircuit2 implements BoundTester {
 		return service;
 	}
 
+	@Override
 	public ServiceReference getBoundServiceRef(int index) {
 		return null;
 	}
 
+	@Override
 	public Dictionary getProperties() {
 		return null;
 	}

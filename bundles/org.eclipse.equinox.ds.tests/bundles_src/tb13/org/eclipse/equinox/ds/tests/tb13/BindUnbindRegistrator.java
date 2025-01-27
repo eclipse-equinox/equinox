@@ -76,6 +76,7 @@ public class BindUnbindRegistrator implements PropertiesProvider {
 		setDataBits(UNBIND_CM_MAP);
 	}
 
+	@Override
 	public Dictionary getProperties() {
 		return properties;
 	}

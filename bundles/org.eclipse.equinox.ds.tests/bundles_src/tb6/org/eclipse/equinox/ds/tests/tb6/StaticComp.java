@@ -53,6 +53,7 @@ public class StaticComp implements DSEventsProvider, BoundTester, ComponentConte
 		}
 	}
 
+	@Override
 	public DSEvent[] getEvents() {
 		DSEvent[] events = new DSEvent[componentEvents.size()];
 		componentEvents.copyInto(events);
@@ -64,6 +65,7 @@ public class StaticComp implements DSEventsProvider, BoundTester, ComponentConte
 	 * 
 	 * @see org.eclipse.equinox.ds.tests.tbc.DSEventsProvider#resetComponentEvents()
 	 */
+	@Override
 	public void resetEvents() {
 		componentEvents.removeAllElements();
 	}
@@ -73,6 +75,7 @@ public class StaticComp implements DSEventsProvider, BoundTester, ComponentConte
 	 * 
 	 * @see org.eclipse.equinox.ds.tests.tbc.PropertiesProvider#getProperties()
 	 */
+	@Override
 	public Dictionary getProperties() {
 		return null;
 	}
@@ -82,6 +85,7 @@ public class StaticComp implements DSEventsProvider, BoundTester, ComponentConte
 	 * 
 	 * @see org.eclipse.equinox.ds.tests.tbc.BoundTester#getBoundObject(int)
 	 */
+	@Override
 	public ServiceReference getBoundServiceRef(int index) {
 		return null;
 	}
@@ -91,6 +95,7 @@ public class StaticComp implements DSEventsProvider, BoundTester, ComponentConte
 	 * 
 	 * @see org.eclipse.equinox.ds.tests.tbc.BoundTester#getBoundObjectsCount()
 	 */
+	@Override
 	public int getBoundObjectsCount() {
 		return (this.rc != null ? 1 : 0);
 	}
@@ -100,6 +105,7 @@ public class StaticComp implements DSEventsProvider, BoundTester, ComponentConte
 	 * 
 	 * @see org.eclipse.equinox.ds.tests.tbc.BoundTester#getBoundService(int)
 	 */
+	@Override
 	public Object getBoundService(int index) {
 		return this.rc;
 	}
@@ -111,6 +117,7 @@ public class StaticComp implements DSEventsProvider, BoundTester, ComponentConte
 	 * org.eclipse.equinox.ds.tests.tbc.ComponentContextProvider#getComponentContext
 	 * ()
 	 */
+	@Override
 	public ComponentContext getComponentContext() {
 		return ctxt;
 	}

@@ -82,6 +82,7 @@ public class ModifyRegistrator implements ComponentContextProvider {
 		throw new RuntimeException("Test method throwException(ComponentContext) is called!");
 	}
 
+	@Override
 	public Dictionary getProperties() {
 		return properties;
 	}
@@ -95,6 +96,7 @@ public class ModifyRegistrator implements ComponentContextProvider {
 		properties.put("config.base.data", Integer.valueOf(data | value));
 	}
 
+	@Override
 	public ComponentContext getComponentContext() {
 		return ctxt;
 	}

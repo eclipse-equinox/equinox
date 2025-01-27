@@ -35,6 +35,7 @@ public class NamedFactory implements NamedService, ComponentContextProvider {
 	// it is absolutely legal to have activate without having deactivate!
 	// public void deactivate(ComponentContext cc) {}
 
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -44,10 +45,12 @@ public class NamedFactory implements NamedService, ComponentContextProvider {
 		return name;
 	}
 
+	@Override
 	public ComponentContext getComponentContext() {
 		return ctxt;
 	}
 
+	@Override
 	public Dictionary getProperties() {
 		return ctxt.getProperties();
 	}

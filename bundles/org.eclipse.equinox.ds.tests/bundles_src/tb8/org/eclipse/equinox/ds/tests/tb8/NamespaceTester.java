@@ -33,6 +33,7 @@ public class NamespaceTester implements NamespaceProvider {
 
 	}
 
+	@Override
 	public int getComponentNSID() {
 		return nsid;
 	}

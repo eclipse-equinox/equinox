@@ -56,24 +56,29 @@ public class BoundReplacer implements DSEventsProvider, BoundMainProvider, Compo
 		boundServiceEvents.addElement(new DSEvent(DSEvent.ACT_UNBOUND, namedService));
 	}
 
+	@Override
 	public Dictionary getProperties() {
 		return null;
 	}
 
+	@Override
 	public DSEvent[] getEvents() {
 		DSEvent[] events = new DSEvent[boundServiceEvents.size()];
 		boundServiceEvents.copyInto(events);
 		return events;
 	}
 
+	@Override
 	public Object getBoundService(String serviceName) {
 		return boundServices.get(serviceName);
 	}
 
+	@Override
 	public void resetEvents() {
 		boundServiceEvents.removeAllElements();
 	}
 
+	@Override
 	public ComponentContext getComponentContext() {
 		return ctxt;
 	}

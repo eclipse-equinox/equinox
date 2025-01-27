@@ -23,18 +23,22 @@ public class StaticCircuit2 implements BoundTester {
 
 	private StaticCircuit1 mate;
 
+	@Override
 	public int getBoundObjectsCount() {
 		return (mate != null ? 1 : 0);
 	}
 
+	@Override
 	public Object getBoundService(int index) {
 		return mate;
 	}
 
+	@Override
 	public ServiceReference getBoundServiceRef(int index) {
 		return null;
 	}
 
+	@Override
 	public Dictionary getProperties() {
 		return null;
 	}
