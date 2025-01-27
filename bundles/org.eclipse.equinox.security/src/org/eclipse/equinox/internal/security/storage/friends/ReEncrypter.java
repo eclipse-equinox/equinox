@@ -31,7 +31,7 @@ import org.eclipse.osgi.util.NLS;
  */
 public class ReEncrypter {
 
-	private class TmpElement {
+	private static class TmpElement {
 		private String path; // absolute node path
 		private Map<String, String> values; // <String>key -> <String>value
 
