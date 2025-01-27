@@ -73,6 +73,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer<Http
 		}
 	}
 
+	@Override
 	public void start(BundleContext bundleContext) throws Exception {
 		context = bundleContext;
 
@@ -83,12 +84,14 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer<Http
 		serviceTracker.open();
 	}
 
+	@Override
 	public void stop(BundleContext bundleContext) throws Exception {
 		serviceTracker.close();
 		serviceTracker = null;
 		context = null;
 	}
 
+	@Override
 	public HttpTuple addingService(ServiceReference<HttpServlet> serviceReference) {
 		BundleContext currentContext = context;
 		if (currentContext == null) {
@@ -186,12 +189,14 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer<Http
 		}
 	}
 
+	@Override
 	public void modifiedService(ServiceReference<HttpServlet> serviceReference, HttpTuple httpTuple) {
 
 		removedService(serviceReference, httpTuple);
 		addingService(serviceReference);
 	}
 
+	@Override
 	public void removedService(ServiceReference<HttpServlet> serviceReference, HttpTuple httpTuple) {
 		BundleContext currentContext = context;
 		if (currentContext != null) {

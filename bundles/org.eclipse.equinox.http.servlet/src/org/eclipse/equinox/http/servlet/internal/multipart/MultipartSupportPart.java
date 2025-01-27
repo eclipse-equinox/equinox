@@ -92,7 +92,7 @@ public class MultipartSupportPart implements Part {
 	private final DiskFileItem item;
 	private final FileItemHeaders headers;
 
-	private class IteratorCollection extends AbstractList<String> {
+	private static class IteratorCollection extends AbstractList<String> {
 
 		public IteratorCollection(Iterator<String> iterator) {
 			this.collection = new ArrayList<>();

@@ -43,12 +43,14 @@ public class ProxyServlet extends HttpServlet {
 	private static final long serialVersionUID = 4117456123807468871L;
 	private HttpServiceRuntimeImpl httpServiceRuntimeImpl;
 
+	@Override
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
 
 		Activator.addProxyServlet(this);
 	}
 
+	@Override
 	public void destroy() {
 		Activator.unregisterHttpService(this);
 
@@ -89,6 +91,7 @@ public class ProxyServlet extends HttpServlet {
 	/**
 	 * @see HttpServlet#service(ServletRequest, ServletResponse)
 	 */
+	@Override
 	protected void service(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 

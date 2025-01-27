@@ -98,6 +98,7 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 		return newSessionId;
 	}
 
+	@Override
 	public String getAuthType() {
 		String authType = (String) this.getAttribute(HttpContext.AUTHENTICATION_TYPE);
 		if (authType != null)
@@ -106,6 +107,7 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 		return request.getAuthType();
 	}
 
+	@Override
 	public String getRemoteUser() {
 		String remoteUser = (String) this.getAttribute(HttpContext.REMOTE_USER);
 		if (remoteUser != null)
@@ -114,6 +116,7 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 		return request.getRemoteUser();
 	}
 
+	@Override
 	public String getPathInfo() {
 		DispatchTargets currentDispatchTargets = dispatchTargets.peek();
 
@@ -124,10 +127,12 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 		return currentDispatchTargets.getPathInfo();
 	}
 
+	@Override
 	public DispatcherType getDispatcherType() {
 		return dispatchTargets.peek().getDispatcherType();
 	}
 
+	@Override
 	public String getParameter(String name) {
 		String[] values = getParameterValues(name);
 		if ((values == null) || (values.length == 0)) {
@@ -136,14 +141,17 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 		return values[0];
 	}
 
+	@Override
 	public Map<String, String[]> getParameterMap() {
 		return dispatchTargets.peek().getParameterMap();
 	}
 
+	@Override
 	public Enumeration<String> getParameterNames() {
 		return Collections.enumeration(getParameterMap().keySet());
 	}
 
+	@Override
 	public String[] getParameterValues(String name) {
 		return getParameterMap().get(name);
 	}
@@ -170,10 +178,12 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 		return currentDispatchTargets.getRequestURI();
 	}
 
+	@Override
 	public ServletContext getServletContext() {
 		return dispatchTargets.peek().getServletRegistration().getServletContext();
 	}
 
+	@Override
 	public String getServletPath() {
 		DispatchTargets currentDispatchTargets = dispatchTargets.peek();
 
@@ -187,10 +197,12 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 		return currentDispatchTargets.getServletPath();
 	}
 
+	@Override
 	public String getContextPath() {
 		return dispatchTargets.peek().getContextController().getFullContextPath();
 	}
 
+	@Override
 	public Object getAttribute(String attributeName) {
 		DispatchTargets current = dispatchTargets.peek();
 		DispatcherType dispatcherType = current.getDispatcherType();
@@ -282,6 +294,7 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 		return request.getAttribute(attributeName);
 	}
 
+	@Override
 	public RequestDispatcher getRequestDispatcher(String path) {
 		DispatchTargets currentDispatchTarget = dispatchTargets.peek();
 
@@ -319,10 +332,12 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 		return req.getRequestURI();
 	}
 
+	@Override
 	public HttpSession getSession() {
 		return getSession(true);
 	}
 
+	@Override
 	public HttpSession getSession(boolean create) {
 		HttpSession session = request.getSession(create);
 		if (session != null) {
@@ -346,6 +361,7 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 		this.dispatchTargets.push(toPush);
 	}
 
+	@Override
 	public void removeAttribute(String name) {
 		if (dispatcherAttributes.contains(name)) {
 			DispatchTargets current = dispatchTargets.peek();
@@ -373,6 +389,7 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 		}
 	}
 
+	@Override
 	public void setAttribute(String name, Object value) {
 		boolean added = (request.getAttribute(name) == null);
 
@@ -429,6 +446,7 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 		return new ArrayList<>(getParts0());
 	}
 
+	@Override
 	public AsyncContext startAsync() throws IllegalStateException {
 		EndpointRegistration<?> endpointRegistration = dispatchTargets.peek().getServletRegistration();
 

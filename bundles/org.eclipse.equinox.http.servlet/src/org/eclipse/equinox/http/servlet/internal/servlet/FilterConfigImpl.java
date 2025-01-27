@@ -37,18 +37,22 @@ public class FilterConfigImpl implements FilterConfig {
 		this.servletContext = servletContext;
 	}
 
+	@Override
 	public String getFilterName() {
 		return filterName;
 	}
 
+	@Override
 	public ServletContext getServletContext() {
 		return servletContext;
 	}
 
+	@Override
 	public String getInitParameter(String name) {
 		return initparams.get(name);
 	}
 
+	@Override
 	public Enumeration<String> getInitParameterNames() {
 		return Collections.enumeration(initparams.keySet());
 	}
