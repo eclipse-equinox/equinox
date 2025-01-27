@@ -34,10 +34,12 @@ public class ReverseParticipantOrderNotifyTest extends CoordinatorTest {
 			this.participants = participants;
 		}
 
+		@Override
 		public void ended(Coordination coordination) throws Exception {
 			participants.add(this);
 		}
 
+		@Override
 		public void failed(Coordination coordination) throws Exception {
 			participants.add(this);
 		}
