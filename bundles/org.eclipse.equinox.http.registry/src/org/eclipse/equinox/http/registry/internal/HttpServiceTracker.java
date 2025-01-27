@@ -39,18 +39,21 @@ public class HttpServiceTracker extends ServiceTracker<HttpService, HttpService>
 		this.registry = registry;
 	}
 
+	@Override
 	public void open() {
 		super.open();
 		registration = context.registerService(HttpContextExtensionService.class.getName(),
 				new HttpContextExtensionServiceFactory(), null);
 	}
 
+	@Override
 	public void close() {
 		registration.unregister();
 		registration = null;
 		super.close();
 	}
 
+	@Override
 	public synchronized HttpService addingService(ServiceReference<HttpService> reference) {
 		HttpService httpService = super.addingService(reference);
 		if (httpService == null)
@@ -64,10 +67,12 @@ public class HttpServiceTracker extends ServiceTracker<HttpService, HttpService>
 		return httpService;
 	}
 
+	@Override
 	public void modifiedService(ServiceReference<HttpService> reference, HttpService service) {
 		// ignored
 	}
 
+	@Override
 	public synchronized void removedService(ServiceReference<HttpService> reference, HttpService service) {
 		HttpRegistryManager httpRegistryManager = httpRegistryManagers.remove(reference);
 		if (httpRegistryManager != null) {
@@ -78,11 +83,13 @@ public class HttpServiceTracker extends ServiceTracker<HttpService, HttpService>
 
 	public class HttpContextExtensionServiceFactory implements ServiceFactory<HttpContextExtensionService> {
 
+		@Override
 		public HttpContextExtensionService getService(Bundle bundle,
 				ServiceRegistration<HttpContextExtensionService> r) {
 			return new HttpContextExtensionServiceImpl(bundle);
 		}
 
+		@Override
 		public void ungetService(Bundle bundle, ServiceRegistration<HttpContextExtensionService> r,
 				HttpContextExtensionService service) {
 			// do nothing
@@ -97,6 +104,7 @@ public class HttpServiceTracker extends ServiceTracker<HttpService, HttpService>
 			this.bundle = bundle;
 		}
 
+		@Override
 		public HttpContext getHttpContext(ServiceReference<HttpService> httpServiceReference, String httpContextId) {
 			synchronized (HttpServiceTracker.this) {
 				HttpRegistryManager httpRegistryManager = httpRegistryManagers.get(httpServiceReference);

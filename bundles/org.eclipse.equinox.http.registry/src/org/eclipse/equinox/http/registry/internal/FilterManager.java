@@ -69,6 +69,7 @@ public class FilterManager implements ExtensionPointTracker.Listener {
 		tracker.close();
 	}
 
+	@Override
 	public void added(IExtension extension) {
 		IConfigurationElement[] elements = extension.getConfigurationElements();
 		for (IConfigurationElement serviceSelectorElement : elements) {
@@ -141,6 +142,7 @@ public class FilterManager implements ExtensionPointTracker.Listener {
 		}
 	}
 
+	@Override
 	public void removed(IExtension extension) {
 		IConfigurationElement[] elements = extension.getConfigurationElements();
 		for (IConfigurationElement filterElement : elements) {
@@ -165,18 +167,21 @@ public class FilterManager implements ExtensionPointTracker.Listener {
 			this.loadOnStartup = true;
 		}
 
+		@Override
 		public void init(FilterConfig filterConfig) throws ServletException {
 			this.config = filterConfig;
 			if (loadOnStartup)
 				initializeDelegate();
 		}
 
+		@Override
 		public void doFilter(ServletRequest arg0, ServletResponse arg1, FilterChain chain)
 				throws ServletException, IOException {
 			initializeDelegate();
 			delegate.doFilter(arg0, arg1, chain);
 		}
 
+		@Override
 		public void destroy() {
 			destroyDelegate();
 		}
