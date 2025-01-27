@@ -54,6 +54,7 @@ public class Activator implements BundleActivator {
 	private ServiceTracker<Object, Object> metaTypeProviderTracker;
 	private ServiceTracker<SAXParserFactory, SAXParserFactory> saxParserFactoryTracker;
 
+	@Override
 	public void start(BundleContext context) throws InvalidSyntaxException {
 		LogTracker lsTracker;
 		ServiceTracker<Object, Object> mtpTracker;
@@ -74,6 +75,7 @@ public class Activator implements BundleActivator {
 		spfTracker.open();
 	}
 
+	@Override
 	public void stop(BundleContext context) {
 		ServiceTracker<SAXParserFactory, SAXParserFactory> spfTracker;
 		ServiceTracker<Object, Object> mtpTracker;
@@ -115,6 +117,7 @@ public class Activator implements BundleActivator {
 			this.mtpTracker = metaTypeProviderTracker;
 		}
 
+		@Override
 		public SAXParserFactory addingService(ServiceReference<SAXParserFactory> ref) {
 			SAXParserFactory parserFactory = bundleCtx.getService(ref);
 			if (parserFactory == null)
@@ -158,10 +161,12 @@ public class Activator implements BundleActivator {
 			registerMetaTypeService();
 		}
 
+		@Override
 		public void modifiedService(ServiceReference<SAXParserFactory> ref, SAXParserFactory object) {
 			// Nothing.
 		}
 
+		@Override
 		public void removedService(ServiceReference<SAXParserFactory> ref, SAXParserFactory object) {
 			ServiceRegistration<?> registration = null;
 			MetaTypeServiceImpl service = null;

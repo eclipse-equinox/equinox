@@ -30,5 +30,6 @@ public interface EquinoxObjectClassDefinition extends ObjectClassDefinition, Ext
 	 * Returns {@link Extendable extendable} versions of
 	 * {@link EquinoxAttributeDefinition attribute definitions}.
 	 */
+	@Override
 	EquinoxAttributeDefinition[] getAttributeDefinitions(int filter);
 }

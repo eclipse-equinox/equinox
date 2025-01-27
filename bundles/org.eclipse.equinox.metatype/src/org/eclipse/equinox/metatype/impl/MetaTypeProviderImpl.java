@@ -137,6 +137,7 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 	 * org.osgi.service.metatype.MetaTypeProvider#getObjectClassDefinition(java.lang
 	 * .String, java.lang.String)
 	 */
+	@Override
 	public EquinoxObjectClassDefinition getObjectClassDefinition(String pid, String locale) {
 
 		if (isInvalidLocale(locale)) {
@@ -182,6 +183,7 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 	 * 
 	 * @see org.osgi.service.metatype.MetaTypeProvider#getLocales()
 	 */
+	@Override
 	public synchronized String[] getLocales() {
 		if (_locales != null)
 			return checkForDefault(_locales);

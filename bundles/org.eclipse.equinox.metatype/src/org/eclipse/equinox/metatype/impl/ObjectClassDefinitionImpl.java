@@ -88,6 +88,7 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Eq
 	 * 
 	 * @see org.osgi.service.metatype.ObjectClassDefinition#getName()
 	 */
+	@Override
 	public String getName() {
 		return getLocalized(_name);
 	}
@@ -97,6 +98,7 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Eq
 	 * 
 	 * @see org.osgi.service.metatype.ObjectClassDefinition#getID()
 	 */
+	@Override
 	public String getID() {
 		return _id;
 	}
@@ -106,6 +108,7 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Eq
 	 * 
 	 * @see org.osgi.service.metatype.ObjectClassDefinition#getDescription()
 	 */
+	@Override
 	public String getDescription() {
 		return getLocalized(_description);
 	}
@@ -162,6 +165,7 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Eq
 	 * 
 	 * @see org.osgi.service.metatype.ObjectClassDefinition#getIcon(int)
 	 */
+	@Override
 	public InputStream getIcon(int sizeHint) throws IOException {
 		// The parameter simply represents a requested size. This method should never
 		// return null if an
