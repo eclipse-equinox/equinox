@@ -103,6 +103,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 	 * @param contxt The device manager's bundle context
 	 */
 
+	@Override
 	public void start(BundleContext contxt) throws Exception {
 		this.context = contxt;
 		running = false;
@@ -153,6 +154,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 	 *
 	 * @param event The FrameworkEvent.
 	 */
+	@Override
 	public void frameworkEvent(FrameworkEvent event) {
 		switch (event.getType()) {
 		case FrameworkEvent.STARTED: {
@@ -200,6 +202,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 	 * @param contxt The device manager's bundle context
 	 */
 
+	@Override
 	public void stop(BundleContext contxt) throws Exception {
 		context.removeFrameworkListener(this);
 
@@ -266,6 +269,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 	 * @return The service object to be tracked for the ServiceReference or
 	 *         <code>null</code> if the ServiceReference should not be tracked.
 	 */
+	@Override
 	public Object addingService(ServiceReference reference) {
 		if (Activator.DEBUG) {
 			this.log.debug(reference, "DeviceManager device service registered"); //$NON-NLS-1$
@@ -286,6 +290,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 	 * @param reference Reference to service that has been modified.
 	 * @param service   The service object for the modified service.
 	 */
+	@Override
 	public void modifiedService(ServiceReference reference, Object service) {
 		// do nothing
 	}
@@ -300,6 +305,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 	 * @param reference Reference to service that has been removed.
 	 * @param object    The service object for the removed service.
 	 */
+	@Override
 	public void removedService(ServiceReference reference, Object object) {
 		if (Activator.DEBUG) {
 			log.debug(reference, "DeviceManager device service unregistered"); //$NON-NLS-1$
@@ -332,6 +338,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 	 *
 	 * Attempt to refine all Device services that are not in use by a driver bundle.
 	 */
+	@Override
 	public void run() {
 		while (running) {
 			DeviceTracker device;

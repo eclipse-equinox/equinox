@@ -64,6 +64,7 @@ public class DeviceTracker extends ServiceTracker {
 	 * Close the Device.
 	 */
 
+	@Override
 	public void close() {
 		if (device != null) {
 			if (Activator.DEBUG) {
@@ -92,6 +93,7 @@ public class DeviceTracker extends ServiceTracker {
 	 * @return The service object to be tracked for the ServiceReference or
 	 *         <code>null</code> if the ServiceReference should not be tracked.
 	 */
+	@Override
 	public Object addingService(ServiceReference reference) {
 		if (Activator.DEBUG) {
 			log.debug(reference, this + " adding Device service"); //$NON-NLS-1$
@@ -116,6 +118,7 @@ public class DeviceTracker extends ServiceTracker {
 	 * @param reference Reference to service that has been modified.
 	 * @param service   The service object for the modified service.
 	 */
+	@Override
 	public void modifiedService(ServiceReference reference, Object service) {
 		properties = new Properties(reference);
 	}
@@ -130,6 +133,7 @@ public class DeviceTracker extends ServiceTracker {
 	 * @param reference Reference to service that has been removed.
 	 * @param service   The service object for the removed service.
 	 */
+	@Override
 	public void removedService(ServiceReference reference, Object service) {
 		if (running) {
 			log.warn(reference, DeviceMsg.Device_service_unregistered);
@@ -252,6 +256,7 @@ public class DeviceTracker extends ServiceTracker {
 
 	}
 
+	@Override
 	public String toString() {
 		return "DeviceTracker"; //$NON-NLS-1$
 	}
@@ -299,6 +304,7 @@ public class DeviceTracker extends ServiceTracker {
 		/**
 		 * Override keys to support case-preserving of keys.
 		 */
+		@Override
 		public Enumeration<String> keys() {
 			return (keys.elements());
 		}
@@ -318,6 +324,7 @@ public class DeviceTracker extends ServiceTracker {
 		 * @param key   header name.
 		 * @param value header value.
 		 */
+		@Override
 		public Object put(String key, Object value) {
 			throw new UnsupportedOperationException();
 		}
@@ -327,6 +334,7 @@ public class DeviceTracker extends ServiceTracker {
 		 *
 		 * @param key header name.
 		 */
+		@Override
 		public Object remove(Object key) {
 			throw new UnsupportedOperationException();
 		}

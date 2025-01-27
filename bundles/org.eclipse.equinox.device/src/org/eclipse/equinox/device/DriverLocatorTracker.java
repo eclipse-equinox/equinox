@@ -67,6 +67,7 @@ public class DriverLocatorTracker extends ServiceTracker {
 	 * @return The service object to be tracked for the ServiceReference or
 	 *         <code>null</code> if the ServiceReference should not be tracked.
 	 */
+	@Override
 	public Object addingService(ServiceReference reference) {
 		if (Activator.DEBUG) {
 			log.debug(reference, "DriverLocatorTracker adding service"); //$NON-NLS-1$
@@ -85,6 +86,7 @@ public class DriverLocatorTracker extends ServiceTracker {
 	 * @param reference Reference to service that has been modified.
 	 * @param service   The service object for the modified service.
 	 */
+	@Override
 	public void modifiedService(ServiceReference reference, Object service) {
 		// do nothing
 	}
@@ -99,6 +101,7 @@ public class DriverLocatorTracker extends ServiceTracker {
 	 * @param reference Reference to service that has been removed.
 	 * @param service   The service object for the removed service.
 	 */
+	@Override
 	public void removedService(ServiceReference reference, Object service) {
 		if (Activator.DEBUG) {
 			log.debug(reference, "DriverLocatorTracker removing service"); //$NON-NLS-1$

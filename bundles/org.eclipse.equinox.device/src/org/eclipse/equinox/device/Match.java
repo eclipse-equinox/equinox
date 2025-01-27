@@ -28,10 +28,12 @@ public class Match implements org.osgi.service.device.Match {
 		this.matchValue = matchValue;
 	}
 
+	@Override
 	public ServiceReference getDriver() {
 		return driver;
 	}
 
+	@Override
 	public int getMatchValue() {
 		return matchValue;
 	}
