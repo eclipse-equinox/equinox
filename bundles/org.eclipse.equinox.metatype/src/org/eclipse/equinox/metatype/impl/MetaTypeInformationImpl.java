@@ -55,6 +55,7 @@ public class MetaTypeInformationImpl extends MetaTypeProviderImpl implements Equ
 	 * 
 	 * @see org.osgi.service.metatype.MetaTypeInformation#getPids()
 	 */
+	@Override
 	public String[] getPids() {
 
 		if (_allPidOCDs.isEmpty()) {
@@ -68,6 +69,7 @@ public class MetaTypeInformationImpl extends MetaTypeProviderImpl implements Equ
 	 * 
 	 * @see org.osgi.service.metatype.MetaTypeInformation#getFactoryPids()
 	 */
+	@Override
 	public String[] getFactoryPids() {
 		if (_allFPidOCDs.isEmpty()) {
 			return emptyStringArray;
@@ -80,6 +82,7 @@ public class MetaTypeInformationImpl extends MetaTypeProviderImpl implements Equ
 	 * 
 	 * @see org.osgi.service.metatype.MetaTypeInformation#getBundle()
 	 */
+	@Override
 	public Bundle getBundle() {
 		return this._bundle;
 	}

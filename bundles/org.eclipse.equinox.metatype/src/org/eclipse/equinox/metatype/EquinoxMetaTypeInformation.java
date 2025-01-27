@@ -23,5 +23,6 @@ public interface EquinoxMetaTypeInformation extends MetaTypeInformation {
 	 * Returns {@link Extendable extendable} versions of
 	 * {@link EquinoxObjectClassDefinition object class definitions}.
 	 */
+	@Override
 	EquinoxObjectClassDefinition getObjectClassDefinition(String id, String locale);
 }

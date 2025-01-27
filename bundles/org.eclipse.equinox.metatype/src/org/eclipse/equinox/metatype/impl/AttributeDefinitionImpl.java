@@ -96,6 +96,7 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 	 * 
 	 * @see org.osgi.service.metatype.AttributeDefinition#getName()
 	 */
+	@Override
 	public String getName() {
 		return getLocalized(_name);
 	}
@@ -105,6 +106,7 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 	 * 
 	 * @see org.osgi.service.metatype.AttributeDefinition#getID()
 	 */
+	@Override
 	public String getID() {
 		return _id;
 	}
@@ -114,6 +116,7 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 	 * 
 	 * @see org.osgi.service.metatype.AttributeDefinition#getDescription()
 	 */
+	@Override
 	public String getDescription() {
 		return getLocalized(_description);
 	}
@@ -123,6 +126,7 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 	 * 
 	 * @see org.osgi.service.metatype.AttributeDefinition#getCardinality()
 	 */
+	@Override
 	public int getCardinality() {
 		return _cardinality;
 	}
@@ -132,6 +136,7 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 	 * 
 	 * @see org.osgi.service.metatype.AttributeDefinition#getType()
 	 */
+	@Override
 	public int getType() {
 		return _dataType;
 	}
@@ -148,6 +153,7 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 	 * 
 	 * @see org.osgi.service.metatype.AttributeDefinition#getOptionLabels()
 	 */
+	@Override
 	public String[] getOptionLabels() {
 
 		List<String> curLabels = _labels;
@@ -169,6 +175,7 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 	 * 
 	 * @see org.osgi.service.metatype.AttributeDefinition#getOptionValues()
 	 */
+	@Override
 	public String[] getOptionValues() {
 		List<String> curValues = _values;
 
@@ -219,6 +226,7 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 	 * 
 	 * @see org.osgi.service.metatype.AttributeDefinition#getDefaultValue()
 	 */
+	@Override
 	public String[] getDefaultValue() {
 		return _defaults;
 	}
@@ -265,6 +273,7 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 	 * 
 	 * @see org.osgi.service.metatype.AttributeDefinition#validate(java.lang.String)
 	 */
+	@Override
 	public String validate(String value) {
 		ValueTokenizer vt = new ValueTokenizer(value, logger);
 		return vt.validate(this);

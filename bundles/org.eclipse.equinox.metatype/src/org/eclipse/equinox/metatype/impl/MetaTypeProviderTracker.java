@@ -57,14 +57,17 @@ public class MetaTypeProviderTracker implements EquinoxMetaTypeInformation {
 		return results.toArray(new String[results.size()]);
 	}
 
+	@Override
 	public String[] getPids() {
 		return getPids(false);
 	}
 
+	@Override
 	public String[] getFactoryPids() {
 		return getPids(true);
 	}
 
+	@Override
 	public Bundle getBundle() {
 		return _bundle;
 	}
@@ -83,6 +86,7 @@ public class MetaTypeProviderTracker implements EquinoxMetaTypeInformation {
 		return null;
 	}
 
+	@Override
 	public String[] getLocales() {
 		if (_bundle.getState() != Bundle.ACTIVE)
 			return new String[0]; // return none if not active
@@ -210,23 +214,28 @@ public class MetaTypeProviderTracker implements EquinoxMetaTypeInformation {
 			return result;
 		}
 
+		@Override
 		public EquinoxObjectClassDefinition getObjectClassDefinition(String id, String locale) {
 			final ObjectClassDefinition ocd = provider.getObjectClassDefinition(id, locale);
 			if (ocd == null)
 				return null;
 			return new EquinoxObjectClassDefinition() {
+				@Override
 				public String getName() {
 					return ocd.getName();
 				}
 
+				@Override
 				public String getID() {
 					return ocd.getID();
 				}
 
+				@Override
 				public String getDescription() {
 					return ocd.getDescription();
 				}
 
+				@Override
 				public InputStream getIcon(int size) throws IOException {
 					return ocd.getIcon(size);
 				}
@@ -249,38 +258,47 @@ public class MetaTypeProviderTracker implements EquinoxMetaTypeInformation {
 					Collection<EquinoxAttributeDefinition> result = new ArrayList<>(ads.length);
 					for (final AttributeDefinition ad : ads) {
 						result.add(new EquinoxAttributeDefinition() {
+							@Override
 							public String getName() {
 								return ad.getName();
 							}
 
+							@Override
 							public String getID() {
 								return ad.getID();
 							}
 
+							@Override
 							public String getDescription() {
 								return ad.getDescription();
 							}
 
+							@Override
 							public int getCardinality() {
 								return ad.getCardinality();
 							}
 
+							@Override
 							public int getType() {
 								return ad.getType();
 							}
 
+							@Override
 							public String[] getOptionValues() {
 								return ad.getOptionValues();
 							}
 
+							@Override
 							public String[] getOptionLabels() {
 								return ad.getOptionLabels();
 							}
 
+							@Override
 							public String validate(String value) {
 								return ad.validate(value);
 							}
 
+							@Override
 							public String[] getDefaultValue() {
 								return ad.getDefaultValue();
 							}
@@ -311,6 +329,7 @@ public class MetaTypeProviderTracker implements EquinoxMetaTypeInformation {
 			};
 		}
 
+		@Override
 		public String[] getLocales() {
 			return provider.getLocales();
 		}

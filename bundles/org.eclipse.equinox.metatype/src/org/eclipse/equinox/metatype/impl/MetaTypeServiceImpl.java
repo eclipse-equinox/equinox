@@ -129,6 +129,7 @@ public class MetaTypeServiceImpl implements EquinoxMetaTypeService, SynchronousB
 	 * @see org.osgi.framework.BundleListener#bundleChanged(org.osgi.framework.
 	 * BundleEvent)
 	 */
+	@Override
 	public void bundleChanged(BundleEvent event) {
 
 		int type = event.getType();

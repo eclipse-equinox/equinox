@@ -27,5 +27,6 @@ public interface EquinoxMetaTypeService extends MetaTypeService {
 	 * extendable} versions of {@link EquinoxObjectClassDefinition object class
 	 * definitions}.
 	 */
+	@Override
 	EquinoxMetaTypeInformation getMetaTypeInformation(Bundle bundle);
 }
