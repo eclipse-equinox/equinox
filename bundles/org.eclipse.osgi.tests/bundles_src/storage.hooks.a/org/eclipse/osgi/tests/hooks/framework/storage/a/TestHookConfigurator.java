@@ -180,6 +180,7 @@ public class TestHookConfigurator implements HookConfigurator {
 	public static volatile boolean handleContentConnection;
 	public static volatile boolean returnNullStorageHook;
 
+	@Override
 	public void addHooks(HookRegistry hookRegistry) {
 		hookRegistry.addStorageHookFactory(new TestStorageHookFactory());
 		hookRegistry.addActivatorHookFactory(() -> new BundleActivator() {

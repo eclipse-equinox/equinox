@@ -67,11 +67,13 @@ public class MovableConfigurationAreaTest extends TestCase {
 		final IPath sourcePath = initialization.getConfigurationPath();
 		final IPath destinationPath = FileSystemHelper.getRandomLocation(FileSystemHelper.getTempDir());
 		suite.addTest(new TestCase("testMove") {
+			@Override
 			public void runBare() throws Throwable {
 				doMove(sourcePath, destinationPath);
 			}
 		});
 		suite.addTest(new TestCase("testTakeSnapshot") {
+			@Override
 			public void runBare() throws Throwable {
 				doTakeSnapshot(destinationPath);
 			}

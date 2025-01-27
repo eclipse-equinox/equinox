@@ -807,6 +807,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 
 	class TestHandler extends AbstractURLStreamHandlerService {
 
+		@Override
 		public URLConnection openConnection(URL u) throws IOException {
 			throw new IOException();
 		}
@@ -1145,19 +1146,23 @@ public class SystemBundleTests extends AbstractBundleTests {
 		BundleContext systemContext = equinox.getBundleContext();
 
 		systemContext.registerService(ResolverHookFactory.class, triggers -> new ResolverHook() {
+			@Override
 			public void filterResolvable(Collection candidates) {
 				// nothing
 			}
 
+			@Override
 			public void filterSingletonCollisions(BundleCapability singleton, Collection collisionCandidates) {
 				// resolve all singletons
 				collisionCandidates.clear();
 			}
 
+			@Override
 			public void filterMatches(BundleRequirement requirement, Collection candidates) {
 				// nothing
 			}
 
+			@Override
 			public void end() {
 				// nothing
 			}
@@ -3275,6 +3280,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		if (SecurityManagerTests.isSecurityManagerAllowed()) {
 			unsetSecurityManager = true;
 			System.setSecurityManager(new SecurityManager() {
+				@Override
 				public void checkPermission(Permission perm) {
 					// do nothing;
 				}

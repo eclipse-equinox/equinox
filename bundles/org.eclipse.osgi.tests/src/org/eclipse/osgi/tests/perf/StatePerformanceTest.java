@@ -39,6 +39,7 @@ public class StatePerformanceTest extends BasePerformanceTest {
 	public void testCreation() throws Exception {
 		final int stateSize = 5000;
 		new PerformanceTestRunner() {
+			@Override
 			protected void test() {
 				buildRandomState(stateSize);
 			}
@@ -48,6 +49,7 @@ public class StatePerformanceTest extends BasePerformanceTest {
 	private void testResolution(int stateSize, int repetitions, String degradation) throws Exception {
 		final State originalState = buildRandomState(stateSize);
 		PerformanceTestRunner runner = new PerformanceTestRunner() {
+			@Override
 			protected void test() {
 				originalState.resolve(false);
 			}
@@ -83,6 +85,7 @@ public class StatePerformanceTest extends BasePerformanceTest {
 		int stateSize = 5000;
 		final State originalState = buildRandomState(stateSize);
 		PerformanceTestRunner runner = new PerformanceTestRunner() {
+			@Override
 			protected void test() throws IOException {
 				storeAndRetrieve(originalState);
 			}

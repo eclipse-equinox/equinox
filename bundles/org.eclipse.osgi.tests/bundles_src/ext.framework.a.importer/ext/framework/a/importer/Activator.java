@@ -25,6 +25,7 @@ import org.osgi.framework.BundleContext;
 
 public class Activator implements BundleActivator {
 
+	@Override
 	public void start(BundleContext context) throws Exception {
 		AbstractBundleTests.simpleResults.addEvent(new FrameworkExtTest().testIt("success")); //$NON-NLS-1$
 		AbstractBundleTests.simpleResults
@@ -38,6 +39,7 @@ public class Activator implements BundleActivator {
 		}
 	}
 
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		ExtensionBundleTests.events.add(context.getBundle().getSymbolicName() + " STOPPED");
 	}

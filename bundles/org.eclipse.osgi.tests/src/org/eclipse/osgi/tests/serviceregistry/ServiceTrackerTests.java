@@ -45,15 +45,18 @@ public class ServiceTrackerTests extends AbstractBundleTests {
 		try {
 			final boolean[] results = new boolean[] { false, false, false };
 			ServiceTrackerCustomizer testCustomizer = new ServiceTrackerCustomizer() {
+				@Override
 				public Object addingService(ServiceReference reference) {
 					results[0] = true;
 					return reference;
 				}
 
+				@Override
 				public void modifiedService(ServiceReference reference, Object service) {
 					results[1] = true;
 				}
 
+				@Override
 				public void removedService(ServiceReference reference, Object service) {
 					results[2] = true;
 				}
@@ -122,15 +125,18 @@ public class ServiceTrackerTests extends AbstractBundleTests {
 		try {
 			final boolean[] results = new boolean[] { false, false, false };
 			ServiceTrackerCustomizer testCustomizer = new ServiceTrackerCustomizer() {
+				@Override
 				public Object addingService(ServiceReference reference) {
 					results[0] = true;
 					return reference;
 				}
 
+				@Override
 				public void modifiedService(ServiceReference reference, Object service) {
 					results[1] = true;
 				}
 
+				@Override
 				public void removedService(ServiceReference reference, Object service) {
 					results[2] = true;
 				}
@@ -199,15 +205,18 @@ public class ServiceTrackerTests extends AbstractBundleTests {
 		try {
 			final boolean[] results = new boolean[] { false, false, false };
 			ServiceTrackerCustomizer testCustomizer = new ServiceTrackerCustomizer() {
+				@Override
 				public Object addingService(ServiceReference reference) {
 					results[0] = true;
 					return reference;
 				}
 
+				@Override
 				public void modifiedService(ServiceReference reference, Object service) {
 					results[1] = true;
 				}
 
+				@Override
 				public void removedService(ServiceReference reference, Object service) {
 					results[2] = true;
 				}

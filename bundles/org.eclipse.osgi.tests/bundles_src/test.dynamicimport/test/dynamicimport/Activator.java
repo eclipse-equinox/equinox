@@ -18,6 +18,7 @@ import org.osgi.framework.BundleContext;
 
 public class Activator implements BundleActivator {
 
+	@Override
 	public void start(BundleContext context) throws Exception {
 		try {
 			Class.forName("org.osgi.framework.hooks.resolver.ResolverHook");
@@ -27,6 +28,7 @@ public class Activator implements BundleActivator {
 		}
 	}
 
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		// nothing
 	}

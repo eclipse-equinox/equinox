@@ -19,10 +19,12 @@ import test.bug259903.b.Service3;
 
 public class Activator implements BundleActivator {
 
+	@Override
 	public void start(BundleContext context) throws Exception {
 		// nothing
 	}
 
+	@Override
 	public void stop(BundleContext context) throws Exception {
 
 		new Service3() {

@@ -1982,18 +1982,22 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 	public void testBug348805() throws BundleException {
 		final boolean[] endCalled = { false };
 		ResolverHookFactory error = triggers -> new ResolverHook() {
+			@Override
 			public void filterSingletonCollisions(BundleCapability singleton, Collection collisionCandidates) {
 				// Nothing
 			}
 
+			@Override
 			public void filterResolvable(Collection candidates) {
 				throw new RuntimeException("Error");
 			}
 
+			@Override
 			public void filterMatches(BundleRequirement requirement, Collection candidates) {
 				// Nothing
 			}
 
+			@Override
 			public void end() {
 				endCalled[0] = true;
 			}
@@ -2013,18 +2017,22 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 	@Test
 	public void testBug348806() throws BundleException {
 		ResolverHookFactory error = triggers -> new ResolverHook() {
+			@Override
 			public void filterSingletonCollisions(BundleCapability singleton, Collection collisionCandidates) {
 				// Nothing
 			}
 
+			@Override
 			public void filterResolvable(Collection candidates) {
 				// Nothing
 			}
 
+			@Override
 			public void filterMatches(BundleRequirement requirement, Collection candidates) {
 				// Nothing
 			}
 
+			@Override
 			public void end() {
 				throw new RuntimeException("Error");
 			}
@@ -2044,18 +2052,22 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 	public void testBug370258_beginException() throws BundleException {
 		final boolean[] endCalled = { false };
 		ResolverHookFactory endHook = triggers -> new ResolverHook() {
+			@Override
 			public void filterSingletonCollisions(BundleCapability singleton, Collection collisionCandidates) {
 				// Nothing
 			}
 
+			@Override
 			public void filterResolvable(Collection candidates) {
 				throw new RuntimeException("Error");
 			}
 
+			@Override
 			public void filterMatches(BundleRequirement requirement, Collection candidates) {
 				// Nothing
 			}
 
+			@Override
 			public void end() {
 				endCalled[0] = true;
 			}
@@ -2083,35 +2095,43 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 	public void testBug370258_endException() throws BundleException {
 		final boolean[] endCalled = { false };
 		ResolverHookFactory endHook = triggers -> new ResolverHook() {
+			@Override
 			public void filterSingletonCollisions(BundleCapability singleton, Collection collisionCandidates) {
 				// Nothing
 			}
 
+			@Override
 			public void filterResolvable(Collection candidates) {
 				throw new RuntimeException("Error");
 			}
 
+			@Override
 			public void filterMatches(BundleRequirement requirement, Collection candidates) {
 				// Nothing
 			}
 
+			@Override
 			public void end() {
 				endCalled[0] = true;
 			}
 		};
 		ResolverHookFactory error = triggers -> new ResolverHook() {
+			@Override
 			public void filterSingletonCollisions(BundleCapability singleton, Collection collisionCandidates) {
 				// Nothing
 			}
 
+			@Override
 			public void filterResolvable(Collection candidates) {
 				// Nothing
 			}
 
+			@Override
 			public void filterMatches(BundleRequirement requirement, Collection candidates) {
 				// Nothing
 			}
 
+			@Override
 			public void end() {
 				throw new RuntimeException("Error");
 			}

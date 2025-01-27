@@ -1491,34 +1491,42 @@ public class DebugOptionsTestCase {
 			this.wrapped = wrapped;
 		}
 
+		@Override
 		public void trace(String option, String message) {
 			wrapped.trace(option, message);
 		}
 
+		@Override
 		public void trace(String option, String message, Throwable error) {
 			wrapped.trace(option, message, error);
 		}
 
+		@Override
 		public void traceDumpStack(String option) {
 			wrapped.traceDumpStack(option);
 		}
 
+		@Override
 		public void traceEntry(String option) {
 			wrapped.traceEntry(option);
 		}
 
+		@Override
 		public void traceEntry(String option, Object methodArgument) {
 			wrapped.traceEntry(option, methodArgument);
 		}
 
+		@Override
 		public void traceEntry(String option, Object[] methodArguments) {
 			wrapped.traceEntry(option, methodArguments);
 		}
 
+		@Override
 		public void traceExit(String option) {
 			wrapped.traceExit(option);
 		}
 
+		@Override
 		public void traceExit(String option, Object result) {
 			wrapped.traceExit(option, result);
 		}
@@ -1529,6 +1537,7 @@ public class DebugOptionsTestCase {
 		String incorrectValue;
 		Map checkValues;
 
+		@Override
 		public void optionsChanged(DebugOptions options) {
 			called = true;
 			if (checkValues == null)

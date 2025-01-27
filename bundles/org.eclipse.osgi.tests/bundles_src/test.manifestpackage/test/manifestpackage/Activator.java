@@ -24,6 +24,7 @@ import test.manifestpackage.f.F;
 
 public class Activator implements BundleActivator {
 
+	@Override
 	public void start(BundleContext context) throws Exception {
 		Package thisPkg = getClass().getPackage();
 		assertNotNull("thisPkg", thisPkg);
@@ -74,6 +75,7 @@ public class Activator implements BundleActivator {
 			throw new RuntimeException(msg);
 	}
 
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		// nothing
 	}

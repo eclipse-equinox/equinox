@@ -171,6 +171,7 @@ public class ServiceExceptionTests extends AbstractBundleTests {
 			this.serviceOrThrowable = serviceOrThrowable;
 		}
 
+		@Override
 		public Object getService(Bundle bundle, ServiceRegistration registration) {
 			if (serviceOrThrowable instanceof RuntimeException)
 				throw (RuntimeException) serviceOrThrowable;
@@ -179,6 +180,7 @@ public class ServiceExceptionTests extends AbstractBundleTests {
 			return serviceOrThrowable;
 		}
 
+		@Override
 		public synchronized void ungetService(Bundle bundle, ServiceRegistration registration, Object service) {
 			try {
 				if (serviceOrThrowable instanceof RuntimeException)
@@ -207,6 +209,7 @@ public class ServiceExceptionTests extends AbstractBundleTests {
 			this.exceptionType = exceptionType;
 		}
 
+		@Override
 		public void frameworkEvent(FrameworkEvent event) {
 			if (event.getBundle() != registrationBundle)
 				return;

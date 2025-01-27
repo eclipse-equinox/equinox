@@ -38,44 +38,54 @@ public class KeyStoreTrustEngineTest extends TestCase {
 	private static TestCase[] s_tests = {
 			/* findTrustAnchor tests */
 			new KeyStoreTrustEngineTest("findTrustAnchor positive test: self signed trusted", "ca1_root") { //$NON-NLS-1$ //$NON-NLS-2$
+				@Override
 				public void runTest() {
 					testFindTrustAnchor0();
 				}
 			}, new KeyStoreTrustEngineTest("findTrustAnchor positive test: chain with root trusted", "ca1_root") { //$NON-NLS-1$ //$NON-NLS-2$
+				@Override
 				public void runTest() {
 					testFindTrustAnchor1();
 				}
 			}, new KeyStoreTrustEngineTest("findTrustAnchor positive test: chain with intermediate trusted", "ca1_ou") { //$NON-NLS-1$ //$NON-NLS-2$
+				@Override
 				public void runTest() {
 					testFindTrustAnchor2();
 				}
 			}, new KeyStoreTrustEngineTest("findTrustAnchor positive test: chain with leaf trusted", "ca1_leafb") { //$NON-NLS-1$ //$NON-NLS-2$
+				@Override
 				public void runTest() {
 					testFindTrustAnchor3();
 				}
 			}, new KeyStoreTrustEngineTest("findTrustAnchor negative test: untrusted self signed") { //$NON-NLS-1$
+				@Override
 				public void runTest() {
 					testFindTrustAnchor4();
 				}
 			}, new KeyStoreTrustEngineTest("findTrustAnchor negative test: untrusted chain") { //$NON-NLS-1$
+				@Override
 				public void runTest() {
 					testFindTrustAnchor5();
 				}
 			}, new KeyStoreTrustEngineTest("findTrustAnchor negative test: invalid chain") { //$NON-NLS-1$
+				@Override
 				public void runTest() {
 					testFindTrustAnchor6();
 				}
 			}, new KeyStoreTrustEngineTest("findTrustAnchor negative test: incomplete-able chain") { //$NON-NLS-1$
+				@Override
 				public void runTest() {
 					testFindTrustAnchor7();
 				}
 			}, new KeyStoreTrustEngineTest("findTrustAnchor negative test: null chain") { //$NON-NLS-1$
+				@Override
 				public void runTest() {
 					testFindTrustAnchor8();
 				}
 			},
 			/* addTrustAnchor tests */
 			new KeyStoreTrustEngineTest("addTrustAnchor positive test: add with alias") { //$NON-NLS-1$
+				@Override
 				public void runTest() {
 					testAddTrustAnchor0();
 				}
@@ -85,60 +95,73 @@ public class KeyStoreTrustEngineTest extends TestCase {
 				 * , null) { public void runTest() { testAddTrustAnchor1(); } }
 				 */
 			new KeyStoreTrustEngineTest("addTrustAnchor negative test: null cert specified") { //$NON-NLS-1$
+				@Override
 				public void runTest() {
 					testAddTrustAnchor2();
 				}
 			}, new KeyStoreTrustEngineTest("addTrustAnchor negative test: existing cert specified", "ca1_root") { //$NON-NLS-1$ //$NON-NLS-2$
+				@Override
 				public void runTest() {
 					testAddTrustAnchor3();
 				}
 			}, new KeyStoreTrustEngineTest("addTrustAnchor negative test: existing alias specified", "ca1_root") { //$NON-NLS-1$ //$NON-NLS-2$
+				@Override
 				public void runTest() {
 					testAddTrustAnchor4();
 				}
 			}
 			/* removeTrustAnchor tests */
 			, new KeyStoreTrustEngineTest("removeTrustAnchor positive test: remove by alias", "ca1_root") { //$NON-NLS-1$ //$NON-NLS-2$
+				@Override
 				public void runTest() {
 					testRemoveTrustAnchor0();
 				}
 			}, new KeyStoreTrustEngineTest("removeTrustAnchor positive test: remove by cert", "ca1_root") { //$NON-NLS-1$ //$NON-NLS-2$
+				@Override
 				public void runTest() {
 					testRemoveTrustAnchor1();
 				}
 			}, new KeyStoreTrustEngineTest("removeTrustAnchor negative test: cert not found") { //$NON-NLS-1$
+				@Override
 				public void runTest() {
 					testRemoveTrustAnchor2();
 				}
 			}, new KeyStoreTrustEngineTest("removeTrustAnchor negative test: by alias not found") { //$NON-NLS-1$
+				@Override
 				public void runTest() {
 					testRemoveTrustAnchor3();
 				}
 			}, new KeyStoreTrustEngineTest("removeTrustAnchor negative test: remove by null alias") { //$NON-NLS-1$
+				@Override
 				public void runTest() {
 					testRemoveTrustAnchor4();
 				}
 			}, new KeyStoreTrustEngineTest("removeTrustAnchor negative test: remove by null certificate") { //$NON-NLS-1$
+				@Override
 				public void runTest() {
 					testRemoveTrustAnchor5();
 				}
 			},
 			/* getTrustAnchor tests */
 			new KeyStoreTrustEngineTest("getTrustAnchor positive test: get by alias", "ca1_root") { //$NON-NLS-1$ //$NON-NLS-2$
+				@Override
 				public void runTest() {
 					testGetTrustAnchor0();
 				}
 			}, new KeyStoreTrustEngineTest("getTrustAnchor negative test: get by null alias") { //$NON-NLS-1$
+				@Override
 				public void runTest() {
 					testGetTrustAnchor1();
 				}
 			}, new KeyStoreTrustEngineTest("getTrustAnchor negative test: does not exist") { //$NON-NLS-1$
+				@Override
 				public void runTest() {
 					testGetTrustAnchor2();
 				}
 			},
 			/* getAliases tests */
 			new KeyStoreTrustEngineTest("getAliases positive test: get the alias list", "ca1_root", "ca2_root") { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				@Override
 				public void runTest() {
 					testGetAliases0();
 				}
@@ -177,6 +200,7 @@ public class KeyStoreTrustEngineTest extends TestCase {
 		this.aliases = aliases;
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		if (supportStore == null) {
 			fail("Could not open keystore with test certificates!"); //$NON-NLS-1$
@@ -213,6 +237,7 @@ public class KeyStoreTrustEngineTest extends TestCase {
 		}
 	}
 
+	@Override
 	protected void tearDown() {
 		engine = null;
 		testStore = null;

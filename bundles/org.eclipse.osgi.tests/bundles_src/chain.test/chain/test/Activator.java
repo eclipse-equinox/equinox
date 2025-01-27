@@ -18,6 +18,7 @@ import org.osgi.framework.*;
 
 public class Activator implements BundleActivator, SynchronousBundleListener {
 
+	@Override
 	public void start(BundleContext context) throws Exception {
 		if (context.getProperty("test.bug300692") == null)
 			return;
@@ -29,10 +30,12 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 		context.removeBundleListener(this);
 	}
 
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		// Nothing
 	}
 
+	@Override
 	public void bundleChanged(BundleEvent event) {
 		if (event.getType() != BundleEvent.LAZY_ACTIVATION)
 			return;

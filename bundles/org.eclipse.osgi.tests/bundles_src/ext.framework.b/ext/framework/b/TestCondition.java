@@ -73,18 +73,22 @@ public class TestCondition implements Condition {
 		}
 	}
 
+	@Override
 	public boolean isMutable() {
 		return curMutable;
 	}
 
+	@Override
 	public boolean isPostponed() {
 		return curPostponed;
 	}
 
+	@Override
 	public boolean isSatisfied() {
 		return curSatisfied;
 	}
 
+	@Override
 	public boolean isSatisfied(Condition[] conditions, Dictionary context) {
 		if (!isPostponed())
 			throw new IllegalStateException("Should not call isSatisfied(Condition[] conditions, Dictionary context)"); //$NON-NLS-1$

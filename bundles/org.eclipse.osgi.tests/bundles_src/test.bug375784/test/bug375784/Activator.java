@@ -23,6 +23,7 @@ import org.osgi.framework.BundleContext;
 
 public class Activator implements BundleActivator {
 
+	@Override
 	public void start(BundleContext context) throws Exception {
 		final ClassLoader parent = getClass().getClassLoader();
 		// create a custom class loader that uses a bundle's class loader as the parent
@@ -102,6 +103,7 @@ public class Activator implements BundleActivator {
 		return classbytes;
 	}
 
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		// Nothing
 	}

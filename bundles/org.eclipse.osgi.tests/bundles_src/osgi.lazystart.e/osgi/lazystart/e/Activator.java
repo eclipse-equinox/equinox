@@ -19,10 +19,12 @@ import osgi.lazystart.d.DTest;
 
 public class Activator implements BundleActivator {
 
+	@Override
 	public void start(BundleContext context) throws Exception {
 		System.out.println(new DTest());
 	}
 
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		// nothing
 	}

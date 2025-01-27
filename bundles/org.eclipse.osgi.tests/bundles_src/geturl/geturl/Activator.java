@@ -23,6 +23,7 @@ import org.osgi.framework.BundleContext;
 
 public class Activator implements BundleActivator {
 
+	@Override
 	public void start(BundleContext context) throws Exception {
 		final URL url = (URL) System.getProperties().get("test.url");
 		final String urlSpec = (String) System.getProperties().get("test.url.spec");
@@ -52,6 +53,7 @@ public class Activator implements BundleActivator {
 		}, props);
 	}
 
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		// TODO Auto-generated method stub
 

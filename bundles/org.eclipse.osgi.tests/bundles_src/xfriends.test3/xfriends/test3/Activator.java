@@ -19,6 +19,7 @@ import org.osgi.framework.BundleContext;
 
 public class Activator implements BundleActivator {
 
+	@Override
 	public void start(BundleContext context) throws Exception {
 		try {
 			AbstractBundleTests.simpleResults
@@ -33,6 +34,7 @@ public class Activator implements BundleActivator {
 		}
 	}
 
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		// nothing
 	}

@@ -23,6 +23,7 @@ public class TestHookConfigurator1 implements HookConfigurator {
 
 	public static volatile List<String> events;
 
+	@Override
 	public void addHooks(HookRegistry hookRegistry) {
 		hookRegistry.addActivatorHookFactory(() -> new BundleActivator() {
 			@Override

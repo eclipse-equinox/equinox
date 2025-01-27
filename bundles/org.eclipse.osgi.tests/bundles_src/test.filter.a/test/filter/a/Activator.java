@@ -20,6 +20,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 public class Activator implements BundleActivator {
 
+	@Override
 	public void start(BundleContext context) throws Exception {
 		final boolean[] serviceChanged = { false };
 		ServiceListener listener = event -> serviceChanged[0] = true;
@@ -29,14 +30,17 @@ public class Activator implements BundleActivator {
 				FrameworkUtil.createFilter("(&(objectClass=java.lang.String)(test=*))"),
 				new ServiceTrackerCustomizer() {
 
+					@Override
 					public Object addingService(ServiceReference reference) {
 						return reference;
 					}
 
+					@Override
 					public void modifiedService(ServiceReference reference, Object service) {
 						modifiedService[0] = true;
 					}
 
+					@Override
 					public void removedService(ServiceReference reference, Object service) {
 						// TODO Auto-generated method stub
 
@@ -55,6 +59,7 @@ public class Activator implements BundleActivator {
 			throw new Exception("did not call tracker customer");
 	}
 
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		// nothing; framework will clean up our listeners
 	}

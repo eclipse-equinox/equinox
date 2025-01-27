@@ -119,6 +119,7 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 	@Test
 	public void testBadListener() throws Exception {
 		LogListener listener = new LogListener() {
+			@Override
 			public synchronized void logged(LogEntry entry) {
 				notifyAll();
 				throw new RuntimeException("Expected error for testBadListener."); //$NON-NLS-1$

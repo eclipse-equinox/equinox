@@ -89,6 +89,7 @@ public class OSGiAPICertificateTest extends BaseSecurityTest {
 		super(name);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		registerEclipseTrustEngine();
 	}

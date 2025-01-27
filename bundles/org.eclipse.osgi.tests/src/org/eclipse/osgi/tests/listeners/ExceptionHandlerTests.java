@@ -30,6 +30,7 @@ public class ExceptionHandlerTests {
 	class FrameworkEventListenerWithResult implements FrameworkListener {
 		FrameworkEvent event = null;
 
+		@Override
 		public synchronized void frameworkEvent(FrameworkEvent newEvent) {
 			if (newEvent.getType() != FrameworkEvent.ERROR)
 				return;

@@ -50,6 +50,7 @@ public class RelaunchApp implements IApplication {
 		ApplicationHandle thisAppHandle = OSGiTestsActivator.getContext().getService(thisAppRef);
 
 		new Thread("launcher") { //$NON-NLS-1$
+			@Override
 			public void run() {
 				// Wait for this application to exit
 				try {

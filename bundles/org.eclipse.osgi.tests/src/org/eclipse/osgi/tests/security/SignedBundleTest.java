@@ -73,6 +73,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 		return suite;
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		registerEclipseTrustEngine();
 		/*

@@ -38,6 +38,7 @@ public class ResolverHookTests extends AbstractResourceTest {
 		final boolean called[] = { false };
 		ResolverHookFactory resolverHookFactory = triggers -> new ResolverHook() {
 
+			@Override
 			public void filterSingletonCollisions(BundleCapability singleton, Collection collisionCandidates) {
 				if (error[0] != null)
 					return;
@@ -60,14 +61,17 @@ public class ResolverHookTests extends AbstractResourceTest {
 				}
 			}
 
+			@Override
 			public void filterResolvable(Collection candidates) {
 				// nothing
 			}
 
+			@Override
 			public void filterMatches(BundleRequirement requirement, Collection candidates) {
 				// nothing
 			}
 
+			@Override
 			public void end() {
 				// nothing
 			}

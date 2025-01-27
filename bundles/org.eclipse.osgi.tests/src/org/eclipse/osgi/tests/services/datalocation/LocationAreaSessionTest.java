@@ -43,6 +43,7 @@ public class LocationAreaSessionTest extends TestCase {
 
 		// first lock with java.nio
 		suite.addTest(new TestCase("testLockJavaNIO") {
+			@Override
 			public void runBare() throws Throwable {
 				doLock(testLocationLockDir, JAVA_NIO, false, true);
 			}
@@ -63,6 +64,7 @@ public class LocationAreaSessionTest extends TestCase {
 
 		// now release lock
 		suite.addTest(new TestCase("testReleaseJavaNIO") {
+			@Override
 			public void runBare() throws Throwable {
 				doRelease();
 			}
@@ -82,6 +84,7 @@ public class LocationAreaSessionTest extends TestCase {
 
 		// now test with java.io
 		suite.addTest(new TestCase("testLockJavaIO") {
+			@Override
 			public void runBare() throws Throwable {
 				// Note that java.io locking only seems to work reliably on windows
 				if (!Constants.OS_WIN32.equals(System.getProperty("osgi.os")))
@@ -104,6 +107,7 @@ public class LocationAreaSessionTest extends TestCase {
 
 		// now release lock
 		suite.addTest(new TestCase("testReleaseJavaIO") {
+			@Override
 			public void runBare() throws Throwable {
 				if (!Constants.OS_WIN32.equals(System.getProperty("osgi.os")))
 					return;

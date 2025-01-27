@@ -18,6 +18,7 @@ import org.osgi.framework.*;
 
 public class Activator implements BundleActivator {
 
+	@Override
 	public void start(BundleContext context) throws Exception {
 		ServiceReference[] refs = context.getServiceReferences(Runnable.class.getName(), "(test=bug306181)");
 		String error = null;
@@ -32,6 +33,7 @@ public class Activator implements BundleActivator {
 		}
 	}
 
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		// TODO Auto-generated method stub
 

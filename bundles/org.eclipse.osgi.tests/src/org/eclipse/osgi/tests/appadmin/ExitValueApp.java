@@ -31,6 +31,7 @@ public class ExitValueApp implements IApplication, Runnable {
 	private IApplicationContext appContext;
 	final Object guardObj = new Object();
 
+	@Override
 	public synchronized Object start(IApplicationContext context) {
 		appContext = context;
 		context.applicationRunning();
@@ -61,6 +62,7 @@ public class ExitValueApp implements IApplication, Runnable {
 		return returnNull ? null : exitValue;
 	}
 
+	@Override
 	public synchronized void stop() {
 		active = false;
 		notifyAll();
@@ -89,10 +91,12 @@ public class ExitValueApp implements IApplication, Runnable {
 				result = "failed";
 				app = new IApplication() {
 
+					@Override
 					public void stop() {
 						// nothing
 					}
 
+					@Override
 					public Object start(IApplicationContext context) throws Exception {
 						return null;
 					}
