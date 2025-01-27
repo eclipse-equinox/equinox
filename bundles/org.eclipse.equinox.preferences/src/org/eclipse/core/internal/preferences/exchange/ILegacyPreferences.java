@@ -19,6 +19,7 @@ package org.eclipse.core.internal.preferences.exchange;
  *
  * @deprecated
  */
+@Deprecated
 public interface ILegacyPreferences {
 	/**
 	 * The method tries to initialize the preferences using the legacy
