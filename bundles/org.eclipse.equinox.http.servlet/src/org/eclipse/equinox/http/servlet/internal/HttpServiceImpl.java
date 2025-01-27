@@ -51,6 +51,7 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 	/**
 	 * @see HttpService#createDefaultHttpContext()
 	 */
+	@Override
 	public synchronized HttpContext createDefaultHttpContext() {
 		checkShutdown();
 
@@ -90,6 +91,7 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 	/**
 	 * @see HttpService#registerResources(String, String, HttpContext)
 	 */
+	@Override
 	public synchronized void registerResources(final String alias, final String name, HttpContext httpContext) {
 
 		checkShutdown();
@@ -108,6 +110,7 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 	/**
 	 * @see HttpService#registerServlet(String, Servlet, Dictionary, HttpContext)
 	 */
+	@Override
 	public synchronized void registerServlet(final String alias, final Servlet servlet,
 			final Dictionary<?, ?> initparams, HttpContext httpContext) {
 
@@ -130,6 +133,7 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 	/**
 	 * @see HttpService#unregister(String)
 	 */
+	@Override
 	public synchronized void unregister(String alias) {
 		checkShutdown();
 

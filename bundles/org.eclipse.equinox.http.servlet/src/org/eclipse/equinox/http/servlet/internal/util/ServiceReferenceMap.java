@@ -41,7 +41,7 @@ public class ServiceReferenceMap extends AbstractMap<String, Object> {
 
 	private Set<java.util.Map.Entry<String, Object>> entries;
 
-	private class ReferenceEntry implements Map.Entry<String, Object> {
+	private static class ReferenceEntry implements Map.Entry<String, Object> {
 
 		ReferenceEntry(String key, Object value) {
 			this.key = key;

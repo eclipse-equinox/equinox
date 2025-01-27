@@ -51,6 +51,7 @@ public class ResourceServlet extends HttpServlet {
 		this.acc = acc;
 	}
 
+	@Override
 	public void service(HttpServletRequest req, final HttpServletResponse resp) throws IOException {
 		String method = req.getMethod();
 		if (method.equals("GET") || method.equals("POST") || method.equals("HEAD")) { //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$

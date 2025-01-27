@@ -30,11 +30,13 @@ public class HttpServiceFactory implements ServiceFactory<HttpService> {
 		this.httpServiceRuntime = httpServiceRuntime;
 	}
 
+	@Override
 	public HttpService getService(Bundle bundle, ServiceRegistration<HttpService> serviceRegistration) {
 
 		return new HttpServiceImpl(bundle, httpServiceRuntime);
 	}
 
+	@Override
 	public void ungetService(Bundle bundle, ServiceRegistration<HttpService> serviceRegistration,
 			HttpService httpService) {
 

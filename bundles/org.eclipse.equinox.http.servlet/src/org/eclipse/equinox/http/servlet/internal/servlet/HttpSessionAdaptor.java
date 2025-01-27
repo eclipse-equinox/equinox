@@ -52,14 +52,17 @@ public class HttpSessionAdaptor implements HttpSession, Serializable {
 		return session;
 	}
 
+	@Override
 	public ServletContext getServletContext() {
 		return servletContext;
 	}
 
+	@Override
 	public Object getAttribute(String arg0) {
 		return session.getAttribute(attributePrefix.concat(arg0));
 	}
 
+	@Override
 	public Enumeration<String> getAttributeNames() {
 		return Collections.enumeration(getAttributeNames0());
 	}
@@ -77,16 +80,21 @@ public class HttpSessionAdaptor implements HttpSession, Serializable {
 	}
 
 	/** @deprecated */
+	@Deprecated
+	@Override
 	public Object getValue(String arg0) {
 		return getAttribute(arg0);
 	}
 
 	/** @deprecated */
+	@Deprecated
+	@Override
 	public String[] getValueNames() {
 		Collection<String> result = getAttributeNames0();
 		return result.toArray(new String[0]);
 	}
 
+	@Override
 	public void invalidate() {
 		HttpSessionEvent httpSessionEvent = new HttpSessionEvent(this);
 
@@ -142,10 +150,13 @@ public class HttpSessionAdaptor implements HttpSession, Serializable {
 	}
 
 	/** @deprecated */
+	@Deprecated
+	@Override
 	public void putValue(String arg0, Object arg1) {
 		setAttribute(arg0, arg1);
 	}
 
+	@Override
 	public void removeAttribute(String arg0) {
 		String newName = attributePrefix.concat(arg0);
 
@@ -172,10 +183,13 @@ public class HttpSessionAdaptor implements HttpSession, Serializable {
 	}
 
 	/** @deprecated */
+	@Deprecated
+	@Override
 	public void removeValue(String arg0) {
 		removeAttribute(arg0);
 	}
 
+	@Override
 	public void setAttribute(String name, Object value) {
 		String newName = attributePrefix.concat(name);
 
@@ -205,38 +219,46 @@ public class HttpSessionAdaptor implements HttpSession, Serializable {
 		}
 	}
 
+	@Override
 	public void setMaxInactiveInterval(int arg0) {
 		// Not sure this can be done per context helper
 		session.setMaxInactiveInterval(arg0);
 	}
 
+	@Override
 	public long getCreationTime() {
 		// Not sure this can be done per context helper
 		return session.getCreationTime();
 	}
 
+	@Override
 	public String getId() {
 		// Not sure this can be done per context helper
 		return session.getId();
 	}
 
+	@Override
 	public long getLastAccessedTime() {
 		// Not sure this can be done per context helper
 		return session.getLastAccessedTime();
 	}
 
+	@Override
 	public int getMaxInactiveInterval() {
 		// Not sure this can be done per context helper
 		return session.getMaxInactiveInterval();
 	}
 
 	/** @deprecated */
+	@Deprecated
+	@Override
 	public javax.servlet.http.HttpSessionContext getSessionContext() {
 		// Not sure this can be done per context helper and I think null is returned
 		// anyway
 		return session.getSessionContext();
 	}
 
+	@Override
 	public boolean isNew() {
 		// Not sure this can be done per context helper
 		return session.isNew();
