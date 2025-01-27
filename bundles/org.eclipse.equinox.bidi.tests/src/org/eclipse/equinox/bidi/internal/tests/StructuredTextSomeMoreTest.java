@@ -27,21 +27,24 @@ import org.junit.Test;
  */
 public class StructuredTextSomeMoreTest extends StructuredTextTestBase {
 
-	private class TestHandler1 extends StructuredTextTypeHandler {
+	private static class TestHandler1 extends StructuredTextTypeHandler {
 
 		public TestHandler1() {
 			// empty constructor
 		}
 
+		@Override
 		public int getSpecialsCount(IStructuredTextExpert expert) {
 			return 1;
 		}
 
+		@Override
 		public int indexOfSpecial(IStructuredTextExpert expert, String text, StructuredTextCharTypes charTypes,
 				StructuredTextOffsets offsets, int caseNumber, int fromIndex) {
 			return fromIndex;
 		}
 
+		@Override
 		public int processSpecial(IStructuredTextExpert expert, String text, StructuredTextCharTypes charTypes,
 				StructuredTextOffsets offsets, int caseNumber, int separLocation) {
 			int len = text.length();
@@ -53,27 +56,30 @@ public class StructuredTextSomeMoreTest extends StructuredTextTestBase {
 		}
 	}
 
-	private class TestHandler2 extends StructuredTextTypeHandler {
+	private static class TestHandler2 extends StructuredTextTypeHandler {
 
 		public TestHandler2() {
 			// empty constructor
 		}
 
+		@Override
 		public int getSpecialsCount(IStructuredTextExpert expert) {
 			return 1;
 		}
 	}
 
-	private class TestHandler3 extends StructuredTextTypeHandler {
+	private static class TestHandler3 extends StructuredTextTypeHandler {
 
 		public TestHandler3() {
 			// empty constructor
 		}
 
+		@Override
 		public int getSpecialsCount(IStructuredTextExpert expert) {
 			return 1;
 		}
 
+		@Override
 		public int indexOfSpecial(IStructuredTextExpert expert, String text, StructuredTextCharTypes charTypes,
 				StructuredTextOffsets offsets, int caseNumber, int fromIndex) {
 			return fromIndex;

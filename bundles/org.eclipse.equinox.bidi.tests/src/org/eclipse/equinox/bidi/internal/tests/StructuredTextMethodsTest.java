@@ -60,10 +60,12 @@ public class StructuredTextMethodsTest extends StructuredTextTestBase {
 			this.dirHebrew = dirHebrew;
 		}
 
+		@Override
 		public String getSeparators(IStructuredTextExpert expert) {
 			return ","; //$NON-NLS-1$
 		}
 
+		@Override
 		public boolean skipProcessing(IStructuredTextExpert expert, String text, StructuredTextCharTypes charTypes) {
 			byte charType = charTypes.getBidiTypeAt(0);
 			if (charType == AL)
@@ -71,10 +73,12 @@ public class StructuredTextMethodsTest extends StructuredTextTestBase {
 			return false;
 		}
 
+		@Override
 		public int getDirection(IStructuredTextExpert expert, String text) {
 			return getDirection(expert, text, new StructuredTextCharTypes(expert, text));
 		}
 
+		@Override
 		public int getDirection(IStructuredTextExpert expert, String text, StructuredTextCharTypes charTypes) {
 			for (int i = 0; i < text.length(); i++) {
 				byte charType = charTypes.getBidiTypeAt(i);
