@@ -33,11 +33,13 @@ public class StructuredTextActivator implements BundleActivator {
 		instance = this; // there is only one bundle activator
 	}
 
+	@Override
 	public void start(BundleContext context) throws Exception {
 		bundleContext = context;
 		instance = this;
 	}
 
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		if (logTracker != null) {
 			logTracker.close();

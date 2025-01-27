@@ -114,21 +114,25 @@ public class StructuredTextTypesCollector implements IRegistryEventListener {
 		}
 	}
 
+	@Override
 	public void added(IExtension[] extensions) {
 		types = null;
 		factories = null;
 	}
 
+	@Override
 	public void removed(IExtension[] extensions) {
 		types = null;
 		factories = null;
 	}
 
+	@Override
 	public void added(IExtensionPoint[] extensionPoints) {
 		types = null;
 		factories = null;
 	}
 
+	@Override
 	public void removed(IExtensionPoint[] extensionPoints) {
 		types = null;
 		factories = null;
