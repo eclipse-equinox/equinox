@@ -87,6 +87,7 @@ public class Activator implements BundleActivator {
 	 * 
 	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
 	 */
+	@Override
 	public void start(final BundleContext bundleContext) {
 		setDebugEnabled(bundleContext);
 
@@ -106,6 +107,7 @@ public class Activator implements BundleActivator {
 	 * 
 	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
 	 */
+	@Override
 	public void stop(final BundleContext context) {
 		if (cachingServiceFactoryRegistration != null) {
 			cachingServiceFactory.stop();
