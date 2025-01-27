@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %bundleName
 Bundle-Vendor: %providerName
 Bundle-SymbolicName: org.eclipse.equinox.http.servlet
-Bundle-Version: 1.8.200.qualifier
+Bundle-Version: 1.8.300.qualifier
 Bundle-Activator: org.eclipse.equinox.http.servlet.internal.Activator
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-17
