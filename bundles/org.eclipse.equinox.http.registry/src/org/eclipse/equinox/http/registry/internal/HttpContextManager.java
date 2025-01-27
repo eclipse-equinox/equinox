@@ -54,6 +54,7 @@ public class HttpContextManager implements Listener {
 		tracker.close();
 	}
 
+	@Override
 	public void added(IExtension extension) {
 		IConfigurationElement[] elements = extension.getConfigurationElements();
 		for (IConfigurationElement httpContextElement : elements) {
@@ -120,6 +121,7 @@ public class HttpContextManager implements Listener {
 		}
 	}
 
+	@Override
 	public void removed(IExtension extension) {
 		IConfigurationElement[] elements = extension.getConfigurationElements();
 		for (IConfigurationElement httpContextElement : elements) {

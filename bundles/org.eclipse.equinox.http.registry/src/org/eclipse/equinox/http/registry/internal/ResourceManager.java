@@ -63,6 +63,7 @@ public class ResourceManager implements ExtensionPointTracker.Listener {
 		tracker.close();
 	}
 
+	@Override
 	public void added(IExtension extension) {
 		IConfigurationElement[] elements = extension.getConfigurationElements();
 		for (IConfigurationElement serviceSelectorElement : elements) {
@@ -126,6 +127,7 @@ public class ResourceManager implements ExtensionPointTracker.Listener {
 		}
 	}
 
+	@Override
 	public void removed(IExtension extension) {
 		IConfigurationElement[] elements = extension.getConfigurationElements();
 		for (IConfigurationElement resourceElement : elements) {

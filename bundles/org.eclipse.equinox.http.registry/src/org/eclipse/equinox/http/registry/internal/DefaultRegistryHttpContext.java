@@ -44,6 +44,7 @@ public class DefaultRegistryHttpContext implements HttpContext {
 		mimeMappings.put(mimeExtension, mimeType);
 	}
 
+	@Override
 	public String getMimeType(String name) {
 		if (mimeMappings != null) {
 			int dotIndex = name.lastIndexOf('.');
@@ -57,10 +58,12 @@ public class DefaultRegistryHttpContext implements HttpContext {
 		return delegate.getMimeType(name);
 	}
 
+	@Override
 	public boolean handleSecurity(HttpServletRequest arg0, HttpServletResponse arg1) throws IOException {
 		return delegate.handleSecurity(arg0, arg1);
 	}
 
+	@Override
 	public URL getResource(String name) {
 		if (resourceMappings == null)
 			return null;

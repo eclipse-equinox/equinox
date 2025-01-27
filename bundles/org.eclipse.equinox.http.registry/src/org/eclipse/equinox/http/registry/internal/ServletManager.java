@@ -70,6 +70,7 @@ public class ServletManager implements ExtensionPointTracker.Listener {
 		tracker.close();
 	}
 
+	@Override
 	public void added(IExtension extension) {
 		IConfigurationElement[] elements = extension.getConfigurationElements();
 		for (IConfigurationElement serviceSelectorElement : elements) {
@@ -142,6 +143,7 @@ public class ServletManager implements ExtensionPointTracker.Listener {
 		}
 	}
 
+	@Override
 	public void removed(IExtension extension) {
 		IConfigurationElement[] elements = extension.getConfigurationElements();
 		for (IConfigurationElement servletElement : elements) {
@@ -166,25 +168,30 @@ public class ServletManager implements ExtensionPointTracker.Listener {
 			this.loadOnStartup = true;
 		}
 
+		@Override
 		public void init(ServletConfig servletConfig) throws ServletException {
 			this.config = servletConfig;
 			if (loadOnStartup)
 				initializeDelegate();
 		}
 
+		@Override
 		public ServletConfig getServletConfig() {
 			return config;
 		}
 
+		@Override
 		public void service(ServletRequest arg0, ServletResponse arg1) throws ServletException, IOException {
 			initializeDelegate();
 			delegate.service(arg0, arg1);
 		}
 
+		@Override
 		public String getServletInfo() {
 			return ""; //$NON-NLS-1$
 		}
 
+		@Override
 		public void destroy() {
 			destroyDelegate();
 		}

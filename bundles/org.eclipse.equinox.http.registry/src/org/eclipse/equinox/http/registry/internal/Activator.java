@@ -32,6 +32,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	private IExtensionRegistry registry;
 	private BundleContext context;
 
+	@Override
 	public void start(BundleContext bundleContext) throws Exception {
 		this.context = bundleContext;
 		packageAdminTracker = new ServiceTracker<>(bundleContext, PackageAdmin.class, this);
@@ -41,6 +42,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		registryTracker.open();
 	}
 
+	@Override
 	public void stop(BundleContext bundleContext) throws Exception {
 		packageAdminTracker.close();
 		packageAdminTracker = null;
@@ -49,6 +51,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		this.context = null;
 	}
 
+	@Override
 	public Object addingService(ServiceReference reference) {
 		Object service = context.getService(reference);
 
@@ -66,10 +69,12 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		return service;
 	}
 
+	@Override
 	public void modifiedService(ServiceReference reference, Object service) {
 		// ignore
 	}
 
+	@Override
 	public void removedService(ServiceReference reference, Object service) {
 		if (service == packageAdmin)
 			packageAdmin = null;
