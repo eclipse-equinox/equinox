@@ -31,10 +31,12 @@ public class CoordinatorServiceFactory implements ServiceFactory<Coordinator> {
 		logTracker = new LogTracker(bundleContext, System.out);
 	}
 
+	@Override
 	public Coordinator getService(Bundle bundle, ServiceRegistration<Coordinator> registration) {
 		return new CoordinatorImpl(bundle, logTracker, timer, getMaxTimeout());
 	}
 
+	@Override
 	public void ungetService(Bundle bundle, ServiceRegistration<Coordinator> registration, Coordinator service) {
 		((CoordinatorImpl) service).shutdown();
 	}

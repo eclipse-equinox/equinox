@@ -25,6 +25,7 @@ public class Activator implements BundleActivator {
 	private CoordinatorServiceFactory factory;
 	private ServiceRegistration<Coordinator> registration;
 
+	@Override
 	public void start(BundleContext bundleContext) throws Exception {
 		factory = new CoordinatorServiceFactory(bundleContext);
 		Dictionary<String, Object> properties = new Hashtable<>();
@@ -35,6 +36,7 @@ public class Activator implements BundleActivator {
 		this.registration = reg;
 	}
 
+	@Override
 	public void stop(BundleContext bundleContext) throws Exception {
 		registration.unregister();
 		factory.shutdown();
