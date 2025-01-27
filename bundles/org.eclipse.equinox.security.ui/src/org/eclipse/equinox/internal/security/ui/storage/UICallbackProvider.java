@@ -33,7 +33,7 @@ import org.eclipse.ui.progress.UIJob;
  */
 public class UICallbackProvider implements IUICallbacks {
 
-	private class InitWithProgress implements IRunnableWithProgress {
+	private static class InitWithProgress implements IRunnableWithProgress {
 
 		private IStorageTask callback;
 		private StorageException exception = null;
