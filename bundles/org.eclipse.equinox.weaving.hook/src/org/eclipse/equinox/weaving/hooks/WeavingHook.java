@@ -199,6 +199,7 @@ public class WeavingHook extends AbstractWeavingHook {
 	 * @see org.eclipse.osgi.internal.hookregistry.BundleFileWrapperFactoryHook#wrapBundleFile(org.eclipse.osgi.storage.bundlefile.BundleFile,
 	 *      org.eclipse.osgi.storage.BundleInfo.Generation, boolean)
 	 */
+	@Override
 	public BundleFileWrapper wrapBundleFile(final BundleFile bundleFile, final Generation generation,
 			final boolean base) {
 		if (bundleFile.getBaseFile() == null) {

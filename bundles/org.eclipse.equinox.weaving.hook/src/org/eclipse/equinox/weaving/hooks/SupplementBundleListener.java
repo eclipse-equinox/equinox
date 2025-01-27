@@ -27,6 +27,7 @@ public class SupplementBundleListener implements SynchronousBundleListener {
 		this.supplementerRegistry = supplementerRegistry;
 	}
 
+	@Override
 	public void bundleChanged(final BundleEvent event) {
 		final Bundle bundle = event.getBundle();
 		if (event.getType() == BundleEvent.RESOLVED) {

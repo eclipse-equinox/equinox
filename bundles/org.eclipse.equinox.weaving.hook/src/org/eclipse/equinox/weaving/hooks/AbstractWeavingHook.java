@@ -44,6 +44,7 @@ public abstract class AbstractWeavingHook extends ClassLoaderHook implements Hoo
 	/**
 	 * @see org.eclipse.osgi.internal.hookregistry.HookConfigurator#addHooks(HookRegistry)
 	 */
+	@Override
 	public void addHooks(final HookRegistry hooks) {
 		if (verbose)
 			System.err.println("[org.eclipse.equinox.weaving.hook] info adding AspectJ hooks ..."); //$NON-NLS-1$
@@ -60,6 +61,7 @@ public abstract class AbstractWeavingHook extends ClassLoaderHook implements Hoo
 	/**
 	 * @see org.eclipse.osgi.internal.hookregistry.ActivatorHookFactory#createActivator()
 	 */
+	@Override
 	public BundleActivator createActivator() {
 		return this;
 	}
