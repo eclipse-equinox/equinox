@@ -209,9 +209,14 @@ public class ExtendedLogServiceFactory implements ServiceFactory<ExtendedLogServ
 		}
 
 		Map<String, LogLevel> getEffectiveLogLevels() {
-			Map<String, LogLevel> effectiveLogLevels = loggerContextTargetMap.getRootLoggerContext().getLogLevels();
-			effectiveLogLevels.putAll(getLogLevels());
-			return effectiveLogLevels;
+			contextsLock.readLock().lock();
+			try {
+				Map<String, LogLevel> effectiveLogLevels = loggerContextTargetMap.getRootLoggerContext().getLogLevels();
+				effectiveLogLevels.putAll(getLogLevels());
+				return effectiveLogLevels;
+			} finally {
+				contextsLock.readLock().unlock();
+			}
 		}
 
 		@Override
@@ -229,6 +234,7 @@ public class ExtendedLogServiceFactory implements ServiceFactory<ExtendedLogServ
 				} finally {
 					contextsLock.writeLock().unlock();
 				}
+				// Note that the readlock is still held here
 				systemBundleLoggerContext = loggerContextTargetMap.applyLogLevels(this);
 			} finally {
 				if (readLocked) {

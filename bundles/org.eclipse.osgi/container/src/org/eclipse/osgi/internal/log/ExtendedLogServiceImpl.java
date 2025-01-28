@@ -25,14 +25,13 @@ public class ExtendedLogServiceImpl implements ExtendedLogService {
 
 	private final ExtendedLogServiceFactory factory;
 	private volatile Bundle bundle;
-	private final Map<Class<? extends org.osgi.service.log.Logger>, Map<String, LoggerImpl>> loggerCache = new HashMap<>();
+	private final Map<String, LoggerImpl> loggerClassLoggers = new HashMap<>();
+	private final Map<String, LoggerImpl> formatterLoggerClassLoggers = new HashMap<>();
 	private static final String LOG_SERVICE = "LogService"; //$NON-NLS-1$
 
 	public ExtendedLogServiceImpl(ExtendedLogServiceFactory factory, Bundle bundle) {
 		this.factory = factory;
 		this.bundle = bundle;
-		loggerCache.put(org.osgi.service.log.Logger.class, new HashMap<>());
-		loggerCache.put(org.osgi.service.log.FormatterLogger.class, new HashMap<>());
 	}
 
 	@SuppressWarnings("deprecation")
@@ -141,18 +140,25 @@ public class ExtendedLogServiceImpl implements ExtendedLogService {
 		}
 		LoggerImpl logger = null;
 		Map<String, LoggerImpl> loggers = null;
+		LoggerContext loggerContext = null;
 		factory.contextsLock.readLock().lock();
 		try {
-			loggers = loggerCache.get(loggerType);
-			if (loggers == null) {
+			if (org.osgi.service.log.Logger.class.equals(loggerType)) {
+				loggers = loggerClassLoggers;
+			} else if (org.osgi.service.log.FormatterLogger.class.equals(loggerType)) {
+				loggers = formatterLoggerClassLoggers;
+			} else {
 				throw new IllegalArgumentException(loggerType.getName());
 			}
 			logger = loggers.get(name);
+			if (logger == null) {
+				// get the loggerContext with the read lock
+				loggerContext = factory.loggerContextTargetMap.getEffectiveLoggerContext(bundle);
+			}
 		} finally {
 			factory.contextsLock.readLock().unlock();
 		}
 		if (logger == null) {
-			LoggerContext loggerContext = factory.loggerContextTargetMap.getEffectiveLoggerContext(bundle);
 			if (loggerType == FormatterLogger.class) {
 				logger = new FormatterLoggerImpl(this, name, loggerContext);
 			} else if (loggerType == org.osgi.service.log.Logger.class) {
@@ -351,10 +357,7 @@ public class ExtendedLogServiceImpl implements ExtendedLogService {
 	}
 
 	void applyLogLevels(EquinoxLoggerContext effectiveLoggerContext) {
-		for (Map<String, LoggerImpl> loggers : loggerCache.values()) {
-			for (LoggerImpl logger : loggers.values()) {
-				logger.applyLoggerContext(effectiveLoggerContext);
-			}
-		}
+		loggerClassLoggers.forEach((s, l) -> l.applyLoggerContext(effectiveLoggerContext));
+		formatterLoggerClassLoggers.forEach((s, l) -> l.applyLoggerContext(effectiveLoggerContext));
 	}
 }
