@@ -220,6 +220,13 @@ public class Debug implements DebugOptionsListener {
 	public void trace(String topic, String message) {
 		LogService current = logService;
 		if (current != null) {
+			// Note that the logger is not cached.
+			// Attempts to cache the logger have not
+			// shown significant performance improvement.
+			// The LogService does cache instances with a
+			// non-blocking read lock. Any caching here
+			// will need to be proven to be faster than
+			// the LogService logger cache.
 			current.getLogger(topic).trace(message);
 		} else {
 			out.println(message);
