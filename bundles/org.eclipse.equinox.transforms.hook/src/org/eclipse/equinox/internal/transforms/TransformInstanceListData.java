@@ -39,18 +39,18 @@ public class TransformInstanceListData extends ServiceTracker<URL, URL> {
 	/**
 	 * Map from transformer class -> tuple array
 	 */
-	private Map<String, TransformTuple[]> transformerToTuple = new HashMap<>();
+	private final Map<String, TransformTuple[]> transformerToTuple = new HashMap<>();
 
 	/**
 	 * List of all tuples in the system.
 	 */
-	private List<TransformTuple> rawTuples = new ArrayList<>();
+	private final List<TransformTuple> rawTuples = new ArrayList<>();
 
 	/**
 	 * Map from bundle ID -> boolean representing whether or not a given bundle
 	 * currently has any transforms registered against it.
 	 */
-	private Map<String, Boolean> bundleIdToTransformPresence = new HashMap<>();
+	private final Map<String, Boolean> bundleIdToTransformPresence = new HashMap<>();
 	private final EquinoxLogServices logServices;
 
 	/**

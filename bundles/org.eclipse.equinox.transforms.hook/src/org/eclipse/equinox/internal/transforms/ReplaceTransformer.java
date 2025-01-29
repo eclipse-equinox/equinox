@@ -28,7 +28,7 @@ import org.osgi.framework.FrameworkUtil;
 class ReplaceTransformer {
 
 	static final String TYPE = "replace"; //$NON-NLS-1$
-	private TransformerHook hook;
+	private final TransformerHook hook;
 
 	ReplaceTransformer(TransformerHook hook) {
 		this.hook = hook;

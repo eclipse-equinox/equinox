@@ -30,8 +30,8 @@ import java.net.URL;
  */
 public class ProxyStreamTransformer extends StreamTransformer {
 
-	private Method method;
-	private Object object;
+	private final Method method;
+	private final Object object;
 
 	/**
 	 * Create a new proxy transformer based on the given object.
