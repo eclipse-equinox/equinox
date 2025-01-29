@@ -33,7 +33,7 @@ public class StorageAbstractTest {
 
 	final protected String defaultFileName = "secure_storage_test.equinox";
 
-	private List<ISecurePreferences> openPreferences = new ArrayList<>(5); // <ISecurePreferences>
+	private final List<ISecurePreferences> openPreferences = new ArrayList<>(5); // <ISecurePreferences>
 
 	protected String getModuleID() {
 		return null;
