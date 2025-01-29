@@ -26,7 +26,7 @@ import org.eclipse.core.runtime.InvalidRegistryObjectException;
 public abstract class Handle {
 	protected IObjectManager objectManager;
 
-	private int objectId;
+	private final int objectId;
 
 	public int getId() {
 		return objectId;

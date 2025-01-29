@@ -40,7 +40,7 @@ public class Activator implements BundleActivator {
 	 */
 	private static final String STORAGE_DIR = "org.eclipse.core.runtime"; //$NON-NLS-1$
 
-	private Object masterRegistryKey = new Object();
+	private final Object masterRegistryKey = new Object();
 	private Object userRegistryKey = new Object();
 
 	private IExtensionRegistry defaultRegistry = null;

@@ -41,28 +41,28 @@ public final class ConfigurationElementDescription {
 	 * 
 	 * @see IConfigurationElement#getName()
 	 */
-	private String name;
+	private final String name;
 
 	/**
 	 * Attributes of the configuration element.
 	 * 
 	 * @see IConfigurationElement#getAttribute(String)
 	 */
-	private ConfigurationElementAttribute[] attributes;
+	private final ConfigurationElementAttribute[] attributes;
 
 	/**
 	 * String value to be stored in this configuration element.
 	 * 
 	 * @see IConfigurationElement#getValue()
 	 */
-	private String value;
+	private final String value;
 
 	/**
 	 * Children of the configuration element.
 	 * 
 	 * @see IConfigurationElement#getChildren()
 	 */
-	private ConfigurationElementDescription[] children;
+	private final ConfigurationElementDescription[] children;
 
 	/**
 	 * Constructor.

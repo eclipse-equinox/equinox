@@ -40,12 +40,12 @@ public final class RegistryContributor implements IContributor {
 	 * Actual ID of the contributor (e.g., "12"). IDs are expected to be unique in
 	 * the workspace.
 	 */
-	private String actualContributorId;
+	private final String actualContributorId;
 
 	/**
 	 * Actual name of the contributor (e.g., "org.eclipse.core.runtime.fragment").
 	 */
-	private String actualContributorName;
+	private final String actualContributorName;
 
 	/**
 	 * ID associated with the entity "in charge" of the contributor (e.g., "1"). IDs

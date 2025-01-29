@@ -21,7 +21,7 @@ import java.io.*;
 public class BufferedRandomInputStream extends InputStream {
 
 	private RandomAccessFile inputFile;
-	private String filePath; // Canonical path to the underlying file used for logging
+	private final String filePath; // Canonical path to the underlying file used for logging
 	private int buffer_size; // Current size of the buffer
 	private int buffer_pos; // Current read position in the buffer
 	/**
