@@ -37,13 +37,13 @@ import org.osgi.framework.BundleContext;
  * commands from the ssh.
  */
 public class SshSession extends Thread implements Closeable {
-	private CommandProcessor processor;
-	private BundleContext context;
-	private SshShell sshShell;
-	private InputStream in;
-	private OutputStream out;
-	private TerminalTypeMappings currentMappings;
-	private Map<String, KEYS> currentEscapesToKey;
+	private final CommandProcessor processor;
+	private final BundleContext context;
+	private final SshShell sshShell;
+	private final InputStream in;
+	private final OutputStream out;
+	private final TerminalTypeMappings currentMappings;
+	private final Map<String, KEYS> currentEscapesToKey;
 
 	private static final String PROMPT = "prompt";
 	private static final String OSGI_PROMPT = "osgi> ";

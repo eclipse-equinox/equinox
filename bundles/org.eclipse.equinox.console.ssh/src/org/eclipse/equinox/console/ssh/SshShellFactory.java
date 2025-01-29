@@ -29,9 +29,9 @@ import org.osgi.framework.BundleContext;
  */
 public class SshShellFactory implements ShellFactory {
 
-	private List<CommandProcessor> processors;
-	private BundleContext context;
-	private Set<SshShell> shells = new HashSet<>();
+	private final List<CommandProcessor> processors;
+	private final BundleContext context;
+	private final Set<SshShell> shells = new HashSet<>();
 
 	public SshShellFactory(List<CommandProcessor> processors, BundleContext context) {
 		this.processors = processors;

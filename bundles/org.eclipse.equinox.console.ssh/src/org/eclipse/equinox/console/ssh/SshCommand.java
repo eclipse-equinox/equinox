@@ -38,7 +38,7 @@ import org.osgi.service.cm.ManagedService;
 public class SshCommand {
 	private String defaultHost = null;
 	private int defaultPort;
-	private List<CommandProcessor> processors = new ArrayList<>();
+	private final List<CommandProcessor> processors = new ArrayList<>();
 	private String host = null;
 	private int port;
 	private SshServ sshServ;
