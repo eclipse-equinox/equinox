@@ -57,7 +57,7 @@ public class StructuredTextCharTypes {
 	final protected String text;
 
 	// 1 byte for each char in text
-	private byte[] types;
+	private final byte[] types;
 
 	// structured text direction. -1 means not yet computed; -2 means within
 	// handler.getDirection
