@@ -44,13 +44,13 @@ import org.osgi.util.tracker.ServiceTracker;
 
 @SuppressWarnings({ "deprecation", "removal" }) // AccessController
 public class BundleInstaller {
-	private BundleContext context;
-	private String rootLocation;
+	private final BundleContext context;
+	private final String rootLocation;
 	private Map<String, Bundle> bundles = new HashMap<>();
-	private ServiceTracker<?, PackageAdmin> packageAdmin;
-	private ServiceTracker<?, StartLevel> startlevel;
-	private ServiceTracker<?, URLConverter> converter;
-	private ServiceTracker<?, PlatformAdmin> platformAdmin;
+	private final ServiceTracker<?, PackageAdmin> packageAdmin;
+	private final ServiceTracker<?, StartLevel> startlevel;
+	private final ServiceTracker<?, URLConverter> converter;
+	private final ServiceTracker<?, PlatformAdmin> platformAdmin;
 
 	public BundleInstaller(String bundlesRoot, BundleContext context) throws InvalidSyntaxException {
 		this.context = context;

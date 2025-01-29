@@ -21,8 +21,8 @@ import org.osgi.service.log.LogEntry;
 import org.osgi.service.log.LogListener;
 
 public class TestListener2 implements LogListener {
-	private List<String> list;
-	private AtomicInteger flag = new AtomicInteger(0);
+	private final List<String> list;
+	private final AtomicInteger flag = new AtomicInteger(0);
 	CountDownLatch latch;
 
 	public TestListener2(CountDownLatch countDownLatch) {

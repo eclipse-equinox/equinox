@@ -19,7 +19,7 @@ import org.osgi.service.log.LogListener;
 
 public class TestListener implements LogListener {
 	private final String testBundleLoc;
-	private LinkedList<LogEntry> logs = new LinkedList<>();
+	private final LinkedList<LogEntry> logs = new LinkedList<>();
 
 	public TestListener() {
 		this(null);

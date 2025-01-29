@@ -1204,8 +1204,8 @@ public class ApplicationAdminTest extends TestCase {
 	}
 
 	public static class ApplicationHandleTracker implements ServiceTrackerCustomizer {
-		private ArrayList events = new ArrayList();
-		private BundleContext bc;
+		private final ArrayList events = new ArrayList();
+		private final BundleContext bc;
 
 		public ApplicationHandleTracker(BundleContext bc) {
 			this.bc = bc;
@@ -1285,8 +1285,8 @@ public class ApplicationAdminTest extends TestCase {
 	}
 
 	public static class ApplicationDescriptorTracker implements ServiceTrackerCustomizer {
-		private BundleContext bc;
-		private ArrayList events = new ArrayList();
+		private final BundleContext bc;
+		private final ArrayList events = new ArrayList();
 
 		public ApplicationDescriptorTracker(BundleContext bc) {
 			this.bc = bc;

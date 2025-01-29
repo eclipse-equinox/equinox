@@ -71,7 +71,7 @@ public class OSGiAPICertificateTest extends BaseSecurityTest {
 	private static ConditionInfo info10True = new ConditionInfo(BundleSignerCondition.class.getName(),
 			new String[] { dnChain08True });
 
-	private Collection<Bundle> installedBundles = new ArrayList<>();
+	private final Collection<Bundle> installedBundles = new ArrayList<>();
 
 	private static String escapeStar(String dnChain) {
 		if (dnChain == null || dnChain.length() == 0)
