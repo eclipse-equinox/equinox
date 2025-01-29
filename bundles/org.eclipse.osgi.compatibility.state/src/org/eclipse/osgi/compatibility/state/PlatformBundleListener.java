@@ -33,7 +33,7 @@ class PlatformBundleListener implements SynchronousBundleListener, FrameworkList
 	private final ModuleDatabase database;
 	private final ModuleContainer container;
 	private long lastResolveStamp = -1;
-	private AtomicBoolean gotUnresolved = new AtomicBoolean(false);
+	private final AtomicBoolean gotUnresolved = new AtomicBoolean(false);
 
 	PlatformBundleListener(State systemState, StateConverter converter, ModuleDatabase database, ModuleContainer container) {
 		this.systemState = systemState;
