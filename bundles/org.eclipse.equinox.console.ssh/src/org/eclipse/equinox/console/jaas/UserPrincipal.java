@@ -22,9 +22,9 @@ import java.util.Set;
  * This class represents a user with password and roles
  */
 public class UserPrincipal implements Principal {
-	private String username;
+	private final String username;
 	private char[] password;
-	private Set<RolePrincipal> rolePrincipals = new HashSet<>();
+	private final Set<RolePrincipal> rolePrincipals = new HashSet<>();
 
 	public UserPrincipal(String username, String password) {
 		this.username = username;

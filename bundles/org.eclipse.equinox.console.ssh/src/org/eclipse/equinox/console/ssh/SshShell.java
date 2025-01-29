@@ -43,12 +43,12 @@ import org.osgi.framework.BundleContext;
  */
 public class SshShell implements Command {
 
-	private List<CommandProcessor> processors;
-	private BundleContext context;
+	private final List<CommandProcessor> processors;
+	private final BundleContext context;
 	private InputStream in;
 	private OutputStream out;
 	private ExitCallback callback;
-	private Map<CommandProcessor, SshSession> commandProcessorToConsoleThreadMap = new HashMap<>();
+	private final Map<CommandProcessor, SshSession> commandProcessorToConsoleThreadMap = new HashMap<>();
 
 	private final Map<String, TerminalTypeMappings> supportedEscapeSequences;
 	private static final String DEFAULT_TTYPE = File.separatorChar == '/' ? "XTERM" : "ANSI";

@@ -20,7 +20,7 @@ import java.security.Principal;
  * This class represents a user role
  */
 public class RolePrincipal implements Principal {
-	private String roleName;
+	private final String roleName;
 
 	public RolePrincipal(String roleName) {
 		this.roleName = roleName;
