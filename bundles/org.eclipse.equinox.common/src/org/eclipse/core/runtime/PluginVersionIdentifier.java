@@ -63,7 +63,7 @@ import org.osgi.framework.Version;
 @Deprecated(forRemoval = true)
 public final class PluginVersionIdentifier {
 
-	private Version version;
+	private final Version version;
 
 	private static final String SEPARATOR = "."; //$NON-NLS-1$
 

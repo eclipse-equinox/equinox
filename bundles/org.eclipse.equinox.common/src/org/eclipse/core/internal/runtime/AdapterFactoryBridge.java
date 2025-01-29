@@ -26,7 +26,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
  */
 public class AdapterFactoryBridge
 		implements ServiceTrackerCustomizer<IAdapterFactory, AdapterFactoryBridge.LazyAdapterFactory> {
-	private BundleContext bundleContext;
+	private final BundleContext bundleContext;
 
 	public AdapterFactoryBridge(BundleContext bundleContext) {
 		this.bundleContext = bundleContext;

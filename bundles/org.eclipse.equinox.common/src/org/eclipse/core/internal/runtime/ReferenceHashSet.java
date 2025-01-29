@@ -100,7 +100,7 @@ public class ReferenceHashSet<T> {
 	}
 
 	private static class StrongReference<U> implements HashedReference<U> {
-		private U referent;
+		private final U referent;
 
 		public StrongReference(U referent, ReferenceQueue<? super U> queue) {
 			this.referent = referent;

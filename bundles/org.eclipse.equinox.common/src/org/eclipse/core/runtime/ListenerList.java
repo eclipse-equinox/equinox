@@ -170,7 +170,7 @@ public class ListenerList<E> implements Iterable<E> {
 	}
 
 	private static class ListenerListIterator<E> implements Iterator<E> {
-		private Object[] listeners;
+		private final Object[] listeners;
 		private int i;
 
 		public ListenerListIterator(Object[] listeners) {

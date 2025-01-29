@@ -422,8 +422,8 @@ public final class AdapterManager implements IAdapterManager {
 
 	private static final class AdapterLookup {
 
-		private Class<?> adaptable;
-		private AdapterManager manager;
+		private final Class<?> adaptable;
+		private final AdapterManager manager;
 		private Map<String, List<IAdapterFactory>> map;
 
 		AdapterLookup(Class<?> adaptable, AdapterManager manager) {

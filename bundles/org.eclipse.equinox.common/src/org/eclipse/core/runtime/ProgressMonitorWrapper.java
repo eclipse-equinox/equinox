@@ -29,7 +29,7 @@ package org.eclipse.core.runtime;
 public abstract class ProgressMonitorWrapper implements IProgressMonitor, IProgressMonitorWithBlocking {
 
 	/** The wrapped progress monitor. */
-	private IProgressMonitor progressMonitor;
+	private final IProgressMonitor progressMonitor;
 
 	/**
 	 * Creates a new wrapper around the given monitor.
