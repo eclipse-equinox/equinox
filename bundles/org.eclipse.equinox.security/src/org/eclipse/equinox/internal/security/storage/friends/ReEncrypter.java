@@ -32,8 +32,8 @@ import org.eclipse.osgi.util.NLS;
 public class ReEncrypter {
 
 	private static class TmpElement {
-		private String path; // absolute node path
-		private Map<String, String> values; // <String>key -> <String>value
+		private final String path; // absolute node path
+		private final Map<String, String> values; // <String>key -> <String>value
 
 		public TmpElement(String path, Map<String, String> values) {
 			this.path = path;
@@ -53,7 +53,7 @@ public class ReEncrypter {
 	final private String moduleID;
 	private boolean processedOK = true;
 
-	private ArrayList<TmpElement> elements = new ArrayList<>(); // List<TmpElement>
+	private final ArrayList<TmpElement> elements = new ArrayList<>(); // List<TmpElement>
 
 	public ReEncrypter(ISecurePreferences prefs, String moduleID) {
 		this.moduleID = moduleID;

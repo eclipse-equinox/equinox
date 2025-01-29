@@ -32,7 +32,7 @@ public class SecurePlatformInternal {
 	private static final String PROVIDER_URL_BASE = "login.config.url.";//$NON-NLS-1$
 	private static final int MAX_PROVIDER_URL_COUNT = 777; // arbitrary upper limit on the number of provider URLs
 	private Configuration defaultConfiguration;
-	private ExtCallbackHandlerLoader callbackHandlerLoader = new ExtCallbackHandlerLoader();
+	private final ExtCallbackHandlerLoader callbackHandlerLoader = new ExtCallbackHandlerLoader();
 
 	private boolean running = false;
 	private static final SecurePlatformInternal s_instance = new SecurePlatformInternal();

@@ -43,7 +43,7 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 	final private static String HINTS_NAME = "hint";//$NON-NLS-1$
 	final private static String HINT_VALUE = "value";//$NON-NLS-1$
 
-	private Map<String, PasswordProviderModuleExt> modules = new HashMap<>(5); // cache of modules found
+	private final Map<String, PasswordProviderModuleExt> modules = new HashMap<>(5); // cache of modules found
 
 	public class ExtStorageModule {
 		public String moduleID;

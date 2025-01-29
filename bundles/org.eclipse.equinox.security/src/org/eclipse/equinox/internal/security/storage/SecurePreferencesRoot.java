@@ -77,9 +77,9 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 
 	private boolean modified = false;
 
-	private JavaEncryption cipher = new JavaEncryption();
+	private final JavaEncryption cipher = new JavaEncryption();
 
-	private Map<String, PasswordExt> passwordCache = new HashMap<>(5); // cached passwords: module ID -> PasswordExt
+	private final Map<String, PasswordExt> passwordCache = new HashMap<>(5); // cached passwords: module ID -> PasswordExt
 
 	public SecurePreferencesRoot(URL location) throws IOException {
 		super(null, null);

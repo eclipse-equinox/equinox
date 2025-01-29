@@ -29,8 +29,8 @@ public class ConfigurationFederator extends Configuration {
 	// events
 	private Configuration[] federatedConfigs = null;
 
-	private Hashtable<String, AppConfigurationEntry[]> configCache = new Hashtable<>(5);
-	private Hashtable<String, String> configToProviderMap = new Hashtable<>(5);
+	private final Hashtable<String, AppConfigurationEntry[]> configCache = new Hashtable<>(5);
+	private final Hashtable<String, String> configToProviderMap = new Hashtable<>(5);
 
 	final private Configuration defaultConfiguration;
 
