@@ -253,9 +253,9 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 
 	static class StandardFilteredRegion implements FilteredRegion {
 
-		private Region region;
+		private final Region region;
 
-		private RegionFilter regionFilter;
+		private final RegionFilter regionFilter;
 
 		StandardFilteredRegion(Region region, RegionFilter regionFilter) {
 			this.region = region;
