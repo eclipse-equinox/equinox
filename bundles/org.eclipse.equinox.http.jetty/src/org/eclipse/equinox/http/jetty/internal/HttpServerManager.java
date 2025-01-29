@@ -62,8 +62,8 @@ public class HttpServerManager implements ManagedServiceFactory {
 	private static final String DIR_PREFIX = "pid_"; //$NON-NLS-1$
 	private static final String INTERNAL_CONTEXT_CLASSLOADER = "org.eclipse.equinox.http.jetty.internal.ContextClassLoader"; //$NON-NLS-1$
 
-	private Map<String, Server> servers = new HashMap<>();
-	private File workDir;
+	private final Map<String, Server> servers = new HashMap<>();
+	private final File workDir;
 
 	public HttpServerManager(File workDir) {
 		this.workDir = workDir;
