@@ -80,5 +80,5 @@ public class TestServletContextHelper10 extends AbstractTestServlet {
 		writer.print('a');
 	}
 
-	private Filter f1 = new BaseFilter('c');
+	private final Filter f1 = new BaseFilter('c');
 }

@@ -53,5 +53,5 @@ public class TestFilter1 extends AbstractTestServlet {
 		writer.print('a');
 	}
 
-	private Filter f1 = new BaseFilter('b');
+	private final Filter f1 = new BaseFilter('b');
 }
