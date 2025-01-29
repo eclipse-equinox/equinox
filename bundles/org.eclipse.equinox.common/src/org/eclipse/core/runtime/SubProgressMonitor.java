@@ -98,7 +98,7 @@ public class SubProgressMonitor extends ProgressMonitorWrapper {
 	private int nestedBeginTasks = 0;
 	private boolean usedUp = false;
 	private boolean hasSubTask = false;
-	private int style;
+	private final int style;
 	private String mainTaskLabel;
 
 	/**
