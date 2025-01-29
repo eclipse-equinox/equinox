@@ -19,7 +19,7 @@ import org.osgi.framework.ServiceReference;
 public class BindBlocker {
 
 	// the time the bind method will block
-	private int timeout = 60000;
+	private final int timeout = 60000;
 
 	public void setLogger(ServiceReference log) {
 		try {

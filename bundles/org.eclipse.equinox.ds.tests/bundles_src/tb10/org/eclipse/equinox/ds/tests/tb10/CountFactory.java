@@ -23,7 +23,7 @@ import org.osgi.framework.ServiceReference;
 
 public class CountFactory implements BoundCountProvider {
 
-	private List boundServices = new ArrayList();
+	private final List boundServices = new ArrayList();
 
 	@Override
 	public int getBoundServiceCount(String service) {

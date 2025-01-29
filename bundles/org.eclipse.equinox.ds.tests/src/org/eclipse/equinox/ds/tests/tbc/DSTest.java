@@ -180,7 +180,7 @@ public class DSTest {
 
 	private ServiceTracker trackerBaseService;
 
-	private Hashtable registeredServices = new Hashtable();
+	private final Hashtable registeredServices = new Hashtable();
 
 	private int scr_restart_timeout = 33000;
 
@@ -2196,9 +2196,9 @@ public class DSTest {
 	}
 
 	class OverloadManager extends Thread {
-		private String compPrefix;
-		private int firstComp;
-		private int lastComp;
+		private final String compPrefix;
+		private final int firstComp;
+		private final int lastComp;
 
 		public OverloadManager(String compPrefix, int first, int last) {
 			this.compPrefix = compPrefix;

@@ -18,7 +18,7 @@ import java.util.Dictionary;
 
 public class DefaultPropertiesProvider implements PropertiesProvider {
 
-	private Dictionary properties;
+	private final Dictionary properties;
 
 	public DefaultPropertiesProvider(Dictionary properties) {
 		this.properties = properties;

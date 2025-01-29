@@ -25,7 +25,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 
 public class BindUnbindRegistrator implements PropertiesProvider {
-	private Dictionary properties = new Properties();
+	private final Dictionary properties = new Properties();
 	private ComponentContext ctxt;
 	private static final int BIND_SR = 1 << 0;
 	private static final int UNBIND_SR = 1 << 1;

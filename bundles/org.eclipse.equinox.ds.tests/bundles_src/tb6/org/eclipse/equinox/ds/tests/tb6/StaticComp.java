@@ -28,7 +28,7 @@ import org.osgi.service.component.ComponentContext;
 public class StaticComp implements DSEventsProvider, BoundTester, ComponentContextProvider {
 
 	private ComponentContext ctxt;
-	private Vector componentEvents = new Vector();
+	private final Vector componentEvents = new Vector();
 	private ReferencedComp rc;
 
 	public void activate(ComponentContext ctxt) {
