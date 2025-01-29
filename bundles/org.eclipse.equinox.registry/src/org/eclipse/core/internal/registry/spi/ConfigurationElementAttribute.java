@@ -39,14 +39,14 @@ public final class ConfigurationElementAttribute {
 	 * 
 	 * @see IConfigurationElement#getAttributeNames()
 	 */
-	private String name;
+	private final String name;
 
 	/**
 	 * Attribute value.
 	 * 
 	 * @see IConfigurationElement#getAttributeAsIs(String)
 	 */
-	private String value;
+	private final String value;
 
 	/**
 	 * Constructor.
