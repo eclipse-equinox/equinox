@@ -30,7 +30,7 @@ import org.osgi.util.tracker.BundleTrackerCustomizer;
 class TransformerBundleExtender implements BundleTrackerCustomizer<ServiceRegistration<URL>> {
 
 	private static final String EQUINOX_TRANSFORMER_HEADER = "Equinox-Transformer"; //$NON-NLS-1$
-	private BundleContext bundleContext;
+	private final BundleContext bundleContext;
 
 	public TransformerBundleExtender(BundleContext bundleContext) {
 		this.bundleContext = bundleContext;

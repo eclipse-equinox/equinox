@@ -35,7 +35,7 @@ public class TransformerList extends ServiceTracker<Object, Object> {
 	/**
 	 * Local cache of transformers.
 	 */
-	private HashMap<String, StreamTransformer> transformers = new HashMap<>();
+	private final HashMap<String, StreamTransformer> transformers = new HashMap<>();
 	private final EquinoxLogServices logServices;
 
 	/**

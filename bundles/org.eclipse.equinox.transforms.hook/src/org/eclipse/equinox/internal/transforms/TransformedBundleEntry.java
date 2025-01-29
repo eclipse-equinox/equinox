@@ -29,8 +29,8 @@ public class TransformedBundleEntry extends BundleEntry {
 
 	long timestamp;
 	private InputStream stream;
-	private BundleEntry original;
-	private TransformedBundleFile bundleFile;
+	private final BundleEntry original;
+	private final TransformedBundleFile bundleFile;
 
 	/**
 	 * Create a wrapped bundle entry. Calls to obtain the content of this entry will

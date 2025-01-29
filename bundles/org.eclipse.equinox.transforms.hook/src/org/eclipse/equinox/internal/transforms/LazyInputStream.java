@@ -24,7 +24,7 @@ import java.io.InputStream;
  */
 public class LazyInputStream extends InputStream {
 
-	private InputStreamProvider provider;
+	private final InputStreamProvider provider;
 
 	private InputStream original = null;
 
