@@ -26,7 +26,7 @@ import org.osgi.framework.Bundle;
  */
 public class BundleProxyClassLoader extends ClassLoader {
 	private final Bundle activatorBundle = Activator.getBundle(Activator.class);
-	private Bundle bundle;
+	private final Bundle bundle;
 	private ClassLoader parent;
 
 	public BundleProxyClassLoader(Bundle bundle) {

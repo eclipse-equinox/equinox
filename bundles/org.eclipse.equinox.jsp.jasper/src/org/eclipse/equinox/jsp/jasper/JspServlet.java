@@ -84,7 +84,7 @@ import org.osgi.framework.Bundle;
 public class JspServlet extends HttpServlet {
 	private static class BundlePermissionCollection extends PermissionCollection {
 		private static final long serialVersionUID = -6365478608043900677L;
-		private Bundle bundle;
+		private final Bundle bundle;
 
 		public BundlePermissionCollection(Bundle bundle) {
 			this.bundle = bundle;
@@ -108,9 +108,9 @@ public class JspServlet extends HttpServlet {
 	}
 
 	private static final long serialVersionUID = -4110476909131707652L;
-	private Servlet jspServlet = new org.apache.jasper.servlet.JspServlet();
+	private final Servlet jspServlet = new org.apache.jasper.servlet.JspServlet();
 	Bundle bundle;
-	private URLClassLoader jspLoader;
+	private final URLClassLoader jspLoader;
 	String bundleResourcePath;
 	String alias;
 
@@ -194,8 +194,8 @@ public class JspServlet extends HttpServlet {
 	}
 
 	private class ServletConfigAdaptor implements ServletConfig {
-		private ServletConfig config;
-		private ServletContext context;
+		private final ServletConfig config;
+		private final ServletContext context;
 
 		public ServletConfigAdaptor(ServletConfig config) {
 			this.config = config;
@@ -251,7 +251,7 @@ public class JspServlet extends HttpServlet {
 	}
 
 	class ServletContextAdaptor {
-		private ServletContext delegate;
+		private final ServletContext delegate;
 
 		public ServletContextAdaptor(ServletContext delegate) {
 			this.delegate = delegate;
