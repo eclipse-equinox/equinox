@@ -27,8 +27,8 @@ import org.osgi.service.component.ComponentContext;
 
 public class AdvancedBounder implements DSEventsProvider, BoundMainProvider, ComponentContextProvider {
 
-	private Hashtable boundServices = new Hashtable();
-	private Vector boundServiceEvents = new Vector();
+	private final Hashtable boundServices = new Hashtable();
+	private final Vector boundServiceEvents = new Vector();
 	private ComponentContext ctxt;
 
 	public void activate(ComponentContext ctxt) {

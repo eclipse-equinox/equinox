@@ -22,7 +22,7 @@ import org.osgi.framework.ServiceReference;
 
 public class BindUnbind implements BoundTester {
 
-	private Vector boundObjects = new Vector();
+	private final Vector boundObjects = new Vector();
 
 	public void bindSAComp(ServiceReference sr) {
 		if (boundObjects.contains(sr)) {
