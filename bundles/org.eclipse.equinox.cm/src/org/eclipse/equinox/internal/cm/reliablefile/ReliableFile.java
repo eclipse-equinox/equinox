@@ -127,7 +127,7 @@ public class ReliableFile {
 	}
 
 	/** File object for original reference file */
-	private File referenceFile;
+	private final File referenceFile;
 
 	/** List of checksum file objects: File => specific ReliableFile generation */
 	private static Hashtable<File, CacheInfo> cacheFiles = new Hashtable<>(20);
