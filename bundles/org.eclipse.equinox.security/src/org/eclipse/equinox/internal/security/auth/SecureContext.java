@@ -25,11 +25,11 @@ import org.eclipse.equinox.security.auth.ILoginContextListener;
 
 public class SecureContext implements ILoginContext {
 
-	private String configName;
+	private final String configName;
 	private LoginContext loginContext;
-	private CallbackHandler handler;
+	private final CallbackHandler handler;
 
-	private SecurityEventsManager eventsManager = new SecurityEventsManager();
+	private final SecurityEventsManager eventsManager = new SecurityEventsManager();
 	private boolean loggedIn = false;
 
 	public SecureContext(String configugationName) {

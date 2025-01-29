@@ -74,7 +74,7 @@ import org.eclipse.equinox.security.storage.provider.IPreferencesContainer;
  */
 public class SecurePreferencesContainer implements IPreferencesContainer {
 
-	private Map<SecurePreferences, SecurePreferencesWrapper> wrappers = new HashMap<>(); // node ->
+	private final Map<SecurePreferences, SecurePreferencesWrapper> wrappers = new HashMap<>(); // node ->
 																							// SecurePreferencesWrapper
 
 	final private Map<Object, Object> options;

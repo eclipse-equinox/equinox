@@ -20,7 +20,7 @@ import org.eclipse.equinox.security.auth.ILoginContextListener;
 
 public class SecurityEventsManager {
 
-	private Vector<ILoginContextListener> listeners = new Vector<>(5);
+	private final Vector<ILoginContextListener> listeners = new Vector<>(5);
 
 	synchronized public void addListener(ILoginContextListener listener) {
 		listeners.add(listener);

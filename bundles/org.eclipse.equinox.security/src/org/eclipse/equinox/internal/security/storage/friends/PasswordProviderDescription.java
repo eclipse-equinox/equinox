@@ -22,11 +22,11 @@ public class PasswordProviderDescription {
 
 	static final private String EMPTY_STRING = ""; //$NON-NLS-1$
 
-	private int priority;
-	private String id;
-	private String name;
-	private String description;
-	private List<String> hints;
+	private final int priority;
+	private final String id;
+	private final String name;
+	private final String description;
+	private final List<String> hints;
 
 	public PasswordProviderDescription(String name, String id, int priority, String description, List<String> hints) {
 		this.id = id;
