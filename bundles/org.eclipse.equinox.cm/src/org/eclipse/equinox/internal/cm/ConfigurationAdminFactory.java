@@ -183,7 +183,7 @@ public class ConfigurationAdminFactory implements ServiceFactory<ConfigurationAd
 
 	private final class ConfigurationAdminParticipant implements Participant {
 
-		private Map<Object, Runnable> tasks = new LinkedHashMap<>();
+		private final Map<Object, Runnable> tasks = new LinkedHashMap<>();
 
 		public ConfigurationAdminParticipant(Coordination coordination) {
 			coordination.addParticipant(this);

@@ -95,7 +95,7 @@ public class PluginManager {
 
 	private static class PluginTracker extends ServiceTracker<ConfigurationPlugin, ConfigurationPlugin> {
 
-		private TreeSet<ServiceReference<ConfigurationPlugin>> serviceReferences = new TreeSet<>(
+		private final TreeSet<ServiceReference<ConfigurationPlugin>> serviceReferences = new TreeSet<>(
 				new Comparator<ServiceReference<ConfigurationPlugin>>() {
 					@Override
 					public int compare(ServiceReference<ConfigurationPlugin> s1,

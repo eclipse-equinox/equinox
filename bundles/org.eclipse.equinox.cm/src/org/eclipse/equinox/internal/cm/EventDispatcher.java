@@ -34,7 +34,7 @@ public class EventDispatcher {
 	/** @GuardedBy this */
 	private ServiceReference<ConfigurationAdmin> configAdminReference;
 	final LogTracker log;
-	private ConfigurationAdminFactory configurationAdminFactory;
+	private final ConfigurationAdminFactory configurationAdminFactory;
 
 	public EventDispatcher(BundleContext context, LogTracker log, ConfigurationAdminFactory configurationAdminFactory) {
 		this.log = log;
