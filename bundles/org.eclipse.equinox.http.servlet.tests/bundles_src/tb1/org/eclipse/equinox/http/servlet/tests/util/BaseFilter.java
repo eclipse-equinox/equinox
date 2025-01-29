@@ -30,7 +30,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class BaseFilter implements Filter {
 
-	private char c;
+	private final char c;
 
 	public BaseFilter(char c) {
 		this.c = c;

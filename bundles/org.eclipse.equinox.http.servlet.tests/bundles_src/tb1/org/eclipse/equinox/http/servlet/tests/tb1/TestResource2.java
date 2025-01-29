@@ -48,8 +48,8 @@ public class TestResource2 extends AbstractTestResource {
 		service.unregisterFilter(f3);
 	}
 
-	private Filter f1 = new BaseFilter('c');
-	private Filter f2 = new BaseFilter('b');
-	private Filter f3 = new BaseFilter('d');
+	private final Filter f1 = new BaseFilter('c');
+	private final Filter f2 = new BaseFilter('b');
+	private final Filter f3 = new BaseFilter('d');
 
 }

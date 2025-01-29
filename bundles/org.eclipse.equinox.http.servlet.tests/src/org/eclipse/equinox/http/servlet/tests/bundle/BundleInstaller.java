@@ -28,10 +28,10 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.util.tracker.ServiceTracker;
 
 public class BundleInstaller {
-	private BundleContext context;
-	private String rootLocation;
+	private final BundleContext context;
+	private final String rootLocation;
 	private HashMap<String, Bundle> bundles = new HashMap<>();
-	private ServiceTracker<Object, Object> converter;
+	private final ServiceTracker<Object, Object> converter;
 
 	public BundleInstaller(String bundlesRoot, BundleContext context) throws InvalidSyntaxException {
 		this.context = context;
