@@ -27,7 +27,7 @@ public class DefaultAuthorizationManager extends AuthorizationManager {
 	boolean enabled = (null != Activator.getAuthorizationEngine());
 
 	private int currentStatus = IStatus.OK;
-	private boolean needsAttention = false;
+	private final boolean needsAttention = false;
 
 	public DefaultAuthorizationManager() {
 		currentStatus = enabled ? Activator.getAuthorizationEngine().getStatus() : IStatus.OK;

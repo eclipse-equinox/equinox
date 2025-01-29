@@ -23,9 +23,9 @@ import org.eclipse.swt.widgets.*;
 
 public class CertificateViewer {
 
-	private Composite composite;
+	private final Composite composite;
 
-	private TableViewer tableViewer;
+	private final TableViewer tableViewer;
 
 	public CertificateViewer(Composite parent) {
 		composite = new Composite(parent, SWT.None);

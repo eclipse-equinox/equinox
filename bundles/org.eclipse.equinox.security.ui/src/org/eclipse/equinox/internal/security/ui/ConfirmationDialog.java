@@ -26,7 +26,7 @@ public class ConfirmationDialog extends TitleAreaDialog {
 	public static final int YES = 100;
 	public static final int NO = 101;
 
-	private Certificate cert;
+	private final Certificate cert;
 
 	public ConfirmationDialog(Shell parentShell, Certificate cert) {
 		super(parentShell);

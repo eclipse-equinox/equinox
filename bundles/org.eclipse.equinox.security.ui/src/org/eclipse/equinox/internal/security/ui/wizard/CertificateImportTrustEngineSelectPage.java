@@ -27,7 +27,7 @@ public class CertificateImportTrustEngineSelectPage extends WizardPage implement
 
 	private Text aliasField;
 	private Combo trustEngineCombo;
-	private ArrayList<TrustEngine> trustEngines = new ArrayList<>();
+	private final ArrayList<TrustEngine> trustEngines = new ArrayList<>();
 
 	protected CertificateImportTrustEngineSelectPage(String pageName) {
 		super(pageName);

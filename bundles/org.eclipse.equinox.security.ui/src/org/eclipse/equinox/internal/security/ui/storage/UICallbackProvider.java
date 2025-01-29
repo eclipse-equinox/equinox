@@ -35,7 +35,7 @@ public class UICallbackProvider implements IUICallbacks {
 
 	private static class InitWithProgress implements IRunnableWithProgress {
 
-		private IStorageTask callback;
+		private final IStorageTask callback;
 		private StorageException exception = null;
 
 		public InitWithProgress(IStorageTask callback) {

@@ -47,7 +47,7 @@ public class X509CertificateAttributeContentProvider implements IStructuredConte
 	private static String LABEL_KEYUSAGE_ENCIPHERONLY = "encipherOnly"; //$NON-NLS-1$
 	private static String LABEL_KEYUSAGE_DECIPHERONLY = "decipherOnly"; //$NON-NLS-1$
 
-	private ArrayList<X509CertificateAttribute> elements = new ArrayList<>();
+	private final ArrayList<X509CertificateAttribute> elements = new ArrayList<>();
 	private Viewer viewer = null;
 	private static String listDelim = ", "; //$NON-NLS-1$
 

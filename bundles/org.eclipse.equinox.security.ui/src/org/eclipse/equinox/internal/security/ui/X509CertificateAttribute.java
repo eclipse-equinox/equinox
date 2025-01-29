@@ -23,16 +23,16 @@ public class X509CertificateAttribute {
 	// Description of the field
 	// NOTE: This will show in the UI so it should be loaded from a translatable
 	// properties file.
-	private String fieldDescription;
+	private final String fieldDescription;
 
 	// A String representation of the value of the field. May have undergone some
 	// transformation to make it "pretty" in the UI
-	private String stringVal;
+	private final String stringVal;
 
 	// The raw data object from inside the certificate. Most likely whatever object
 	// the getter method
 	// for the field returns.
-	private Object rawValue;
+	private final Object rawValue;
 
 	public X509CertificateAttribute(String propDescription, String StringVal, Object objValue) {
 		super();
