@@ -45,7 +45,7 @@ public class SecurityStatusControl extends ControlContribution {
 	/* the default id for this Item */
 	private static final String ID = "org.eclipse.ui.securityStatus"; //$NON-NLS-1$
 
-	private IWorkbenchWindow window;
+	private final IWorkbenchWindow window;
 	private CLabel label;
 
 	private IconState currentState;

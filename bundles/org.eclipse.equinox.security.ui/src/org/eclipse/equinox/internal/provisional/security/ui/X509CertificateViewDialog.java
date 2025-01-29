@@ -28,9 +28,9 @@ import org.eclipse.swt.layout.*;
 import org.eclipse.swt.widgets.*;
 
 public class X509CertificateViewDialog extends TitleAreaDialog {
-	private X509Certificate theCert;
+	private final X509Certificate theCert;
 	private static final DateFormat _df = DateFormat.getDateInstance(DateFormat.LONG);
-	private X500PrincipalHelper nameHelper = new X500PrincipalHelper();
+	private final X500PrincipalHelper nameHelper = new X500PrincipalHelper();
 
 	// We use the "bannerFont" for our bold font
 	private static Font boldFont = JFaceResources.getBannerFont();

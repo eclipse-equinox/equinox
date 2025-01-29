@@ -58,9 +58,9 @@ public class ValuesView {
 	protected Shell shell;
 
 	class TableValuesElement {
-		private String key;
+		private final String key;
 		private String value;
-		private boolean encrypted;
+		private final boolean encrypted;
 
 		public TableValuesElement(String key) {
 			this.key = key;
