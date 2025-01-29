@@ -21,7 +21,7 @@ import org.osgi.framework.Constants;
  * A companion to ExportPackageDescription from the state used while resolving.
  */
 public class ResolverExport extends VersionSupplier {
-	private ResolverBundle resolverBundle;
+	private final ResolverBundle resolverBundle;
 
 	ResolverExport(ResolverBundle resolverBundle, ExportPackageDescription epd) {
 		super(epd);

@@ -27,7 +27,7 @@ public class GroupingChecker {
 	// a mapping of bundles to their package roots; keyed by
 	// ResolverBundle -> HashMap of packages; keyed by
 	// package name -> PackageRoots
-	private Map<ResolverBundle, Map<String, PackageRoots>> bundles = new HashMap<>();
+	private final Map<ResolverBundle, Map<String, PackageRoots>> bundles = new HashMap<>();
 
 	/*
 	 * This method fully populates a bundles package roots for the purpose of resolving
@@ -284,7 +284,7 @@ public class GroupingChecker {
 	}
 
 	class PackageRoots {
-		private String name;
+		private final String name;
 		private ResolverExport[] roots;
 
 		PackageRoots(String name) {

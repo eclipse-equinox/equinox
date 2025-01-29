@@ -91,7 +91,7 @@ public class ResolverImpl implements Resolver {
 	// Used to check permissions for import/export, provide/require, host/fragment
 	private final PermissionChecker permissionChecker;
 	// Set of bundles that are pending removal
-	private MappedList<Long, BundleDescription> removalPending = new MappedList<>();
+	private final MappedList<Long, BundleDescription> removalPending = new MappedList<>();
 	// Indicates whether this resolver has been initialized
 	private boolean initialized = false;
 

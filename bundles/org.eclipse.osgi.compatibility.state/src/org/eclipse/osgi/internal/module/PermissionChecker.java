@@ -19,7 +19,7 @@ import org.osgi.framework.*;
 
 public class PermissionChecker {
 	private boolean checkPermissions = false;
-	private ResolverImpl resolver;
+	private final ResolverImpl resolver;
 
 	public PermissionChecker(boolean checkPermissions, ResolverImpl resolver) {
 		this.checkPermissions = checkPermissions;
