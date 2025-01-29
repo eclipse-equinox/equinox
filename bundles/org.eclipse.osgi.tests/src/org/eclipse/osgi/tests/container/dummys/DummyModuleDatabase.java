@@ -29,8 +29,8 @@ public class DummyModuleDatabase extends ModuleDatabase {
 		super(adaptor);
 	}
 
-	private List<DummyModuleEvent> moduleEvents = new ArrayList<>();
-	private List<DummyContainerEvent> containerEvents = new ArrayList<>();
+	private final List<DummyModuleEvent> moduleEvents = new ArrayList<>();
+	private final List<DummyContainerEvent> containerEvents = new ArrayList<>();
 
 	void addEvent(DummyModuleEvent event) {
 		synchronized (moduleEvents) {
