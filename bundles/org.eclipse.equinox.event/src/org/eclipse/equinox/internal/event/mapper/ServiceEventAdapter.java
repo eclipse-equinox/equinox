@@ -30,7 +30,7 @@ public class ServiceEventAdapter extends EventAdapter {
 	public static final String UNREGISTERING = "UNREGISTERING"; //$NON-NLS-1$
 	public static final String MODIFIED = "MODIFIED"; //$NON-NLS-1$
 	public static final String REGISTERED = "REGISTERED"; //$NON-NLS-1$
-	private ServiceEvent event;
+	private final ServiceEvent event;
 
 	public ServiceEventAdapter(ServiceEvent event, EventAdmin eventAdmin) {
 		super(eventAdmin);

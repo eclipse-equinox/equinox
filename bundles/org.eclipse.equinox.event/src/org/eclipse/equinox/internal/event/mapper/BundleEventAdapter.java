@@ -33,7 +33,7 @@ public class BundleEventAdapter extends EventAdapter {
 	public static final String UNINSTALLED = "UNINSTALLED"; //$NON-NLS-1$
 	public static final String RESOLVED = "RESOLVED"; //$NON-NLS-1$
 	public static final String UNRESOLVED = "UNRESOLVED"; //$NON-NLS-1$
-	private BundleEvent event;
+	private final BundleEvent event;
 
 	public BundleEventAdapter(BundleEvent event, EventAdmin eventAdmin) {
 		super(eventAdmin);
