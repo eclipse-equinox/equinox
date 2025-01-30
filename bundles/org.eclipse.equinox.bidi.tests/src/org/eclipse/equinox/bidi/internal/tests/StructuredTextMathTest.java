@@ -24,14 +24,14 @@ import org.junit.Test;
  */
 public class StructuredTextMathTest extends StructuredTextTestBase {
 
-	private StructuredTextEnvironment envLTR = new StructuredTextEnvironment("ar", false,
+	private final StructuredTextEnvironment envLTR = new StructuredTextEnvironment("ar", false,
 			StructuredTextEnvironment.ORIENT_LTR);
-	private StructuredTextEnvironment envRTL = new StructuredTextEnvironment("ar", false,
+	private final StructuredTextEnvironment envRTL = new StructuredTextEnvironment("ar", false,
 			StructuredTextEnvironment.ORIENT_RTL);
 
-	private IStructuredTextExpert expertLTR = StructuredTextExpertFactory.getStatefulExpert(new StructuredTextMath(),
+	private final IStructuredTextExpert expertLTR = StructuredTextExpertFactory.getStatefulExpert(new StructuredTextMath(),
 			envLTR);
-	private IStructuredTextExpert expertRTL = StructuredTextExpertFactory.getStatefulExpert(new StructuredTextMath(),
+	private final IStructuredTextExpert expertRTL = StructuredTextExpertFactory.getStatefulExpert(new StructuredTextMath(),
 			envRTL);
 
 	private void verifyOneLine(String msg, String data, String resLTR, String resRTL) {
