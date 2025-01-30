@@ -824,7 +824,7 @@ public class DataParser {
 	private static class MyErrorHandler implements ErrorHandler {
 
 		/** Error handler output goes here */
-		private PrintStream _out;
+		private final PrintStream _out;
 
 		MyErrorHandler(PrintStream out) {
 			this._out = out;
