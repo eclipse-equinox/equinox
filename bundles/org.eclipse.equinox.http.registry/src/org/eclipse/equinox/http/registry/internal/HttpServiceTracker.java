@@ -27,8 +27,8 @@ import org.osgi.util.tracker.ServiceTracker;
 
 public class HttpServiceTracker extends ServiceTracker<HttpService, HttpService> {
 
-	private PackageAdmin packageAdmin;
-	private IExtensionRegistry registry;
+	private final PackageAdmin packageAdmin;
+	private final IExtensionRegistry registry;
 
 	private ServiceRegistration<?> registration;
 	Map<ServiceReference<HttpService>, HttpRegistryManager> httpRegistryManagers = new HashMap<>();
@@ -98,7 +98,7 @@ public class HttpServiceTracker extends ServiceTracker<HttpService, HttpService>
 
 	public class HttpContextExtensionServiceImpl implements HttpContextExtensionService {
 
-		private Bundle bundle;
+		private final Bundle bundle;
 
 		public HttpContextExtensionServiceImpl(Bundle bundle) {
 			this.bundle = bundle;

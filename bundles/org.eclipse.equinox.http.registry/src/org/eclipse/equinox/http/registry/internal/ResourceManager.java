@@ -40,13 +40,13 @@ public class ResourceManager implements ExtensionPointTracker.Listener {
 
 	private static final String FILTER = "filter"; //$NON-NLS-1$
 
-	private ExtensionPointTracker tracker;
+	private final ExtensionPointTracker tracker;
 
-	private List<IConfigurationElement> registered = new ArrayList<>();
+	private final List<IConfigurationElement> registered = new ArrayList<>();
 
-	private HttpRegistryManager httpRegistryManager;
+	private final HttpRegistryManager httpRegistryManager;
 
-	private ServiceReference<?> reference;
+	private final ServiceReference<?> reference;
 
 	public ResourceManager(HttpRegistryManager httpRegistryManager, ServiceReference<?> reference,
 			IExtensionRegistry registry) {

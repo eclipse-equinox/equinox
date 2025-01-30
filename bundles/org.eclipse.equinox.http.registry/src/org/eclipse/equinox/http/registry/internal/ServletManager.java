@@ -47,13 +47,13 @@ public class ServletManager implements ExtensionPointTracker.Listener {
 
 	private static final String FILTER = "filter"; //$NON-NLS-1$
 
-	private ExtensionPointTracker tracker;
+	private final ExtensionPointTracker tracker;
 
-	private HttpRegistryManager httpRegistryManager;
+	private final HttpRegistryManager httpRegistryManager;
 
-	private List<IConfigurationElement> registered = new ArrayList<>();
+	private final List<IConfigurationElement> registered = new ArrayList<>();
 
-	private ServiceReference<?> reference;
+	private final ServiceReference<?> reference;
 
 	public ServletManager(HttpRegistryManager httpRegistryManager, ServiceReference<?> reference,
 			IExtensionRegistry registry) {
@@ -155,7 +155,7 @@ public class ServletManager implements ExtensionPointTracker.Listener {
 	}
 
 	private static class ServletWrapper implements Servlet {
-		private IConfigurationElement element;
+		private final IConfigurationElement element;
 		private Servlet delegate;
 		private ServletConfig config;
 		private boolean loadOnStartup = false;

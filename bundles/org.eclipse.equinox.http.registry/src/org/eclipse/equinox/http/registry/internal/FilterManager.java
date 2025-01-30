@@ -46,13 +46,13 @@ public class FilterManager implements ExtensionPointTracker.Listener {
 
 	private static final String FILTER = "filter"; //$NON-NLS-1$
 
-	private ExtensionPointTracker tracker;
+	private final ExtensionPointTracker tracker;
 
-	private HttpRegistryManager httpRegistryManager;
+	private final HttpRegistryManager httpRegistryManager;
 
-	private Map<IConfigurationElement, Filter> registered = new HashMap<>();
+	private final Map<IConfigurationElement, Filter> registered = new HashMap<>();
 
-	private ServiceReference<?> reference;
+	private final ServiceReference<?> reference;
 
 	public FilterManager(HttpRegistryManager httpRegistryManager, ServiceReference<?> reference,
 			IExtensionRegistry registry) {
@@ -154,7 +154,7 @@ public class FilterManager implements ExtensionPointTracker.Listener {
 
 	private static class FilterWrapper implements Filter {
 
-		private IConfigurationElement element;
+		private final IConfigurationElement element;
 		private Filter delegate;
 		private FilterConfig config;
 		private boolean loadOnStartup = false;
