@@ -34,7 +34,7 @@ import org.xml.sax.SAXException;
 public class MetaTypeServiceImpl implements EquinoxMetaTypeService, SynchronousBundleListener {
 	private static String CACHE_FILE = "metaTypeCache"; //$NON-NLS-1$
 	SAXParserFactory _parserFactory;
-	private Hashtable<Long, EquinoxMetaTypeInformation> _mtps = new Hashtable<>(7);
+	private final Hashtable<Long, EquinoxMetaTypeInformation> _mtps = new Hashtable<>(7);
 
 	private final LogTracker logger;
 	private final ServiceTracker<Object, Object> metaTypeProviderTracker;
