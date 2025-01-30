@@ -21,7 +21,7 @@ import org.junit.Assert;
 
 public class TestAdapterFactory2 extends Assert implements IAdapterFactory {
 
-	private Supplier<TestAdapter2> supplier;
+	private final Supplier<TestAdapter2> supplier;
 
 	public TestAdapterFactory2(Supplier<TestAdapter2> supplier) {
 		this.supplier = supplier;

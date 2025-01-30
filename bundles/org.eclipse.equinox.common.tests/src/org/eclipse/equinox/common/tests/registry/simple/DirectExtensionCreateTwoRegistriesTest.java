@@ -33,9 +33,9 @@ import org.junit.Test;
  */
 public class DirectExtensionCreateTwoRegistriesTest extends BaseExtensionRegistryRun {
 
-	private String extensionPointId = "AAAid"; //$NON-NLS-1$
-	private String extensionPointAltId = "BBBid"; //$NON-NLS-1$
-	private String extensionPointSchemaRef = "schema/schema.exsd"; //$NON-NLS-1$
+	private final String extensionPointId = "AAAid"; //$NON-NLS-1$
+	private final String extensionPointAltId = "BBBid"; //$NON-NLS-1$
+	private final String extensionPointSchemaRef = "schema/schema.exsd"; //$NON-NLS-1$
 
 	private IExtensionRegistry theDeviceRegistryA;
 	private IExtensionRegistry theDeviceRegistryB;

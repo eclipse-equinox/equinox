@@ -43,25 +43,25 @@ import org.osgi.framework.FrameworkUtil;
 
 public class StatusTest {
 
-	private int status1Severity = IStatus.OK;
-	private String status1PluginId = "org.eclipse.core.tests.runtime";
-	private int status1Code = -20;
-	private String status1Message = "Something was canceled";
-	private Exception status1Exception = new OperationCanceledException();
+	private final int status1Severity = IStatus.OK;
+	private final String status1PluginId = "org.eclipse.core.tests.runtime";
+	private final int status1Code = -20;
+	private final String status1Message = "Something was canceled";
+	private final Exception status1Exception = new OperationCanceledException();
 	private Status status1;
 
-	private int status2Severity = IStatus.ERROR;
-	private String status2PluginId = " ";
-	private int status2Code = IStatus.OK;
-	private String status2Message = "";
-	private Exception status2Exception = null;
+	private final int status2Severity = IStatus.ERROR;
+	private final String status2PluginId = " ";
+	private final int status2Code = IStatus.OK;
+	private final String status2Message = "";
+	private final Exception status2Exception = null;
 	private Status status2;
 
-	private String multistatus1PluginId = "org.eclipse.core.tests.multistatus1";
-	private int multistatus1Code = 20;
-	private IStatus[] multistatus1Children = new IStatus[0];
-	private String multistatus1Message = "Multistatus #1 message";
-	private Throwable multistatus1Exception = new OperationCanceledException();
+	private final String multistatus1PluginId = "org.eclipse.core.tests.multistatus1";
+	private final int multistatus1Code = 20;
+	private final IStatus[] multistatus1Children = new IStatus[0];
+	private final String multistatus1Message = "Multistatus #1 message";
+	private final Throwable multistatus1Exception = new OperationCanceledException();
 	private MultiStatus multistatus1;
 
 	private MultiStatus multistatus2;
