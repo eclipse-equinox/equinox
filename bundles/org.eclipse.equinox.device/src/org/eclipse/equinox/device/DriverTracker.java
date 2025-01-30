@@ -417,9 +417,9 @@ public class DriverTracker extends ServiceTracker {
 	}
 
 	public class DriverUpdate implements Runnable, ServiceListener, BundleListener {
-		private Activator manager_;
-		private Bundle bundle;
-		private BundleContext contxt;
+		private final Activator manager_;
+		private final Bundle bundle;
+		private final BundleContext contxt;
 
 		/** if false the thread must terminate */
 		private volatile boolean running;

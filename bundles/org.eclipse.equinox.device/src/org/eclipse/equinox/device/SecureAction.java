@@ -21,7 +21,7 @@ import java.security.*;
  */
 public class SecureAction {
 	// make sure we use the correct controlContext;
-	private AccessControlContext controlContext;
+	private final AccessControlContext controlContext;
 
 	/**
 	 * Constructs a new SecureAction object. The constructed SecureAction object
