@@ -22,7 +22,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 
 public class DefaultRegistryHttpContext implements HttpContext {
-	private HttpContext delegate;
+	private final HttpContext delegate;
 	private List<ResourceMapping> resourceMappings;
 	private Properties mimeMappings;
 
@@ -93,8 +93,8 @@ public class DefaultRegistryHttpContext implements HttpContext {
 	}
 
 	public static class ResourceMapping {
-		private Bundle bundle;
-		private String bundlePath;
+		private final Bundle bundle;
+		private final String bundlePath;
 
 		public ResourceMapping(Bundle bundle, String path) {
 			this.bundle = bundle;

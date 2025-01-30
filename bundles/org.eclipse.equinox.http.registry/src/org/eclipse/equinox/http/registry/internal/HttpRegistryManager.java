@@ -83,17 +83,17 @@ public class HttpRegistryManager {
 		}
 	}
 
-	private HttpContextManager httpContextManager;
-	private ServletManager servletManager;
-	private FilterManager filterManager;
-	private ResourceManager resourceManager;
-	private HttpService httpService;
-	private PackageAdmin packageAdmin;
-	private Map<String, HttpContextContribution> contexts = new HashMap<>();
-	private Map<String, FilterContribution> filters = new HashMap<>();
-	private Map<String, ServletContribution> servlets = new HashMap<>();
-	private Map<String, ResourcesContribution> resources = new HashMap<>();
-	private Set<String> registered = new HashSet<>();
+	private final HttpContextManager httpContextManager;
+	private final ServletManager servletManager;
+	private final FilterManager filterManager;
+	private final ResourceManager resourceManager;
+	private final HttpService httpService;
+	private final PackageAdmin packageAdmin;
+	private final Map<String, HttpContextContribution> contexts = new HashMap<>();
+	private final Map<String, FilterContribution> filters = new HashMap<>();
+	private final Map<String, ServletContribution> servlets = new HashMap<>();
+	private final Map<String, ResourcesContribution> resources = new HashMap<>();
+	private final Set<String> registered = new HashSet<>();
 
 	public HttpRegistryManager(ServiceReference<?> reference, HttpService httpService, PackageAdmin packageAdmin,
 			IExtensionRegistry registry) {

@@ -37,9 +37,9 @@ public class HttpContextManager implements Listener {
 	private static final String RESOURCEMAPPING = "resource-mapping"; //$NON-NLS-1$
 	private static final String BUNDLE = "bundle"; //$NON-NLS-1$
 
-	private List<IConfigurationElement> registered = new ArrayList<>();
-	private HttpRegistryManager httpRegistryManager;
-	private ExtensionPointTracker tracker;
+	private final List<IConfigurationElement> registered = new ArrayList<>();
+	private final HttpRegistryManager httpRegistryManager;
+	private final ExtensionPointTracker tracker;
 
 	public HttpContextManager(HttpRegistryManager httpRegistryManager, IExtensionRegistry registry) {
 		this.httpRegistryManager = httpRegistryManager;
