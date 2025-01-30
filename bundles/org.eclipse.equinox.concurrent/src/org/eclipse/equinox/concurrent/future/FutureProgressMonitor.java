@@ -27,7 +27,7 @@ import org.eclipse.core.runtime.ProgressMonitorWrapper;
 public class FutureProgressMonitor extends ProgressMonitorWrapper {
 
 	private IProgressMonitor monitor;
-	private Object lock = new Object();
+	private final Object lock = new Object();
 
 	/**
 	 * Create a new progress monitor wrapping the given monitor. The nested monitor
