@@ -45,7 +45,7 @@ public class XSLTStreamTransformer {
 	 * access.
 	 */
 	class XSLTPipe extends Pipe {
-		private Transformer transformer;
+		private final Transformer transformer;
 
 		public XSLTPipe(InputStream original, Transformer transformer) throws IOException {
 			super(original);
@@ -90,7 +90,7 @@ public class XSLTStreamTransformer {
 	/**
 	 * Tracks the logging service.
 	 */
-	private ServiceTracker<FrameworkLog, FrameworkLog> logTracker;
+	private final ServiceTracker<FrameworkLog, FrameworkLog> logTracker;
 
 	/**
 	 * A map containing compiled XSLT transformations. These transforms are held by
