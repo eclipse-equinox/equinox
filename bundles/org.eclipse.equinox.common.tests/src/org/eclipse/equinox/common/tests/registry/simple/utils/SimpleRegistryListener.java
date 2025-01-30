@@ -27,7 +27,7 @@ import org.eclipse.core.runtime.*;
  */
 public class SimpleRegistryListener implements IRegistryChangeListener {
 
-	private List<IRegistryChangeEvent> events = new LinkedList<>();
+	private final List<IRegistryChangeEvent> events = new LinkedList<>();
 
 	@Override
 	public synchronized void registryChanged(IRegistryChangeEvent newEvent) {

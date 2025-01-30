@@ -363,7 +363,7 @@ public class IAdapterManagerTest {
 	public static class GenericToStringAdapterFactory implements IAdapterFactory, IAdapterFactoryExt {
 
 		public boolean loaded = true;
-		private Class<?> adaptableType;
+		private final Class<?> adaptableType;
 
 		public GenericToStringAdapterFactory(Class<?> adaptableType) {
 			this.adaptableType = adaptableType;
