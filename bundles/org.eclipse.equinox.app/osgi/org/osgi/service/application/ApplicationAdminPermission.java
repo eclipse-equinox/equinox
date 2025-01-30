@@ -60,7 +60,7 @@ public class ApplicationAdminPermission extends Permission {
 	 */
 	public static final String LOCK_ACTION = "lock";
 
-	private ApplicationDescriptor	applicationDescriptor;
+	private final ApplicationDescriptor	applicationDescriptor;
 
 	/**
 	 * Constructs an ApplicationAdminPermission. The {@code filter}
