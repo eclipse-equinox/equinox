@@ -39,7 +39,7 @@ public class ServiceReferenceMap extends AbstractMap<String, Object> {
 		return entries;
 	}
 
-	private Set<java.util.Map.Entry<String, Object>> entries;
+	private final Set<java.util.Map.Entry<String, Object>> entries;
 
 	private static class ReferenceEntry implements Map.Entry<String, Object> {
 
@@ -63,8 +63,8 @@ public class ServiceReferenceMap extends AbstractMap<String, Object> {
 			return key;
 		}
 
-		private String key;
-		private Object value;
+		private final String key;
+		private final Object value;
 
 	}
 

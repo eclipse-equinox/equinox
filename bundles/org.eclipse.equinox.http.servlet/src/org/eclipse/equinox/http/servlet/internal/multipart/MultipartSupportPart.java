@@ -111,7 +111,7 @@ public class MultipartSupportPart implements Part {
 			return collection.size();
 		}
 
-		private List<String> collection;
+		private final List<String> collection;
 
 	}
 

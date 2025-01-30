@@ -88,7 +88,7 @@ public class EventListeners {
 		}
 	}
 
-	private ConcurrentMap<Class<? extends EventListener>, List<ListenerRegistration>> map = new ConcurrentHashMap<>();
+	private final ConcurrentMap<Class<? extends EventListener>, List<ListenerRegistration>> map = new ConcurrentHashMap<>();
 
 	class ListenerList<R extends EventListener> extends AbstractList<R> {
 
@@ -107,7 +107,7 @@ public class EventListeners {
 			return list.size();
 		}
 
-		private List<ListenerRegistration> list;
+		private final List<ListenerRegistration> list;
 
 	}
 }
