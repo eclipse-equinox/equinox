@@ -41,7 +41,7 @@ public class ProxyContext {
 
 	private final ConcurrentMap<ContextController, ContextAttributes> attributesMap = new ConcurrentHashMap<>();
 	File proxyContextTempDir;
-	private ServletContext servletContext;
+	private final ServletContext servletContext;
 
 	public ProxyContext(String contextName, ServletContext servletContext) {
 		this.servletContext = servletContext;
