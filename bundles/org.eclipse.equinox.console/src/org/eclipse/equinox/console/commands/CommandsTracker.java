@@ -26,7 +26,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 public class CommandsTracker {
-	private Set<String> commandNames;
+	private final Set<String> commandNames;
 	private ServiceTracker<Object, Set<String>> commandsTracker = null;
 	private static final Object lock = new Object();
 

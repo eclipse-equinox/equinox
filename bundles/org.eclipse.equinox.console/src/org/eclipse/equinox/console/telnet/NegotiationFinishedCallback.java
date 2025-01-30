@@ -24,7 +24,7 @@ package org.eclipse.equinox.console.telnet;
  */
 public class NegotiationFinishedCallback implements Callback {
 
-	private TelnetConnection telnetConnection;
+	private final TelnetConnection telnetConnection;
 
 	public NegotiationFinishedCallback(TelnetConnection telnetConnection) {
 		this.telnetConnection = telnetConnection;

@@ -29,7 +29,7 @@ import org.osgi.framework.BundleContext;
 
 public class ExportStateCommand {
 
-	private BundleContext context;
+	private final BundleContext context;
 
 	public ExportStateCommand(BundleContext context) {
 		this.context = context;

@@ -25,8 +25,8 @@ import org.eclipse.equinox.console.completion.common.Completer;
  */
 public class StringsCompleter implements Completer {
 
-	private Set<String> strings;
-	private boolean isCaseSensitive;
+	private final Set<String> strings;
+	private final boolean isCaseSensitive;
 
 	public StringsCompleter(Set<String> strings, boolean isCaseSensitive) {
 		this.strings = strings;

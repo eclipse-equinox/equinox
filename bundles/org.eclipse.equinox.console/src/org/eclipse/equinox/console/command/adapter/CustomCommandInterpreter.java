@@ -36,10 +36,10 @@ import org.osgi.framework.Bundle;
  * the CommandProviderAdapter.
  */
 public class CustomCommandInterpreter implements CommandInterpreter {
-	private PrintStream out = System.out;
+	private final PrintStream out = System.out;
 	/** Strings used to format other strings */
-	private String tab = "\t"; //$NON-NLS-1$
-	private String newline = "\r\n"; //$NON-NLS-1$
+	private final String tab = "\t"; //$NON-NLS-1$
+	private final String newline = "\r\n"; //$NON-NLS-1$
 	private final Iterator<Object> arguments;
 	private final CommandSession commandSession;
 	/**

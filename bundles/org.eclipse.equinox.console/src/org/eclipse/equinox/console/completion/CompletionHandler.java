@@ -34,8 +34,8 @@ import org.osgi.framework.ServiceReference;
  */
 public class CompletionHandler {
 
-	private BundleContext context;
-	private CommandSession session;
+	private final BundleContext context;
+	private final CommandSession session;
 	Set<Completer> completers;
 	private static final String FILE = "file";
 	private static final char VARIABLE_PREFIX = '$';

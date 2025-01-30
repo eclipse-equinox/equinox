@@ -489,7 +489,7 @@ public class ConsoleInputScanner extends Scanner {
 	}
 
 	private static class Candidates {
-		private String[] candidates;
+		private final String[] candidates;
 		private int currentCandidateIndex = 0;
 
 		public Candidates(String[] candidates) {

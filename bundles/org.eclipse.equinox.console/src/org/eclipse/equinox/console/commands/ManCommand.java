@@ -21,7 +21,7 @@ import org.apache.felix.service.command.CommandSession;
 import org.osgi.framework.BundleContext;
 
 public class ManCommand {
-	private BundleContext context;
+	private final BundleContext context;
 
 	public ManCommand(BundleContext context) {
 		this.context = context;

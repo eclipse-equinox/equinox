@@ -25,7 +25,7 @@ import org.eclipse.equinox.console.completion.common.Completer;
  */
 public class VariableNamesCompleter implements Completer {
 
-	private CommandSession session;
+	private final CommandSession session;
 
 	public VariableNamesCompleter(CommandSession session) {
 		this.session = session;

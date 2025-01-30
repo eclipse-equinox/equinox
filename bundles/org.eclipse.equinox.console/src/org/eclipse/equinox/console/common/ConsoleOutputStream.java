@@ -37,7 +37,7 @@ public class ConsoleOutputStream extends OutputStream {
 	private boolean isEcho = true;
 	private boolean queueing = false;
 	private byte prevByte;
-	private byte[] buffer;
+	private final byte[] buffer;
 	private int pos;
 
 	/**

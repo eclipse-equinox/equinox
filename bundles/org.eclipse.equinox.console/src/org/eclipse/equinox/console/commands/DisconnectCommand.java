@@ -34,7 +34,7 @@ public class DisconnectCommand {
 	private static final String DISCONNECT_MESSAGE = "Disconnect from console? (y/n; default=y) ";
 	private static final String DISCONNECT_CONFIRMATION_Y = "y";
 
-	private BundleContext context;
+	private final BundleContext context;
 
 	public DisconnectCommand(BundleContext context) {
 		this.context = context;
