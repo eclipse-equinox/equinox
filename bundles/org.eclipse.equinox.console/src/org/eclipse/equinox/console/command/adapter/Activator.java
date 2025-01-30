@@ -238,7 +238,7 @@ public class Activator implements BundleActivator {
 	// provided by a CommandProviderAdapter.
 	public class CommandCustomizer implements ServiceTrackerCustomizer<CommandProvider, List<ServiceRegistration<?>>> {
 
-		private BundleContext context;
+		private final BundleContext context;
 
 		public CommandCustomizer(BundleContext context) {
 			this.context = context;

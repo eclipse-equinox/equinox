@@ -38,14 +38,14 @@ import org.apache.felix.service.command.CommandSession;
  * to Gogo commands.
  */
 public class HelpCommand {
-	private BundleContext context;
-	private Set<CommandProvider> legacyCommandProviders;
-	private ServiceTracker<CommandProvider, Set<CommandProvider>> commandProvidersTracker;
-	private ServiceTracker<CommandsTracker, CommandsTracker> commandsTrackerTracker;
+	private final BundleContext context;
+	private final Set<CommandProvider> legacyCommandProviders;
+	private final ServiceTracker<CommandProvider, Set<CommandProvider>> commandProvidersTracker;
+	private final ServiceTracker<CommandsTracker, CommandsTracker> commandsTrackerTracker;
 	private static final String COMMANDS = ".commands";
 
 	public class CommandProviderCustomizer implements ServiceTrackerCustomizer<CommandProvider, Set<CommandProvider>> {
-		private BundleContext context;
+		private final BundleContext context;
 
 		public CommandProviderCustomizer(BundleContext context) {
 			this.context = context;

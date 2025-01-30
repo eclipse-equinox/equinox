@@ -45,8 +45,8 @@ public class TelnetInputScanner extends Scanner {
 	private int lastRead = -1;
 	private ArrayList<Integer> currentTerminalType = new ArrayList<>();
 	private ArrayList<Integer> lastTerminalType = null;
-	private Set<String> supportedTerminalTypes = new HashSet<>();
-	private Callback callback;
+	private final Set<String> supportedTerminalTypes = new HashSet<>();
+	private final Callback callback;
 
 	public TelnetInputScanner(ConsoleInputStream toShell, ConsoleOutputStream toTelnet, Callback callback) {
 		super(toShell, toTelnet);
@@ -119,7 +119,7 @@ public class TelnetInputScanner extends Scanner {
 	private boolean isNegotiation;
 	private boolean isWill;
 
-	private byte[] tTypeRequest = { (byte) IAC, (byte) SB, (byte) TTYPE, (byte) SEND, (byte) IAC, (byte) SE };
+	private final byte[] tTypeRequest = { (byte) IAC, (byte) SB, (byte) TTYPE, (byte) SEND, (byte) IAC, (byte) SE };
 
 	private void scanCommand(final int b) throws IOException {
 		if (isNegotiation) {

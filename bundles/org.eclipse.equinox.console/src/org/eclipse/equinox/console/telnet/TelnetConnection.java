@@ -33,11 +33,11 @@ import org.osgi.framework.BundleContext;
  */
 public class TelnetConnection extends Thread implements Closeable {
 
-	private Socket socket;
-	private CommandProcessor processor;
-	private BundleContext context;
+	private final Socket socket;
+	private final CommandProcessor processor;
+	private final BundleContext context;
 	protected boolean isTelnetNegotiationFinished = false;
-	private Callback callback;
+	private final Callback callback;
 	private static final long TIMEOUT = 1000;
 	private static final long NEGOTIATION_TIMEOUT = 60000;
 	private static final String PROMPT = "prompt";

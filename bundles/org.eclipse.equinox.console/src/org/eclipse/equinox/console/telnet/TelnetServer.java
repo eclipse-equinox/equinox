@@ -36,9 +36,9 @@ public class TelnetServer extends Thread {
 	private ServerSocket server;
 	private boolean isRunning = true;
 	private List<CommandProcessor> processors = null;
-	private BundleContext context;
-	private List<Socket> sockets = new ArrayList<>();
-	private Map<CommandProcessor, List<TelnetConnection>> processorToConnectionsMapping = new HashMap<>();
+	private final BundleContext context;
+	private final List<Socket> sockets = new ArrayList<>();
+	private final Map<CommandProcessor, List<TelnetConnection>> processorToConnectionsMapping = new HashMap<>();
 
 	public TelnetServer(BundleContext context, List<CommandProcessor> processors, String host, int port)
 			throws IOException {

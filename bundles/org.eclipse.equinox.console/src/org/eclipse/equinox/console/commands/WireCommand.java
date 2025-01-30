@@ -40,7 +40,7 @@ public class WireCommand {
 	private static final Comparator<BundleRevision> BUNDLE_REVISIONS_BY_NAME = Comparator.comparing(
 			BundleRevision::getSymbolicName, String.CASE_INSENSITIVE_ORDER);
 
-	private BundleContext context;
+	private final BundleContext context;
 
 	public WireCommand(BundleContext context) {
 		this.context = context;

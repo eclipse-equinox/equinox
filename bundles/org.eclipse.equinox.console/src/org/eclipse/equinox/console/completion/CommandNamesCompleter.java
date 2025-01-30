@@ -30,8 +30,8 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class CommandNamesCompleter implements Completer {
 
-	private CommandSession session;
-	private ServiceTracker<CommandsTracker, CommandsTracker> commandsTrackerTracker;
+	private final CommandSession session;
+	private final ServiceTracker<CommandsTracker, CommandsTracker> commandsTrackerTracker;
 	private static final String COMMANDS = ".commands";
 
 	public CommandNamesCompleter(BundleContext context, CommandSession session) {

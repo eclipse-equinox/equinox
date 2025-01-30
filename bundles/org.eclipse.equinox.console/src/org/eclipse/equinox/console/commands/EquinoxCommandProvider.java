@@ -181,7 +181,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	/** this list contains the bundles known to be lazily awaiting activation */
 	private final List<Bundle> lazyActivation = new ArrayList<>();
 
-	private Activator activator;
+	private final Activator activator;
 
 	/** commands provided by this command provider */
 	private static final String[] functions = new String[] { "exit", "shutdown", "sta", "start", "sto", "stop", "i",
