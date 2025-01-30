@@ -28,7 +28,7 @@ public class OSXProvider extends PasswordProvider {
 
 	private static final String SERVICE_NAME = "equinox.secure.storage"; //$NON-NLS-1$
 
-	private String accountName = System.getProperty("user.name"); //$NON-NLS-1$
+	private final String accountName = System.getProperty("user.name"); //$NON-NLS-1$
 
 	private native String getPassword(String service, String account) throws SecurityException;
 
