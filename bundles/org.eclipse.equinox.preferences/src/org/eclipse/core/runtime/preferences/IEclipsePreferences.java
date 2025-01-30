@@ -42,7 +42,7 @@ public interface IEclipsePreferences extends Preferences {
 		 */
 		private static final long serialVersionUID = 1L;
 
-		private Preferences child;
+		private final Preferences child;
 
 		/**
 		 * Constructor for a new node change event object.
@@ -127,9 +127,9 @@ public interface IEclipsePreferences extends Preferences {
 		 */
 		private static final long serialVersionUID = 1L;
 
-		private String key;
-		private Object newValue;
-		private Object oldValue;
+		private final String key;
+		private final Object newValue;
+		private final Object oldValue;
 
 		/**
 		 * Constructor for a new preference change event. The node and the key must not
