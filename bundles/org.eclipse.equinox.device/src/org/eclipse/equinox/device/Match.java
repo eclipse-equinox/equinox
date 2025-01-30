@@ -20,8 +20,8 @@ import org.osgi.framework.ServiceReference;
  */
 public class Match implements org.osgi.service.device.Match {
 
-	private ServiceReference driver;
-	private int matchValue;
+	private final ServiceReference driver;
+	private final int matchValue;
 
 	Match(ServiceReference driver, int matchValue) {
 		this.driver = driver;
