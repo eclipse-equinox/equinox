@@ -31,14 +31,14 @@ public class EclipseScheduledApplication implements ScheduledApplication, EventH
 			+ ApplicationDescriptor.APPLICATION_PID + "="; //$NON-NLS-1$
 	private static final String FILTER_POSTFIX = "))"; //$NON-NLS-1$
 
-	private boolean recurring;
-	private String topic;
-	private String eventFilter;
-	private Map<String, Object> args;
-	private String appPid;
-	private String id;
+	private final boolean recurring;
+	private final String topic;
+	private final String eventFilter;
+	private final Map<String, Object> args;
+	private final String appPid;
+	private final String id;
 	private ServiceRegistration sr;
-	private ServiceTracker appTracker;
+	private final ServiceTracker appTracker;
 	private boolean removed = false;
 
 	EclipseScheduledApplication(BundleContext context, String id, String appPid, Map<String, Object> args, String topic,

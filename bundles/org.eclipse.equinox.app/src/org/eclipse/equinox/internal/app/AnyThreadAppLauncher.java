@@ -17,7 +17,7 @@ package org.eclipse.equinox.internal.app;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 
 public class AnyThreadAppLauncher implements Runnable {
-	private EclipseAppHandle appHandle;
+	private final EclipseAppHandle appHandle;
 
 	private AnyThreadAppLauncher(EclipseAppHandle appHandle) {
 		this.appHandle = appHandle;
