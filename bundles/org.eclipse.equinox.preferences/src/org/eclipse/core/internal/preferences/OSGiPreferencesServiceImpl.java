@@ -38,10 +38,10 @@ public class OSGiPreferencesServiceImpl implements PreferencesService {
 	private static final class OSGiLocalRootPreferences implements Preferences {
 
 		// The "local" root of this preference tree (not the real Eclipse root)
-		private Preferences root;
+		private final Preferences root;
 
 		// the node this node is wrappering
-		private Preferences wrapped;
+		private final Preferences wrapped;
 
 		private OSGiLocalRootPreferences(Preferences root) {
 			this(root, root);
@@ -252,7 +252,7 @@ public class OSGiPreferencesServiceImpl implements PreferencesService {
 
 	} // end static inner class OSGiLocalRootPreferences
 
-	private IEclipsePreferences bundlePreferences;
+	private final IEclipsePreferences bundlePreferences;
 
 	OSGiPreferencesServiceImpl(IEclipsePreferences bundlePreferences) {
 		this.bundlePreferences = bundlePreferences;
