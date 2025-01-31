@@ -36,7 +36,7 @@ class JNIBridge {
 
 	private native String _get_os_recommended_folder();
 
-	private String library;
+	private final String library;
 	private boolean libraryLoaded = false;
 
 	/**
