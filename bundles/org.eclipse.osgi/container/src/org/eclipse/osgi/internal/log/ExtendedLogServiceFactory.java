@@ -251,18 +251,21 @@ public class ExtendedLogServiceFactory implements ServiceFactory<ExtendedLogServ
 			}
 			Map<String, LogLevel> logLevels = systemBundleLoggerContext.getEffectiveLogLevels();
 			LogLevel equinoxTrace = logLevels.remove(Debug.EQUINOX_TRACE);
-			if (equinoxTrace != LogLevel.TRACE) {
+			if (equinoxTrace == null) {
 				return;
 			}
 			DebugOptions debugOptions = getConfiguration().getDebugOptions();
 			Map<String, String> options = debugOptions.getOptions();
 			options.clear();
 			boolean enable = false;
-			for (Entry<String, LogLevel> level : logLevels.entrySet()) {
-				if (level.getValue() == LogLevel.TRACE
-						&& !(EQUINOX_LOGGER_NAME.equals(level.getKey()) || PERF_LOGGER_NAME.equals(level.getKey()))) {
-					options.put(level.getKey(), Boolean.TRUE.toString());
-					enable = true;
+			if (equinoxTrace == LogLevel.TRACE) {
+				// enable trace options if the EQUINOX.TRACE is set to trace
+				for (Entry<String, LogLevel> level : logLevels.entrySet()) {
+					if (level.getValue() == LogLevel.TRACE && !(EQUINOX_LOGGER_NAME.equals(level.getKey())
+							|| PERF_LOGGER_NAME.equals(level.getKey()))) {
+						options.put(level.getKey(), Boolean.TRUE.toString());
+						enable = true;
+					}
 				}
 			}
 			debugOptions.setOptions(options);

@@ -169,9 +169,8 @@ public class LogEquinoxTraceTest extends AbstractBundleTests {
 					logEntry.getLoggerName());
 		}
 
-		// remove all debug options which should disable debug trace
-		rootLogLevels.clear();
-		rootLogLevels.put(Debug.EQUINOX_TRACE, LogLevel.TRACE);
+		// Setting the EQUINOX.TRACE to anything but trace should disable
+		rootLogLevels.put(Debug.EQUINOX_TRACE, LogLevel.AUDIT);
 		rootContext.setLogLevels(rootLogLevels);
 		assertFalse("Expected debug to be disabled.", debugOptions.isDebugEnabled());
 		assertEquals("Expected no debug Options.", 0, debugOptions.getOptions().size());
