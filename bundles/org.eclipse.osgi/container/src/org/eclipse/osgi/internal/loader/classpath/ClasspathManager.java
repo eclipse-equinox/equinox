@@ -83,7 +83,7 @@ public class ClasspathManager {
 	private ArrayMap<String, String> loadedLibraries = null;
 	// used to detect recusive defineClass calls for the same class on the same
 	// class loader (bug 345500)
-	private ThreadLocal<DefineContext> currentDefineContext = new ThreadLocal<>();
+	private final ThreadLocal<DefineContext> currentDefineContext = new ThreadLocal<>();
 
 	/**
 	 * Constructs a classpath manager for the given generation and module class

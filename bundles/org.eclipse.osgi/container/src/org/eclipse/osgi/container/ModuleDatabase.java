@@ -514,6 +514,7 @@ public class ModuleDatabase {
 		try {
 			Map<ModuleRevision, ModuleWiring> clonedWirings = new HashMap<>(wirings);
 			clonedWirings.replaceAll(new BiFunction<ModuleRevision, ModuleWiring, ModuleWiring>() {
+				@Override
 				public ModuleWiring apply(ModuleRevision r, ModuleWiring w) {
 					return new ModuleWiring(r, w.getCapabilities(), w.getRequirements(), w.getProvidedWires(),
 							w.getRequiredWires(), w.getSubstitutedNames());

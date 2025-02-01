@@ -57,7 +57,7 @@ import org.osgi.service.startlevel.StartLevel;
 
 public class SystemBundleActivator implements BundleActivator {
 	private EquinoxFactoryManager urlFactoryManager;
-	private List<ServiceRegistration<?>> registrations = new ArrayList<>(10);
+	private final List<ServiceRegistration<?>> registrations = new ArrayList<>(10);
 	private SecurityManager setSecurityManagner;
 
 	@SuppressWarnings("deprecation")

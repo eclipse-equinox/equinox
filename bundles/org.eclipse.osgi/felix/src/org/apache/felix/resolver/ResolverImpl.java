@@ -89,9 +89,9 @@ public class ResolverImpl implements Resolver
         private final List<Capability> m_dynamicCandidates;
         // keeps track of valid related resources that we have seen.
         // a null value or TRUE indicate it is valid
-        private Map<Resource, Boolean> m_validRelatedResources = new HashMap<Resource, Boolean>(0);
+        private final Map<Resource, Boolean> m_validRelatedResources = new HashMap<Resource, Boolean>(0);
         // keeps track of related resources for each resource
-        private Map<Resource, Collection<Resource>> m_relatedResources = new HashMap<Resource, Collection<Resource>>(0);
+        private final Map<Resource, Collection<Resource>> m_relatedResources = new HashMap<Resource, Collection<Resource>>(0);
         // Holds candidate permutations based on permutating "uses" chains.
         // These permutations are given higher priority.
         private final List<Candidates> m_usesPermutations = new LinkedList<Candidates>();
@@ -408,7 +408,8 @@ public class ResolverImpl implements Resolver
         this.m_executor = executor;
     }
 
-    public Map<Resource, List<Wire>> resolve(ResolveContext rc) throws ResolutionException
+    @Override
+	public Map<Resource, List<Wire>> resolve(ResolveContext rc) throws ResolutionException
     {
         if (m_executor != null)
         {
@@ -421,7 +422,8 @@ public class ResolverImpl implements Resolver
                     AccessController.doPrivileged(
                         new PrivilegedAction<ExecutorService>()
                         {
-                            public ExecutorService run()
+                            @Override
+							public ExecutorService run()
                             {
                                 return Executors.newFixedThreadPool(m_parallelism);
                             }
@@ -437,7 +439,8 @@ public class ResolverImpl implements Resolver
                 if (System.getSecurityManager() != null)
                 {
                     AccessController.doPrivileged(new PrivilegedAction<Void>(){
-                        public Void run() {
+                        @Override
+						public Void run() {
                             executor.shutdownNow();
                             return null;
                         }
@@ -686,7 +689,8 @@ public class ResolverImpl implements Resolver
         return error;
     }
 
-    public Map<Resource,List<Wire>> resolveDynamic(ResolveContext context,
+    @Override
+	public Map<Resource,List<Wire>> resolveDynamic(ResolveContext context,
             Wiring hostWiring, Requirement dynamicRequirement)
             throws ResolutionException
     {
@@ -1182,7 +1186,8 @@ public class ResolverImpl implements Resolver
                 {
                     this.resource = resource;
                 }
-                public void run()
+                @Override
+				public void run()
                 {
                     List<WireCandidate> wireCandidates = getWireCandidates(session, allCandidates, resource);
                     allWireCandidates.put(resource, wireCandidates);
@@ -1215,7 +1220,8 @@ public class ResolverImpl implements Resolver
             allPackages.put(resource, packages);
             executor.execute(new Runnable()
             {
-                public void run()
+                @Override
+				public void run()
                 {
                     calculateExportedPackages(session, allCandidates, resource,
                         packages.m_exportedPkgs, packages.m_substitePkgs);
@@ -1229,7 +1235,8 @@ public class ResolverImpl implements Resolver
         {
             executor.execute(new Runnable()
             {
-                public void run()
+                @Override
+				public void run()
                 {
                     getPackages(session, allCandidates, allWireCandidates, allPackages, resource, allPackages.get(resource));
                 }
@@ -1260,7 +1267,8 @@ public class ResolverImpl implements Resolver
             {
                 executor.execute(new Runnable()
                 {
-                    public void run()
+                    @Override
+					public void run()
                     {
                         getPackageSourcesInternal(session, allPackages, resource, packages);
                     }
@@ -1274,7 +1282,8 @@ public class ResolverImpl implements Resolver
         {
             executor.execute(new Runnable()
             {
-                public void run()
+                @Override
+				public void run()
                 {
                     computeUses(session, allWireCandidates, allPackages, resource);
                 }
@@ -1821,7 +1830,8 @@ public class ResolverImpl implements Resolver
                 : resource.getCapabilities(null);
         @SuppressWarnings("serial")
         OpenHashMap<String, Set<Capability>> pkgs = new OpenHashMap<String, Set<Capability>>(caps.size()) {
-            public Set<Capability> compute(String pkgName) {
+            @Override
+			public Set<Capability> compute(String pkgName) {
                 return new HashSet<Capability>();
             }
         };
@@ -2173,12 +2183,14 @@ public class ResolverImpl implements Resolver
             m_exportedPkgs = new OpenHashMap<String, Blame>(nbCaps);
             m_substitePkgs = new OpenHashMap<String, Blame>(nbCaps);
             m_importedPkgs = new OpenHashMap<String, List<Blame>>(nbReqs) {
-                public List<Blame> compute(String s) {
+                @Override
+				public List<Blame> compute(String s) {
                     return new ArrayList<Blame>();
                 }
             };
             m_requiredPkgs = new OpenHashMap<String, List<Blame>>(nbReqs) {
-                public List<Blame> compute(String s) {
+                @Override
+				public List<Blame> compute(String s) {
                     return new ArrayList<Blame>();
                 }
             };
@@ -2328,7 +2340,8 @@ public class ResolverImpl implements Resolver
             this.m_blame2 = blame2;
         }
 
-        public String getMessage() {
+        @Override
+		public String getMessage() {
             if (m_blame2 == null)
             {
                 return "Uses constraint violation. Unable to resolve resource "
@@ -2362,7 +2375,8 @@ public class ResolverImpl implements Resolver
             }
         }
 
-        public Collection<Requirement> getUnresolvedRequirements() {
+        @Override
+		public Collection<Requirement> getUnresolvedRequirements() {
             if (m_blame2 == null)
             {
                 // This is an export conflict so there is only the first blame;
@@ -2525,7 +2539,8 @@ public class ResolverImpl implements Resolver
         {
             FutureTask<Void> task = new FutureTask<Void>(new Runnable()
             {
-                public void run()
+                @Override
+				public void run()
                 {
                     try
                     {
@@ -2595,7 +2610,8 @@ public class ResolverImpl implements Resolver
 
     static class DumbExecutor implements Executor
     {
-        public void execute(Runnable command)
+        @Override
+		public void execute(Runnable command)
         {
             command.run();
         }

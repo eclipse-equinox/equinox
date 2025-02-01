@@ -140,7 +140,7 @@ public class ReliableFile {
 	}
 
 	/** File object for original reference file */
-	private File referenceFile;
+	private final File referenceFile;
 
 	/** List of checksum file objects: File => specific ReliableFile generation */
 	private static Hashtable<File, CacheInfo> cacheFiles = new Hashtable<>(20);
@@ -894,7 +894,7 @@ public class ReliableFile {
 		return buffer;
 	}
 
-	private class CacheInfo {
+	private static class CacheInfo {
 		int filetype;
 		Checksum checksum;
 		long timeStamp;

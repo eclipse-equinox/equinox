@@ -253,6 +253,7 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
 	@Override
 	public void delete() {
 		securityAdmin.delete(this, true);

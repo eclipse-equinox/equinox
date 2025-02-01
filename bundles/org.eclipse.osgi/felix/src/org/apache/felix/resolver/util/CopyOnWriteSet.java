@@ -40,27 +40,33 @@ public class CopyOnWriteSet<E> implements Set<E>, Cloneable {
         data = col.toArray(new Object[col.size()]);
     }
 
-    public Iterator<E> iterator() {
+    @Override
+	public Iterator<E> iterator() {
         return new Iterator<E>() {
             int idx = 0;
-            public boolean hasNext() {
+            @Override
+			public boolean hasNext() {
                 return idx < data.length;
             }
-            @SuppressWarnings("unchecked")
+            @Override
+			@SuppressWarnings("unchecked")
             public E next() {
                 return (E) data[idx++];
             }
-            public void remove() {
+            @Override
+			public void remove() {
                 CopyOnWriteSet.this.remove(--idx);
             }
         };
     }
 
-    public int size() {
+    @Override
+	public int size() {
         return data.length;
     }
 
-    public boolean add(E e) {
+    @Override
+	public boolean add(E e) {
         Object[] d = data;
         if (d.length == 0) {
             data = new Object[] {e};
@@ -92,11 +98,13 @@ public class CopyOnWriteSet<E> implements Set<E>, Cloneable {
         data = a;
     }
 
-    public Object[] toArray() {
+    @Override
+	public Object[] toArray() {
         return data.clone();
     }
 
-    @SuppressWarnings("unchecked")
+    @Override
+	@SuppressWarnings("unchecked")
     public <T> T[] toArray(T[] a) {
         int size = data.length;
         if (a.length < size)
@@ -160,15 +168,18 @@ public class CopyOnWriteSet<E> implements Set<E>, Cloneable {
         }
     }
 
-    public boolean isEmpty() {
+    @Override
+	public boolean isEmpty() {
         return size() == 0;
     }
 
-    public boolean contains(Object o) {
+    @Override
+	public boolean contains(Object o) {
         throw new UnsupportedOperationException();
     }
 
-    public boolean remove(Object o) {
+    @Override
+	public boolean remove(Object o) {
         int index;
         if ((index = indexOf(o, data, data.length)) >= 0) {
             remove(index);
@@ -192,11 +203,13 @@ public class CopyOnWriteSet<E> implements Set<E>, Cloneable {
         return -1;
     }
 
-    public boolean containsAll(Collection<?> c) {
+    @Override
+	public boolean containsAll(Collection<?> c) {
         throw new UnsupportedOperationException();
     }
 
-    public boolean addAll(Collection<? extends E> c) {
+    @Override
+	public boolean addAll(Collection<? extends E> c) {
         Object[] cs = c.toArray();
         if (cs.length == 0)
             return false;
@@ -219,15 +232,18 @@ public class CopyOnWriteSet<E> implements Set<E>, Cloneable {
         return false;
     }
 
-    public boolean retainAll(Collection<?> c) {
+    @Override
+	public boolean retainAll(Collection<?> c) {
         throw new UnsupportedOperationException();
     }
 
-    public boolean removeAll(Collection<?> c) {
+    @Override
+	public boolean removeAll(Collection<?> c) {
         throw new UnsupportedOperationException();
     }
 
-    public void clear() {
+    @Override
+	public void clear() {
         throw new UnsupportedOperationException();
     }
 

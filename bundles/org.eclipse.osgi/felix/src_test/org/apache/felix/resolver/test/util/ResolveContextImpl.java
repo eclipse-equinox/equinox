@@ -107,7 +107,8 @@ public class ResolveContextImpl extends ResolveContext
             return Collections.emptyList();
         }
 
-        public List<Wire> getSubstitutionWires(Wiring wiring)
+        @Override
+		public List<Wire> getSubstitutionWires(Wiring wiring)
         {
             List<Wire> result = m_substitutions.get(wiring);
             return result == null ? Collections.<Wire> emptyList() : result;

@@ -64,6 +64,7 @@ public class SecurityRowSnapShot implements ConditionalPermissionInfo {
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
 	@Override
 	public void delete() {
 		throw new UnsupportedOperationException();
