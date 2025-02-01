@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -54,13 +54,17 @@ import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -309,24 +313,15 @@ public class Main {
 	 * @see "http://www.oracle.com/technetwork/java/javase/versioning-naming-139433.html for information on valid version strings"
 	 * @see "http://openjdk.java.net/jeps/223 for information on the JavaSE-9 version JEP 223"
 	 */
-	static class Identifier {
-		private static final String DELIM = ". _-"; //$NON-NLS-1$
-		private int major, minor, service;
-
-		Identifier(int major, int minor, int service) {
-			super();
-			this.major = major;
-			this.minor = minor;
-			this.service = service;
-		}
+	private record Identifier(int major, int minor, int service, String qualifier) {
 
 		/**
 		 * @throws NumberFormatException if cannot parse the major and minor version components
 		 */
-		Identifier(String versionString) {
-			super();
-			StringTokenizer tokenizer = new StringTokenizer(versionString, DELIM);
-
+		static Identifier create(String versionString, String delimiter) {
+			StringTokenizer tokenizer = new StringTokenizer(versionString, delimiter);
+			int major = 0, minor = 0, service = 0;
+			String qualifier = ""; //$NON-NLS-1$
 			// major
 			if (tokenizer.hasMoreTokens()) {
 				major = Integer.parseInt(tokenizer.nextToken());
@@ -342,38 +337,22 @@ public class Main {
 				if (tokenizer.hasMoreTokens()) {
 					service = Integer.parseInt(tokenizer.nextToken());
 				}
+				// qualifier
+				if (tokenizer.hasMoreTokens()) {
+					qualifier = tokenizer.nextToken();
+				}
 			} catch (NumberFormatException nfe) {
 				// ignore the minor and service qualifiers in that case and default to 0
 				// this will allow us to tolerate other non-conventional version numbers
 			}
+			return new Identifier(major, minor, service, qualifier);
 		}
 
-		/**
-		 * Returns true if this id is considered to be greater than or equal to the given baseline.
-		 * e.g.
-		 * 1.2.9 >= 1.3.1 -> false
-		 * 1.3.0 >= 1.3.1 -> false
-		 * 1.3.1 >= 1.3.1 -> true
-		 * 1.3.2 >= 1.3.1 -> true
-		 * 2.0.0 >= 1.3.1 -> true
-		 */
-		boolean isGreaterEqualTo(Identifier minimum) {
-			if (major < minimum.major) {
-				return false;
-			}
-			if (major > minimum.major) {
-				return true;
-			}
-			// major numbers are equivalent so check minor
-			if (minor < minimum.minor) {
-				return false;
-			}
-			if (minor > minimum.minor) {
-				return true;
-			}
-			// minor numbers are equivalent so check service
-			return service >= minimum.service;
-		}
+		private static final Comparator<Identifier> MAIN_VERSION = Comparator. //
+				comparingInt(Identifier::major) // 
+				.thenComparingInt(Identifier::minor) //
+				.thenComparingInt(Identifier::service);
+		private static final Comparator<Identifier> FULL_VERSION = MAIN_VERSION.thenComparing(Identifier::qualifier);
 	}
 
 	private String getWS() {
@@ -388,28 +367,16 @@ public class Main {
 		}
 
 		String osName = getOS();
-		if (osName.equals(Constants.OS_WIN32)) {
-			return Constants.WS_WIN32;
-		}
-		if (osName.equals(Constants.OS_LINUX)) {
-			return Constants.WS_GTK;
-		}
-		if (osName.equals(Constants.OS_MACOSX)) {
-			return Constants.WS_COCOA;
-		}
-		if (osName.equals(Constants.OS_HPUX)) {
-			return Constants.WS_GTK;
-		}
-		if (osName.equals(Constants.OS_AIX)) {
-			return Constants.WS_GTK;
-		}
-		if (osName.equals(Constants.OS_SOLARIS)) {
-			return Constants.WS_GTK;
-		}
-		if (osName.equals(Constants.OS_QNX)) {
-			return Constants.WS_PHOTON;
-		}
-		return Constants.WS_UNKNOWN;
+		return switch (osName) {
+			case Constants.OS_WIN32 -> Constants.WS_WIN32;
+			case Constants.OS_LINUX -> Constants.WS_GTK;
+			case Constants.OS_MACOSX -> Constants.WS_COCOA;
+			case Constants.OS_HPUX -> Constants.WS_GTK;
+			case Constants.OS_AIX -> Constants.WS_GTK;
+			case Constants.OS_SOLARIS -> Constants.WS_GTK;
+			case Constants.OS_QNX -> Constants.WS_PHOTON;
+			default -> Constants.WS_UNKNOWN;
+		};
 	}
 
 	private String getOS() {
@@ -513,10 +480,7 @@ public class Main {
 				File location = new File(locations[0]);
 				if (location.isAbsolute()) {
 					String dir = location.getParent();
-					String fragment = searchFor(fragmentName, dir);
-					if (fragment != null) {
-						libPath = getLibraryFromFragment(fragment);
-					}
+					libPath = getLibraryFromFragment(fragmentName, dir);
 				}
 			}
 		}
@@ -527,10 +491,7 @@ public class Main {
 				for (int i = urls.length - 1; i >= 0 && libPath == null; i--) {
 					File entryFile = new File(urls[i].getFile());
 					String dir = entryFile.getParent();
-					String fragment = searchFor(fragmentName, dir);
-					if (fragment != null) {
-						libPath = getLibraryFromFragment(fragment);
-					}
+					libPath = getLibraryFromFragment(fragmentName, dir);
 				}
 			}
 		}
@@ -538,15 +499,16 @@ public class Main {
 			URL install = getInstallLocation();
 			String location = install.getFile();
 			location += "/plugins/"; //$NON-NLS-1$
-			String fragment = searchFor(fragmentName, location);
-			if (fragment != null) {
-				libPath = getLibraryFromFragment(fragment);
-			}
+			libPath = getLibraryFromFragment(fragmentName, location);
 		}
 		return libPath;
 	}
 
-	private String getLibraryFromFragment(String fragment) {
+	private String getLibraryFromFragment(String fragmentName, String dir) {
+		String fragment = searchFor(fragmentName, dir);
+		if (fragment == null) {
+			return null;
+		}
 		if (fragment.startsWith(FILE_SCHEME)) {
 			fragment = fragment.substring(5);
 		}
@@ -561,17 +523,9 @@ public class Main {
 		}
 
 		try (ZipFile fragmentJar = new ZipFile(frag)) {
-			Enumeration<? extends ZipEntry> entries = fragmentJar.entries();
-			String entry = null;
-			while (entries.hasMoreElements()) {
-				ZipEntry zipEntry = entries.nextElement();
-				if (zipEntry.getName().startsWith("eclipse_")) { //$NON-NLS-1$
-					entry = zipEntry.getName();
-					break;
-				}
-			}
-			if (entry != null) {
-				String lib = extractFromJAR(fragment, entry);
+			Optional<String> entry = fragmentJar.stream().map(ZipEntry::getName).filter(n -> n.startsWith("eclipse_")).findFirst(); //$NON-NLS-1$
+			if (entry.isPresent()) {
+				String lib = extractFromJAR(fragment, entry.get());
 				if (!getOS().equals("win32")) { //$NON-NLS-1$
 					try {
 						Files.setPosixFilePermissions(Paths.get(lib), PERMISSION_755);
@@ -637,7 +591,7 @@ public class Main {
 		setSecurityPolicy(bootPath);
 		// splash handling is done here, because the default case needs to know
 		// the location of the boot plugin we are going to use
-		handleSplash(bootPath);
+		handleSplash();
 
 		beforeFwkInvocation();
 		invokeFramework(passThruArgs, bootPath);
@@ -721,9 +675,10 @@ public class Main {
 			return true;
 		}
 		try {
-			Identifier required = new Identifier(requiredVersion);
-			Identifier available = new Identifier(availableVersion);
-			boolean compatible = available.isGreaterEqualTo(required);
+			String delimiter = ". _-"; //$NON-NLS-1$
+			Identifier required = Identifier.create(requiredVersion, delimiter);
+			Identifier available = Identifier.create(availableVersion, delimiter);
+			boolean compatible = Identifier.MAIN_VERSION.compare(available, required) >= 0;
 			if (!compatible) {
 				// any non-zero value should do it - 14 used to be used for version incompatibility in Eclipse 2.1
 				System.setProperty(PROP_EXITCODE, "14"); //$NON-NLS-1$
@@ -804,6 +759,8 @@ public class Main {
 		}
 	}
 
+	private static final Pattern COMMA = Pattern.compile(","); //$NON-NLS-1$
+
 	/**
 	 * Returns the result of converting a list of comma-separated tokens into an array
 	 *
@@ -814,15 +771,9 @@ public class Main {
 		if (prop == null || prop.trim().equals("")) { //$NON-NLS-1$
 			return new String[0];
 		}
-		ArrayList<String> list = new ArrayList<>();
-		StringTokenizer tokens = new StringTokenizer(prop, ","); //$NON-NLS-1$
-		while (tokens.hasMoreTokens()) {
-			String token = tokens.nextToken().trim();
-			if (!token.isEmpty()) {
-				list.add(token);
-			}
-		}
-		return list.isEmpty() ? new String[0] : list.toArray(new String[list.size()]);
+		return COMMA.splitAsStream(prop) //
+				.map(String::trim).filter(s -> !s.isEmpty()) //
+				.toArray(String[]::new);
 	}
 
 	/**
@@ -883,7 +834,7 @@ public class Main {
 			if (installLocation.getProtocol().equals("file")) { //$NON-NLS-1$
 				extensionResults.add(path);
 				extensionURL = new File(path).toURL();
-			} else { //$NON-NLS-1$
+			} else {
 				extensionURL = new URL(installLocation.getProtocol(), installLocation.getHost(), installLocation.getPort(), path);
 			}
 			//Load a property file of the extension, merge its content, and in case of dev mode add the bin entries
@@ -1009,7 +960,7 @@ public class Main {
 				char lastChar = location.charAt(location.length() - 1);
 				if ((location.endsWith(".jar") || (lastChar == '/' || lastChar == '\\'))) { //$NON-NLS-1$
 					url = new URL(base, location);
-				} else { //$NON-NLS-1$
+				} else {
 					url = new URL(base, location + "/"); //$NON-NLS-1$
 				}
 			}
@@ -1038,7 +989,7 @@ public class Main {
 			}
 			if (url.getProtocol().equals("file")) { //$NON-NLS-1$
 				url = new File(path).toURL();
-			} else { //$NON-NLS-1$
+			} else {
 				url = new URL(url.getProtocol(), url.getHost(), url.getPort(), path);
 			}
 		}
@@ -1081,13 +1032,10 @@ public class Main {
 				matches.add(candidate);
 			}
 		}
-		String[] names = matches.toArray(new String[matches.size()]);
-		int result = findMax(target, names);
-		if (result == -1) {
-			return null;
-		}
-		File candidate = new File(root, names[result]);
-		return candidate.getAbsolutePath().replace(File.separatorChar, '/') + (candidate.isDirectory() ? "/" : ""); //$NON-NLS-1$//$NON-NLS-2$
+		return findMax(target, matches).map(name -> {
+			File candidate = new File(root, name);
+			return candidate.getAbsolutePath().replace(File.separatorChar, '/') + (candidate.isDirectory() ? "/" : ""); //$NON-NLS-1$//$NON-NLS-2$
+		}).orElse(null);
 	}
 
 	private boolean isMatchingCandidate(String target, String candidate, File root) {
@@ -1146,56 +1094,17 @@ public class Main {
 		return searchFor(target, start);
 	}
 
-	protected int findMax(String prefix, String[] candidates) {
-		int result = -1;
-		Object maxVersion = null;
-		for (int i = 0; i < candidates.length; i++) {
-			String name = (candidates[i] != null) ? candidates[i] : ""; //$NON-NLS-1$
+	protected Optional<String> findMax(String prefix, List<String> candidates) {
+		return candidates.stream().map(name -> {
 			String version = ""; //$NON-NLS-1$ // Note: directory with version suffix is always > than directory without version suffix
 			if (prefix == null) {
 				version = name; //webstart just passes in versions
 			} else if (name.startsWith(prefix + "_")) { //$NON-NLS-1$
 				version = name.substring(prefix.length() + 1); //prefix_version
 			}
-			Object currentVersion = getVersionElements(version);
-			if (maxVersion == null) {
-				result = i;
-				maxVersion = currentVersion;
-			} else {
-				if (compareVersion((Object[]) maxVersion, (Object[]) currentVersion) < 0) {
-					result = i;
-					maxVersion = currentVersion;
-				}
-			}
-		}
-		return result;
-	}
-
-	/**
-	 * Compares version strings.
-	 * @return result of comparison, as integer;
-	 * <code><0</code> if left < right;
-	 * <code>0</code> if left == right;
-	 * <code>>0</code> if left > right;
-	 */
-	private int compareVersion(Object[] left, Object[] right) {
-
-		int result = ((Integer) left[0]).compareTo((Integer) right[0]); // compare major
-		if (result != 0) {
-			return result;
-		}
-
-		result = ((Integer) left[1]).compareTo((Integer) right[1]); // compare minor
-		if (result != 0) {
-			return result;
-		}
-
-		result = ((Integer) left[2]).compareTo((Integer) right[2]); // compare service
-		if (result != 0) {
-			return result;
-		}
-
-		return ((String) left[3]).compareTo((String) right[3]); // compare qualifier
+			Identifier currentVersion = getVersionElements(version);
+			return Map.entry(name, currentVersion);
+		}).max(Comparator.comparing(Map.Entry::getValue, Identifier.FULL_VERSION)).map(Map.Entry::getKey);
 	}
 
 	/**
@@ -1206,30 +1115,15 @@ public class Main {
 	 * major, minor and service) and the fourth element is of type String (representing
 	 * qualifier). Note, that returning anything else will cause exceptions in the caller.
 	 */
-	private Object[] getVersionElements(String version) {
+	private Identifier getVersionElements(String version) {
 		if (version.endsWith(".jar")) { //$NON-NLS-1$
 			version = version.substring(0, version.length() - 4);
 		}
-		Object[] result = {Integer.valueOf(0), Integer.valueOf(0), Integer.valueOf(0), ""}; //$NON-NLS-1$
-		StringTokenizer t = new StringTokenizer(version, "."); //$NON-NLS-1$
-		String token;
-		int i = 0;
-		while (t.hasMoreTokens() && i < 4) {
-			token = t.nextToken();
-			if (i < 3) {
-				// major, minor or service ... numeric values
-				try {
-					result[i++] = Integer.valueOf(token);
-				} catch (Exception e) {
-					// invalid number format - use default numbers (0) for the rest
-					break;
-				}
-			} else {
-				// qualifier ... string value
-				result[i++] = token;
-			}
+		try {
+			return Identifier.create(version, "."); //$NON-NLS-1$
+		} catch (NumberFormatException e) {
+			return new Identifier(0, 0, 0, ""); //$NON-NLS-1$
 		}
-		return result;
 	}
 
 	private static URL buildURL(String spec, boolean trailingSlash) {
@@ -1518,11 +1412,7 @@ public class Main {
 	 * @param argString the arguments string
 	 */
 	public static void main(String argString) {
-		ArrayList<String> list = new ArrayList<>(5);
-		for (StringTokenizer tokens = new StringTokenizer(argString, " "); tokens.hasMoreElements();) { //$NON-NLS-1$
-			list.add(tokens.nextToken());
-		}
-		main(list.toArray(new String[list.size()]));
+		main(argString.split(" ")); //$NON-NLS-1$
 	}
 
 	/**
@@ -2269,7 +2159,7 @@ public class Main {
 	 *
 	 * @param defaultPath search path for the boot plugin
 	 */
-	private void handleSplash(URL[] defaultPath) {
+	private void handleSplash() {
 		// run without splash if we are initializing or nosplash
 		// was specified (splashdown = true)
 		if (initialize || splashDown || bridge == null) {
@@ -2300,7 +2190,7 @@ public class Main {
 		}
 
 		// determine the splash location
-		splashLocation = getSplashLocation(defaultPath);
+		splashLocation = getSplashLocation();
 		if (debug) {
 			System.out.println("Splash location:\n    " + splashLocation); //$NON-NLS-1$
 		}
@@ -2344,7 +2234,7 @@ public class Main {
 	 * If that does not work, look for a default splash.  Currently the splash must be in the file system
 	 * so the return value here is the file system path.
 	 */
-	private String getSplashLocation(URL[] bootPath) {
+	private String getSplashLocation() {
 		//check the path passed in from -showsplash first.  The old launcher passed a timeout value
 		//as the argument, so only use it if it isn't a number and the file exists.
 		if (splashLocation != null && !Character.isDigit(splashLocation.charAt(0)) && new File(splashLocation).exists()) {
