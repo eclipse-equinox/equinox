@@ -60,11 +60,14 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -137,7 +140,7 @@ public class Main {
 	private String vm = null;
 	private String[] vmargs = null;
 	private String[] commands = null;
-	private String[] extensionPaths = null;
+	private List<String> extensionPaths = null;
 
 	private JNIBridge bridge = null;
 
@@ -428,7 +431,7 @@ public class Main {
 	/**
 	 *  Sets up the JNI bridge to native calls
 	 */
-	private void setupJNI(URL[] defaultPath) {
+	private void setupJNI(List<URL> defaultPath) {
 		if (bridge != null) {
 			return;
 		}
@@ -454,37 +457,28 @@ public class Main {
 		}
 	}
 
-	private String getLibraryPath(String fragmentName, URL[] defaultPath) {
-		String libPath = null;
+	private String getLibraryPath(String fragmentName, List<URL> defaultPath) {
+		Stream<String> searchPath = Stream.empty();
 		if (inDevelopmentMode && devClassPathProps != null) {
 			String devPathList = devClassPathProps.getProperty(PLUGIN_ID);
-			String[] locations = getArrayFromList(devPathList);
-			if (locations.length > 0) {
-				File location = new File(locations[0]);
+			List<String> locations = getArrayFromList(devPathList);
+			if (!locations.isEmpty()) {
+				File location = new File(locations.get(0));
 				if (location.isAbsolute()) {
-					String dir = location.getParent();
-					libPath = getLibraryFromFragment(fragmentName, dir);
+					searchPath = Stream.of(location.getParent());
 				}
 			}
 		}
-		if (libPath == null && bootLocation != null) {
-			URL[] urls = defaultPath;
-			if (urls != null && urls.length > 0) {
-				//the last one is most interesting
-				for (int i = urls.length - 1; i >= 0 && libPath == null; i--) {
-					File entryFile = new File(urls[i].getFile());
-					String dir = entryFile.getParent();
-					libPath = getLibraryFromFragment(fragmentName, dir);
-				}
-			}
+		if (bootLocation != null && defaultPath != null && !defaultPath.isEmpty()) {
+			searchPath = Stream.concat(searchPath, // the last one is most interesting
+					IntStream.range(0, defaultPath.size()).map(i -> defaultPath.size() - 1 - i).mapToObj(defaultPath::get) //
+							.map(url -> new File(url.getFile()).getParent()));
 		}
-		if (libPath == null) {
-			URL install = getInstallLocation();
-			String location = install.getFile();
-			location += "/plugins/"; //$NON-NLS-1$
-			libPath = getLibraryFromFragment(fragmentName, location);
-		}
-		return libPath;
+		searchPath = Stream.concat(searchPath, // 
+				Stream.of(getInstallLocation().getFile() + "/plugins/")); //$NON-NLS-1$
+
+		return searchPath.map(dir -> getLibraryFromFragment(fragmentName, dir)) //
+				.filter(Objects::nonNull).findFirst().orElse(null);
 	}
 
 	private String getLibraryFromFragment(String fragmentName, String dir) {
@@ -555,7 +549,7 @@ public class Main {
 		getInstallLocation();
 
 		// locate boot plugin (may return -dev mode variations)
-		URL[] bootPath = getBootPath(bootLocation);
+		List<URL> bootPath = getBootPath(bootLocation);
 
 		//Set up the JNI bridge.  We need to know the install location to find the shared library
 		setupJNI(bootPath);
@@ -570,13 +564,13 @@ public class Main {
 		if (!checkConfigurationLocation(configurationLocation)) {
 			return;
 		}
-
-		setSecurityPolicy(bootPath);
+		URL[] bootPathURLs = bootPath.toArray(URL[]::new);
+		setSecurityPolicy(bootPathURLs);
 		// splash handling is done here, because the default case needs to know
 		// the location of the boot plugin we are going to use
 		handleSplash();
 
-		invokeFramework(passThruArgs, bootPath);
+		invokeFramework(passThruArgs, bootPathURLs);
 	}
 
 	@SuppressWarnings({"removal"})
@@ -595,9 +589,9 @@ public class Main {
 				return;
 			}
 			// get the list of codesource URLs to grant AllPermission to
-			URL[] rootURLs = new URL[bootPath.length + 1];
-			rootURLs[0] = source.getLocation();
-			System.arraycopy(bootPath, 0, rootURLs, 1, bootPath.length);
+			List<URL> rootURLs = new ArrayList<>(bootPath.length + 1);
+			rootURLs.add(source.getLocation());
+			Collections.addAll(rootURLs, bootPath);
 			// replace the security policy
 			Policy eclipsePolicy = new EclipsePolicy(Policy.getPolicy(), rootURLs);
 			Policy.setPolicy(eclipsePolicy);
@@ -745,13 +739,13 @@ public class Main {
 	 * @return the array of string tokens
 	 * @param prop the initial comma-separated string
 	 */
-	private String[] getArrayFromList(String prop) {
+	private List<String> getArrayFromList(String prop) {
 		if (prop == null || prop.isBlank()) {
-			return new String[0];
+			return List.of();
 		}
 		return COMMA.splitAsStream(prop) //
 				.map(String::trim).filter(s -> !s.isEmpty()) //
-				.toArray(String[]::new);
+				.toList();
 	}
 
 	/**
@@ -762,14 +756,14 @@ public class Main {
 	 * @param base the base location
 	 * @exception MalformedURLException if a problem occurs computing the class path
 	 */
-	private URL[] getDevPath(URL base) throws IOException {
-		ArrayList<URL> result = new ArrayList<>(5);
+	private List<URL> getDevPath(URL base) throws IOException {
+		List<URL> result = new ArrayList<>(5);
 		if (inDevelopmentMode) {
 			addDevEntries(base, result, OSGI);
 		}
 		//The jars from the base always need to be added, even when running in dev mode (bug 46772)
 		addBaseJars(base, result);
-		return result.toArray(new URL[result.size()]);
+		return result;
 	}
 
 	private URL constructURL(URL url, String name) {
@@ -794,10 +788,10 @@ public class Main {
 		}
 	}
 
-	private void readFrameworkExtensions(URL base, ArrayList<URL> result) throws IOException {
-		String[] extensions = getArrayFromList(System.getProperty(PROP_EXTENSIONS));
+	private void readFrameworkExtensions(URL base, List<URL> result) throws IOException {
+		List<String> extensions = getArrayFromList(System.getProperty(PROP_EXTENSIONS));
 		String parent = new File(base.getFile()).getParent();
-		ArrayList<String> extensionResults = new ArrayList<>(extensions.length);
+		List<String> extensionResults = new ArrayList<>(extensions.size());
 		for (String extension : extensions) {
 			//Search the extension relatively to the osgi plugin
 			String path = searchForBundle(extension, parent);
@@ -831,7 +825,7 @@ public class Main {
 				// this is a "normal" RFC 101 framework extension bundle just put the base path on the classpath
 				extensionProperties = new Properties();
 			}
-			String[] entries = extensionClassPath == null || extensionClassPath.isEmpty() ? new String[] {""} : getArrayFromList(extensionClassPath); //$NON-NLS-1$
+			List<String> entries = extensionClassPath == null || extensionClassPath.isEmpty() ? List.of("") : getArrayFromList(extensionClassPath); //$NON-NLS-1$
 			String qualifiedPath = System.getProperty(PROP_CLASSPATH) == null ? "." : ""; //$NON-NLS-1$ //$NON-NLS-2$
 			for (String entry : entries) {
 				qualifiedPath += ", " + FILE_SCHEME + path + entry; //$NON-NLS-1$
@@ -852,10 +846,10 @@ public class Main {
 				addDevEntries(extensionURL, result, name);
 			}
 		}
-		extensionPaths = extensionResults.toArray(new String[extensionResults.size()]);
+		extensionPaths = extensionResults;
 	}
 
-	private void addBaseJars(URL base, ArrayList<URL> result) throws IOException {
+	private void addBaseJars(URL base, List<URL> result) throws IOException {
 		String baseJarList = System.getProperty(PROP_CLASSPATH);
 		if (baseJarList == null) {
 			readFrameworkExtensions(base, result);
@@ -876,8 +870,8 @@ public class Main {
 		}
 		System.setProperty(PROP_FRAMEWORK_SYSPATH, fwkPath);
 
-		String[] baseJars = getArrayFromList(baseJarList);
-		if (baseJars.length == 0) {
+		List<String> baseJars = getArrayFromList(baseJarList);
+		if (baseJars.isEmpty()) {
 			if (!inDevelopmentMode && new File(base.getFile()).isDirectory()) {
 				throw new IOException("Unable to initialize " + PROP_CLASSPATH); //$NON-NLS-1$
 			}
@@ -920,7 +914,7 @@ public class Main {
 		if (devPathList == null) {
 			devPathList = devClassPathProps.getProperty("*"); //$NON-NLS-1$
 		}
-		String[] locations = getArrayFromList(devPathList);
+		List<String> locations = getArrayFromList(devPathList);
 		for (String location : locations) {
 			File path = new File(location);
 			URL url;
@@ -946,7 +940,7 @@ public class Main {
 	 * @param base the base location
 	 * @exception MalformedURLException if a problem occurs computing the class path
 	 */
-	private URL[] getBootPath(String base) throws IOException {
+	private List<URL> getBootPath(String base) throws IOException {
 		URL url = null;
 		if (base != null) {
 			url = buildURL(base, true);
@@ -971,7 +965,7 @@ public class Main {
 			System.out.println("Framework located:\n    " + url.toExternalForm()); //$NON-NLS-1$
 		}
 		// add on any dev path elements
-		URL[] result = getDevPath(url);
+		List<URL> result = getDevPath(url);
 		if (debug) {
 			System.out.println("Framework classpath:"); //$NON-NLS-1$
 			for (URL devPath : result) {
@@ -997,7 +991,7 @@ public class Main {
 			return null;
 		}
 
-		ArrayList<String> matches = new ArrayList<>(2);
+		List<String> matches = new ArrayList<>(2);
 		for (String candidate : candidates) {
 			if (isMatchingCandidate(target, candidate, root)) {
 				matches.add(candidate);
@@ -2216,22 +2210,22 @@ public class Main {
 		}
 		String splashPath = System.getProperty(PROP_SPLASHPATH);
 		if (splashPath != null) {
-			String[] entries = getArrayFromList(splashPath);
-			ArrayList<String> path = new ArrayList<>(entries.length);
+			List<String> entries = getArrayFromList(splashPath);
+			List<String> paths = new ArrayList<>(entries.size());
 			for (String e : entries) {
 				String entry = resolve(e);
 				if (entry != null && entry.startsWith(FILE_SCHEME)) {
 					File entryFile = new File(entry.substring(5).replace('/', File.separatorChar));
 					entry = searchFor(entryFile.getName(), entryFile.getParent());
 					if (entry != null) {
-						path.add(entry);
+						paths.add(entry);
 					}
 				} else {
 					log("Invalid splash path entry: " + e); //$NON-NLS-1$
 				}
 			}
 			// see if we can get a splash given the splash path
-			result = searchForSplash(path.toArray(new String[path.size()]));
+			result = searchForSplash(paths);
 			if (result != null) {
 				System.setProperty(PROP_SPLASHLOCATION, result);
 				return result;
@@ -2243,18 +2237,16 @@ public class Main {
 	/*
 	 * Do a locale-sensitive lookup of splash image
 	 */
-	private String searchForSplash(String[] searchPath) {
-		if (searchPath == null) {
+	private String searchForSplash(List<String> searchPath) {
+		if (searchPath.isEmpty()) {
 			return null;
 		}
-
 		// Get the splash screen for the specified locale
 		String locale = System.getProperty(PROP_NL);
 		if (locale == null) {
 			locale = Locale.getDefault().toString();
 		}
-		String[] nlVariants = buildNLVariants(locale);
-
+		List<String> nlVariants = buildNLVariants(locale);
 		for (String nlVariant : nlVariants) {
 			for (String path : searchPath) {
 				if (path.startsWith(FILE_SCHEME)) {
@@ -2279,7 +2271,6 @@ public class Main {
 				}
 			}
 		}
-
 		// sorry, could not find splash image
 		return null;
 	}
@@ -2359,10 +2350,10 @@ public class Main {
 	 * candidates in "nl/fr/FR/", then "nl/fr/", and finally in the root.
 	 * Candidate names are defined in SPLASH_IMAGES and include splash.png, splash.jpg, etc.
 	 */
-	private static String[] buildNLVariants(String locale) {
+	private static List<String> buildNLVariants(String locale) {
 		//build list of suffixes for loading resource bundles
 		String nl = locale;
-		ArrayList<String> result = new ArrayList<>(4);
+		List<String> result = new ArrayList<>(4);
 		int lastSeparator;
 		while (true) {
 			for (String name : SPLASH_IMAGES) {
@@ -2378,7 +2369,7 @@ public class Main {
 		for (String name : SPLASH_IMAGES) {
 			result.add(name);
 		}
-		return result.toArray(new String[result.size()]);
+		return result;
 	}
 
 	/*
@@ -2633,7 +2624,7 @@ public class Main {
 		private Policy policy;
 
 		// The set of URLs to give AllPermissions to; this is the set of bootURLs
-		private URL[] urls;
+		private List<URL> urls;
 
 		// The AllPermissions collection
 		private PermissionCollection allPermissions;
@@ -2641,7 +2632,7 @@ public class Main {
 		// The AllPermission permission
 		Permission allPermission = new AllPermission();
 
-		EclipsePolicy(Policy policy, URL[] urls) {
+		EclipsePolicy(Policy policy, List<URL> urls) {
 			this.policy = policy;
 			this.urls = urls;
 			allPermissions = new PermissionCollection() {
