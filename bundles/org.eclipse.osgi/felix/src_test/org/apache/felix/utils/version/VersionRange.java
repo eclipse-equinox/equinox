@@ -349,7 +349,8 @@ public class VersionRange implements Serializable
     }
 
 
-    public int hashCode()
+    @Override
+	public int hashCode()
     {
         final int prime = 31;
         int result = 1;
@@ -361,7 +362,8 @@ public class VersionRange implements Serializable
     }
 
 
-    public boolean equals( Object obj )
+    @Override
+	public boolean equals( Object obj )
     {
         if ( this == obj )
             return true;
@@ -392,7 +394,8 @@ public class VersionRange implements Serializable
     }
 
 
-    public String toString()
+    @Override
+	public String toString()
     {
         if ( ANY_VERSION.equals( this ) )
         {

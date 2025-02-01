@@ -53,7 +53,8 @@ public class ResourceImpl implements Resource
         m_caps.add(cap);
     }
 
-    public List<Capability> getCapabilities(String namespace)
+    @Override
+	public List<Capability> getCapabilities(String namespace)
     {
         List<Capability> result = m_caps;
         if (namespace != null)
@@ -75,7 +76,8 @@ public class ResourceImpl implements Resource
         m_reqs.add(req);
     }
 
-    public List<Requirement> getRequirements(String namespace)
+    @Override
+	public List<Requirement> getRequirements(String namespace)
     {
         List<Requirement> result = m_reqs;
         if (namespace != null)

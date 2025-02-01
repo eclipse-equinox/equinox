@@ -101,6 +101,7 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 
 	private static final class ClassNameLock {
 		static final Function<String, ClassNameLock> SUPPLIER = new Function<String, ClassNameLock>() {
+			@Override
 			public ClassNameLock apply(String className) {
 				return new ClassNameLock(className);
 			}

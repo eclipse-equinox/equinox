@@ -40,22 +40,26 @@ class WireImpl implements Wire
         m_cap = cap;
     }
 
-    public Resource getRequirer()
+    @Override
+	public Resource getRequirer()
     {
         return m_requirer;
     }
 
-    public Requirement getRequirement()
+    @Override
+	public Requirement getRequirement()
     {
         return m_req;
     }
 
-    public Resource getProvider()
+    @Override
+	public Resource getProvider()
     {
         return m_provider;
     }
 
-    public Capability getCapability()
+    @Override
+	public Capability getCapability()
     {
         return m_cap;
     }

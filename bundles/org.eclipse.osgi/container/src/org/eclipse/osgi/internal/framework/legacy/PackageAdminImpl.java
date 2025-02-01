@@ -378,6 +378,7 @@ public class PackageAdminImpl implements PackageAdmin {
 		/**
 		 * @deprecated
 		 */
+		@Deprecated
 		@Override
 		public String getSpecificationVersion() {
 			return getVersion().toString();

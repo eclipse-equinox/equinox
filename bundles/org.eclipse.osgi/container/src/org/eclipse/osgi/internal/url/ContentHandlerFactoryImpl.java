@@ -40,7 +40,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * content handler.
  */
 public class ContentHandlerFactoryImpl extends MultiplexingFactory implements java.net.ContentHandlerFactory {
-	private ServiceTracker<ContentHandler, ContentHandler> contentHandlerTracker;
+	private final ServiceTracker<ContentHandler, ContentHandler> contentHandlerTracker;
 
 	private static final String contentHandlerClazz = "java.net.ContentHandler"; //$NON-NLS-1$
 	private static final String CONTENT_HANDLER_PKGS = "java.content.handler.pkgs"; //$NON-NLS-1$
@@ -49,7 +49,7 @@ public class ContentHandlerFactoryImpl extends MultiplexingFactory implements ja
 	private static final List<Class<?>> ignoredClasses = Arrays.asList(
 			new Class<?>[] { MultiplexingContentHandler.class, ContentHandlerFactoryImpl.class, URLConnection.class });
 
-	private Map<String, ContentHandlerProxy> proxies;
+	private final Map<String, ContentHandlerProxy> proxies;
 	private java.net.ContentHandlerFactory parentFactory;
 
 	public ContentHandlerFactoryImpl(BundleContext context, EquinoxContainer container) {
