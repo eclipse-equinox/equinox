@@ -276,7 +276,6 @@ public class Main {
 	// types of parent classloaders the framework can have
 	private static final String PARENT_CLASSLOADER_APP = "app"; //$NON-NLS-1$
 	private static final String PARENT_CLASSLOADER_EXT = "ext"; //$NON-NLS-1$
-	private static final String PARENT_CLASSLOADER_BOOT = "boot"; //$NON-NLS-1$
 	private static final String PARENT_CLASSLOADER_CURRENT = "current"; //$NON-NLS-1$
 
 	// log file handling
@@ -651,6 +650,7 @@ public class Main {
 		//Nothing to do.
 	}
 
+	@SuppressWarnings({"removal"})
 	protected void setSecurityPolicy(URL[] bootPath) {
 		String eclipseSecurity = System.getProperty(PROP_ECLIPSESECURITY);
 		if (eclipseSecurity != null) {
@@ -676,22 +676,11 @@ public class Main {
 	}
 
 	private void invokeFramework(String[] passThruArgs, URL[] bootPath) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, Error, Exception, InvocationTargetException {
-		String type = PARENT_CLASSLOADER_BOOT;
-		try {
-			String javaVersion = System.getProperty("java.version"); //$NON-NLS-1$
-			if (javaVersion != null && new Identifier(javaVersion).isGreaterEqualTo(new Identifier("1.9"))) { //$NON-NLS-1$
-				// Workaround for bug 466683. Some org.w3c.dom.* packages that used to be available from
-				// JavaSE's boot classpath are only available from the extension path in Java 9 b62.
-				// Workaround for bug 489958. javax.annotation.* types are only available from
-				// JavaSE-9's extension path in Java 9-ea+108. The identifier "1.9" could be changed to "9", but "1.9" works just as well.
-				type = PARENT_CLASSLOADER_EXT;
-			}
-		} catch (SecurityException | NumberFormatException e) {
-			// If the security manager won't allow us to get the system property, continue for
-			// now and let things fail later on their own if necessary.
-			// If the version string was in a format that we don't understand, continue and
-			// let things fail later on their own if necessary.
-		}
+		// Workaround for bug 466683. Some org.w3c.dom.* packages that used to be available from
+		// JavaSE's boot classpath are only available from the extension path in Java 9 b62.
+		// Workaround for bug 489958. javax.annotation.* types are only available from
+		// JavaSE-9's extension path in Java 9-ea+108. The identifier "1.9" could be changed to "9", but "1.9" works just as well.
+		String type = PARENT_CLASSLOADER_EXT;
 		type = System.getProperty(PROP_PARENT_CLASSLOADER, type);
 		type = System.getProperty(PROP_FRAMEWORK_PARENT_CLASSLOADER, type);
 		ClassLoader parent = null;
@@ -2787,6 +2776,7 @@ public class Main {
 	 * nobody will actually call them (unless they casted the policy to EclipsePolicy and
 	 * called our methods)
 	 */
+	@SuppressWarnings({"removal"})
 	private class EclipsePolicy extends Policy {
 		// The policy that this EclipsePolicy is replacing
 		private Policy policy;
@@ -2912,12 +2902,12 @@ public class Main {
 			super.addURL(url);
 		}
 
-		// preparing for Java 9
+		@Override
 		protected URL findResource(String moduleName, String name) {
 			return findResource(name);
 		}
 
-		// preparing for Java 9
+		@Override
 		protected Class<?> findClass(String moduleName, String name) {
 			try {
 				return findClass(name);
