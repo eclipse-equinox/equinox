@@ -661,6 +661,7 @@ static int _run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 				relaunchCommand[0] = program;
 				break;
 			} // fall-through to default non-zero exit code handling.
+			/* no break */
 		case RESTART_NEW_EC:
 			if (!noRestart) {
 				if(launchMode == LAUNCH_EXE) {
@@ -682,6 +683,7 @@ static int _run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 				}
 				break;
 			} // fall-through to default non-zero exit code handling.
+			/* no break */
 		default: {
 			_TCHAR *title = _tcsdup(officialName);
 			errorMsg = NULL;
@@ -1747,6 +1749,7 @@ static int determineVM(_TCHAR** msg) {
     		/* else default.ee does exist */
     		vmName = result;
     		/* fall through to VM_EE_PROPS*/
+    		/* no break */
     	case VM_EE_PROPS:
     		return vmEEProps(vmName, msg);
 
