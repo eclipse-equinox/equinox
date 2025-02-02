@@ -79,6 +79,7 @@ GTK_LIBS = \
  -DPIXBUF_LIB="\"libgdk_pixbuf-2.0.so.0\"" -DGOBJ_LIB="\"libgobject-2.0.so.0\"" \
  -DGIO_LIB="\"libgio-2.0.so.0\"" -DGLIB_LIB="\"libglib-2.0.so.0\""
 LFLAGS = ${M_ARCH} -shared -fpic -Wl,--export-dynamic 
+GTK_CFLAGS := $(shell pkg-config --cflags gtk+-3.0)
 CFLAGS = ${M_CFLAGS} ${M_ARCH} -g -s -Wall\
 	-fpic \
 	-DLINUX \
@@ -90,7 +91,7 @@ CFLAGS = ${M_CFLAGS} ${M_ARCH} -g -s -Wall\
 	-I. \
 	-I.. \
 	-I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux \
-	`pkg-config --cflags gtk+-3.0`
+	$(GTK_CFLAGS)
 
 all: $(EXEC) $(DLL)
 
