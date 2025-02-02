@@ -445,6 +445,20 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 	setenv(firstThreadEnvVariable, "1", 1);
 #endif
 
+#ifdef LINUX
+	if (!noSplash) {
+		char *swtGtk4 = getenv("SWT_GTK4");
+		if (swtGtk4 != NULL && strcmp(swtGtk4, "1") == 0) {
+			// The eclipse launcher uses GTK3 exclusively, therefore when starting GTK4
+			// it must be started without a splash screen
+			// https://github.com/eclipse-equinox/equinox/issues/831
+			// If the user didn't already specify -nosplash print a warning and turn the splashscreen off
+			_ftprintf(stderr, "WARNING: SWT_GTK4 does not support splash screen yet. Therefore it has been disabled. To suppress this message launch with -nosplash\n");
+			noSplash = 1;
+		}
+	}
+#endif
+
 	return _run(argc, argv, vmArgs);
 }
 
