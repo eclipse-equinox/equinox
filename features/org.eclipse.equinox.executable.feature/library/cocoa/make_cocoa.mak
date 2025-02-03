@@ -85,6 +85,9 @@ $(EXEC): $(MAIN_OBJS) $(COMMON_OBJS)
 $(DLL): $(DLL_OBJS) $(COMMON_OBJS)
 	$(CC) -bundle -o $(DLL) $(ARCHS) $(DLL_OBJS) $(COMMON_OBJS) $(LIBS)
 
+# There are no known checks today for macOS to be done here. See make_linux.mak's checklibs for more info.
+checklibs: all
+
 install: all
 	$(info Install into: EXE_OUTPUT_DIR:$(EXE_OUTPUT_DIR) LIB_OUTPUT_DIR:$(LIB_OUTPUT_DIR))
 	mkdir -p $(EXE_OUTPUT_DIR)
