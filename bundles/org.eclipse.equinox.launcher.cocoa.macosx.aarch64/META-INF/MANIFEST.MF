@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-Vendor: %providerName
 Bundle-SymbolicName: org.eclipse.equinox.launcher.cocoa.macosx.aarch64;singleton:=true
-Bundle-Version: 1.2.1100.qualifier
+Bundle-Version: 1.2.1200.qualifier
 Fragment-Host: org.eclipse.equinox.launcher;bundle-version="[1.6.0,1.7.0)"
 Eclipse-PlatformFilter: (& (osgi.ws=cocoa) (osgi.os=macosx) (osgi.arch=aarch64) )
 Bundle-Localization: launcher.cocoa.macosx.aarch64
