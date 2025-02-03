@@ -133,6 +133,34 @@ $(DLL): $(DLL_OBJS) $(COMMON_OBJS)
 	$(info Linking and generating: $(DLL))
 	$(CC) $(LFLAGS) -o $(DLL) $(DLL_OBJS) $(COMMON_OBJS) $(LIBS)
 
+
+# Permitted dependencies and glibc versions
+# This does not include libraries that are dynamically loaded with dlopen,
+# like all the gtk libraries. The purpose of this list, and the version
+# limit on glibc is to ensure eclipse launcher will be able to start
+# on the widest range on Linuxes.
+# All other error handling regarding missing/problematic libraries
+# can be done at runtime.
+ifeq ($(DEFAULT_OS_ARCH),x86_64)
+PERMITTED_LIBRARIES=libc.so.6 libpthread.so.0 libdl.so.2
+PERMITTED_GLIBC_VERSION=2.7
+checklibs: all
+	$(info Verifying $(EXEC) $(DLL) have permitted dependencies)
+	./check_dependencies.sh $(EXEC) $(PERMITTED_GLIBC_VERSION) $(PERMITTED_LIBRARIES)
+	./check_dependencies.sh $(DLL) $(PERMITTED_GLIBC_VERSION) $(PERMITTED_LIBRARIES)
+else
+# We don't enforce max version and library sets on non-x86-64 because
+# 1. We build on native hardware for those platforms so we don't have
+#    ability to use docker to adjust dependency versions as easily
+# 2. The other platforms that are newer are generally faster moving
+#    and it is less likely to break users to have harder version
+#    requirements.
+# As we get bigger user base on non-x86-64 we should start enforcing
+# upper bounds for them too.
+checklibs: all
+endif
+
+
 install: all
 	$(info Install into: EXE_OUTPUT_DIR:$(EXE_OUTPUT_DIR) LIB_OUTPUT_DIR:$(LIB_OUTPUT_DIR))
 	mkdir -p $(EXE_OUTPUT_DIR)

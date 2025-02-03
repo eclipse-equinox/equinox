@@ -17,7 +17,7 @@ def runOnNativeBuildAgent(String platform, Closure body) {
 	def final nativeBuildStageName = 'Perform native launcher build'
 	if (platform == 'gtk.linux.x86_64') {
 		podTemplate(inheritFrom: 'basic' /* inherit general configuration */, containers: [
-			containerTemplate(name: 'launcherbuild', image: 'eclipse/platformreleng-debian-swtnativebuild:12',
+			containerTemplate(name: 'launcherbuild', image: 'eclipse/platformreleng-debian-swtgtk3nativebuild:10',
 				resourceRequestCpu:'1000m', resourceRequestMemory:'512Mi',
 				resourceLimitCpu:'2000m', resourceLimitMemory:'4096Mi',
 				alwaysPullImage: true, command: 'cat', ttyEnabled: true)
@@ -219,7 +219,7 @@ pipeline {
 									withEnv(["JAVA_HOME=${WORKSPACE}/jdk.resources", "EXE_OUTPUT_DIR=${WORKSPACE}/libs", "LIB_OUTPUT_DIR=${WORKSPACE}/libs"]) {
 										dir(ws) {
 											if (isUnix()) {
-												sh "sh build.sh -ws ${ws} -os ${os} -arch ${arch} install"
+												sh "sh build.sh -ws ${ws} -os ${os} -arch ${arch} checklibs install"
 											} else {
 												bat "cmd /c build.bat -ws ${ws} -os ${os} -arch ${arch} install"
 											}
