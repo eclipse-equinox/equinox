@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -52,6 +52,7 @@ import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
@@ -308,24 +309,16 @@ public class Main {
 	 * @see "http://www.oracle.com/technetwork/java/javase/versioning-naming-139433.html for information on valid version strings"
 	 * @see "http://openjdk.java.net/jeps/223 for information on the JavaSE-9 version JEP 223"
 	 */
-	static class Identifier {
-		private static final String DELIM = ". _-"; //$NON-NLS-1$
-		private int major, minor, service;
+	private record Identifier(int major, int minor, int service) {
 
-		Identifier(int major, int minor, int service) {
-			super();
-			this.major = major;
-			this.minor = minor;
-			this.service = service;
-		}
+		private static final String DELIM = ". _-"; //$NON-NLS-1$
 
 		/**
 		 * @throws NumberFormatException if cannot parse the major and minor version components
 		 */
-		Identifier(String versionString) {
-			super();
+		static Identifier create(String versionString) {
 			StringTokenizer tokenizer = new StringTokenizer(versionString, DELIM);
-
+			int major = 0, minor = 0, service = 0;
 			// major
 			if (tokenizer.hasMoreTokens())
 				major = Integer.parseInt(tokenizer.nextToken());
@@ -342,7 +335,13 @@ public class Main {
 				// ignore the minor and service qualifiers in that case and default to 0
 				// this will allow us to tolerate other non-conventional version numbers
 			}
+			return new Identifier(major, minor, service);
 		}
+
+		private static final Comparator<Identifier> VERSION_ELEMENTS = Comparator. //
+				comparingInt(Identifier::major) // 
+				.thenComparingInt(Identifier::minor) //
+				.thenComparingInt(Identifier::service);
 
 		/**
 		 * Returns true if this id is considered to be greater than or equal to the given baseline.
@@ -354,17 +353,7 @@ public class Main {
 		 * 2.0.0 >= 1.3.1 -> true
 		 */
 		boolean isGreaterEqualTo(Identifier minimum) {
-			if (major < minimum.major)
-				return false;
-			if (major > minimum.major)
-				return true;
-			// major numbers are equivalent so check minor
-			if (minor < minimum.minor)
-				return false;
-			if (minor > minimum.minor)
-				return true;
-			// minor numbers are equivalent so check service
-			return service >= minimum.service;
+			return VERSION_ELEMENTS.compare(this, minimum) >= 0;
 		}
 	}
 
@@ -377,23 +366,17 @@ public class Main {
 			ws = osgiWs;
 			return ws;
 		}
-
 		String osName = getOS();
-		if (osName.equals(Constants.OS_WIN32))
-			return Constants.WS_WIN32;
-		if (osName.equals(Constants.OS_LINUX))
-			return Constants.WS_GTK;
-		if (osName.equals(Constants.OS_MACOSX))
-			return Constants.WS_COCOA;
-		if (osName.equals(Constants.OS_HPUX))
-			return Constants.WS_GTK;
-		if (osName.equals(Constants.OS_AIX))
-			return Constants.WS_GTK;
-		if (osName.equals(Constants.OS_SOLARIS))
-			return Constants.WS_GTK;
-		if (osName.equals(Constants.OS_QNX))
-			return Constants.WS_PHOTON;
-		return Constants.WS_UNKNOWN;
+		return switch (osName) {
+			case Constants.OS_WIN32 -> Constants.WS_WIN32;
+			case Constants.OS_LINUX -> Constants.WS_GTK;
+			case Constants.OS_MACOSX -> Constants.WS_COCOA;
+			case Constants.OS_HPUX -> Constants.WS_GTK;
+			case Constants.OS_AIX -> Constants.WS_GTK;
+			case Constants.OS_SOLARIS -> Constants.WS_GTK;
+			case Constants.OS_QNX -> Constants.WS_PHOTON;
+			default -> Constants.WS_UNKNOWN;
+		};
 	}
 
 	private String getOS() {
@@ -636,7 +619,7 @@ public class Main {
 		String type = PARENT_CLASSLOADER_BOOT;
 		try {
 			String javaVersion = System.getProperty("java.version"); //$NON-NLS-1$
-			if (javaVersion != null && new Identifier(javaVersion).isGreaterEqualTo(new Identifier("1.9"))) { //$NON-NLS-1$
+			if (javaVersion != null && Identifier.create(javaVersion).isGreaterEqualTo(Identifier.create("1.9"))) { //$NON-NLS-1$
 				// Workaround for bug 466683. Some org.w3c.dom.* packages that used to be available from
 				// JavaSE's boot classpath are only available from the extension path in Java 9 b62.
 				// Workaround for bug 489958. javax.annotation.* types are only available from
@@ -688,8 +671,8 @@ public class Main {
 		if (requiredVersion == null || availableVersion == null)
 			return true;
 		try {
-			Identifier required = new Identifier(requiredVersion);
-			Identifier available = new Identifier(availableVersion);
+			Identifier required = Identifier.create(requiredVersion);
+			Identifier available = Identifier.create(availableVersion);
 			boolean compatible = available.isGreaterEqualTo(required);
 			if (!compatible) {
 				// any non-zero value should do it - 14 used to be used for version incompatibility in Eclipse 2.1
@@ -2609,6 +2592,7 @@ public class Main {
 	 * nobody will actually call them (unless they casted the policy to EclipsePolicy and
 	 * called our methods)
 	 */
+	@SuppressWarnings({"removal", "deprecation"})
 	private class EclipsePolicy extends Policy {
 		// The policy that this EclipsePolicy is replacing
 		private Policy policy;
@@ -2726,12 +2710,12 @@ public class Main {
 			super.addURL(url);
 		}
 
-		// preparing for Java 9
+		@Override
 		protected URL findResource(String moduleName, String name) {
 			return findResource(name);
 		}
 
-		// preparing for Java 9
+		@Override
 		protected Class<?> findClass(String moduleName, String name) {
 			try {
 				return findClass(name);
