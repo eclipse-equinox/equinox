@@ -29,8 +29,8 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public abstract class AuthorizationEngine {
 
-	private EventManager manager = new EventManager();
-	private EventDispatcher<AuthorizationListener, Object, AuthorizationEvent> dispatcher = new AuthEventDispatcher();
+	private final EventManager manager = new EventManager();
+	private final EventDispatcher<AuthorizationListener, Object, AuthorizationEvent> dispatcher = new AuthEventDispatcher();
 	private final ServiceTracker<AuthorizationListener, AuthorizationListener> listenerTracker;
 
 	public AuthorizationEngine(BundleContext context) {

@@ -81,11 +81,11 @@ class ModuleResolutionReport implements ResolutionReport {
 	private final Map<Resource, List<Entry>> entries;
 	private final ResolutionException resolutionException;
 	private final Map<Resource, List<Wire>> resolutionResult;
-	private int totalPerm;
-	private int processedPerm;
-	private int usesPerm;
-	private int subPerm;
-	private int importPerm;
+	private final int totalPerm;
+	private final int processedPerm;
+	private final int usesPerm;
+	private final int subPerm;
+	private final int importPerm;
 
 	ModuleResolutionReport(Map<Resource, List<Wire>> resolutionResult, Map<Resource, List<Entry>> entries,
 			ResolutionException cause, int totalPerm, int processedPerm, int usesPerm, int subPerm, int importPerm) {

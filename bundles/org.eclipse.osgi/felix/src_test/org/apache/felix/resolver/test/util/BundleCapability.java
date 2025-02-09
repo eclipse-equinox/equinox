@@ -40,7 +40,8 @@ public class BundleCapability implements Capability
         m_attrs.put(BundleNamespace.BUNDLE_NAMESPACE.intern(), name);
     }
 
-    public String getNamespace()
+    @Override
+	public String getNamespace()
     {
         return BundleNamespace.BUNDLE_NAMESPACE.intern();
     }
@@ -50,7 +51,8 @@ public class BundleCapability implements Capability
         m_dirs.put(name.intern(), value);
     }
 
-    public Map<String, String> getDirectives()
+    @Override
+	public Map<String, String> getDirectives()
     {
         return m_dirs;
     }
@@ -60,12 +62,14 @@ public class BundleCapability implements Capability
         m_attrs.put(name.intern(), value);
     }
 
-    public Map<String, Object> getAttributes()
+    @Override
+	public Map<String, Object> getAttributes()
     {
         return m_attrs;
     }
 
-    public Resource getResource()
+    @Override
+	public Resource getResource()
     {
         return m_resource;
     }

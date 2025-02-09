@@ -80,27 +80,32 @@ public class WrappedCapability implements HostedCapability
         return hash;
     }
 
-    public Capability getDeclaredCapability()
+    @Override
+	public Capability getDeclaredCapability()
     {
         return m_cap;
     }
 
-    public Resource getResource()
+    @Override
+	public Resource getResource()
     {
         return m_host;
     }
 
-    public String getNamespace()
+    @Override
+	public String getNamespace()
     {
         return m_cap.getNamespace();
     }
 
-    public Map<String, String> getDirectives()
+    @Override
+	public Map<String, String> getDirectives()
     {
         return m_cap.getDirectives();
     }
 
-    public Map<String, Object> getAttributes()
+    @Override
+	public Map<String, Object> getAttributes()
     {
         return m_augmentedAttrs;
     }

@@ -30,7 +30,8 @@ import org.osgi.resource.Capability;
 
 public class CandidateComparator implements Comparator<Capability>
 {
-    public int compare(Capability cap1, Capability cap2)
+    @Override
+	public int compare(Capability cap1, Capability cap2)
     {
         int c = 0;
         // Always prefer system bundle

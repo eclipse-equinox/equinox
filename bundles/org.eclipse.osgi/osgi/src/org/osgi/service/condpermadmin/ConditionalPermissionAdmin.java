@@ -60,6 +60,7 @@ public interface ConditionalPermissionAdmin {
 	 * @deprecated As of 1.1. Use {@link #newConditionalPermissionUpdate()}
 	 *             instead.
 	 */
+	@Deprecated
 	ConditionalPermissionInfo addConditionalPermissionInfo(ConditionInfo[] conditions, PermissionInfo[] permissions);
 
 	/**
@@ -96,6 +97,7 @@ public interface ConditionalPermissionAdmin {
 	 * @deprecated As of 1.1. Use {@link #newConditionalPermissionUpdate()}
 	 *             instead.
 	 */
+	@Deprecated
 	ConditionalPermissionInfo setConditionalPermissionInfo(String name, ConditionInfo[] conditions, PermissionInfo[] permissions);
 
 	/**
@@ -115,6 +117,7 @@ public interface ConditionalPermissionAdmin {
 	 * @deprecated As of 1.1. Use {@link #newConditionalPermissionUpdate()}
 	 *             instead.
 	 */
+	@Deprecated
 	Enumeration<ConditionalPermissionInfo> getConditionalPermissionInfos();
 
 	/**
@@ -127,6 +130,7 @@ public interface ConditionalPermissionAdmin {
 	 * @deprecated As of 1.1. Use {@link #newConditionalPermissionUpdate()}
 	 *             instead.
 	 */
+	@Deprecated
 	ConditionalPermissionInfo getConditionalPermissionInfo(String name);
 
 	/**

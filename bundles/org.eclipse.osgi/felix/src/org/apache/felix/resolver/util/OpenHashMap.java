@@ -119,7 +119,8 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         return this.defRetValue;
     }
 
-    public boolean equals(Object o) {
+    @Override
+	public boolean equals(Object o) {
         if (o == this) {
             return true;
         } else if (!(o instanceof Map)) {
@@ -148,7 +149,8 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         }
     }
 
-    public String toString() {
+    @Override
+	public String toString() {
         StringBuilder s = new StringBuilder();
         Iterator<Map.Entry<K, V>> i = this.fast().iterator();
         int n = this.size();
@@ -229,7 +231,8 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         return (V) oldValue;
     }
 
-    public void putAll(Map<? extends K, ? extends V> m) {
+    @Override
+	public void putAll(Map<? extends K, ? extends V> m) {
         if ((double) this.f <= 0.5D) {
             this.ensureCapacity(m.size());
         } else {
@@ -296,7 +299,8 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         return -1;
     }
 
-    @SuppressWarnings("unchecked")
+    @Override
+	@SuppressWarnings("unchecked")
     public V put(K k, V v) {
         int pos = this.insert(k, v);
         if (pos < 0) {
@@ -388,7 +392,8 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         }
     }
 
-    public V remove(Object k) {
+    @Override
+	public V remove(Object k) {
         if (k == null) {
             return this.containsNullKey ? this.removeNullEntry() : this.defRetValue;
         } else {
@@ -467,7 +472,8 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @Override
+	@SuppressWarnings("unchecked")
     public V get(Object k) {
         if (k == null) {
             return containsNullKey ? (V) value[n] : defRetValue;
@@ -496,7 +502,8 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         }
     }
 
-    public boolean containsKey(Object k) {
+    @Override
+	public boolean containsKey(Object k) {
         if (k == null) {
             return this.containsNullKey;
         } else {
@@ -519,7 +526,8 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         }
     }
 
-    public boolean containsValue(Object v) {
+    @Override
+	public boolean containsValue(Object v) {
         Object[] value = this.value;
         Object[] key = this.key;
         if (containsNullKey && (value[n] == null && v == null) || value[n].equals(v)) {
@@ -533,7 +541,8 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         return false;
     }
 
-    public void clear() {
+    @Override
+	public void clear() {
         if (size != 0) {
             size = 0;
             containsNullKey = false;
@@ -543,11 +552,13 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         }
     }
 
-    public int size() {
+    @Override
+	public int size() {
         return this.size;
     }
 
-    public boolean isEmpty() {
+    @Override
+	public boolean isEmpty() {
         return this.size == 0;
     }
 
@@ -595,7 +606,8 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @Override
+	@SuppressWarnings("unchecked")
     public K firstKey() {
         if (size == 0) {
             throw new NoSuchElementException();
@@ -604,7 +616,8 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @Override
+	@SuppressWarnings("unchecked")
     public K lastKey() {
         if (size == 0) {
             throw new NoSuchElementException();
@@ -613,26 +626,31 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         }
     }
 
-    public Comparator<? super K> comparator() {
+    @Override
+	public Comparator<? super K> comparator() {
         return null;
     }
 
-    public SortedMap<K, V> tailMap(K from) {
+    @Override
+	public SortedMap<K, V> tailMap(K from) {
         throw new UnsupportedOperationException();
     }
 
-    public SortedMap<K, V> headMap(K to) {
+    @Override
+	public SortedMap<K, V> headMap(K to) {
         throw new UnsupportedOperationException();
     }
 
-    public SortedMap<K, V> subMap(K from, K to) {
+    @Override
+	public SortedMap<K, V> subMap(K from, K to) {
         throw new UnsupportedOperationException();
     }
 
     public Iterable<Map.Entry<K, V>> fast() {
         if (fast == null) {
             fast = new Iterable<Entry<K, V>>() {
-                public Iterator<Entry<K, V>> iterator() {
+                @Override
+				public Iterator<Entry<K, V>> iterator() {
                     return new FastEntryIterator();
                 }
             };
@@ -641,7 +659,8 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         return fast;
     }
 
-    public SortedSet<Map.Entry<K, V>> entrySet() {
+    @Override
+	public SortedSet<Map.Entry<K, V>> entrySet() {
         if (entries == null) {
             entries = new MapEntrySet();
         }
@@ -649,7 +668,8 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         return this.entries;
     }
 
-    public SortedSet<K> keySet() {
+    @Override
+	public SortedSet<K> keySet() {
         if (keys == null) {
             keys = new KeySet();
         }
@@ -657,22 +677,27 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         return keys;
     }
 
-    public Collection<V> values() {
+    @Override
+	public Collection<V> values() {
         if (values == null) {
             values = new AbstractObjectCollection<V>() {
-                public Iterator<V> iterator() {
+                @Override
+				public Iterator<V> iterator() {
                     return new ValueIterator();
                 }
 
-                public int size() {
+                @Override
+				public int size() {
                     return size;
                 }
 
-                public boolean contains(Object v) {
+                @Override
+				public boolean contains(Object v) {
                     return containsValue(v);
                 }
 
-                public void clear() {
+                @Override
+				public void clear() {
                     OpenHashMap.this.clear();
                 }
             };
@@ -801,7 +826,8 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         this.value = newValue;
     }
 
-    @SuppressWarnings("unchecked")
+    @Override
+	@SuppressWarnings("unchecked")
     public OpenHashMap<K, V> clone() {
         OpenHashMap<K, V> c;
         try {
@@ -821,7 +847,8 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         return c;
     }
 
-    public int hashCode() {
+    @Override
+	public int hashCode() {
         int h = 0;
         for( int j = realSize(), i = 0, t = 0; j-- != 0; ) {
             while (key[i] == null) {
@@ -912,7 +939,8 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
             super();
         }
 
-        @SuppressWarnings("unchecked")
+        @Override
+		@SuppressWarnings("unchecked")
         public V next() {
             return (V) value[this.nextEntry()];
         }
@@ -922,29 +950,35 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         private KeySet() {
         }
 
-        public Iterator<K> iterator() {
+        @Override
+		public Iterator<K> iterator() {
             return new KeyIterator();
         }
 
-        public int size() {
+        @Override
+		public int size() {
             return size;
         }
 
-        public boolean contains(Object k) {
+        @Override
+		public boolean contains(Object k) {
             return containsKey(k);
         }
 
-        public boolean remove(Object k) {
+        @Override
+		public boolean remove(Object k) {
             int oldSize = size;
             OpenHashMap.this.remove(k);
             return size != oldSize;
         }
 
-        public void clear() {
+        @Override
+		public void clear() {
             OpenHashMap.this.clear();
         }
 
-        @SuppressWarnings("unchecked")
+        @Override
+		@SuppressWarnings("unchecked")
         public K first() {
             if (size == 0) {
                 throw new NoSuchElementException();
@@ -953,7 +987,8 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
             }
         }
 
-        @SuppressWarnings("unchecked")
+        @Override
+		@SuppressWarnings("unchecked")
         public K last() {
             if (size == 0) {
                 throw new NoSuchElementException();
@@ -962,19 +997,23 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
             }
         }
 
-        public Comparator<? super K> comparator() {
+        @Override
+		public Comparator<? super K> comparator() {
             return null;
         }
 
-        public final SortedSet<K> tailSet(K from) {
+        @Override
+		public final SortedSet<K> tailSet(K from) {
             throw new UnsupportedOperationException();
         }
 
-        public final SortedSet<K> headSet(K to) {
+        @Override
+		public final SortedSet<K> headSet(K to) {
             throw new UnsupportedOperationException();
         }
 
-        public final SortedSet<K> subSet(K from, K to) {
+        @Override
+		public final SortedSet<K> subSet(K from, K to) {
             throw new UnsupportedOperationException();
         }
     }
@@ -984,7 +1023,8 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
             super();
         }
 
-        @SuppressWarnings("unchecked")
+        @Override
+		@SuppressWarnings("unchecked")
         public K next() {
             return (K) key[this.nextEntry()];
         }
@@ -994,27 +1034,33 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         private MapEntrySet() {
         }
 
-        public EntryIterator iterator() {
+        @Override
+		public EntryIterator iterator() {
             return new EntryIterator();
         }
 
-        public Comparator<? super Entry<K, V>> comparator() {
+        @Override
+		public Comparator<? super Entry<K, V>> comparator() {
             return null;
         }
 
-        public SortedSet<Entry<K, V>> subSet(Entry<K, V> fromElement, Entry<K, V> toElement) {
+        @Override
+		public SortedSet<Entry<K, V>> subSet(Entry<K, V> fromElement, Entry<K, V> toElement) {
             throw new UnsupportedOperationException();
         }
 
-        public SortedSet<Entry<K, V>> headSet(Entry<K, V> toElement) {
+        @Override
+		public SortedSet<Entry<K, V>> headSet(Entry<K, V> toElement) {
             throw new UnsupportedOperationException();
         }
 
-        public SortedSet<Entry<K, V>> tailSet(Entry<K, V> fromElement) {
+        @Override
+		public SortedSet<Entry<K, V>> tailSet(Entry<K, V> fromElement) {
             throw new UnsupportedOperationException();
         }
 
-        public Entry<K, V> first() {
+        @Override
+		public Entry<K, V> first() {
             if (size == 0) {
                 throw new NoSuchElementException();
             } else {
@@ -1022,7 +1068,8 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
             }
         }
 
-        public Entry<K, V> last() {
+        @Override
+		public Entry<K, V> last() {
             if (size == 0) {
                 throw new NoSuchElementException();
             } else {
@@ -1030,7 +1077,8 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
             }
         }
 
-        public boolean contains(Object o) {
+        @Override
+		public boolean contains(Object o) {
             if (!(o instanceof java.util.Map.Entry)) {
                 return false;
             } else {
@@ -1071,7 +1119,8 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
             }
         }
 
-        public boolean remove(Object o) {
+        @Override
+		public boolean remove(Object o) {
             if (!(o instanceof java.util.Map.Entry)) {
                 return false;
             } else {
@@ -1134,11 +1183,13 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
             }
         }
 
-        public int size() {
+        @Override
+		public int size() {
             return size;
         }
 
-        public void clear() {
+        @Override
+		public void clear() {
             OpenHashMap.this.clear();
         }
     }
@@ -1151,7 +1202,8 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
             this.entry = new MapEntry();
         }
 
-        public MapEntry next() {
+        @Override
+		public MapEntry next() {
             this.entry.index = this.nextEntry();
             return this.entry;
         }
@@ -1164,18 +1216,21 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
             super();
         }
 
-        public MapEntry next() {
+        @Override
+		public MapEntry next() {
             return this.entry = new MapEntry(this.nextEntry());
         }
 
-        public void remove() {
+        @Override
+		public void remove() {
             super.remove();
             this.entry.index = -1;
         }
     }
 
     public static abstract class AbstractObjectSet<K> extends AbstractObjectCollection<K> implements Cloneable {
-        public boolean equals(Object o) {
+        @Override
+		public boolean equals(Object o) {
             if (o == this) {
                 return true;
             } else if (!(o instanceof Set)) {
@@ -1186,7 +1241,8 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
             }
         }
 
-        public int hashCode() {
+        @Override
+		public int hashCode() {
             int h = 0;
             int n = this.size();
 
@@ -1324,24 +1380,28 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         MapEntry() {
         }
 
-        @SuppressWarnings("unchecked")
+        @Override
+		@SuppressWarnings("unchecked")
         public K getKey() {
             return (K) key[this.index];
         }
 
-        @SuppressWarnings("unchecked")
+        @Override
+		@SuppressWarnings("unchecked")
         public V getValue() {
             return (V) value[this.index];
         }
 
-        @SuppressWarnings("unchecked")
+        @Override
+		@SuppressWarnings("unchecked")
         public V setValue(V v) {
             Object oldValue = value[this.index];
             value[this.index] = v;
             return (V) oldValue;
         }
 
-        public boolean equals(Object o) {
+        @Override
+		public boolean equals(Object o) {
             if (!(o instanceof Entry)) {
                 return false;
             } else {
@@ -1366,13 +1426,15 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
             }
         }
 
-        public int hashCode() {
+        @Override
+		public int hashCode() {
             return (key[this.index] == null ? 0 :
                     key[this.index].hashCode()) ^ (value[this.index] == null ? 0 :
                     value[this.index].hashCode());
         }
 
-        public String toString() {
+        @Override
+		public String toString() {
             return key[this.index] + "=>" + value[this.index];
         }
     }
@@ -1382,13 +1444,15 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
         protected AbstractObjectCollection() {
         }
 
-        public Object[] toArray() {
+        @Override
+		public Object[] toArray() {
             Object[] a = new Object[this.size()];
             unwrap(this.iterator(), a);
             return a;
         }
 
-        @SuppressWarnings("unchecked")
+        @Override
+		@SuppressWarnings("unchecked")
         public <T> T[] toArray(T[] a) {
             if (a.length < this.size()) {
                 a = (T[]) Array.newInstance(a.getClass().getComponentType(), this.size());
@@ -1397,7 +1461,8 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
             return a;
         }
 
-        public boolean addAll(Collection<? extends K> c) {
+        @Override
+		public boolean addAll(Collection<? extends K> c) {
             boolean retVal = false;
             Iterator<? extends K> i = c.iterator();
             int n = c.size();
@@ -1411,11 +1476,13 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
             return retVal;
         }
 
-        public boolean add(K k) {
+        @Override
+		public boolean add(K k) {
             throw new UnsupportedOperationException();
         }
 
-        public boolean containsAll(Collection<?> c) {
+        @Override
+		public boolean containsAll(Collection<?> c) {
             int n = c.size();
             Iterator<?> i = c.iterator();
 
@@ -1428,7 +1495,8 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
             return false;
         }
 
-        public boolean retainAll(Collection<?> c) {
+        @Override
+		public boolean retainAll(Collection<?> c) {
             boolean retVal = false;
             int n = this.size();
             Iterator<K> i = this.iterator();
@@ -1443,7 +1511,8 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
             return retVal;
         }
 
-        public boolean removeAll(Collection<?> c) {
+        @Override
+		public boolean removeAll(Collection<?> c) {
             boolean retVal = false;
             int n = c.size();
             Iterator<?> i = c.iterator();
@@ -1457,11 +1526,13 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
             return retVal;
         }
 
-        public boolean isEmpty() {
+        @Override
+		public boolean isEmpty() {
             return this.size() == 0;
         }
 
-        public String toString() {
+        @Override
+		public String toString() {
             StringBuilder s = new StringBuilder();
             Iterator<K> i = this.iterator();
             int n = this.size();

@@ -507,10 +507,12 @@ final class ModuleResolver {
 				}
 			}
 
+			@Override
 			public void logRequirement(String message, Requirement requirement) {
 				debug(String.format(message, ModuleContainer.toString(requirement)));
 			}
 
+			@Override
 			public void logCapability(String message, Capability requirement) {
 				debug(String.format(message, ModuleContainer.toString(requirement)));
 			}
@@ -643,8 +645,8 @@ final class ModuleResolver {
 		private volatile boolean currentlyResolvingMandatory = false;
 		private final Set<Resource> transitivelyResolveFailures = new LinkedHashSet<>();
 		private final Set<Resource> failedToResolve = new HashSet<>();
-		private AtomicBoolean scheduleTimeout = new AtomicBoolean(true);
-		private AtomicReference<ScheduledFuture<?>> timoutFuture = new AtomicReference<>();
+		private final AtomicBoolean scheduleTimeout = new AtomicBoolean(true);
+		private final AtomicReference<ScheduledFuture<?>> timoutFuture = new AtomicReference<>();
 		/*
 		 * Used to generate the UNRESOLVED_PROVIDER resolution report entries.
 		 *

@@ -64,7 +64,8 @@ public class SimpleFilter
         return m_op;
     }
 
-    public String toString()
+    @Override
+	public String toString()
     {
         String s = null;
         switch (m_op)

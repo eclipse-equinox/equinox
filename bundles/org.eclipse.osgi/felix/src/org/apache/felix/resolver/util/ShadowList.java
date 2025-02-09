@@ -52,7 +52,8 @@ public class ShadowList extends CandidateSelector
         m_original = new ArrayList<Capability>(original);
     }
 
-    public ShadowList copy() {
+    @Override
+	public ShadowList copy() {
         return new ShadowList(this, m_original);
     }
 
