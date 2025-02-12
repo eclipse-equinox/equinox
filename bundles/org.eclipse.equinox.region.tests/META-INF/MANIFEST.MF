@@ -5,12 +5,6 @@ Bundle-SymbolicName: org.eclipse.equinox.region.tests
 Bundle-Version: 1.6.200.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Import-Package: junit.framework;version="4.8.1",
- org.aspectj.internal.lang.annotation;version="[1.6.3,2.0.0)";resolution:=optional,
- org.aspectj.lang;version="[1.6.3,2.0.0)";resolution:=optional,
- org.aspectj.lang.annotation;version="[1.6.3,2.0.0)";resolution:=optional,
- org.aspectj.lang.reflect;version="[1.6.3,2.0.0)";resolution:=optional,
- org.aspectj.runtime.internal;version="[1.6.3,2.0.0)";resolution:=optional,
- org.aspectj.runtime.reflect;version="[1.6.3,2.0.0)";resolution:=optional,
  org.eclipse.core.runtime;version="3.7.0",
  org.eclipse.core.tests.harness,
  org.eclipse.equinox.region;version="1.1.0",
