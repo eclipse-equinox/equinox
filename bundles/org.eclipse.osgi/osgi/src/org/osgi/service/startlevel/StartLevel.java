@@ -72,6 +72,7 @@ import org.osgi.framework.Bundle;
  * @deprecated This service has been replaced by the
  *             <code>org.osgi.framework.startlevel</code> package.
  */
+@Deprecated
 public interface StartLevel {
 	/**
 	 * Return the active start level value of the Framework.

@@ -1653,7 +1653,7 @@ public abstract class FilterImpl implements Filter {
 		private Version leftVersion;
 		private Version rightVersion;
 		private char rightRule = 0;
-		private Collection<Version> excludes = new ArrayList<>(0);
+		private final Collection<Version> excludes = new ArrayList<>(0);
 
 		@Override
 		public String toString() {

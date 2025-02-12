@@ -41,22 +41,26 @@ public class PackageRequirement implements Requirement
         m_attrs = new HashMap<String, Object>();
     }
 
-    public String getNamespace()
+    @Override
+	public String getNamespace()
     {
         return PackageNamespace.PACKAGE_NAMESPACE;
     }
 
-    public Map<String, String> getDirectives()
+    @Override
+	public Map<String, String> getDirectives()
     {
         return m_dirs;
     }
 
-    public Map<String, Object> getAttributes()
+    @Override
+	public Map<String, Object> getAttributes()
     {
         return m_attrs;
     }
 
-    public Resource getResource()
+    @Override
+	public Resource getResource()
     {
         return m_resource;
     }

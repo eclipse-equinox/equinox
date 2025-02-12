@@ -1231,11 +1231,13 @@ class Candidates
             this.requirement = requirement;
         }
 
-        public String getMessage() {
+        @Override
+		public String getMessage() {
             return "Dynamic import failed.";
         }
 
-        public Collection<Requirement> getUnresolvedRequirements() {
+        @Override
+		public Collection<Requirement> getUnresolvedRequirements() {
             return Collections.singleton(requirement);
         }
 
@@ -1254,7 +1256,8 @@ class Candidates
             this.resource = resource;
         }
 
-        public String getMessage() {
+        @Override
+		public String getMessage() {
             return "Fragment was not selected for attachment: " + resource;
         }
 
@@ -1284,7 +1287,8 @@ class Candidates
             this.cause = cause;
         }
 
-        public String getMessage() {
+        @Override
+		public String getMessage() {
             String msg = "Unable to resolve " + requirement.getResource()
                     + ": missing requirement " + requirement;
             if (cause != null)
@@ -1294,7 +1298,8 @@ class Candidates
             return msg;
         }
 
-        public Collection<Requirement> getUnresolvedRequirements() {
+        @Override
+		public Collection<Requirement> getUnresolvedRequirements() {
             return Collections.singleton(requirement);
         }
 

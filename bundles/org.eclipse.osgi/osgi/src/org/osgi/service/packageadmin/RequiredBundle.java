@@ -48,6 +48,7 @@ import org.osgi.framework.Version;
  *             <code>org.osgi.framework.wiring</code> package.
  * @author $Id$
  */
+@Deprecated
 public interface RequiredBundle {
 	/**
 	 * Returns the symbolic name of this required bundle.

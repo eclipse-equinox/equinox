@@ -110,7 +110,7 @@ public final class StorageManager {
 	private final boolean openCleanup = Boolean.valueOf(System.getProperty("osgi.embedded.cleanupOnOpen")).booleanValue(); //$NON-NLS-1$
 	private final boolean saveCleanup = Boolean.valueOf(System.getProperty("osgi.embedded.cleanupOnSave")).booleanValue(); //$NON-NLS-1$
 
-	private class Entry {
+	private static class Entry {
 		int readId;
 		int writeId;
 		int fileType;

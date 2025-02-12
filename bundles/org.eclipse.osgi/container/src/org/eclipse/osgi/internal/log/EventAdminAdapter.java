@@ -33,12 +33,12 @@ public class EventAdminAdapter implements ServiceTrackerCustomizer<Object, Objec
 	private static Collection<String> eventAdminObjectClass = Arrays.asList("org.osgi.service.event.EventAdmin"); //$NON-NLS-1$
 	private static Collection<String> eventHandlerObjectClass = Arrays.asList("org.osgi.service.event.EventHandler"); //$NON-NLS-1$
 
-	private ServiceTracker<Object, Object> eventAdminTracker;
-	private ServiceTracker<Object, Object> eventHandlerTracker;
-	private BundleContext context;
+	private final ServiceTracker<Object, Object> eventAdminTracker;
+	private final ServiceTracker<Object, Object> eventHandlerTracker;
+	private final BundleContext context;
 	private ServiceReference<Object> eventAdmin;
 	private int logEventHandlers;
-	private ExtendedLogReaderServiceFactory logReaderServiceFactory;
+	private final ExtendedLogReaderServiceFactory logReaderServiceFactory;
 	private EventAdminLogListener logListener;
 
 	public EventAdminAdapter(BundleContext context, ExtendedLogReaderServiceFactory logReaderServiceFactory) {

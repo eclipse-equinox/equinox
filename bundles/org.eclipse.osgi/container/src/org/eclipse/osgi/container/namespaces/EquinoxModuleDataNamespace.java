@@ -69,6 +69,7 @@ public class EquinoxModuleDataNamespace extends Namespace {
 	 * 
 	 * @deprecated use {@link #LAZYSTART_HEADER}
 	 */
+	@Deprecated
 	public static final String AUTOSTART_HEADER = "Eclipse-AutoStart"; //$NON-NLS-1$
 
 	/**

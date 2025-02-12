@@ -420,7 +420,7 @@ class OrderedExecutor implements ThreadFactory {
 	 */
 	class OrderedTaskQueue {
 		private final Queue<OrderedTask> dependencyQueue = new LinkedList<>();
-		private AtomicReference<OrderedTask> firstTask = new AtomicReference<>();
+		private final AtomicReference<OrderedTask> firstTask = new AtomicReference<>();
 
 		void execute(Runnable task, int numListeners) {
 			executeOrderedTask(task, this, numListeners);

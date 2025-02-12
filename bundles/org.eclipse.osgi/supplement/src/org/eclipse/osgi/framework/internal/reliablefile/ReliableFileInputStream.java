@@ -33,7 +33,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 	/**
 	 * size of crc and signature
 	 */
-	private int sigSize;
+	private final int sigSize;
 
 	/**
 	 * current position reading from file

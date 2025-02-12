@@ -95,7 +95,8 @@ class WrappedResource implements Resource
         return m_fragments;
     }
 
-    public List<Capability> getCapabilities(String namespace)
+    @Override
+	public List<Capability> getCapabilities(String namespace)
     {
         if (namespace != null) {
             List<Capability> filtered = new ArrayList<Capability>();
@@ -109,7 +110,8 @@ class WrappedResource implements Resource
         return m_cachedCapabilities;
     }
 
-    public List<Requirement> getRequirements(String namespace)
+    @Override
+	public List<Requirement> getRequirements(String namespace)
     {
         if (namespace != null) {
             List<Requirement> filtered = new ArrayList<Requirement>();
@@ -123,7 +125,8 @@ class WrappedResource implements Resource
         return m_cachedRequirements;
     }
 
-    public String toString()
+    @Override
+	public String toString()
     {
         return m_host.toString();
     }

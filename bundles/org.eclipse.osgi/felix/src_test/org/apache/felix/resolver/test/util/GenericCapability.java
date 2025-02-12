@@ -39,7 +39,8 @@ public class GenericCapability implements Capability
         m_attrs = new HashMap<String, Object>();
     }
 
-    public String getNamespace()
+    @Override
+	public String getNamespace()
     {
         return m_namespace;
     }
@@ -49,7 +50,8 @@ public class GenericCapability implements Capability
         m_dirs.put(name.intern(), value);
     }
 
-    public Map<String, String> getDirectives()
+    @Override
+	public Map<String, String> getDirectives()
     {
         return m_dirs;
     }
@@ -59,12 +61,14 @@ public class GenericCapability implements Capability
         m_attrs.put(name.intern(), value);
     }
 
-    public Map<String, Object> getAttributes()
+    @Override
+	public Map<String, Object> getAttributes()
     {
         return m_attrs;
     }
 
-    public Resource getResource()
+    @Override
+	public Resource getResource()
     {
         return m_resource;
     }

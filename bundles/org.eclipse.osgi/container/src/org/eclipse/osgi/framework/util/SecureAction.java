@@ -45,7 +45,7 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class SecureAction {
 	// make sure we use the correct controlContext;
-	private AccessControlContext controlContext;
+	private final AccessControlContext controlContext;
 
 	// uses initialization-on-demand holder idiom to do fast lazy loading
 	private static class BootClassLoaderHolder {

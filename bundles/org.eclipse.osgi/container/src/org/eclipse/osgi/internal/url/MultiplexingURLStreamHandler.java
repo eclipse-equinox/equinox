@@ -32,8 +32,8 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 	private static Field handlerField;
 	private static boolean methodsInitialized = false;
 
-	private String protocol;
-	private URLStreamHandlerFactoryImpl factory;
+	private final String protocol;
+	private final URLStreamHandlerFactoryImpl factory;
 	private final URLStreamHandler authorized;
 
 	private static synchronized void initializeMethods(URLStreamHandlerFactoryImpl factory) {

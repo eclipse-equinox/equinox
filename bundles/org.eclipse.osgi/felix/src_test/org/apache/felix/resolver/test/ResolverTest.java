@@ -1610,19 +1610,23 @@ public class ResolverTest
             this.provider = provider;
         }
 
-        public Capability getCapability() {
+        @Override
+		public Capability getCapability() {
             return capability;
         }
 
-        public Requirement getRequirement() {
+        @Override
+		public Requirement getRequirement() {
             return requirement;
         }
 
-        public Resource getRequirer() {
+        @Override
+		public Resource getRequirer() {
             return requirer;
         }
 
-        public Resource getProvider() {
+        @Override
+		public Resource getProvider() {
             return provider;
         }
     }
@@ -1641,7 +1645,8 @@ public class ResolverTest
             this.resourceCapabilities = resourceCapabilities;
         }
 
-        public List<Capability> getResourceCapabilities(String namespace) {
+        @Override
+		public List<Capability> getResourceCapabilities(String namespace) {
             if (resourceCapabilities == null) {
                 resourceCapabilities = new ArrayList<Capability>();
                 for (Wire wire : invertedWires.get(resource)) {
@@ -1662,7 +1667,8 @@ public class ResolverTest
             return resourceCapabilities;
         }
 
-        public List<Requirement> getResourceRequirements(String namespace) {
+        @Override
+		public List<Requirement> getResourceRequirements(String namespace) {
             if (resourceRequirements == null) {
                 resourceRequirements = new ArrayList<Requirement>();
                 for (Wire wire : wires.get(resource)) {
@@ -1683,7 +1689,8 @@ public class ResolverTest
             return resourceRequirements;
         }
 
-        public List<Wire> getProvidedResourceWires(String namespace) {
+        @Override
+		public List<Wire> getProvidedResourceWires(String namespace) {
             List<Wire> providedWires = invertedWires.get(resource);
             if (namespace != null) {
                 List<Wire> wires = new ArrayList<Wire>();
@@ -1697,7 +1704,8 @@ public class ResolverTest
             return providedWires;
         }
 
-        public List<Wire> getRequiredResourceWires(String namespace) {
+        @Override
+		public List<Wire> getRequiredResourceWires(String namespace) {
             List<Wire> requiredWires = wires.get(resource);
             if (namespace != null) {
                 List<Wire> wires = new ArrayList<Wire>();
@@ -1711,7 +1719,8 @@ public class ResolverTest
             return requiredWires;
         }
 
-        public Resource getResource() {
+        @Override
+		public Resource getResource() {
             return resource;
         }
     }

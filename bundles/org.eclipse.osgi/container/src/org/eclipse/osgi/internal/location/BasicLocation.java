@@ -119,6 +119,7 @@ public class BasicLocation implements Location {
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
 	@Override
 	public boolean setURL(URL value, boolean lock) throws IllegalStateException {
 		try {
