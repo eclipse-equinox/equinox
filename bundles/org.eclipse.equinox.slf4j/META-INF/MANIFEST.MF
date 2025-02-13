@@ -2,6 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %bundleName
 Bundle-Vendor: %providerName
+Bundle-Localization: plugin
 Bundle-SymbolicName: org.eclipse.equinox.slf4j
 Bundle-Version: 1.0.0.qualifier
 Import-Package: org.slf4j;version="[2.0.0,3.0.0)",
