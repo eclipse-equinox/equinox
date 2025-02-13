@@ -20,7 +20,7 @@ import org.slf4j.helpers.MessageFormatter;
 class EquinoxLogger extends org.slf4j.helpers.MarkerIgnoringBase {
 
 	private static final long serialVersionUID = 1L;
-	private Logger logger;
+	private final Logger logger;
 
 	EquinoxLogger(String name, Logger logger) {
 		this.name = name;
