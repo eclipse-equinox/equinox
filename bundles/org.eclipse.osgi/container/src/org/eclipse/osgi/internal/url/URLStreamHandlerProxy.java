@@ -21,8 +21,8 @@ import java.net.InetAddress;
 import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.URLStreamHandler;
 import java.util.function.Supplier;
+import org.eclipse.equinox.plurl.PlurlStreamHandlerBase;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
@@ -44,10 +44,10 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
  * environment of URLStreamHandlerServices being registered and unregistered.
  */
 
-public class URLStreamHandlerProxy extends URLStreamHandler {
+public class URLStreamHandlerProxy extends PlurlStreamHandlerBase {
 
 	private static final URLStreamHandlerService NO_HANDLER = new NullURLStreamHandlerService();
-	// TODO lots of type-based names
+
 	protected URLStreamHandlerService realHandlerService;
 
 	protected final URLStreamHandlerSetter urlSetter;
@@ -94,7 +94,7 @@ public class URLStreamHandlerProxy extends URLStreamHandler {
 	 * @see java.net.URLStreamHandler#equals(URL, URL)
 	 */
 	@Override
-	protected boolean equals(URL url1, URL url2) {
+	public boolean equals(URL url1, URL url2) {
 		return getRealHandlerService().equals(url1, url2);
 	}
 
@@ -102,7 +102,7 @@ public class URLStreamHandlerProxy extends URLStreamHandler {
 	 * @see java.net.URLStreamHandler#getDefaultPort()
 	 */
 	@Override
-	protected int getDefaultPort() {
+	public int getDefaultPort() {
 		return getRealHandlerService().getDefaultPort();
 	}
 
@@ -110,7 +110,7 @@ public class URLStreamHandlerProxy extends URLStreamHandler {
 	 * @see java.net.URLStreamHandler#getHostAddress(URL)
 	 */
 	@Override
-	protected InetAddress getHostAddress(URL url) {
+	public InetAddress getHostAddress(URL url) {
 		return getRealHandlerService().getHostAddress(url);
 	}
 
@@ -118,7 +118,7 @@ public class URLStreamHandlerProxy extends URLStreamHandler {
 	 * @see java.net.URLStreamHandler#hashCode(URL)
 	 */
 	@Override
-	protected int hashCode(URL url) {
+	public int hashCode(URL url) {
 		return getRealHandlerService().hashCode(url);
 	}
 
@@ -126,7 +126,7 @@ public class URLStreamHandlerProxy extends URLStreamHandler {
 	 * @see java.net.URLStreamHandler#hostsEqual(URL, URL)
 	 */
 	@Override
-	protected boolean hostsEqual(URL url1, URL url2) {
+	public boolean hostsEqual(URL url1, URL url2) {
 		return getRealHandlerService().hostsEqual(url1, url2);
 	}
 
@@ -134,7 +134,7 @@ public class URLStreamHandlerProxy extends URLStreamHandler {
 	 * @see java.net.URLStreamHandler#openConnection(URL)
 	 */
 	@Override
-	protected URLConnection openConnection(URL url) throws IOException {
+	public URLConnection openConnection(URL url) throws IOException {
 		return getRealHandlerService().openConnection(url);
 	}
 
@@ -150,7 +150,7 @@ public class URLStreamHandlerProxy extends URLStreamHandler {
 	 * @see java.net.URLStreamHandler#sameFile(URL, URL)
 	 */
 	@Override
-	protected boolean sameFile(URL url1, URL url2) {
+	public boolean sameFile(URL url1, URL url2) {
 		return getRealHandlerService().sameFile(url1, url2);
 	}
 
@@ -158,32 +158,12 @@ public class URLStreamHandlerProxy extends URLStreamHandler {
 	 * @see java.net.URLStreamHandler#toExternalForm(URL)
 	 */
 	@Override
-	protected String toExternalForm(URL url) {
+	public String toExternalForm(URL url) {
 		return getRealHandlerService().toExternalForm(url);
 	}
 
-	/**
-	 * @see java.net.URLStreamHandler#setURL(URL, String, String, int, String,
-	 *      String, String, String, String)
-	 */
 	@Override
-	public void setURL(URL u, String protocol, String host, int port, String authority, String userInfo, String file,
-			String query, String ref) {
-		super.setURL(u, protocol, host, port, authority, userInfo, file, query, ref);
-	}
-
-	@SuppressWarnings("deprecation")
-	@Override
-	public void setURL(URL url, String protocol, String host, int port, String file, String ref) {
-
-		// using non-deprecated URLStreamHandler.setURL method.
-		// setURL(URL u, String protocol, String host, int port, String authority,
-		// String userInfo, String file, String query, String ref)
-		super.setURL(url, protocol, host, port, null, null, file, null, ref);
-	}
-
-	@Override
-	protected URLConnection openConnection(URL u, Proxy p) throws IOException {
+	public URLConnection openConnection(URL u, Proxy p) throws IOException {
 		try {
 			URLStreamHandlerService service = getRealHandlerService();
 			Method openConn = service.getClass().getMethod("openConnection", //$NON-NLS-1$
@@ -198,6 +178,15 @@ public class URLStreamHandlerProxy extends URLStreamHandler {
 			// expected on JRE < 1.5
 			throw new UnsupportedOperationException(e);
 		}
+	}
+
+	void setURLInternal(URL u, String proto, String host, int port, String auth, String user, String path, String query,
+			String ref) {
+		setURL(u, proto, host, port, auth, user, path, query, ref);
+	}
+
+	void setURLInternal(URL u, String proto, String host, int port, String file, String ref) {
+		setURL(u, proto, host, port, file, ref);
 	}
 
 	public boolean isActive() {
