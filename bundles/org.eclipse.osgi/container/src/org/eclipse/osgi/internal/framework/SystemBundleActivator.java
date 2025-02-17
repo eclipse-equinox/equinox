@@ -23,6 +23,10 @@ import java.util.Hashtable;
 import java.util.List;
 import org.apache.felix.resolver.Logger;
 import org.apache.felix.resolver.ResolverImpl;
+import org.eclipse.equinox.plurl.Plurl;
+import org.eclipse.equinox.plurl.PlurlContentHandlerFactory;
+import org.eclipse.equinox.plurl.PlurlStreamHandlerFactory;
+import org.eclipse.equinox.plurl.impl.PlurlImpl;
 import org.eclipse.osgi.internal.debug.FrameworkDebugOptions;
 import org.eclipse.osgi.internal.framework.legacy.PackageAdminImpl;
 import org.eclipse.osgi.internal.framework.legacy.StartLevelImpl;
@@ -30,7 +34,8 @@ import org.eclipse.osgi.internal.location.BasicLocation;
 import org.eclipse.osgi.internal.location.EquinoxLocations;
 import org.eclipse.osgi.internal.permadmin.EquinoxSecurityManager;
 import org.eclipse.osgi.internal.permadmin.SecurityAdmin;
-import org.eclipse.osgi.internal.url.EquinoxFactoryManager;
+import org.eclipse.osgi.internal.url.ContentHandlerFactoryImpl;
+import org.eclipse.osgi.internal.url.URLStreamHandlerFactoryImpl;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.osgi.service.debug.DebugOptionsListener;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
@@ -56,7 +61,9 @@ import org.osgi.service.startlevel.StartLevel;
  */
 
 public class SystemBundleActivator implements BundleActivator {
-	private EquinoxFactoryManager urlFactoryManager;
+	private Plurl plurl;
+	private PlurlStreamHandlerFactory plurlStreamHandlerFactory;
+	private PlurlContentHandlerFactory plurlContentHandlerFactory;
 	private List<ServiceRegistration<?>> registrations = new ArrayList<>(10);
 	private SecurityManager setSecurityManagner;
 
@@ -75,8 +82,12 @@ public class SystemBundleActivator implements BundleActivator {
 
 		equinoxContainer.systemStart(bc);
 
-		urlFactoryManager = new EquinoxFactoryManager(equinoxContainer);
-		urlFactoryManager.installHandlerFactories(bc);
+		plurl = new PlurlImpl();
+		plurl.install();
+		plurlStreamHandlerFactory = new URLStreamHandlerFactoryImpl(bc, equinoxContainer);
+		plurlContentHandlerFactory = new ContentHandlerFactoryImpl(bc, equinoxContainer);
+		Plurl.add(plurlStreamHandlerFactory);
+		Plurl.add(plurlContentHandlerFactory);
 
 		FrameworkDebugOptions dbgOptions = (FrameworkDebugOptions) configuration.getDebugOptions();
 		dbgOptions.start(bc);
@@ -218,7 +229,8 @@ public class SystemBundleActivator implements BundleActivator {
 				.getDebugOptions();
 		dbgOptions.stop(bc);
 
-		urlFactoryManager.uninstallHandlerFactories();
+		Plurl.remove(plurlStreamHandlerFactory);
+		Plurl.remove(plurlContentHandlerFactory);
 
 		// unregister services
 		for (ServiceRegistration<?> registration : registrations)
