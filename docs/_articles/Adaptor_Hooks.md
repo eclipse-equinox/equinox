@@ -1,42 +1,13 @@
-
+---
+layout: default
+title: Adaptor Hooks
+summary: All about Adaptor Hooks
+---
 
 Adaptor Hooks
 =============
 
-Contents
---------
 
-*   [1 Overview](#Overview)
-*   [2 Hookable Adaptor](#Hookable-Adaptor)
-    *   [2.1 The Base Adaptor](#The-Base-Adaptor)
-    *   [2.2 The Hook Registry](#The-Hook-Registry)
-        *   [2.2.1 Hook Configurators](#Hook-Configurators)
-        *   [2.2.2 Discovering Hook Configurators](#Discovering-Hook-Configurators)
-            *   [2.2.2.1 hookconfigurators.properties files](#hookconfigurators.properties-files)
-            *   [2.2.2.2 osgi.hook.configurators property](#osgi.hook.configurators-property)
-            *   [2.2.2.3 osgi.hook.configurators.include property](#osgi.hook.configurators.include-property)
-            *   [2.2.2.4 osgi.hook.configurators.exclude property](#osgi.hook.configurators.exclude-property)
-*   [3 Hook interfaces](#Hook-interfaces)
-    *   [3.1 Adaptor Hook](#Adaptor-Hook)
-    *   [3.2 Bundle File Factory Hook](#Bundle-File-Factory-Hook)
-    *   [3.3 Bundle File Wrapper Factory Hook](#Bundle-File-Wrapper-Factory-Hook)
-    *   [3.4 Bundle Watcher Hook](#Bundle-Watcher-Hook)
-    *   [3.5 Class Loading Hook](#Class-Loading-Hook)
-    *   [3.6 Class Loading Stats Hook](#Class-Loading-Stats-Hook)
-    *   [3.7 Storage Hook](#Storage-Hook)
-*   [4 Bundle Files](#Bundle-Files)
-*   [5 Class Loaders](#Class-Loaders)
-*   [6 Built-in Hook Configurators](#Built-in-Hook-Configurators)
-    *   [6.1 DevClassLoadingHook configurator](#DevClassLoadingHook-configurator)
-    *   [6.2 EclipseStorageHook configurator](#EclipseStorageHook-configurator)
-    *   [6.3 EclipseLogHook](#EclipseLogHook)
-    *   [6.4 EclipseErrorHandler](#EclipseErrorHandler)
-    *   [6.5 EclipseAdaptorHook](#EclipseAdaptorHook)
-    *   [6.6 EclipseClassLoadingHook](#EclipseClassLoadingHook)
-    *   [6.7 EclipseLazyStarter](#EclipseLazyStarter)
-    *   [6.8 StatsManager](#StatsManager)
-    *   [6.9 SignedBundleHook](#SignedBundleHook)
-*   [7 Examples](#Examples)
 
 Overview
 --------

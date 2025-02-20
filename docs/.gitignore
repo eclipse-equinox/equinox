@@ -1,0 +1,7 @@
+.sass-cache/
+tmp/
+_site/
+.bundle/
+vendor/
+.jekyll-metadata
+pagefind*

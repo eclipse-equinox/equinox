@@ -1,17 +1,14 @@
+---
+layout: default
+title: Where Is My Bundle
+summary: Short description of steps that you can take to debug problems when you don't see your bundle.
+---
+
 Where Is My Bundle
 ==================
 
 Sometimes when you start Eclipse, you don't see your bundle and you wonder why. This page will provide a short description of steps that you can take to debug this problem.
 
-Contents
---------
-
-*   [1 Steps To Get More Information](#Steps-To-Get-More-Information)
-*   [2 Bundle States](#Bundle-States)
-*   [3 OSGi Can't See My Bundle](#OSGi-Can.27t-See-My-Bundle)
-    *   [3.1 Eclipse v3.4 and later: p2](#Eclipse-v3.4-and-later:-p2)
-    *   [3.2 Eclipse v3.3 and Earlier: OSGi - config.ini](#Eclipse-v3.3-and-Earlier:-OSGi---config.ini)
-        *   [3.2.1 Update - platform.xml](#Update---platform.xml)
 
 ### Steps To Get More Information
 
@@ -49,7 +46,7 @@ Note that the dropins directory is only checked on startup and its content is tr
 
 #### Eclipse v3.3 and Earlier: OSGi - config.ini
 
-**[Note: these instructions are for Eclipse 3.3 and earlier: those versions which are managed by the Classic Update Manager.](/index.php?title=Note:_these_instructions_are_for_Eclipse_3.3_and_earlier:_those_versions_which_are_managed_by_the_Classic_Update_Manager.&action=edit&redlink=1 "Note: these instructions are for Eclipse 3.3 and earlier: those versions which are managed by the Classic Update Manager. (page does not exist)")**
+**Note: these instructions are for Eclipse 3.3 and earlier: those versions which are managed by the Classic Update Manager.**
 
 In your Eclipse configuration area (by default a `configuration/` folder in the install directory) there is a file called `config.ini`. This is a Java properties file which contains properties which are read by OSGi on startup. The important one for you right now is the **`osgi.bundles`** property. This property lists the bundles that OSGi will see on startup and also sets their start level and tells OSGi whether or not to start them right away. By default, Eclipse will have 3 bundles on the list.
 
