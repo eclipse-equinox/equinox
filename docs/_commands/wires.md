@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: post
 title: wires [bundleID]
 summary: Prints information about the wiring of a particular bundle
 ---
