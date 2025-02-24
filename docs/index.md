@@ -27,7 +27,7 @@ PRs to improve the documentation are always welcome.
 </table>
 
 
-## Commands
+## Console Commands
 
 <table class="property-index">
     <thead>
