@@ -38,3 +38,10 @@ Server running... press ctrl-c to stop.
 Open http://127.0.0.1:4000 in your browser to see the result while developing. 
 The server does support hot-reload so you should see changes to `.md` files immediately without restart (there are a few exceptions). Checkout the [jekyll-docs](https://jekyllrb.com/docs/pages/) to get more into the details and features.
 
+## Customizing Themes
+
+In order to customize the layouts, we have copied the layouts of our theme `jekyll-theme-minimal` (see `_config.yml`) from https://github.com/pages-themes/minimal/tree/master/_layouts to the `_layouts` folder.
+
+More info on overriding themes at: https://jekyllrb.com/docs/themes/#overriding-theme-defaults
+
+
