@@ -1,4 +1,4 @@
-# Equinox Documentation Local deve
+# Equinox Documentation
 
 This is the documentation of the Eclipse Equinox Framework. This README shows you how to build and run the documentation locally, which is useful if you want to extend the site. 
 
