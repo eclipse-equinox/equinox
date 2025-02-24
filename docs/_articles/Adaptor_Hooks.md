@@ -1,12 +1,11 @@
 ---
-layout: default
+layout: post
 title: Adaptor Hooks
 summary: All about Adaptor Hooks
 ---
 
-Adaptor Hooks
-=============
-
+* The generated Toc will be an ordered list
+{:toc}
 
 
 Overview

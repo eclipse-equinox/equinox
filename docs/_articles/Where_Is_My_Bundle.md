@@ -1,11 +1,11 @@
 ---
-layout: default
+layout: post
 title: Where Is My Bundle
 summary: Short description of steps that you can take to debug problems when you don't see your bundle.
 ---
 
-Where Is My Bundle
-==================
+* The generated Toc will be an ordered list
+{:toc}
 
 Sometimes when you start Eclipse, you don't see your bundle and you wonder why. This page will provide a short description of steps that you can take to debug this problem.
 
