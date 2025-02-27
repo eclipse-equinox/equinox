@@ -41,7 +41,7 @@ public class LocationHelper {
 		boolean isFile = spec.startsWith("file:"); //$NON-NLS-1$
 		try {
 			if (isFile)
-				return adjustTrailingSlash(new File(spec.substring(5)).toURL(), trailingSlash);
+				return adjustTrailingSlash(toFileURL(spec).toURL(), trailingSlash);
 			return new URL(spec);
 		} catch (MalformedURLException e) {
 			// if we failed and it is a file spec, there is nothing more we can do
@@ -53,6 +53,15 @@ public class LocationHelper {
 			} catch (MalformedURLException e1) {
 				return null;
 			}
+		}
+	}
+
+	private static File toFileURL(String spec) {
+		try {
+			// Try to build it from a URI that will be properly decoded.
+			return new File(new URI(spec));
+		} catch (URISyntaxException | IllegalArgumentException e) {
+			return new File(spec.substring(5));
 		}
 	}
 
