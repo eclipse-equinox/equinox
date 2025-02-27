@@ -32,6 +32,8 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLConnection;
@@ -1177,7 +1179,7 @@ public class Main {
 		boolean isFile = spec.startsWith(FILE_SCHEME);
 		try {
 			if (isFile) {
-				File toAdjust = new File(spec.substring(5));
+				File toAdjust = toFileURL(spec);
 				toAdjust = resolveFile(toAdjust);
 				if (toAdjust.isDirectory())
 					return adjustTrailingSlash(toAdjust.toURL(), trailingSlash);
@@ -1197,6 +1199,15 @@ public class Main {
 			} catch (MalformedURLException e1) {
 				return null;
 			}
+		}
+	}
+
+	private static File toFileURL(String spec) {
+		try {
+			// Try to build it from a URI that will be properly decoded.
+			return new File(new URI(spec));
+		} catch (URISyntaxException | IllegalArgumentException e) {
+			return new File(spec.substring(5));
 		}
 	}
 
