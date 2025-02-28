@@ -51,6 +51,9 @@ class ProblemReduction {
         Resource targetResource = requirement.getResource();
         // fetch the current candidate for this requirement
         Capability currentCandidate = candidates.getFirstCandidate(requirement);
+		if (currentCandidate == null) {
+			return Collections.emptyList();
+		}
         Resource candidateResource = currentCandidate.getResource();
         // now check if it has any uses constraints
         Set<String> uses = new TreeSet<>(Util.getUses(currentCandidate));
