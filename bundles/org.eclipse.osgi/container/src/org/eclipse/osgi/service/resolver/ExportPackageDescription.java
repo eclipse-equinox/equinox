@@ -37,6 +37,7 @@ public interface ExportPackageDescription extends BaseDescription {
 	 * @deprecated all export package descriptions are roots. The Reexport-Package
 	 *             header never became API.
 	 */
+	@Deprecated
 	public boolean isRoot();
 
 	/**

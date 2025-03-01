@@ -298,7 +298,7 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 	}
 
 	private static class ArrayEnumeration<E> implements Enumeration<E> {
-		private E[] array;
+		private final E[] array;
 		int cur = 0;
 
 		public ArrayEnumeration(E[] array, int size) {

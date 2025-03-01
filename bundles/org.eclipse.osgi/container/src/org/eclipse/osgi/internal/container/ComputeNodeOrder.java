@@ -109,14 +109,14 @@ public class ComputeNodeOrder {
 		 *
 		 * Element type: <code>Vertex</code>
 		 */
-		private List<Vertex> vertexList = new ArrayList<>(100);
+		private final List<Vertex> vertexList = new ArrayList<>(100);
 
 		/**
 		 * Map from id to vertex.
 		 *
 		 * Key type: <code>Object</code>; value type: <code>Vertex</code>
 		 */
-		private Map<Object, Vertex> vertexMap = new HashMap<>(100);
+		private final Map<Object, Vertex> vertexMap = new HashMap<>(100);
 
 		/**
 		 * DFS visit time. Non-negative.

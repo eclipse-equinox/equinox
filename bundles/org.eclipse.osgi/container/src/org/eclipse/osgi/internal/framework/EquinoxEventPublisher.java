@@ -54,7 +54,7 @@ public class EquinoxEventPublisher {
 
 	private final EquinoxContainer container;
 
-	private Object monitor = new Object();
+	private final Object monitor = new Object();
 	private EventManager eventManager;
 
 	/*

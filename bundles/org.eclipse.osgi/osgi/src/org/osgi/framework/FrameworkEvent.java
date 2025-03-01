@@ -156,6 +156,7 @@ public class FrameworkEvent extends EventObject {
 	 * @since 1.5
 	 * @deprecated As of 1.10.
 	 */
+	@Deprecated
 	public final static int	STOPPED_BOOTCLASSPATH_MODIFIED	= 0x00000100;
 
 	/**
@@ -191,6 +192,7 @@ public class FrameworkEvent extends EventObject {
 	 *             the other constructor with the System Bundle as the event
 	 *             source.
 	 */
+	@Deprecated
 	public FrameworkEvent(int type, Object source) {
 		super(source);
 		this.type = type;

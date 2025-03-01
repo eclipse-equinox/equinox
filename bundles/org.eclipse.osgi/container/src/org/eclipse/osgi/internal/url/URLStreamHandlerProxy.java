@@ -214,8 +214,8 @@ public class URLStreamHandlerProxy extends URLStreamHandler {
 
 	private static final class LazyURLStreamHandlerService implements Supplier<URLStreamHandlerService> {
 
-		private BundleContext bundleContext;
-		private ServiceReference<URLStreamHandlerService> reference;
+		private final BundleContext bundleContext;
+		private final ServiceReference<URLStreamHandlerService> reference;
 		private URLStreamHandlerService service;
 		private boolean disposed;
 

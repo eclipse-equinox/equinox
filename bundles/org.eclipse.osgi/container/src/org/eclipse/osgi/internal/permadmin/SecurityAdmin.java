@@ -255,6 +255,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
 	@Override
 	public ConditionalPermissionInfo addConditionalPermissionInfo(ConditionInfo[] conds, PermissionInfo[] perms) {
 		return setConditionalPermissionInfo(null, conds, perms, true);
@@ -287,6 +288,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
 	@Override
 	public ConditionalPermissionInfo getConditionalPermissionInfo(String name) {
 		synchronized (lock) {
@@ -297,6 +299,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
 	@Override
 	public Enumeration<ConditionalPermissionInfo> getConditionalPermissionInfos() {
 		// could implement our own Enumeration, but we don't care about performance
@@ -312,6 +315,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
 	@Override
 	public ConditionalPermissionInfo setConditionalPermissionInfo(String name, ConditionInfo[] conds,
 			PermissionInfo[] perms) {
