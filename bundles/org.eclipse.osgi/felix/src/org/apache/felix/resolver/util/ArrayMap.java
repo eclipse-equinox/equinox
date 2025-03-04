@@ -99,11 +99,13 @@ public class ArrayMap<K, V> extends AbstractMap<K, V> {
                     return new Iterator<V>() {
                         int index = 0;
 
-                        public boolean hasNext() {
+                        @Override
+						public boolean hasNext() {
                             return index < size;
                         }
 
-                        @SuppressWarnings("unchecked")
+                        @Override
+						@SuppressWarnings("unchecked")
                         public V next() {
                             if (index >= size) {
                                 throw new NoSuchElementException();
@@ -111,7 +113,8 @@ public class ArrayMap<K, V> extends AbstractMap<K, V> {
                             return (V) table[(index++ << 1) + 1];
                         }
                         
-                        public void remove() {
+                        @Override
+						public void remove() {
                             throw new UnsupportedOperationException();
                         }
                     };
@@ -135,11 +138,13 @@ public class ArrayMap<K, V> extends AbstractMap<K, V> {
                     FastEntry<K, V> entry = new FastEntry<K, V>();
                     int index = 0;
 
-                    public boolean hasNext() {
+                    @Override
+					public boolean hasNext() {
                         return index < size;
                     }
 
-                    @SuppressWarnings("unchecked")
+                    @Override
+					@SuppressWarnings("unchecked")
                     public FastEntry<K, V> next() {
                         if (index >= size) {
                             throw new NoSuchElementException();
@@ -151,7 +156,8 @@ public class ArrayMap<K, V> extends AbstractMap<K, V> {
                         return entry;
                     }
 
-                    public void remove() {
+                    @Override
+					public void remove() {
                         throw new UnsupportedOperationException();
                     }
                 };
@@ -168,16 +174,19 @@ public class ArrayMap<K, V> extends AbstractMap<K, V> {
         K key;
         V value;
 
-        public K getKey() {
+        @Override
+		public K getKey() {
             return key;
         }
 
 
-        public V getValue() {
+        @Override
+		public V getValue() {
             return value;
         }
 
-        public V setValue(V value) {
+        @Override
+		public V setValue(V value) {
             throw new UnsupportedOperationException();
         }
     }

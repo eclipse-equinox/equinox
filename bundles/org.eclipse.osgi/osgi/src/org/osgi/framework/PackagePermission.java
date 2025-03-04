@@ -66,6 +66,7 @@ public final class PackagePermission extends BasicPermission {
 	 * 
 	 * @deprecated As of 1.5. Use {@code exportonly} instead.
 	 */
+	@Deprecated
 	public final static String						EXPORT				= "export";
 
 	/**

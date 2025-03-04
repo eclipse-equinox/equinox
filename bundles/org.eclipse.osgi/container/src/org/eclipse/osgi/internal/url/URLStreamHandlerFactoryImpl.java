@@ -43,9 +43,9 @@ public class URLStreamHandlerFactoryImpl extends MultiplexingFactory implements 
 
 	private static final List<Class<?>> ignoredClasses = Arrays.asList(
 			new Class<?>[] { MultiplexingURLStreamHandler.class, URLStreamHandlerFactoryImpl.class, URL.class });
-	private Map<String, URLStreamHandlerProxy> proxies;
+	private final Map<String, URLStreamHandlerProxy> proxies;
 	private URLStreamHandlerFactory parentFactory;
-	private ThreadLocal<List<String>> creatingProtocols = new ThreadLocal<>();
+	private final ThreadLocal<List<String>> creatingProtocols = new ThreadLocal<>();
 
 	/**
 	 * Create the factory.

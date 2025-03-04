@@ -19,7 +19,7 @@ import java.io.*;
  * Internal class.
  */
 public class Locker_JavaIo implements Locker {
-	private File lockFile;
+	private final File lockFile;
 	private RandomAccessFile lockRAF;
 
 	public Locker_JavaIo(File lockFile) {

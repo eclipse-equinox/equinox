@@ -69,7 +69,8 @@ public class CandidateSelector {
         return current;
     }
 
-    public String toString() {
+    @Override
+	public String toString() {
         return getRemainingCandidates().toString();
     }
 

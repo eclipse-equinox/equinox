@@ -130,6 +130,7 @@ public interface Constants {
 	 * 
 	 * @deprecated As of 1.2.
 	 */
+	@Deprecated
 	String	EXPORT_SERVICE							= "Export-Service";
 
 	/**
@@ -163,6 +164,7 @@ public interface Constants {
 	 * 
 	 * @deprecated As of 1.2.
 	 */
+	@Deprecated
 	String	IMPORT_SERVICE							= "Import-Service";
 
 	/**
@@ -248,6 +250,7 @@ public interface Constants {
 	 * @deprecated As of 1.3. This has been replaced by
 	 *             {@link #VERSION_ATTRIBUTE}.
 	 */
+	@Deprecated
 	String	PACKAGE_SPECIFICATION_VERSION			= "specification-version";
 
 	/**
@@ -327,6 +330,7 @@ public interface Constants {
 	 * @since 1.2
 	 * @deprecated As of 1.6. Replaced by the {@code osgi.ee} capability.
 	 */
+	@Deprecated
 	String	BUNDLE_REQUIREDEXECUTIONENVIRONMENT		= "Bundle-RequiredExecutionEnvironment";
 
 	/**
@@ -849,6 +853,7 @@ public interface Constants {
 	 * @since 1.3
 	 * @deprecated As of 1.9.
 	 */
+	@Deprecated
 	String	EXTENSION_BOOTCLASSPATH					= "bootclasspath";
 
 	/**
@@ -958,6 +963,7 @@ public interface Constants {
 	 * @since 1.2
 	 * @deprecated As of 1.6. Replaced by the {@code osgi.ee} capability.
 	 */
+	@Deprecated
 	String	FRAMEWORK_EXECUTIONENVIRONMENT			= "org.osgi.framework.executionenvironment";
 
 	/**
@@ -1036,6 +1042,7 @@ public interface Constants {
 	 * @since 1.3
 	 * @deprecated As of 1.10.
 	 */
+	@Deprecated
 	String	SUPPORTS_BOOTCLASSPATH_EXTENSION		= "org.osgi.supports.bootclasspath.extension";
 
 	/**

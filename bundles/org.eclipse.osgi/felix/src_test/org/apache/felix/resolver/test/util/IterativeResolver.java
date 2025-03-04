@@ -43,7 +43,8 @@ public class IterativeResolver implements Resolver {
         this.resolver = resolver;
     }
 
-    public Map<Resource, List<Wire>> resolve(final ResolveContext context) throws ResolutionException {
+    @Override
+	public Map<Resource, List<Wire>> resolve(final ResolveContext context) throws ResolutionException {
 
         final Map<Resource, List<Wire>> wires = new HashMap<Resource, List<Wire>>();
         final Map<Resource, List<Wire>> invertedWires = new HashMap<Resource, List<Wire>>();
@@ -104,7 +105,7 @@ public class IterativeResolver implements Resolver {
         return wires;
     }
 
-    private class SimpleWiring implements Wiring {
+    private static class SimpleWiring implements Wiring {
         final Resource resource;
         final Map<Resource, List<Wire>> wires;
         final Map<Resource, List<Wire>> invertedWires;
@@ -117,7 +118,8 @@ public class IterativeResolver implements Resolver {
             this.invertedWires = invertedWires;
         }
 
-        public List<Capability> getResourceCapabilities(String namespace) {
+        @Override
+		public List<Capability> getResourceCapabilities(String namespace) {
             if (resourceCapabilities == null) {
                 resourceCapabilities = new ArrayList<Capability>();
                 for (Wire wire : invertedWires.get(resource)) {
@@ -138,7 +140,8 @@ public class IterativeResolver implements Resolver {
             return resourceCapabilities;
         }
 
-        public List<Requirement> getResourceRequirements(String namespace) {
+        @Override
+		public List<Requirement> getResourceRequirements(String namespace) {
             if (resourceRequirements == null) {
                 resourceRequirements = new ArrayList<Requirement>();
                 for (Wire wire : wires.get(resource)) {
@@ -159,7 +162,8 @@ public class IterativeResolver implements Resolver {
             return resourceRequirements;
         }
 
-        public List<Wire> getProvidedResourceWires(String namespace) {
+        @Override
+		public List<Wire> getProvidedResourceWires(String namespace) {
             List<Wire> providedWires = invertedWires.get(resource);
             if (namespace != null) {
                 List<Wire> wires = new ArrayList<Wire>();
@@ -173,7 +177,8 @@ public class IterativeResolver implements Resolver {
             return providedWires;
         }
 
-        public List<Wire> getRequiredResourceWires(String namespace) {
+        @Override
+		public List<Wire> getRequiredResourceWires(String namespace) {
             List<Wire> requiredWires = wires.get(resource);
             if (namespace != null) {
                 List<Wire> wires = new ArrayList<Wire>();
@@ -187,12 +192,14 @@ public class IterativeResolver implements Resolver {
             return requiredWires;
         }
 
-        public Resource getResource() {
+        @Override
+		public Resource getResource() {
             return resource;
         }
     }
 
-    public Map<Resource, List<Wire>> resolveDynamic(ResolveContext context,
+    @Override
+	public Map<Resource, List<Wire>> resolveDynamic(ResolveContext context,
         Wiring hostWiring, Requirement dynamicRequirement) throws ResolutionException
     {
         throw new UnsupportedOperationException();

@@ -71,22 +71,26 @@ public class WrappedRequirement implements Requirement
         return m_req;
     }
 
-    public Resource getResource()
+    @Override
+	public Resource getResource()
     {
         return m_host;
     }
 
-    public String getNamespace()
+    @Override
+	public String getNamespace()
     {
         return m_req.getNamespace();
     }
 
-    public Map<String, String> getDirectives()
+    @Override
+	public Map<String, String> getDirectives()
     {
         return m_req.getDirectives();
     }
 
-    public Map<String, Object> getAttributes()
+    @Override
+	public Map<String, Object> getAttributes()
     {
         return m_req.getAttributes();
     }

@@ -58,6 +58,7 @@ public final class ModuleRevisionBuilder {
 	 */
 	public static class GenericInfo {
 		final static Function<GenericInfo, String> GETNAMESPACE = new Function<GenericInfo, String>() {
+			@Override
 			public String apply(GenericInfo info) {
 				return info.getNamespace();
 			}
