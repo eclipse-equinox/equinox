@@ -1,0 +1,24 @@
+theme: jekyll-theme-minimal
+title: Eclipse Equinox Documentation
+description: This is the documentation of the Eclipse Equinox Framework.
+logo: /assets/img/logo.png
+
+collections:
+  articles:
+    output: true
+  commands:
+    output: true
+
+exclude:
+  - 'Gemfile'
+  - 'Gemfile.lock'
+  - 'README.md'
+  - 'CONTRIBUTING.md'
+  - 'LICENSE'
+  - '.gitignore'
+  - '.project'
+  - 'run.sh'
+  - '/vendor'
+  - '/.settings'
+  - '/.bundle'
+  - 'pagefind'
