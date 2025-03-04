@@ -259,6 +259,17 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+          <groupId>org.eclipse.tycho</groupId>
+          <artifactId>tycho-cleancode-plugin</artifactId>
+          <configuration>
+              <ignores>
+                  <ignore>felix/src/.*</ignore>
+                  <ignore>osgi/src/.*</ignore>
+                  <ignore>felix/src_test/.*</ignore>
+              </ignores>
+          </configuration>
+      </plugin>
     </plugins>
     <pluginManagement>
       <plugins>
