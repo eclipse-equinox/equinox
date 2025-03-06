@@ -102,8 +102,9 @@ public class FrameworkLauncher {
 	static {
 		// We do this to ensure the anonymous Enumeration class in allPermissions is
 		// pre-loaded
-		if (allPermissions.elements() == null)
+		if (allPermissions.elements() == null) {
 			throw new IllegalStateException();
+		}
 	}
 
 	protected ServletConfig config;
@@ -195,9 +196,9 @@ public class FrameworkLauncher {
 		final String extensionBundleBSN = EXTENSIONBUNDLE_DEFAULT_BSN;
 		File extensionBundleFile = findExtensionBundleFile(plugins, extensionBundleBSN);
 
-		if (extensionBundleFile == null)
+		if (extensionBundleFile == null) {
 			generateExtensionBundle(plugins, extensionBundleBSN, EXTENSIONBUNDLE_DEFAULT_VERSION);
-		else if (Boolean.valueOf(config.getInitParameter(CONFIG_OVERRIDE_AND_REPLACE_EXTENSION_BUNDLE))
+		} else if (Boolean.valueOf(config.getInitParameter(CONFIG_OVERRIDE_AND_REPLACE_EXTENSION_BUNDLE))
 				.booleanValue()) {
 			String extensionBundleVersion = findExtensionBundleVersion(extensionBundleFile, extensionBundleBSN);
 			if (extensionBundleFile.isDirectory()) {
@@ -219,8 +220,9 @@ public class FrameworkLauncher {
 			}
 		};
 		File[] extensionBundles = plugins.listFiles(extensionBundleFilter);
-		if (extensionBundles.length == 0)
+		if (extensionBundles.length == 0) {
 			return null;
+		}
 
 		if (extensionBundles.length > 1) {
 			for (int i = 1; i < extensionBundles.length; i++) {
@@ -290,8 +292,9 @@ public class FrameworkLauncher {
 		}
 
 		String extendedExports = config.getInitParameter(CONFIG_EXTENDED_FRAMEWORK_EXPORTS);
-		if (extendedExports != null && extendedExports.trim().length() != 0)
+		if (extendedExports != null && extendedExports.trim().length() != 0) {
 			packageExports += ", " + extendedExports; //$NON-NLS-1$
+		}
 
 		attribs.putValue(EXPORT_PACKAGE, packageExports);
 		writeJarFile(new File(plugins, extensionBundleBSN + "_" + extensionBundleVersion + DOT_JAR), mf); //$NON-NLS-1$
@@ -301,8 +304,9 @@ public class FrameworkLauncher {
 		String fileName = extensionBundleFile.getName();
 		if (fileName.endsWith(DOT_JAR)) {
 			Manifest mf = readJarFile(extensionBundleFile);
-			if (mf == null)
+			if (mf == null) {
 				return;
+			}
 			Attributes attributes = mf.getMainAttributes();
 			String exportPackage = (String) attributes.remove(new Attributes.Name("X-Deploy-Export-Package")); //$NON-NLS-1$
 			if (exportPackage != null) {
@@ -366,8 +370,9 @@ public class FrameworkLauncher {
 	 * line arguments available when starting Eclipse.
 	 */
 	public synchronized void start() {
-		if (platformDirectory == null)
+		if (platformDirectory == null) {
 			throw new IllegalStateException("Could not start the Framework - (not deployed)"); //$NON-NLS-1$
+		}
 
 		if (frameworkClassLoader != null) {
 			context.log("Framework is already started"); //$NON-NLS-1$
@@ -386,8 +391,9 @@ public class FrameworkLauncher {
 				} else {
 					String key = arg.substring(2, equalsIndex);
 					String value = arg.substring(equalsIndex + 1);
-					if (value.startsWith("\"") && value.endsWith("\"")) //$NON-NLS-1$//$NON-NLS-2$
+					if (value.startsWith("\"") && value.endsWith("\"")) { //$NON-NLS-1$//$NON-NLS-2$
 						value = value.substring(1, value.length() - 1);
+					}
 					setInitialProperty(initialPropertyMap, key, value);
 				}
 			}
@@ -414,8 +420,9 @@ public class FrameworkLauncher {
 
 		InvocationTargetException ite) {
 			Throwable t = ite.getTargetException();
-			if (t == null)
+			if (t == null) {
 				t = ite;
+			}
 			context.log("Error while starting Framework", t); //$NON-NLS-1$
 			throw new RuntimeException(t.getMessage());
 		} catch (Exception e) {
@@ -441,8 +448,9 @@ public class FrameworkLauncher {
 			// search for osgi.framework in osgi.install.area
 			String path = new File(installBase, "plugins").toString(); //$NON-NLS-1$
 			path = searchFor(FRAMEWORK_BUNDLE_NAME, path);
-			if (path == null)
+			if (path == null) {
 				throw new RuntimeException("Could not find framework"); //$NON-NLS-1$
+			}
 
 			osgiFrameworkFile = new File(path);
 		} else {
@@ -450,8 +458,9 @@ public class FrameworkLauncher {
 				osgiFramework = osgiFramework.substring(FILE_SCHEME.length());
 			}
 			osgiFrameworkFile = new File(osgiFramework);
-			if (!osgiFrameworkFile.isAbsolute())
+			if (!osgiFrameworkFile.isAbsolute()) {
 				osgiFrameworkFile = new File(installBase, osgiFramework);
+			}
 		}
 
 		try {
@@ -469,8 +478,9 @@ public class FrameworkLauncher {
 			StringTokenizer tokenizer = new StringTokenizer(osgiFrameworkExtensions, ","); //$NON-NLS-1$
 			while (tokenizer.hasMoreTokens()) {
 				String extension = tokenizer.nextToken().trim();
-				if (extension.length() == 0)
+				if (extension.length() == 0) {
 					continue;
+				}
 
 				URL extensionURL = findExtensionURL(extension, osgiFrameworkFile);
 				if (extensionURL != null) {
@@ -485,16 +495,19 @@ public class FrameworkLauncher {
 		File extensionFile = null;
 		if (extension.startsWith(REFERENCE_SCHEME)) {
 			extension = extension.substring(REFERENCE_SCHEME.length());
-			if (!extension.startsWith(FILE_SCHEME))
+			if (!extension.startsWith(FILE_SCHEME)) {
 				throw new RuntimeException("Non-file scheme for framework extension URL -- " + extension); //$NON-NLS-1$
+			}
 			extension = extension.substring(FILE_SCHEME.length());
 			extensionFile = new File(extension);
-			if (!extensionFile.isAbsolute())
+			if (!extensionFile.isAbsolute()) {
 				extensionFile = new File(osgiFrameworkFile.getParentFile(), extension);
+			}
 		} else {
 			String fullExtensionPath = searchFor(extension, osgiFrameworkFile.getParent());
-			if (fullExtensionPath == null)
+			if (fullExtensionPath == null) {
 				return null;
+			}
 			extensionFile = new File(fullExtensionPath);
 		}
 
@@ -538,8 +551,9 @@ public class FrameworkLauncher {
 					}
 				} catch (InvocationTargetException ite) {
 					Throwable t = ite.getTargetException();
-					if (t == null)
+					if (t == null) {
 						t = ite;
+					}
 					throw new RuntimeException(t.getMessage());
 				} catch (Exception e) {
 					throw new RuntimeException(e.getMessage());
@@ -569,8 +583,9 @@ public class FrameworkLauncher {
 
 		try {
 			// install.area if not specified
-			if (initialPropertyMap.get(OSGI_INSTALL_AREA) == null)
+			if (initialPropertyMap.get(OSGI_INSTALL_AREA) == null) {
 				initialPropertyMap.put(OSGI_INSTALL_AREA, platformDirectory.toURL().toExternalForm());
+			}
 
 			// configuration.area if not specified
 			if (initialPropertyMap.get(OSGI_CONFIGURATION_AREA) == null) {
@@ -596,15 +611,17 @@ public class FrameworkLauncher {
 			// osgi.framework if not specified
 			if (initialPropertyMap.get(OSGI_FRAMEWORK) == null) {
 				String osgiFramework = configurationProperties.getProperty(OSGI_FRAMEWORK);
-				if (osgiFramework != null)
+				if (osgiFramework != null) {
 					initialPropertyMap.put(OSGI_FRAMEWORK, osgiFramework);
+				}
 			}
 
 			// osgi.framework.extensions if not specified
 			if (initialPropertyMap.get(OSGI_FRAMEWORK_EXTENSIONS) == null) {
 				String osgiFrameworkExtensions = configurationProperties.getProperty(OSGI_FRAMEWORK_EXTENSIONS);
-				if (osgiFrameworkExtensions != null)
+				if (osgiFrameworkExtensions != null) {
 					initialPropertyMap.put(OSGI_FRAMEWORK_EXTENSIONS, osgiFrameworkExtensions);
+				}
 			}
 
 		} catch (MalformedURLException e) {
@@ -619,10 +636,11 @@ public class FrameworkLauncher {
 			if (value.equals(NULL_IDENTIFIER)) {
 				clearPrefixedSystemProperties(key.substring(0, key.length() - 1), initialPropertyMap);
 			}
-		} else if (value.equals(NULL_IDENTIFIER))
+		} else if (value.equals(NULL_IDENTIFIER)) {
 			initialPropertyMap.put(key, null);
-		else
+		} else {
 			initialPropertyMap.put(key, value);
+		}
 	}
 
 	private Properties loadConfigurationFile(Map<String, String> initialPropertyMap) {
@@ -639,12 +657,14 @@ public class FrameworkLauncher {
 				configurationArea = configurationArea.substring(FILE_SCHEME.length());
 			}
 			File configurationBase = new File(configurationArea);
-			if (!configurationBase.isAbsolute())
+			if (!configurationBase.isAbsolute()) {
 				configurationBase = new File(installBase, configurationArea);
+			}
 
 			File configurationFile = new File(configurationBase, CONFIG_INI);
-			if (!configurationFile.exists())
+			if (!configurationFile.exists()) {
 				return null;
+			}
 
 			Properties configProperties = new Properties();
 			is = new BufferedInputStream(new FileInputStream(configurationFile));
@@ -654,13 +674,14 @@ public class FrameworkLauncher {
 			context.log("Error reading configuration file -- " + t.toString()); //$NON-NLS-1$
 			return null;
 		} finally {
-			if (is != null)
+			if (is != null) {
 				try {
 					is.close();
 				} catch (IOException e) {
 					// unexpected
 					e.printStackTrace();
 				}
+			}
 		}
 	}
 
@@ -789,8 +810,9 @@ public class FrameworkLauncher {
 		if (resourcePath.endsWith("/")) { //$NON-NLS-1$
 			target.mkdir();
 			Set<String> paths = context.getResourcePaths(resourcePath);
-			if (paths == null)
+			if (paths == null) {
 				return;
+			}
 			for (String path : paths) {
 				File newFile = new File(target, path.substring(resourcePath.length()));
 				copyResource(path, newFile);
@@ -904,15 +926,17 @@ public class FrameworkLauncher {
 			}
 		};
 		File[] candidates = new File(start).listFiles(filter);
-		if (candidates == null)
+		if (candidates == null) {
 			return null;
+		}
 		String[] arrays = new String[candidates.length];
 		for (int i = 0; i < arrays.length; i++) {
 			arrays[i] = candidates[i].getName();
 		}
 		int result = findMax(arrays);
-		if (result == -1)
+		if (result == -1) {
 			return null;
+		}
 		return candidates[result].getAbsolutePath().replace(File.separatorChar, '/')
 				+ (candidates[result].isDirectory() ? "/" : ""); //$NON-NLS-1$//$NON-NLS-2$
 	}
@@ -925,8 +949,9 @@ public class FrameworkLauncher {
 			String version = ""; //$NON-NLS-1$ // Note: directory with version suffix is always > than directory
 									// without version suffix
 			int index = name.indexOf('_');
-			if (index != -1)
+			if (index != -1) {
 				version = name.substring(index + 1);
+			}
 			Object currentVersion = getVersionElements(version);
 			if (maxVersion == null) {
 				result = i;
@@ -950,16 +975,19 @@ public class FrameworkLauncher {
 	private int compareVersion(Object[] left, Object[] right) {
 
 		int result = ((Integer) left[0]).compareTo((Integer) right[0]); // compare major
-		if (result != 0)
+		if (result != 0) {
 			return result;
+		}
 
 		result = ((Integer) left[1]).compareTo((Integer) right[1]); // compare minor
-		if (result != 0)
+		if (result != 0) {
 			return result;
+		}
 
 		result = ((Integer) left[2]).compareTo((Integer) right[2]); // compare service
-		if (result != 0)
+		if (result != 0) {
 			return result;
+		}
 
 		return ((String) left[3]).compareTo((String) right[3]); // compare qualifier
 	}
@@ -975,8 +1003,9 @@ public class FrameworkLauncher {
 	 *         else will cause exceptions in the caller.
 	 */
 	private Object[] getVersionElements(String version) {
-		if (version.endsWith(DOT_JAR))
+		if (version.endsWith(DOT_JAR)) {
 			version = version.substring(0, version.length() - 4);
+		}
 		Object[] result = { Integer.valueOf(0), Integer.valueOf(0), Integer.valueOf(0), "" }; //$NON-NLS-1$
 		StringTokenizer t = new StringTokenizer(version, "."); //$NON-NLS-1$
 		String token;
@@ -1031,8 +1060,9 @@ public class FrameworkLauncher {
 			URL resource = findResource(name);
 			if (resource == null) {
 				ClassLoader parent = getParent();
-				if (parent != null)
+				if (parent != null) {
 					resource = parent.getResource(name);
+				}
 			}
 			return resource;
 		}
@@ -1054,15 +1084,17 @@ public class FrameworkLauncher {
 					clazz = findClass(name);
 				} catch (ClassNotFoundException e) {
 					ClassLoader parent = getParent();
-					if (parent != null)
+					if (parent != null) {
 						clazz = parent.loadClass(name);
-					else
+					} else {
 						clazz = getSystemClassLoader().loadClass(name);
+					}
 				}
 			}
 
-			if (resolve)
+			if (resolve) {
 				resolveClass(clazz);
+			}
 
 			return clazz;
 		}
