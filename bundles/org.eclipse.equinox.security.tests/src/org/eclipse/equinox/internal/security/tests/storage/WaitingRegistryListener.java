@@ -42,10 +42,11 @@ public class WaitingRegistryListener extends org.junit.Assert implements IRegist
 
 	public void register(String id) {
 		extPointId = id; // used for verification in callbacks
-		if (extPointId != null)
+		if (extPointId != null) {
 			RegistryFactory.getRegistry().addListener(this, extPointId);
-		else
+		} else {
 			RegistryFactory.getRegistry().addListener(this);
+		}
 	}
 
 	public void unregister() {
@@ -69,28 +70,32 @@ public class WaitingRegistryListener extends org.junit.Assert implements IRegist
 	}
 
 	public synchronized String[] extensionsReceived(long timeout) {
-		if (extensionIDs != null)
+		if (extensionIDs != null) {
 			return extensionIDs.toArray(new String[0]);
+		}
 		try {
 			wait(timeout);
 		} catch (InterruptedException e) {
 			// who cares?
 		}
-		if (extensionIDs == null)
+		if (extensionIDs == null) {
 			return null;
+		}
 		return extensionIDs.toArray(new String[0]);
 	}
 
 	public synchronized String[] extPointsReceived(long timeout) {
-		if (extPointIDs != null)
+		if (extPointIDs != null) {
 			return extPointIDs.toArray(new String[0]);
+		}
 		try {
 			wait(timeout);
 		} catch (InterruptedException e) {
 			// who cares?
 		}
-		if (extPointIDs == null)
+		if (extPointIDs == null) {
 			return null;
+		}
 		return extPointIDs.toArray(new String[0]);
 	}
 
@@ -100,8 +105,9 @@ public class WaitingRegistryListener extends org.junit.Assert implements IRegist
 			while (callbacks < events) {
 				long currentTime = System.currentTimeMillis();
 				long alreadyWaited = currentTime - startTime;
-				if (alreadyWaited < 0)
+				if (alreadyWaited < 0) {
 					alreadyWaited = 0; // just in case if system timer is not very precise
+				}
 				long timeToWait = maxTimeout - alreadyWaited;
 				if (timeToWait <= 0) {
 					wait(MIN_WAIT_TIME); // give it a last chance
@@ -154,16 +160,18 @@ public class WaitingRegistryListener extends org.junit.Assert implements IRegist
 
 			// test navigation: to extension point
 			String ownerId = extension.getExtensionPointUniqueIdentifier();
-			if (extPointId != null)
+			if (extPointId != null) {
 				assertTrue(extPointId.equals(ownerId));
+			}
 			// test navigation: all children
 			assertTrue(validContents(extension.getConfigurationElements()));
 		}
 	}
 
 	private boolean validContents(IConfigurationElement[] children) {
-		if (children == null)
+		if (children == null) {
 			return true;
+		}
 		for (IConfigurationElement child : children) {
 			if (!child.isValid()) {
 				return false;

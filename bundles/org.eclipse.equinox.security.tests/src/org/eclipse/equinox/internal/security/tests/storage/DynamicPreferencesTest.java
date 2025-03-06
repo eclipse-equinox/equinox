@@ -85,8 +85,9 @@ public class DynamicPreferencesTest extends StorageAbstractTest {
 			node2.put(clearTextKey, clearTextValue, false);
 
 			// uninstall high priority module
-			if (uninstallBundle(bundle02))
+			if (uninstallBundle(bundle02)) {
 				bundle02 = null;
+			}
 
 			// check newly filled elements - should cause an exception
 			checkUnreadable(node1, key2);
@@ -99,10 +100,12 @@ public class DynamicPreferencesTest extends StorageAbstractTest {
 			check(preferences);
 		} finally {
 			// in case of exception in the process
-			if (bundle02 != null)
+			if (bundle02 != null) {
 				bundle02.uninstall();
-			if (bundle01 != null)
+			}
+			if (bundle01 != null) {
 				bundle01.uninstall();
+			}
 		}
 	}
 
@@ -144,8 +147,9 @@ public class DynamicPreferencesTest extends StorageAbstractTest {
 			}
 
 			{ // block3: uninstall high priority module and reload
-				if (uninstallBundle(bundle02))
+				if (uninstallBundle(bundle02)) {
 					bundle02 = null;
+				}
 				ISecurePreferences preferences = newPreferences(location, getOptions());
 				ISecurePreferences node1 = preferences.node("/abc");
 				ISecurePreferences node2 = preferences.node("/abc/high");
@@ -157,10 +161,12 @@ public class DynamicPreferencesTest extends StorageAbstractTest {
 			}
 		} finally {
 			// in case of exception in the process
-			if (bundle02 != null)
+			if (bundle02 != null) {
 				bundle02.uninstall();
-			if (bundle01 != null)
+			}
+			if (bundle01 != null) {
 				bundle01.uninstall();
+			}
 			StorageUtils.delete(location);
 		}
 	}
@@ -221,8 +227,9 @@ public class DynamicPreferencesTest extends StorageAbstractTest {
 		} finally {
 			listener.unregister();
 			// in case of exception in the process
-			if (bundle != null)
+			if (bundle != null) {
 				bundle.uninstall();
+			}
 		}
 	}
 

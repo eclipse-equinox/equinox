@@ -79,8 +79,9 @@ public class ReEncrypterTest extends StorageAbstractTest {
 				check(preferences);
 			}
 		} finally {
-			if (bundle != null)
+			if (bundle != null) {
 				bundle.uninstall();
+			}
 		}
 	}
 

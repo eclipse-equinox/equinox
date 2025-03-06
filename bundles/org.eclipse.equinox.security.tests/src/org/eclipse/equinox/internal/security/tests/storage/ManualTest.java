@@ -45,10 +45,12 @@ public class ManualTest {
 		for (Provider provider : providers) {
 			for (Map.Entry<Object, Object> entry : provider.entrySet()) {
 				String key = (String) entry.getKey();
-				if (key == null)
+				if (key == null) {
 					continue;
-				if (key.indexOf(' ') != -1) // skips "[Cipher.ABC SupportedPaddings]", etc.
+				}
+				if (key.indexOf(' ') != -1) { // skips "[Cipher.ABC SupportedPaddings]", etc.
 					continue;
+				}
 				if (key.startsWith("Cipher.")) {
 					String cipher = key.substring(7); // length("Cipher.")
 					System.out.println("[cypher] " + cipher);

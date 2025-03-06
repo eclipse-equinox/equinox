@@ -52,8 +52,9 @@ public class WinPreferencesTest extends SecurePreferencesTest {
 		Bundle[] bundles = context.getBundles();
 		for (Bundle bundle : bundles) {
 			String bundleName = bundle.getSymbolicName();
-			if (!symbolicID.equals(bundleName))
+			if (!symbolicID.equals(bundleName)) {
 				continue;
+			}
 			int bundleState = bundle.getState();
 			return (bundleState != Bundle.INSTALLED) && (bundleState != Bundle.UNINSTALLED);
 		}

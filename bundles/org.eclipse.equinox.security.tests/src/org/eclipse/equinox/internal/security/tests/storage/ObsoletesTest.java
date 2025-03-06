@@ -43,8 +43,9 @@ public class ObsoletesTest {
 		IExtension linuxExtension = null;
 		for (IExtension extension : extensions) {
 			String moduleID = extension.getUniqueIdentifier();
-			if (moduleID == null) // IDs on those extensions are mandatory; if not specified, ignore the extension
+			if (moduleID == null) { // IDs on those extensions are mandatory; if not specified, ignore the extension
 				continue;
+			}
 			moduleID = moduleID.toLowerCase();
 			if (moduleID.equals(LINUX_PASSWORD_PROVIDER)) {
 				linuxExtension = extension;
@@ -82,8 +83,9 @@ public class ObsoletesTest {
 		Bundle[] bundles = context.getBundles();
 		for (Bundle bundle : bundles) {
 			String bundleName = bundle.getSymbolicName();
-			if (!symbolicID.equals(bundleName))
+			if (!symbolicID.equals(bundleName)) {
 				continue;
+			}
 			int bundleState = bundle.getState();
 			return (bundleState != Bundle.INSTALLED) && (bundleState != Bundle.UNINSTALLED);
 		}

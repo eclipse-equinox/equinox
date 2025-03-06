@@ -564,8 +564,9 @@ abstract public class SecurePreferencesTest extends StorageAbstractTest {
 		assertNotNull(array1);
 		assertNotNull(array2);
 		assertEquals(array1.length, array2.length);
-		for (int i = 0; i < array1.length; i++)
+		for (int i = 0; i < array1.length; i++) {
 			assertEquals(array1[i], array2[i]);
+		}
 	}
 
 	private URL getFilePath(String path) throws IOException {
