@@ -202,8 +202,9 @@ public class DataParser {
 		protected void collectExtensionAttributes(Attributes attributes) {
 			for (int i = 0; i < attributes.getLength(); i++) {
 				String key = attributes.getURI(i);
-				if (key.length() == 0 || key.startsWith("http://www.osgi.org/xmlns/metatype/v")) //$NON-NLS-1$
+				if (key.length() == 0 || key.startsWith("http://www.osgi.org/xmlns/metatype/v")) { //$NON-NLS-1$
 					continue;
+				}
 				Map<String, String> value = extensionAttributes.get(key);
 				if (value == null) {
 					value = new HashMap<>();
@@ -372,8 +373,9 @@ public class DataParser {
 
 			logger.log(LogTracker.LOG_DEBUG, "Here is OcdHandler:startElement():" //$NON-NLS-1$
 					+ qName);
-			if (!_isParsedDataValid)
+			if (!_isParsedDataValid) {
 				return;
+			}
 
 			String name = getName(localName, qName);
 			if (name.equalsIgnoreCase(AD)) {
@@ -382,8 +384,9 @@ public class DataParser {
 			} else if (name.equalsIgnoreCase(ICON)) {
 				IconHandler iconHandler = new IconHandler(this);
 				iconHandler.init(name, atts);
-				if (iconHandler._isParsedDataValid)
+				if (iconHandler._isParsedDataValid) {
 					icons.add(iconHandler._icon);
+				}
 			} else {
 				logger.log(LogTracker.LOG_WARNING, NLS.bind(MetaTypeMsg.UNEXPECTED_ELEMENT, new Object[] { name,
 						atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName() }));
@@ -393,8 +396,9 @@ public class DataParser {
 		@Override
 		protected void finished() {
 			logger.log(LogTracker.LOG_DEBUG, "Here is OcdHandler():finished()"); //$NON-NLS-1$
-			if (!_isParsedDataValid)
+			if (!_isParsedDataValid) {
 				return;
+			}
 			// OCD gets all parsed ADs.
 			for (AttributeDefinitionImpl ad : _ads) {
 				_ocd.addAttributeDefinition(ad, ad.isRequired());
@@ -562,8 +566,9 @@ public class DataParser {
 
 			logger.log(LogTracker.LOG_DEBUG, "Here is AttributeDefinitionHandler:startElement():" //$NON-NLS-1$
 					+ qName);
-			if (!_isParsedDataValid)
+			if (!_isParsedDataValid) {
 				return;
+			}
 
 			String name = getName(localName, qName);
 			if (name.equalsIgnoreCase(OPTION)) {
@@ -584,23 +589,27 @@ public class DataParser {
 		protected void finished() {
 
 			logger.log(LogTracker.LOG_DEBUG, "Here is AttributeDefinitionHandler():finished()"); //$NON-NLS-1$
-			if (!_isParsedDataValid)
+			if (!_isParsedDataValid) {
 				return;
+			}
 			int numOfValues = _optionValues.size();
 			_ad.setOption(_optionLabels, _optionValues, true);
 			String[] values = _ad.getOptionValues();
-			if (values == null)
+			if (values == null) {
 				values = new String[0];
-			if (numOfValues != values.length)
+			}
+			if (numOfValues != values.length) {
 				logger.log(LogTracker.LOG_WARNING, NLS.bind(MetaTypeMsg.INVALID_OPTIONS_XML,
 						new Object[] { elementId, _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName() }));
+			}
 
 			if (ad_defaults_str != null) {
 				_ad.setDefaultValue(ad_defaults_str, true);
-				if (_ad.getDefaultValue() == null)
+				if (_ad.getDefaultValue() == null) {
 					logger.log(LogTracker.LOG_WARNING,
 							NLS.bind(MetaTypeMsg.INVALID_DEFAULTS_XML, new Object[] { ad_defaults_str, elementId,
 									_dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName() }));
+				}
 			}
 
 			_parent_ADs.add(_ad);
@@ -702,8 +711,9 @@ public class DataParser {
 
 			logger.log(LogTracker.LOG_DEBUG, "Here is DesignateHandler:startElement():" //$NON-NLS-1$
 					+ qName);
-			if (!_isParsedDataValid)
+			if (!_isParsedDataValid) {
 				return;
+			}
 
 			String name = getName(localName, qName);
 			if (name.equalsIgnoreCase(OBJECT)) {
@@ -722,8 +732,9 @@ public class DataParser {
 		protected void finished() {
 
 			logger.log(LogTracker.LOG_DEBUG, "Here is DesignateHandler():finished()"); //$NON-NLS-1$
-			if (!_isParsedDataValid)
+			if (!_isParsedDataValid) {
 				return;
+			}
 
 			if (_ocdref == null) {
 				_isParsedDataValid = false;
@@ -766,8 +777,9 @@ public class DataParser {
 
 			logger.log(LogTracker.LOG_DEBUG, "Here is ObjectHandler:startElement():" //$NON-NLS-1$
 					+ qName);
-			if (!_isParsedDataValid)
+			if (!_isParsedDataValid) {
 				return;
+			}
 
 			String name = getName(localName, qName);
 			if (name.equalsIgnoreCase(ATTRIBUTE)) {

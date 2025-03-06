@@ -70,8 +70,9 @@ public class MetaTypeServiceImpl implements EquinoxMetaTypeService, SynchronousB
 		final ServiceTracker<Object, Object> tracker = this.metaTypeProviderTracker;
 		Long bID = Long.valueOf(b.getBundleId());
 		synchronized (_mtps) {
-			if (_mtps.containsKey(bID))
+			if (_mtps.containsKey(bID)) {
 				return _mtps.get(bID);
+			}
 			EquinoxMetaTypeInformation mti = AccessController
 					.doPrivileged(new PrivilegedAction<EquinoxMetaTypeInformation>() {
 						@Override
@@ -83,8 +84,9 @@ public class MetaTypeServiceImpl implements EquinoxMetaTypeService, SynchronousB
 								loggerTemp.log(LogTracker.LOG_ERROR, NLS.bind(MetaTypeMsg.METADATA_PARSE_ERROR,
 										b.getBundleId(), b.getSymbolicName()), e);
 							}
-							if (impl == null || !impl._isThereMeta)
+							if (impl == null || !impl._isThereMeta) {
 								return new MetaTypeProviderTracker(b, loggerTemp, tracker);
+							}
 							return impl;
 						}
 					});

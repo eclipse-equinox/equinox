@@ -31,8 +31,9 @@ public class ValueTokenizer {
 	 */
 	public ValueTokenizer(String values_str, LogTracker logger) {
 		this.logger = logger;
-		if (values_str == null)
+		if (values_str == null) {
 			return;
+		}
 		// The trick is to strip out unescaped whitespace characters before and
 		// after the input string as well as before and after each
 		// individual token within the input string without losing any escaped
@@ -151,15 +152,18 @@ public class ValueTokenizer {
 			// parsed as an integer, do the string comparison instead.
 			Integer min = ad.getMinValue() == null ? null : Integer.valueOf((String) ad.getMinValue());
 			Integer max = ad.getMaxValue() == null ? null : Integer.valueOf((String) ad.getMaxValue());
-			if (min != null && value.length() < min)
+			if (min != null && value.length() < min) {
 				return true;
-			if (max != null && value.length() > max)
+			}
+			if (max != null && value.length() > max) {
 				return true;
+			}
 		} catch (NumberFormatException e) {
 			// Either min or max was not an integer. Do a string comparison.
 			if ((ad.getMinValue() != null && value.compareTo((String) ad.getMinValue()) < 0)
-					|| (ad.getMaxValue() != null && value.compareTo((String) ad.getMaxValue()) > 0))
+					|| (ad.getMaxValue() != null && value.compareTo((String) ad.getMaxValue()) > 0)) {
 				return true;
+			}
 		}
 		return false;
 	}

@@ -103,8 +103,9 @@ public abstract class LocalizationElement {
 			urls = (searchCandidates[idx] == null ? null
 					: FragmentUtils.findEntries(bundle,
 							resourceBase + searchCandidates[idx] + MetaTypeProviderImpl.RESOURCE_FILE_EXT));
-			if (urls != null && urls.length > 0)
+			if (urls != null && urls.length > 0) {
 				resourceUrl = urls[0];
+			}
 		}
 
 		if (resourceUrl != null) {

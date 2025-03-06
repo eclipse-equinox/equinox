@@ -178,8 +178,9 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Eq
 		// using a new one.
 		List<Icon> icons = this.icons;
 		// Icons will be null if none were specified.
-		if (icons == null)
+		if (icons == null) {
 			return null;
+		}
 		int index = Collections.binarySearch(icons, icon, iconComparator);
 		if (index < 0) {
 			// If the index is less than zero, there wasn't an exact match.
@@ -189,28 +190,30 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Eq
 			int insertionPoint = -(index + 1);
 			Icon lessThan = insertionPoint == 0 ? null : icons.get(insertionPoint - 1);
 			Icon greaterThan = insertionPoint == icons.size() ? null : icons.get(insertionPoint);
-			if (lessThan == null)
+			if (lessThan == null) {
 				// There were no icons whose size was smaller than the requested size.
 				icon = greaterThan;
-			else if (greaterThan == null)
+			} else if (greaterThan == null) {
 				// There were no icons whose size was greater than the requested size.
 				icon = lessThan;
-			else {
+			} else {
 				// There was at least one icon with a smaller size and at least one with
 				// a greater size than the requested size. Compute the average to see which one
 				// to choose.
 				int average = (greaterThan.getIconSize() + lessThan.getIconSize()) / 2;
-				if (sizeHint < average)
+				if (sizeHint < average) {
 					// The smaller icon is closer to the requested size.
 					icon = lessThan;
-				else
+				} else {
 					// The larger icon is closer to the requested size.
 					icon = greaterThan;
+				}
 			}
-		} else
+		} else {
 			// The index was greater than or equal to zero, indicating the index of an exact
 			// match.
 			icon = icons.get(index);
+		}
 		Bundle b = icon.getIconBundle();
 		URL[] urls = FragmentUtils.findEntries(b, getLocalized(icon.getIconName()));
 		if (urls != null && urls.length > 0) {
@@ -221,8 +224,9 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Eq
 
 	void setIcons(List<Icon> icons) {
 		// Do nothing if icons is null or empty.
-		if (icons == null || icons.isEmpty())
+		if (icons == null || icons.isEmpty()) {
 			return;
+		}
 		// Prepare the list of icons for binary searches as in getIcon(int).
 		Collections.sort(icons, iconComparator);
 		// Make the list unmodifiable for safe binary searches without copying.

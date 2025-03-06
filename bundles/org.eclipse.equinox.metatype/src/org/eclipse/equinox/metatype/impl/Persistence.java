@@ -144,9 +144,9 @@ public class Persistence {
 				return;
 			}
 
-			if (string == null)
+			if (string == null) {
 				out.writeByte(NULL);
-			else {
+			} else {
 				byte[] data = string.getBytes(StandardCharsets.UTF_8);
 
 				if (data.length > 65535) {
@@ -165,8 +165,9 @@ public class Persistence {
 				throw new NullPointerException();
 			}
 			Integer cur = writeStringCache.get(string);
-			if (cur != null)
+			if (cur != null) {
 				throw new IllegalStateException("String is already in the write table: " + string); //$NON-NLS-1$
+			}
 			Integer index = writeStringCache.size();
 			writeStringCache.put(string, index);
 			out.writeInt(index.intValue());

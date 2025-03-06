@@ -247,10 +247,11 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 		// If the default value is a single empty string and cardinality != 0, the
 		// default value must become String[0].
 		// We know the cardinality has already been set in the constructor.
-		if (_cardinality != 0 && defaults.length == 1 && defaults[0].length() == 0)
+		if (_cardinality != 0 && defaults.length == 1 && defaults[0].length() == 0) {
 			setDefaultValue(new String[0]);
-		else
+		} else {
 			setDefaultValue(vt.getValuesAsArray());
+		}
 	}
 
 	/**

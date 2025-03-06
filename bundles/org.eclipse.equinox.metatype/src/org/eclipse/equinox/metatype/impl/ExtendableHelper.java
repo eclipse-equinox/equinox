@@ -28,8 +28,9 @@ public class ExtendableHelper implements Extendable {
 	}
 
 	public ExtendableHelper(Map<String, Map<String, String>> extensions) {
-		if (extensions == null)
+		if (extensions == null) {
 			throw new NullPointerException();
+		}
 		this.extensions = extensions;
 	}
 
