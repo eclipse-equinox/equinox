@@ -88,10 +88,12 @@ public class TestProgressMonitor implements IProgressMonitor {
 	}
 
 	private static boolean equals(Object o1, Object o2) {
-		if (o1 == null)
+		if (o1 == null) {
 			return o2 == null;
-		if (o2 == null)
+		}
+		if (o2 == null) {
 			return false;
+		}
 		return o1.equals(o2);
 	}
 
@@ -220,8 +222,9 @@ public class TestProgressMonitor implements IProgressMonitor {
 	public void internalWorked(double work) {
 		workCalls++;
 		doubleWorkedCalls++;
-		if (work == 0.0)
+		if (work == 0.0) {
 			redundantWorkCalls++;
+		}
 		totalWork += work;
 	}
 
@@ -239,16 +242,18 @@ public class TestProgressMonitor implements IProgressMonitor {
 	@Override
 	public void setTaskName(String name) {
 		taskNameCalls++;
-		if (equals(name, taskName))
+		if (equals(name, taskName)) {
 			redundantSetTaskCalls++;
+		}
 		taskName = name;
 	}
 
 	@Override
 	public void subTask(String name) {
 		subTaskCalls++;
-		if (equals(name, subTaskName))
+		if (equals(name, subTaskName)) {
 			redundantSubTaskCalls++;
+		}
 		subTaskName = name;
 	}
 
@@ -256,8 +261,9 @@ public class TestProgressMonitor implements IProgressMonitor {
 	public void worked(int work) {
 		workCalls++;
 		intWorkedCalls++;
-		if (work == 0)
+		if (work == 0) {
 			redundantWorkCalls++;
+		}
 		totalWork += work;
 	}
 

@@ -45,8 +45,9 @@ public class SimpleRegistryListener implements IRegistryChangeListener {
 	 * @return the first event received, or <code>null</code> if none was received
 	 */
 	public synchronized IRegistryChangeEvent getEvent(long timeout) {
-		if (!events.isEmpty())
+		if (!events.isEmpty()) {
 			return events.remove(0);
+		}
 		try {
 			wait(timeout);
 		} catch (InterruptedException e) {
