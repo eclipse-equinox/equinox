@@ -47,15 +47,19 @@ public abstract class AbstractTest {
 	}
 
 	protected void assertEquals(String message, String[] s1, String[] s2) {
-		if (s1 == s2)
+		if (s1 == s2) {
 			return;
+		}
 		// We know that at least one is not null from the above check.
-		if (s1 == null || s2 == null)
+		if (s1 == null || s2 == null) {
 			fail(message + " (one of the arrays was null)"); //$NON-NLS-1$
-		if (s1.length != s2.length)
+		}
+		if (s1.length != s2.length) {
 			fail(message + " (array lengths weren't equal)"); //$NON-NLS-1$
-		for (int i = 0; i < s1.length; i++)
+		}
+		for (int i = 0; i < s1.length; i++) {
 			Assert.assertEquals(message, s1[i], s2[i]);
+		}
 	}
 
 	protected void assertIcon(InputStream icon, int size) throws IOException {
@@ -124,8 +128,9 @@ public abstract class AbstractTest {
 	}
 
 	protected AttributeDefinition findAttributeDefinitionById(String id, AttributeDefinition[] ads) {
-		if (id == null || ads == null)
+		if (id == null || ads == null) {
 			return null;
+		}
 		for (AttributeDefinition ad : ads) {
 			if (ad == null) {
 				continue;
@@ -138,8 +143,9 @@ public abstract class AbstractTest {
 	}
 
 	protected String getFirstDefaultValue(String[] defaultValue) {
-		if (defaultValue == null || defaultValue.length == 0)
+		if (defaultValue == null || defaultValue.length == 0) {
 			return null;
+		}
 		return defaultValue[0];
 	}
 

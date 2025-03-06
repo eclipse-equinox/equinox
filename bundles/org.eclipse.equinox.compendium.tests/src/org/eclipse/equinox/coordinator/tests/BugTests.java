@@ -36,9 +36,10 @@ public class BugTests extends CoordinatorTest {
 		// Set c1 to null so it will become weakly reachable and enqueued.
 		c1 = null;
 		// Ensure c1 becomes weakly reachable.
-		for (int i = 0; i < 100 && reference.get() != null; i++)
+		for (int i = 0; i < 100 && reference.get() != null; i++) {
 			// Force garbage collection.
 			System.gc();
+		}
 		assertNull("The enclosing coordination never became weakly reachable", reference.get()); //$NON-NLS-1$
 		// For some reason, this delay is necessary to force the failure
 		// condition to occur when running "normally". The failure will occur
