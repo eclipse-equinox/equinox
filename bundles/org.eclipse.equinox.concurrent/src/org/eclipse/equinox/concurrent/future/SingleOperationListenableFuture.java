@@ -57,8 +57,9 @@ public class SingleOperationListenableFuture<ResultType> extends SingleOperation
 				this.progressMonitor = monitor;
 				this.listenerExecutor = executor;
 				// Now, if we're already done, then execute the listenable now
-				if (isDone())
+				if (isDone()) {
 					execListenable();
+				}
 			}
 		}
 	}
@@ -71,8 +72,9 @@ public class SingleOperationListenableFuture<ResultType> extends SingleOperation
 				@Override
 				public void handleException(Throwable exception) {
 					synchronized (SingleOperationListenableFuture.this) {
-						if (!isCanceled())
+						if (!isCanceled()) {
 							setException(exception);
+						}
 						execListenable();
 					}
 				}
@@ -82,8 +84,9 @@ public class SingleOperationListenableFuture<ResultType> extends SingleOperation
 					@SuppressWarnings("unchecked")
 					ResultType result = (ResultType) runnable.run(getProgressMonitor());
 					synchronized (SingleOperationListenableFuture.this) {
-						if (!isCanceled())
+						if (!isCanceled()) {
 							set(result);
+						}
 						execListenable();
 					}
 				}
@@ -93,11 +96,13 @@ public class SingleOperationListenableFuture<ResultType> extends SingleOperation
 
 	private void execListenable() {
 		// If no progressRunnable has been set, then we simply return
-		if (progressRunnable == null || listenerExecutor == null)
+		if (progressRunnable == null || listenerExecutor == null) {
 			return;
+		}
 		// Make sure that the progress monitor is set to non-null
-		if (progressMonitor == null)
+		if (progressMonitor == null) {
 			progressMonitor = new NullProgressMonitor();
+		}
 		// then we execute using executor
 		this.listenerExecutor.execute(progressRunnable, progressMonitor);
 	}

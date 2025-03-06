@@ -46,8 +46,9 @@ public class FutureProgressMonitor extends ProgressMonitorWrapper {
 	public void beginTask(String name, int totalWork) {
 		super.beginTask(name, totalWork);
 		synchronized (lock) {
-			if (monitor != null)
+			if (monitor != null) {
 				monitor.beginTask(name, totalWork);
+			}
 		}
 	}
 
@@ -64,8 +65,9 @@ public class FutureProgressMonitor extends ProgressMonitorWrapper {
 	public void internalWorked(double work) {
 		super.internalWorked(work);
 		synchronized (lock) {
-			if (monitor != null)
+			if (monitor != null) {
 				monitor.internalWorked(work);
+			}
 		}
 	}
 
@@ -73,8 +75,9 @@ public class FutureProgressMonitor extends ProgressMonitorWrapper {
 	public void setCanceled(boolean value) {
 		super.setCanceled(value);
 		synchronized (lock) {
-			if (monitor != null)
+			if (monitor != null) {
 				monitor.setCanceled(value);
+			}
 		}
 	}
 
@@ -82,8 +85,9 @@ public class FutureProgressMonitor extends ProgressMonitorWrapper {
 	public void setTaskName(String name) {
 		super.setTaskName(name);
 		synchronized (lock) {
-			if (monitor != null)
+			if (monitor != null) {
 				monitor.setTaskName(name);
+			}
 		}
 	}
 
@@ -91,8 +95,9 @@ public class FutureProgressMonitor extends ProgressMonitorWrapper {
 	public void subTask(String name) {
 		super.subTask(name);
 		synchronized (lock) {
-			if (monitor != null)
+			if (monitor != null) {
 				monitor.subTask(name);
+			}
 		}
 	}
 
@@ -100,8 +105,9 @@ public class FutureProgressMonitor extends ProgressMonitorWrapper {
 	public void worked(int work) {
 		super.worked(work);
 		synchronized (lock) {
-			if (monitor != null)
+			if (monitor != null) {
 				monitor.worked(work);
+			}
 		}
 	}
 
@@ -116,8 +122,9 @@ public class FutureProgressMonitor extends ProgressMonitorWrapper {
 	public void setChildProgressMonitor(IProgressMonitor value) {
 		synchronized (lock) {
 			this.monitor = value;
-			if (monitor != null && isCanceled())
+			if (monitor != null && isCanceled()) {
 				this.monitor.setCanceled(true);
+			}
 		}
 	}
 
