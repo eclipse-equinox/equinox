@@ -52,8 +52,9 @@ public class GenericConstraint extends ResolverConstraint {
 	}
 
 	public VersionSupplier[] getMatchingCapabilities() {
-		if (isMultiple())
+		if (isMultiple()) {
 			return getPossibleSuppliers();
+		}
 		VersionSupplier supplier = getSelectedSupplier();
 		return supplier == null ? null : new VersionSupplier[] {supplier};
 	}

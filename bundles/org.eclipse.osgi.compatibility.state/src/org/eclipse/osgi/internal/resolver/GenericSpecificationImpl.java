@@ -64,11 +64,13 @@ public class GenericSpecificationImpl extends VersionConstraintImpl implements G
 
 	@Override
 	public boolean isSatisfiedBy(BaseDescription supplier) {
-		if (!(supplier instanceof GenericDescription))
+		if (!(supplier instanceof GenericDescription)) {
 			return false;
+		}
 		GenericDescription candidate = (GenericDescription) supplier;
-		if (!getType().equals(candidate.getType()))
+		if (!getType().equals(candidate.getType())) {
 			return false;
+		}
 		// Note that names and versions are only matched by including them in the filter
 		return matchingFilter == null || matchingFilter.match(candidate.getAttributes());
 	}
@@ -82,8 +84,9 @@ public class GenericSpecificationImpl extends VersionConstraintImpl implements G
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(Constants.REQUIRE_CAPABILITY).append(": ").append(getType()); //$NON-NLS-1$
-		if (matchingFilter != null)
+		if (matchingFilter != null) {
 			sb.append("; filter=\"").append(getMatchingFilter()).append('"'); //$NON-NLS-1$
+		}
 		return sb.toString();
 	}
 
@@ -96,10 +99,11 @@ public class GenericSpecificationImpl extends VersionConstraintImpl implements G
 
 	void setType(String type) {
 		synchronized (this.monitor) {
-			if (type == null || type.equals(GenericDescription.DEFAULT_TYPE))
+			if (type == null || type.equals(GenericDescription.DEFAULT_TYPE)) {
 				this.type = GenericDescription.DEFAULT_TYPE;
-			else
+			} else {
 				this.type = type;
+			}
 		}
 	}
 
@@ -139,8 +143,9 @@ public class GenericSpecificationImpl extends VersionConstraintImpl implements G
 			}
 			int len = suppliers == null ? 0 : suppliers.length;
 			GenericDescription[] temp = new GenericDescription[len + 1];
-			if (suppliers != null)
+			if (suppliers != null) {
 				System.arraycopy(suppliers, 0, temp, 0, len);
+			}
 			temp[len] = (GenericDescription) supplier;
 			suppliers = temp;
 		}
@@ -189,12 +194,15 @@ public class GenericSpecificationImpl extends VersionConstraintImpl implements G
 	protected Map<String, String> getInternalDirectives() {
 		Map<String, String> result = new HashMap<>(2);
 		synchronized (this.monitor) {
-			if (arbitraryDirectives != null)
+			if (arbitraryDirectives != null) {
 				result.putAll(arbitraryDirectives);
-			if ((resolution & GenericSpecification.RESOLUTION_OPTIONAL) != 0)
+			}
+			if ((resolution & GenericSpecification.RESOLUTION_OPTIONAL) != 0) {
 				result.put(Constants.RESOLUTION_DIRECTIVE, Constants.RESOLUTION_OPTIONAL);
-			if ((resolution & GenericSpecification.RESOLUTION_MULTIPLE) != 0)
+			}
+			if ((resolution & GenericSpecification.RESOLUTION_MULTIPLE) != 0) {
 				result.put(Namespace.REQUIREMENT_CARDINALITY_DIRECTIVE, Namespace.CARDINALITY_MULTIPLE);
+			}
 			if (matchingFilter != null) {
 				result.put(Constants.FILTER_DIRECTIVE, matchingFilter.toString());
 			}

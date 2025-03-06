@@ -25,8 +25,9 @@ public class BundleConstraint extends ResolverConstraint {
 
 	@Override
 	boolean isOptional() {
-		if (constraint instanceof HostSpecification)
+		if (constraint instanceof HostSpecification) {
 			return false;
+		}
 		return ((BundleSpecification) constraint).isOptional();
 	}
 }

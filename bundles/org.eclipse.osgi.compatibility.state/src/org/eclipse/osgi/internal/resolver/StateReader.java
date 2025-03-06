@@ -84,8 +84,9 @@ final class StateReader {
 	}
 
 	public StateReader(File stateDirectory) {
-		if (!stateDirectory.exists())
+		if (!stateDirectory.exists()) {
 			stateDirectory.mkdirs();
+		}
 		this.stateFile = new File(stateDirectory, STATE_FILE);
 		this.lazyFile = new File(stateDirectory, LAZY_FILE);
 		this.lazyLoad = false;
@@ -103,8 +104,9 @@ final class StateReader {
 
 	private Object getFromObjectTable(int index) {
 		Object result = objectTable.get(Integer.valueOf(index));
-		if (result == null)
+		if (result == null) {
 			throw new IllegalStateException("Expected to find an object at table index: " + index); //$NON-NLS-1$
+		}
 		return result;
 	}
 
@@ -112,15 +114,18 @@ final class StateReader {
 		DataInputStream in = new DataInputStream(new BufferedInputStream(secureAction.getFileInputStream(stateFile), BUFFER_SIZE_FULLYREAD));
 		DataInputStream lazyIn = null;
 		try {
-			if (in.readByte() != STATE_CACHE_VERSION)
+			if (in.readByte() != STATE_CACHE_VERSION) {
 				return false;
+			}
 			byte tag = readTag(in);
-			if (tag != OBJECT)
+			if (tag != OBJECT) {
 				return false;
+			}
 			int index = in.readInt();
 			long timestampRead = in.readLong();
-			if (expectedTimestamp >= 0 && timestampRead != expectedTimestamp)
+			if (expectedTimestamp >= 0 && timestampRead != expectedTimestamp) {
 				return false;
+			}
 			addToObjectTable(state, index);
 			// read the platform property keys
 			String[] platformPropKeys = (String[]) readPlatformProp(in);
@@ -132,8 +137,9 @@ final class StateReader {
 				int numProps = in.readInt();
 				for (int j = 0; j < numProps; j++) {
 					Object value = readPlatformProp(in);
-					if (value != null && j < platformPropKeys.length)
+					if (value != null && j < platformPropKeys.length) {
 						props.put(platformPropKeys[j], value);
+					}
 				}
 				platformProps[i] = props;
 			}
@@ -142,8 +148,9 @@ final class StateReader {
 			for (int i = 0; i < numBundles; i++) {
 				BundleDescriptionImpl bundle = readBundleDescription(in);
 				state.basicAddBundle(bundle);
-				if (bundle.isResolved())
+				if (bundle.isResolved()) {
 					state.addResolvedBundle(bundle);
+				}
 			}
 			// read the DisabledInfos
 			int numDisableInfos = in.readInt();
@@ -153,34 +160,40 @@ final class StateReader {
 			}
 			state.setTimeStamp(timestampRead);
 			state.setResolved(in.readBoolean());
-			if (lazyLoad)
+			if (lazyLoad) {
 				return true;
+			}
 			//read in from lazy data file; using the fully read buffer size because we are reading the complete file in.
 			lazyIn = new DataInputStream(new BufferedInputStream(secureAction.getFileInputStream(lazyFile), BUFFER_SIZE_FULLYREAD));
-			for (int i = 0; i < numBundles; i++)
+			for (int i = 0; i < numBundles; i++) {
 				readBundleDescriptionLazyData(lazyIn, 0);
+			}
 		} finally {
 			in.close();
-			if (lazyIn != null)
+			if (lazyIn != null) {
 				try {
 					lazyIn.close();
 				} catch (IOException e) {
 					// ignore
 				}
+			}
 		}
 		return true;
 	}
 
 	private boolean readStateDeprecated(StateImpl state, DataInputStream in, long expectedTimestamp) throws IOException {
-		if (in.readByte() != STATE_CACHE_VERSION)
+		if (in.readByte() != STATE_CACHE_VERSION) {
 			return false;
+		}
 		byte tag = readTag(in);
-		if (tag != OBJECT)
+		if (tag != OBJECT) {
 			return false;
+		}
 		int index = in.readInt();
 		long timestampRead = in.readLong();
-		if (expectedTimestamp >= 0 && timestampRead != expectedTimestamp)
+		if (expectedTimestamp >= 0 && timestampRead != expectedTimestamp) {
 			return false;
+		}
 		addToObjectTable(state, index);
 		// read the platform property keys
 		String[] platformPropKeys = (String[]) readPlatformProp(in);
@@ -192,50 +205,60 @@ final class StateReader {
 			int numProps = in.readInt();
 			for (int j = 0; j < numProps; j++) {
 				Object value = readPlatformProp(in);
-				if (value != null && j < platformPropKeys.length)
+				if (value != null && j < platformPropKeys.length) {
 					props.put(platformPropKeys[j], value);
+				}
 			}
 			platformProps[i] = props;
 		}
 		state.setPlatformProperties(platformProps);
 		numBundles = in.readInt();
-		if (numBundles == 0)
+		if (numBundles == 0) {
 			return true;
+		}
 		for (int i = 0; i < numBundles; i++) {
 			BundleDescriptionImpl bundle = readBundleDescription(in);
 			state.basicAddBundle(bundle);
-			if (bundle.isResolved())
+			if (bundle.isResolved()) {
 				state.addResolvedBundle(bundle);
+			}
 		}
 		state.setTimeStamp(timestampRead);
 		state.setResolved(in.readBoolean());
 		in.readInt(); // skip past the old offset
-		if (lazyLoad)
+		if (lazyLoad) {
 			return true;
-		for (int i = 0; i < numBundles; i++)
+		}
+		for (int i = 0; i < numBundles; i++) {
 			readBundleDescriptionLazyData(in, 0);
+		}
 		return true;
 	}
 
 	private Object readPlatformProp(DataInputStream in) throws IOException {
 		byte type = in.readByte();
-		if (type == NULL)
+		if (type == NULL) {
 			return null;
+		}
 		int num = in.readInt();
-		if (num == 1)
+		if (num == 1) {
 			return readString(in, false);
+		}
 		String[] result = new String[num];
-		for (int i = 0; i < result.length; i++)
+		for (int i = 0; i < result.length; i++) {
 			result[i] = readString(in, false);
+		}
 		return result;
 	}
 
 	private BundleDescriptionImpl readBundleDescription(DataInputStream in) throws IOException {
 		byte tag = readTag(in);
-		if (tag == NULL)
+		if (tag == NULL) {
 			return null;
-		if (tag == INDEX)
+		}
+		if (tag == INDEX) {
 			return (BundleDescriptionImpl) getFromObjectTable(in.readInt());
+		}
 		// first read in non-lazy loaded data
 		BundleDescriptionImpl result = new BundleDescriptionImpl();
 		addToObjectTable(result, in.readInt());
@@ -250,8 +273,9 @@ final class StateReader {
 		result.setStateBit(BundleDescriptionImpl.ATTACH_FRAGMENTS, in.readBoolean());
 		result.setStateBit(BundleDescriptionImpl.DYNAMIC_FRAGMENTS, in.readBoolean());
 		String[] mandatory = readList(in);
-		if (mandatory != null)
+		if (mandatory != null) {
 			result.setDirective(Constants.MANDATORY_DIRECTIVE, mandatory);
+		}
 		result.setAttributes(readMap(in));
 		result.setArbitraryDirectives(readMap(in));
 		result.setHost(readHostSpec(in));
@@ -260,8 +284,9 @@ final class StateReader {
 		int numDeps = in.readInt();
 		if (numDeps > 0) {
 			BundleDescription[] deps = new BundleDescription[numDeps];
-			for (int i = 0; i < numDeps; i++)
+			for (int i = 0; i < numDeps; i++) {
 				deps[i] = readBundleDescription(in);
+			}
 			result.addDependencies(deps, false); // no need to check dups; we already know there are none when we resolved (bug 152900)
 		}
 		// No need to set the dependencies between fragment and hosts; that was already done in the above loop (bug 152900)
@@ -282,8 +307,9 @@ final class StateReader {
 
 	@SuppressWarnings("unchecked")
 	private BundleDescriptionImpl readBundleDescriptionLazyData(DataInputStream in, int skip) throws IOException {
-		if (skip > 0)
+		if (skip > 0) {
 			in.skipBytes(skip);
+		}
 		int index = in.readInt();
 		BundleDescriptionImpl result = (BundleDescriptionImpl) getFromObjectTable(index);
 		if (result.isFullyLoaded()) {
@@ -297,64 +323,72 @@ final class StateReader {
 		int exportCount = in.readInt();
 		if (exportCount > 0) {
 			ExportPackageDescription[] exports = new ExportPackageDescription[exportCount];
-			for (int i = 0; i < exports.length; i++)
+			for (int i = 0; i < exports.length; i++) {
 				exports[i] = readExportPackageDesc(in);
+			}
 			result.setExportPackages(exports);
 		}
 
 		int importCount = in.readInt();
 		if (importCount > 0) {
 			ImportPackageSpecification[] imports = new ImportPackageSpecification[importCount];
-			for (int i = 0; i < imports.length; i++)
+			for (int i = 0; i < imports.length; i++) {
 				imports[i] = readImportPackageSpec(in);
+			}
 			result.setImportPackages(imports);
 		}
 
 		int requiredBundleCount = in.readInt();
 		if (requiredBundleCount > 0) {
 			BundleSpecification[] requiredBundles = new BundleSpecification[requiredBundleCount];
-			for (int i = 0; i < requiredBundles.length; i++)
+			for (int i = 0; i < requiredBundles.length; i++) {
 				requiredBundles[i] = readBundleSpec(in);
+			}
 			result.setRequiredBundles(requiredBundles);
 		}
 
 		int selectedCount = in.readInt();
 		if (selectedCount > 0) {
 			ExportPackageDescription[] selected = new ExportPackageDescription[selectedCount];
-			for (int i = 0; i < selected.length; i++)
+			for (int i = 0; i < selected.length; i++) {
 				selected[i] = readExportPackageDesc(in);
+			}
 			result.setSelectedExports(selected);
 		}
 
 		int substitutedCount = in.readInt();
 		if (substitutedCount > 0) {
 			ExportPackageDescription[] selected = new ExportPackageDescription[substitutedCount];
-			for (int i = 0; i < selected.length; i++)
+			for (int i = 0; i < selected.length; i++) {
 				selected[i] = readExportPackageDesc(in);
+			}
 			result.setSubstitutedExports(selected);
 		}
 
 		int resolvedCount = in.readInt();
 		if (resolvedCount > 0) {
 			ExportPackageDescription[] resolved = new ExportPackageDescription[resolvedCount];
-			for (int i = 0; i < resolved.length; i++)
+			for (int i = 0; i < resolved.length; i++) {
 				resolved[i] = readExportPackageDesc(in);
+			}
 			result.setResolvedImports(resolved);
 		}
 
 		int resolvedRequiredCount = in.readInt();
 		if (resolvedRequiredCount > 0) {
 			BundleDescription[] resolved = new BundleDescription[resolvedRequiredCount];
-			for (int i = 0; i < resolved.length; i++)
+			for (int i = 0; i < resolved.length; i++) {
 				resolved[i] = readBundleDescription(in);
+			}
 			result.setResolvedRequires(resolved);
 		}
 
 		int eeCount = in.readInt();
 		if (eeCount > 0) {
 			String[] ee = new String[eeCount];
-			for (int i = 0; i < ee.length; i++)
+			for (int i = 0; i < ee.length; i++) {
 				ee[i] = readString(in, false);
+			}
 			result.setExecutionEnvironments(ee);
 		}
 
@@ -372,32 +406,36 @@ final class StateReader {
 		int genericCapCnt = in.readInt();
 		if (genericCapCnt > 0) {
 			GenericDescription[] capabilities = new GenericDescription[genericCapCnt];
-			for (int i = 0; i < capabilities.length; i++)
+			for (int i = 0; i < capabilities.length; i++) {
 				capabilities[i] = readGenericDescription(in);
+			}
 			result.setGenericCapabilities(capabilities);
 		}
 
 		int genericReqCnt = in.readInt();
 		if (genericReqCnt > 0) {
 			GenericSpecification[] reqs = new GenericSpecification[genericReqCnt];
-			for (int i = 0; i < reqs.length; i++)
+			for (int i = 0; i < reqs.length; i++) {
 				reqs[i] = readGenericSpecification(in);
+			}
 			result.setGenericRequires(reqs);
 		}
 
 		int selectedGenCapCnt = in.readInt();
 		if (selectedGenCapCnt > 0) {
 			GenericDescription[] capabilities = new GenericDescription[selectedGenCapCnt];
-			for (int i = 0; i < capabilities.length; i++)
+			for (int i = 0; i < capabilities.length; i++) {
 				capabilities[i] = readGenericDescription(in);
+			}
 			result.setSelectedCapabilities(capabilities);
 		}
 
 		int resolvedGenCapCnt = in.readInt();
 		if (resolvedGenCapCnt > 0) {
 			GenericDescription[] capabilities = new GenericDescription[resolvedGenCapCnt];
-			for (int i = 0; i < capabilities.length; i++)
+			for (int i = 0; i < capabilities.length; i++) {
 				capabilities[i] = readGenericDescription(in);
+			}
 			result.setResolvedCapabilities(capabilities);
 		}
 
@@ -415,10 +453,12 @@ final class StateReader {
 
 	private BundleSpecificationImpl readBundleSpec(DataInputStream in) throws IOException {
 		byte tag = readTag(in);
-		if (tag == NULL)
+		if (tag == NULL) {
 			return null;
-		if (tag == INDEX)
+		}
+		if (tag == INDEX) {
 			return (BundleSpecificationImpl) getFromObjectTable(in.readInt());
+		}
 		BundleSpecificationImpl result = new BundleSpecificationImpl();
 		int tableIndex = in.readInt();
 		addToObjectTable(result, tableIndex);
@@ -433,10 +473,12 @@ final class StateReader {
 
 	private ExportPackageDescriptionImpl readExportPackageDesc(DataInputStream in) throws IOException {
 		byte tag = readTag(in);
-		if (tag == NULL)
+		if (tag == NULL) {
 			return null;
-		if (tag == INDEX)
+		}
+		if (tag == INDEX) {
 			return (ExportPackageDescriptionImpl) getFromObjectTable(in.readInt());
+		}
 		ExportPackageDescriptionImpl exportPackageDesc = new ExportPackageDescriptionImpl();
 		int tableIndex = in.readInt();
 		addToObjectTable(exportPackageDesc, tableIndex);
@@ -455,28 +497,29 @@ final class StateReader {
 
 	private Map<String, Object> readMap(DataInputStream in) throws IOException {
 		int count = in.readInt();
-		if (count == 0)
+		if (count == 0) {
 			return null;
+		}
 		HashMap<String, Object> result = new HashMap<>(count);
 		for (int i = 0; i < count; i++) {
 			String key = readString(in, false);
 			Object value = null;
 			byte type = in.readByte();
-			if (type == 0)
+			if (type == 0) {
 				value = readString(in, false);
-			else if (type == 1)
+			} else if (type == 1) {
 				value = readList(in);
-			else if (type == 2)
+			} else if (type == 2) {
 				value = in.readBoolean() ? Boolean.TRUE : Boolean.FALSE;
-			else if (type == 3)
+			} else if (type == 3) {
 				value = Integer.valueOf(in.readInt());
-			else if (type == 4)
+			} else if (type == 4) {
 				value = Long.valueOf(in.readLong());
-			else if (type == 5)
+			} else if (type == 5) {
 				value = Double.valueOf(in.readDouble());
-			else if (type == 6)
+			} else if (type == 6) {
 				value = readVersion(in);
-			else if (type == 7) {
+			} else if (type == 7) {
 				value = readString(in, false);
 				try {
 					Class<?> uriClazz = Class.forName("java.net.URI"); //$NON-NLS-1$
@@ -564,11 +607,13 @@ final class StateReader {
 
 	private String[] readList(DataInputStream in) throws IOException {
 		int count = in.readInt();
-		if (count == 0)
+		if (count == 0) {
 			return null;
+		}
 		String[] result = new String[count];
-		for (int i = 0; i < count; i++)
+		for (int i = 0; i < count; i++) {
 			result[i] = readString(in, false);
+		}
 		return result;
 	}
 
@@ -579,10 +624,12 @@ final class StateReader {
 
 	private ImportPackageSpecificationImpl readImportPackageSpec(DataInputStream in) throws IOException {
 		byte tag = readTag(in);
-		if (tag == NULL)
+		if (tag == NULL) {
 			return null;
-		if (tag == INDEX)
+		}
+		if (tag == INDEX) {
 			return (ImportPackageSpecificationImpl) getFromObjectTable(in.readInt());
+		}
 		ImportPackageSpecificationImpl result = new ImportPackageSpecificationImpl();
 		int tableIndex = in.readInt();
 		addToObjectTable(result, tableIndex);
@@ -598,10 +645,12 @@ final class StateReader {
 
 	private HostSpecificationImpl readHostSpec(DataInputStream in) throws IOException {
 		byte tag = readTag(in);
-		if (tag == NULL)
+		if (tag == NULL) {
 			return null;
-		if (tag == INDEX)
+		}
+		if (tag == INDEX) {
 			return (HostSpecificationImpl) getFromObjectTable(in.readInt());
+		}
 		HostSpecificationImpl result = new HostSpecificationImpl();
 		int tableIndex = in.readInt();
 		addToObjectTable(result, tableIndex);
@@ -609,8 +658,9 @@ final class StateReader {
 		int hostCount = in.readInt();
 		if (hostCount > 0) {
 			BundleDescription[] hosts = new BundleDescription[hostCount];
-			for (int i = 0; i < hosts.length; i++)
+			for (int i = 0; i < hosts.length; i++) {
 				hosts[i] = readBundleDescription(in);
+			}
 			result.setHosts(hosts);
 		}
 		result.setAttributes(readMap(in));
@@ -621,10 +671,12 @@ final class StateReader {
 	@SuppressWarnings("unchecked")
 	private GenericDescription readGenericDescription(DataInputStream in) throws IOException {
 		byte tag = readTag(in);
-		if (tag == NULL)
+		if (tag == NULL) {
 			return null;
-		if (tag == INDEX)
+		}
+		if (tag == INDEX) {
 			return (GenericDescription) getFromObjectTable(in.readInt());
+		}
 		int tableIndex = in.readInt();
 		GenericDescriptionImpl result = new GenericDescriptionImpl();
 		addToObjectTable(result, tableIndex);
@@ -641,18 +693,21 @@ final class StateReader {
 		result.setAttributes(attrs);
 		@SuppressWarnings("rawtypes")
 		Map directives = readMap(in);
-		if (directives != null)
+		if (directives != null) {
 			result.setDirectives(directives);
+		}
 		result.setFragmentDeclaration(readGenericDescription(in));
 		return result;
 	}
 
 	private GenericSpecificationImpl readGenericSpecification(DataInputStream in) throws IOException {
 		byte tag = readTag(in);
-		if (tag == NULL)
+		if (tag == NULL) {
 			return null;
-		if (tag == INDEX)
+		}
+		if (tag == INDEX) {
 			return (GenericSpecificationImpl) getFromObjectTable(in.readInt());
+		}
 		GenericSpecificationImpl result = new GenericSpecificationImpl();
 		int tableIndex = in.readInt();
 		addToObjectTable(result, tableIndex);
@@ -660,8 +715,9 @@ final class StateReader {
 		result.setType(readString(in, false));
 		int num = in.readInt();
 		GenericDescription[] suppliers = num == 0 ? null : new GenericDescription[num];
-		for (int i = 0; i < num; i++)
+		for (int i = 0; i < num; i++) {
 			suppliers[i] = readGenericDescription(in);
+		}
 		result.setSupplers(suppliers);
 		result.setResolution(in.readInt());
 		try {
@@ -675,18 +731,21 @@ final class StateReader {
 	}
 
 	private NativeCodeSpecification readNativeCode(DataInputStream in) throws IOException {
-		if (!in.readBoolean())
+		if (!in.readBoolean()) {
 			return null;
+		}
 		NativeCodeSpecificationImpl result = new NativeCodeSpecificationImpl();
 		result.setOptional(in.readBoolean());
 		int numNativeDesc = in.readInt();
 		NativeCodeDescriptionImpl[] nativeDescs = new NativeCodeDescriptionImpl[numNativeDesc];
-		for (int i = 0; i < numNativeDesc; i++)
+		for (int i = 0; i < numNativeDesc; i++) {
 			nativeDescs[i] = readNativeCodeDescription(in);
+		}
 		result.setPossibleSuppliers(nativeDescs);
 		int supplierIndex = in.readInt();
-		if (supplierIndex >= 0)
+		if (supplierIndex >= 0) {
 			result.setSupplier(nativeDescs[supplierIndex]);
+		}
 		return result;
 	}
 
@@ -710,21 +769,25 @@ final class StateReader {
 
 	private VersionRange[] readVersionRanges(DataInputStream in) throws IOException {
 		int num = in.readInt();
-		if (num == 0)
+		if (num == 0) {
 			return null;
+		}
 		VersionRange[] result = new VersionRange[num];
-		for (int i = 0; i < num; i++)
+		for (int i = 0; i < num; i++) {
 			result[i] = readVersionRange(in);
+		}
 		return result;
 	}
 
 	private String[] readStringArray(DataInputStream in) throws IOException {
 		int num = in.readInt();
-		if (num == 0)
+		if (num == 0) {
 			return null;
+		}
 		String[] result = new String[num];
-		for (int i = 0; i < num; i++)
+		for (int i = 0; i < num; i++) {
 			result[i] = readString(in, false);
+		}
 		return result;
 	}
 
@@ -736,8 +799,9 @@ final class StateReader {
 
 	private Version readVersion(DataInputStream in) throws IOException {
 		byte tag = readTag(in);
-		if (tag == NULL)
+		if (tag == NULL) {
 			return Version.emptyVersion;
+		}
 		int majorComponent = in.readInt();
 		int minorComponent = in.readInt();
 		int serviceComponent = in.readInt();
@@ -748,8 +812,9 @@ final class StateReader {
 
 	private VersionRange readVersionRange(DataInputStream in) throws IOException {
 		byte tag = readTag(in);
-		if (tag == NULL)
+		if (tag == NULL) {
 			return null;
+		}
 		return new VersionRange(readVersion(in), in.readBoolean(), readVersion(in), in.readBoolean());
 	}
 
@@ -775,8 +840,9 @@ final class StateReader {
 
 	private String readString(DataInputStream in, boolean intern) throws IOException {
 		byte type = in.readByte();
-		if (type == NULL)
+		if (type == NULL) {
 			return null;
+		}
 
 		if (type == LONG_STRING) {
 			int length = in.readInt();
@@ -784,13 +850,15 @@ final class StateReader {
 			in.readFully(data);
 			String string = new String(data, StandardCharsets.UTF_8);
 
-			if (intern)
+			if (intern) {
 				return string.intern();
+			}
 			return ObjectPool.intern(string);
 		}
 
-		if (intern)
+		if (intern) {
 			return in.readUTF().intern();
+		}
 		return ObjectPool.intern(in.readUTF());
 	}
 
@@ -799,8 +867,9 @@ final class StateReader {
 	}
 
 	private DataInputStream openLazyFile() throws IOException {
-		if (lazyFile == null)
+		if (lazyFile == null) {
 			throw new IOException(); // TODO error message here!
+		}
 		return new DataInputStream(new BufferedInputStream(secureAction.getFileInputStream(lazyFile), BUFFER_SIZE_LAZY));
 	}
 
@@ -821,17 +890,19 @@ final class StateReader {
 		DataInputStream in = null;
 		try {
 			in = openLazyFile();
-			for (int i = 0; i < numBundles; i++)
+			for (int i = 0; i < numBundles; i++) {
 				readBundleDescriptionLazyData(in, 0);
+			}
 		} catch (IOException ioe) {
 			throw new RuntimeException(ioe.getMessage(), ioe); // TODO need error message here
 		} finally {
-			if (in != null)
+			if (in != null) {
 				try {
 					in.close();
 				} catch (IOException e) {
 					// nothing we can do now
 				}
+			}
 		}
 	}
 
@@ -843,28 +914,33 @@ final class StateReader {
 			addDependencies(target, toLoad);
 			int skipBytes[] = getSkipBytes(toLoad);
 			// look for the lazy data of the toLoad list
-			for (int skipByte : skipBytes)
+			for (int skipByte : skipBytes) {
 				readBundleDescriptionLazyData(in, skipByte);
+			}
 		}
 	}
 
 	private void addDependencies(BundleDescriptionImpl target, List<BundleDescriptionImpl> toLoad) {
-		if (toLoad.contains(target) || target.isFullyLoaded())
+		if (toLoad.contains(target) || target.isFullyLoaded()) {
 			return;
+		}
 		int i = 0;
 		for (BundleDescriptionImpl bundle : toLoad) {
 			// insert the target into the list sorted by lazy data offsets
-			if (target.getLazyDataOffset() < bundle.getLazyDataOffset())
+			if (target.getLazyDataOffset() < bundle.getLazyDataOffset()) {
 				break;
+			}
 			i++;
 		}
-		if (i >= toLoad.size())
+		if (i >= toLoad.size()) {
 			toLoad.add(target);
-		else
+		} else {
 			toLoad.add(i, target);
+		}
 		List<BundleDescription> deps = target.getBundleDependencies();
-		for (BundleDescription dep : deps)
+		for (BundleDescription dep : deps) {
 			addDependencies((BundleDescriptionImpl) dep, toLoad);
+		}
 	}
 
 	private int[] getSkipBytes(List<BundleDescriptionImpl> toLoad) {
@@ -885,8 +961,9 @@ final class StateReader {
 		for (Iterator<Entry<Integer, Object>> entries = objectTable.entrySet().iterator(); entries.hasNext();) {
 			Map.Entry<Integer, Object> entry = entries.next();
 			Object value = entry.getValue();
-			if (value instanceof ExportPackageDescription || value instanceof GenericDescription || value instanceof ImportPackageSpecification || value instanceof BundleSpecification || value instanceof GenericSpecification)
+			if (value instanceof ExportPackageDescription || value instanceof GenericDescription || value instanceof ImportPackageSpecification || value instanceof BundleSpecification || value instanceof GenericSpecification) {
 				entries.remove();
+			}
 		}
 	}
 }

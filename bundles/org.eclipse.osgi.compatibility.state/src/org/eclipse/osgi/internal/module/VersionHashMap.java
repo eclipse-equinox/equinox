@@ -24,8 +24,9 @@ public class VersionHashMap<V extends VersionSupplier> extends MappedList<String
 		this.resolver = resolver;
 		Dictionary<?, ?>[] allProperties = resolver.getState().getPlatformProperties();
 		Object preferSystem = allProperties.length == 0 ? "true" : allProperties[0].get("osgi.resolver.preferSystemPackages"); //$NON-NLS-1$//$NON-NLS-2$
-		if (preferSystem == null)
+		if (preferSystem == null) {
 			preferSystem = "true"; //$NON-NLS-1$
+		}
 		preferSystemPackages = Boolean.valueOf(preferSystem.toString()).booleanValue();
 	}
 
@@ -37,8 +38,9 @@ public class VersionHashMap<V extends VersionSupplier> extends MappedList<String
 		if (compare(existing.get(existing.size() - 1), value) > 0) {
 			index = Collections.binarySearch(existing, value, this);
 
-			if (index < 0)
+			if (index < 0) {
 				index = -index - 1;
+			}
 		}
 		return index;
 	}
@@ -55,14 +57,16 @@ public class VersionHashMap<V extends VersionSupplier> extends MappedList<String
 
 	private V contains(V vs, boolean remove) {
 		List<V> existing = internal.get(vs.getName());
-		if (existing == null)
+		if (existing == null) {
 			return null;
+		}
 		int index = existing.indexOf(vs);
 		if (index >= 0) {
 			if (remove) {
 				existing.remove(index);
-				if (existing.size() == 0)
+				if (existing.size() == 0) {
 					internal.remove(vs.getName());
+				}
 			}
 			return vs;
 		}
@@ -83,8 +87,9 @@ public class VersionHashMap<V extends VersionSupplier> extends MappedList<String
 	// from the resolved bundles are ahead of those from unresolved bundles
 	void reorder() {
 		for (List<V> existing : internal.values()) {
-			if (existing.size() > 1)
+			if (existing.size() > 1) {
 				Collections.sort(existing, this);
+			}
 		}
 	}
 
@@ -96,20 +101,24 @@ public class VersionHashMap<V extends VersionSupplier> extends MappedList<String
 	@Override
 	public int compare(V vs1, V vs2) {
 		// if the selection policy is set then use that
-		if (resolver.getSelectionPolicy() != null)
+		if (resolver.getSelectionPolicy() != null) {
 			return resolver.getSelectionPolicy().compare(vs1.getBaseDescription(), vs2.getBaseDescription());
+		}
 		if (preferSystemPackages) {
 			String systemBundle = resolver.getSystemBundle();
-			if (systemBundle.equals(vs1.getBundleDescription().getSymbolicName()) && !systemBundle.equals(vs2.getBundleDescription().getSymbolicName()))
+			if (systemBundle.equals(vs1.getBundleDescription().getSymbolicName()) && !systemBundle.equals(vs2.getBundleDescription().getSymbolicName())) {
 				return -1;
-			else if (!systemBundle.equals(vs1.getBundleDescription().getSymbolicName()) && systemBundle.equals(vs2.getBundleDescription().getSymbolicName()))
+			} else if (!systemBundle.equals(vs1.getBundleDescription().getSymbolicName()) && systemBundle.equals(vs2.getBundleDescription().getSymbolicName())) {
 				return 1;
+			}
 		}
-		if (vs1.getBundleDescription().isResolved() != vs2.getBundleDescription().isResolved())
+		if (vs1.getBundleDescription().isResolved() != vs2.getBundleDescription().isResolved()) {
 			return vs1.getBundleDescription().isResolved() ? -1 : 1;
+		}
 		int versionCompare = -(vs1.getVersion().compareTo(vs2.getVersion()));
-		if (versionCompare != 0)
+		if (versionCompare != 0) {
 			return versionCompare;
+		}
 		return Long.compare(vs1.getBundleDescription().getBundleId(), vs2.getBundleDescription().getBundleId());
 	}
 }

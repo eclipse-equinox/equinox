@@ -30,17 +30,20 @@ public class UserState extends StateImpl {
 
 	@Override
 	public boolean removeBundle(BundleDescription description) {
-		if (description.getLocation() != null)
+		if (description.getLocation() != null) {
 			updated.remove(description.getLocation());
-		if (!super.removeBundle(description))
+		}
+		if (!super.removeBundle(description)) {
 			return false;
+		}
 		return true;
 	}
 
 	@Override
 	public boolean updateBundle(BundleDescription newDescription) {
-		if (!super.updateBundle(newDescription))
+		if (!super.updateBundle(newDescription)) {
 			return false;
+		}
 		updated.add(newDescription.getLocation());
 		return true;
 	}

@@ -43,8 +43,9 @@ final class StateDeltaImpl implements StateDelta {
 		synchronized (this.changes) {
 			List<BundleDelta> result = new ArrayList<>();
 			for (BundleDelta change : changes.values()) {
-				if (mask == change.getType() || (!exact && (change.getType() & mask) != 0))
+				if (mask == change.getType() || (!exact && (change.getType() & mask) != 0)) {
 					result.add(change);
+				}
 			}
 			return result.toArray(new BundleDelta[result.size()]);
 		}
@@ -76,8 +77,9 @@ final class StateDeltaImpl implements StateDelta {
 				return;
 			}
 			int newType = change.getType();
-			if ((newType & BundleDelta.REMOVED) != 0)
+			if ((newType & BundleDelta.REMOVED) != 0) {
 				newType &= ~BundleDelta.REMOVED;
+			}
 			change.setType(newType | BundleDelta.ADDED);
 			change.setBundle(added);
 		}
@@ -90,8 +92,9 @@ final class StateDeltaImpl implements StateDelta {
 				changes.put(updated, new BundleDeltaImpl(updated, BundleDelta.UPDATED));
 				return;
 			}
-			if ((change.getType() & (BundleDelta.ADDED | BundleDelta.REMOVED)) != 0)
+			if ((change.getType() & (BundleDelta.ADDED | BundleDelta.REMOVED)) != 0) {
 				return;
+			}
 			change.setType(change.getType() | BundleDelta.UPDATED);
 			change.setBundle(updated);
 		}
@@ -109,8 +112,9 @@ final class StateDeltaImpl implements StateDelta {
 				return;
 			}
 			int newType = change.getType();
-			if ((newType & BundleDelta.ADDED) != 0)
+			if ((newType & BundleDelta.ADDED) != 0) {
 				newType &= ~BundleDelta.ADDED;
+			}
 			change.setType(newType | BundleDelta.REMOVED);
 		}
 	}
@@ -123,8 +127,9 @@ final class StateDeltaImpl implements StateDelta {
 				return;
 			}
 			int newType = change.getType();
-			if ((newType & BundleDelta.REMOVAL_COMPLETE) != 0)
+			if ((newType & BundleDelta.REMOVAL_COMPLETE) != 0) {
 				newType &= ~BundleDelta.REMOVAL_COMPLETE;
+			}
 			change.setType(newType | BundleDelta.REMOVAL_PENDING);
 		}
 	}
@@ -137,16 +142,18 @@ final class StateDeltaImpl implements StateDelta {
 				return;
 			}
 			int newType = change.getType();
-			if ((newType & BundleDelta.REMOVAL_PENDING) != 0)
+			if ((newType & BundleDelta.REMOVAL_PENDING) != 0) {
 				newType &= ~BundleDelta.REMOVAL_PENDING;
+			}
 			change.setType(newType | BundleDelta.REMOVAL_COMPLETE);
 		}
 	}
 
 	void recordBundleResolved(BundleDescriptionImpl resolved, boolean result) {
 		synchronized (this.changes) {
-			if (resolved.isResolved() == result)
+			if (resolved.isResolved() == result) {
 				return; // do not record anything if nothing has changed
+			}
 			BundleDeltaImpl change = (BundleDeltaImpl) changes.get(resolved);
 			int newType = result ? BundleDelta.RESOLVED : BundleDelta.UNRESOLVED;
 			if (change == null) {

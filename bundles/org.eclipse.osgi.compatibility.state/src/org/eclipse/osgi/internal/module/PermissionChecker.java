@@ -31,8 +31,9 @@ public class PermissionChecker {
 	 * and for a bundle to export/provide a package/BSN
 	 */
 	public boolean checkPermission(VersionConstraint vc, BaseDescription bd) {
-		if (!checkPermissions)
+		if (!checkPermissions) {
 			return true;
+		}
 		// TODO could optimize out the producer permission check on export package
 		boolean success = false;
 		Permission producerPermission = null, consumerPermission = null;
@@ -75,24 +76,27 @@ public class PermissionChecker {
 		}
 		if (success && consumer != null && (consumer.getState() & Bundle.UNINSTALLED) == 0) {
 			success = consumer.hasPermission(consumerPermission);
-			if (!success)
+			if (!success) {
 				resolver.getState().addResolverError(vc.getBundle(), errorType, consumerPermission.toString(), vc);
+			}
 		}
 
 		return success;
 	}
 
 	boolean checkPackagePermission(ExportPackageDescription export) {
-		if (!checkPermissions)
+		if (!checkPermissions) {
 			return true;
+		}
 		export.getSupplier().getBundle();
 		Bundle bundle = export.getSupplier().getBundle();
 		return bundle == null ? false : bundle.hasPermission(new PackagePermission(export.getName(), PackagePermission.EXPORTONLY));
 	}
 
 	boolean checkCapabilityPermission(GenericDescription capability) {
-		if (!checkPermissions)
+		if (!checkPermissions) {
 			return true;
+		}
 		Bundle bundle = capability.getSupplier().getBundle();
 		return bundle == null ? false : bundle.hasPermission(new CapabilityPermission(capability.getType(), CapabilityPermission.PROVIDE));
 	}

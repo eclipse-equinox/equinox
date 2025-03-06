@@ -182,8 +182,9 @@ class PlatformBundleListener implements SynchronousBundleListener, FrameworkList
 							} else if (userObject instanceof ModuleCapability && userObject.equals(wire.getCapability())) {
 								foundCandidate = true;
 							}
-							if (foundCandidate)
+							if (foundCandidate) {
 								break wirings;
+							}
 						}
 					}
 					if (!foundCandidate) {

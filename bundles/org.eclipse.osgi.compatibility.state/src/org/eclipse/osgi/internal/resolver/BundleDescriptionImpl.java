@@ -129,8 +129,9 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	public String[] getExecutionEnvironments() {
 		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
-			if (currentData.executionEnvironments == null)
+			if (currentData.executionEnvironments == null) {
 				return EMPTY_STRING;
+			}
 			return currentData.executionEnvironments;
 		}
 	}
@@ -139,8 +140,9 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	public ImportPackageSpecification[] getImportPackages() {
 		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
-			if (currentData.importPackages == null)
+			if (currentData.importPackages == null) {
 				return EMPTY_IMPORTS;
+			}
 			return currentData.importPackages;
 		}
 	}
@@ -149,8 +151,9 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	public ImportPackageSpecification[] getAddedDynamicImportPackages() {
 		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
-			if (currentData.addedDynamicImports == null)
+			if (currentData.addedDynamicImports == null) {
 				return EMPTY_IMPORTS;
+			}
 			return currentData.addedDynamicImports.toArray(new ImportPackageSpecification[currentData.addedDynamicImports.size()]);
 		}
 	}
@@ -159,8 +162,9 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	public BundleSpecification[] getRequiredBundles() {
 		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
-			if (currentData.requiredBundles == null)
+			if (currentData.requiredBundles == null) {
 				return EMPTY_BUNDLESPECS;
+			}
 			return currentData.requiredBundles;
 		}
 	}
@@ -169,8 +173,9 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	public GenericSpecification[] getGenericRequires() {
 		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
-			if (currentData.genericRequires == null)
+			if (currentData.genericRequires == null) {
 				return EMPTY_GENERICSPECS;
+			}
 			return currentData.genericRequires;
 		}
 	}
@@ -179,8 +184,9 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	public GenericDescription[] getGenericCapabilities() {
 		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
-			if (currentData.genericCapabilities == null)
+			if (currentData.genericCapabilities == null) {
 				return EMPTY_GENERICDESCS;
+			}
 			return currentData.genericCapabilities;
 		}
 	}
@@ -213,11 +219,13 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 
 	@Override
 	public BundleDescription[] getFragments() {
-		if (host != null)
+		if (host != null) {
 			return EMPTY_BUNDLEDESCS;
+		}
 		StateImpl currentState = (StateImpl) getContainingState();
-		if (currentState == null)
+		if (currentState == null) {
 			throw new IllegalStateException("BundleDescription does not belong to a state."); //$NON-NLS-1$
+		}
 		return currentState.getFragments(this);
 	}
 
@@ -255,8 +263,9 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	public ExportPackageDescription[] getSelectedExports() {
 		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
-			if (currentData.selectedExports == null)
+			if (currentData.selectedExports == null) {
 				return EMPTY_EXPORTS;
+			}
 			return currentData.selectedExports;
 		}
 	}
@@ -265,8 +274,9 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	public GenericDescription[] getSelectedGenericCapabilities() {
 		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
-			if (currentData.selectedCapabilities == null)
+			if (currentData.selectedCapabilities == null) {
 				return EMPTY_GENERICDESCS;
+			}
 			return currentData.selectedCapabilities;
 		}
 	}
@@ -275,8 +285,9 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	public ExportPackageDescription[] getSubstitutedExports() {
 		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
-			if (currentData.substitutedExports == null)
+			if (currentData.substitutedExports == null) {
 				return EMPTY_EXPORTS;
+			}
 			return currentData.substitutedExports;
 		}
 	}
@@ -285,8 +296,9 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	public BundleDescription[] getResolvedRequires() {
 		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
-			if (currentData.resolvedRequires == null)
+			if (currentData.resolvedRequires == null) {
 				return EMPTY_BUNDLEDESCS;
+			}
 			return currentData.resolvedRequires;
 		}
 	}
@@ -295,8 +307,9 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	public ExportPackageDescription[] getResolvedImports() {
 		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
-			if (currentData.resolvedImports == null)
+			if (currentData.resolvedImports == null) {
 				return EMPTY_EXPORTS;
+			}
 			return currentData.resolvedImports;
 		}
 	}
@@ -305,8 +318,9 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	public GenericDescription[] getResolvedGenericRequires() {
 		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
-			if (currentData.resolvedCapabilities == null)
+			if (currentData.resolvedCapabilities == null) {
 				return EMPTY_GENERICDESCS;
+			}
 			return currentData.resolvedCapabilities;
 		}
 	}
@@ -388,10 +402,11 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		synchronized (this.monitor) {
 			checkLazyData();
 			lazyData.requiredBundles = requiredBundles == null || requiredBundles.length > 0 ? requiredBundles : EMPTY_BUNDLESPECS;
-			if (requiredBundles != null)
+			if (requiredBundles != null) {
 				for (BundleSpecification requiredBundle : requiredBundles) {
 					((VersionConstraintImpl) requiredBundle).setBundle(this);
 				}
+			}
 		}
 	}
 
@@ -399,10 +414,11 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		synchronized (this.monitor) {
 			checkLazyData();
 			lazyData.genericCapabilities = genericCapabilities == null || genericCapabilities.length > 0 ? genericCapabilities : EMPTY_GENERICDESCS;
-			if (genericCapabilities != null)
+			if (genericCapabilities != null) {
 				for (GenericDescription genericCapability : genericCapabilities) {
 					((GenericDescriptionImpl) genericCapability).setSupplier(this);
 				}
+			}
 		}
 	}
 
@@ -410,10 +426,11 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		synchronized (this.monitor) {
 			checkLazyData();
 			lazyData.genericRequires = genericRequires == null || genericRequires.length > 0 ? genericRequires : EMPTY_GENERICSPECS;
-			if (genericRequires != null)
+			if (genericRequires != null) {
 				for (GenericSpecification genericRequire : genericRequires) {
 					((VersionConstraintImpl) genericRequire).setBundle(this);
 				}
+			}
 		}
 	}
 
@@ -424,10 +441,11 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			if (nativeCode != null) {
 				((NativeCodeSpecificationImpl) nativeCode).setBundle(this);
 				NativeCodeDescription[] suppliers = nativeCode.getPossibleSuppliers();
-				if (suppliers != null)
+				if (suppliers != null) {
 					for (NativeCodeDescription supplier : suppliers) {
 						((NativeCodeDescriptionImpl) supplier).setSupplier(this);
 					}
+				}
 			}
 		}
 	}
@@ -443,8 +461,9 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			} else {
 				stateBits &= ~stateBit;
 				if (stateBit == RESOLVED) {
-					if (bundleWiring != null)
+					if (bundleWiring != null) {
 						bundleWiring.invalidate();
+					}
 					bundleWiring = null;
 				}
 			}
@@ -455,10 +474,11 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		synchronized (this.monitor) {
 			containingState = (StateImpl) value;
 			if (containingState != null && containingState.getReader() != null) {
-				if (containingState.getReader().isLazyLoaded())
+				if (containingState.getReader().isLazyLoaded()) {
 					stateBits |= LAZY_LOADED;
-				else
+				} else {
 					stateBits &= ~LAZY_LOADED;
+				}
 			} else {
 				stateBits &= ~LAZY_LOADED;
 			}
@@ -477,10 +497,11 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	protected void setLazyLoaded(boolean lazyLoad) {
 		loadLazyData();
 		synchronized (this.monitor) {
-			if (lazyLoad)
+			if (lazyLoad) {
 				stateBits |= LAZY_LOADED;
-			else
+			} else {
 				stateBits &= ~LAZY_LOADED;
+			}
 		}
 	}
 
@@ -552,8 +573,9 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 
 	@Override
 	public String toString() {
-		if (getSymbolicName() == null)
+		if (getSymbolicName() == null) {
 			return "[" + getBundleId() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+		}
 		return getSymbolicName() + "_" + getVersion(); //$NON-NLS-1$
 	}
 
@@ -564,8 +586,9 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 
 	@Override
 	public boolean compare(KeyedElement other) {
-		if (!(other instanceof BundleDescriptionImpl))
+		if (!(other instanceof BundleDescriptionImpl)) {
 			return false;
+		}
 		BundleDescriptionImpl otherBundleDescription = (BundleDescriptionImpl) other;
 		return bundleId == otherBundleDescription.bundleId;
 	}
@@ -585,8 +608,9 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 
 	protected void removeDependencies() {
 		synchronized (this.monitor) {
-			if (dependencies == null)
+			if (dependencies == null) {
 				return;
+			}
 			for (BundleDescription element : dependencies) {
 				((BundleDescriptionImpl) element).removeDependent(this);
 			}
@@ -596,10 +620,12 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 
 	protected void addDependencies(BaseDescription[] newDependencies, boolean checkDups) {
 		synchronized (this.monitor) {
-			if (newDependencies == null)
+			if (newDependencies == null) {
 				return;
-			if (!checkDups && dependencies == null)
+			}
+			if (!checkDups && dependencies == null) {
 				dependencies = new ArrayList<>(newDependencies.length);
+			}
 			for (BaseDescription newDependency : newDependencies) {
 				addDependency((BaseDescriptionImpl) newDependency, checkDups);
 			}
@@ -609,10 +635,12 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	protected void addDependency(BaseDescriptionImpl dependency, boolean checkDups) {
 		synchronized (this.monitor) {
 			BundleDescriptionImpl bundle = (BundleDescriptionImpl) dependency.getSupplier();
-			if (bundle == this)
+			if (bundle == this) {
 				return;
-			if (dependencies == null)
+			}
+			if (dependencies == null) {
 				dependencies = new ArrayList<>(10);
+			}
 			if (!checkDups || !dependencies.contains(bundle)) {
 				bundle.addDependent(this);
 				dependencies.add(bundle);
@@ -626,12 +654,14 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	 */
 	List<BundleDescription> getBundleDependencies() {
 		synchronized (this.monitor) {
-			if (dependencies == null)
+			if (dependencies == null) {
 				return new ArrayList<>(0);
+			}
 			ArrayList<BundleDescription> required = new ArrayList<>(dependencies.size());
 			for (BundleDescription dep : dependencies) {
-				if (dep != this && dep.getHost() == null)
+				if (dep != this && dep.getHost() == null) {
 					required.add(dep);
+				}
 			}
 			return required;
 		}
@@ -639,8 +669,9 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 
 	protected void addDependent(BundleDescription dependent) {
 		synchronized (this.monitor) {
-			if (dependents == null)
+			if (dependents == null) {
 				dependents = new ArrayList<>(10);
+			}
 			// no need to check for duplicates here; this is only called in addDepenency which already checks for dups.
 			dependents.add(dependent);
 		}
@@ -648,8 +679,9 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 
 	protected void removeDependent(BundleDescription dependent) {
 		synchronized (this.monitor) {
-			if (dependents == null)
+			if (dependents == null) {
 				return;
+			}
 			dependents.remove(dependent);
 		}
 	}
@@ -657,8 +689,9 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	@Override
 	public BundleDescription[] getDependents() {
 		synchronized (this.monitor) {
-			if (dependents == null)
+			if (dependents == null) {
 				return EMPTY_BUNDLEDESCS;
+			}
 			return dependents.toArray(new BundleDescription[dependents.size()]);
 		}
 	}
@@ -705,13 +738,15 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		//if (Thread.holdsLock(this.monitor)) {
 		//	throw new IllegalStateException("Should not call fullyLoad() holding monitor."); //$NON-NLS-1$
 		//}
-		if ((stateBits & LAZY_LOADED) == 0)
+		if ((stateBits & LAZY_LOADED) == 0) {
 			return this.lazyData;
+		}
 
 		StateImpl currentState = (StateImpl) getContainingState();
 		StateReader reader = currentState == null ? null : currentState.getReader();
-		if (reader == null)
+		if (reader == null) {
 			throw new IllegalStateException("No valid reader for the bundle description"); //$NON-NLS-1$
+		}
 
 		synchronized (currentState.monitor) {
 			if (isFullyLoaded()) {
@@ -747,16 +782,19 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	void addDynamicImportPackages(ImportPackageSpecification[] dynamicImport) {
 		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
-			if (currentData.addedDynamicImports == null)
+			if (currentData.addedDynamicImports == null) {
 				currentData.addedDynamicImports = new ArrayList<>();
+			}
 			for (ImportPackageSpecification addImport : dynamicImport) {
-				if (!ImportPackageSpecification.RESOLUTION_DYNAMIC.equals(addImport.getDirective(Constants.RESOLUTION_DIRECTIVE)))
+				if (!ImportPackageSpecification.RESOLUTION_DYNAMIC.equals(addImport.getDirective(Constants.RESOLUTION_DIRECTIVE))) {
 					throw new IllegalArgumentException("Import must be a dynamic import."); //$NON-NLS-1$
+				}
 			}
 			adding: for (ImportPackageSpecification addImport : dynamicImport) {
 				for (ImportPackageSpecification currentImport : currentData.addedDynamicImports) {
-					if (equalImports(addImport, currentImport))
+					if (equalImports(addImport, currentImport)) {
 						continue adding;
+					}
 				}
 				((ImportPackageSpecificationImpl) addImport).setBundle(this);
 				currentData.addedDynamicImports.add(addImport);
@@ -765,14 +803,18 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	}
 
 	private boolean equalImports(ImportPackageSpecification addImport, ImportPackageSpecification currentImport) {
-		if (!isEqual(addImport.getName(), currentImport.getName()))
+		if (!isEqual(addImport.getName(), currentImport.getName())) {
 			return false;
-		if (!isEqual(addImport.getVersionRange(), currentImport.getVersionRange()))
+		}
+		if (!isEqual(addImport.getVersionRange(), currentImport.getVersionRange())) {
 			return false;
-		if (!isEqual(addImport.getBundleSymbolicName(), currentImport.getBundleSymbolicName()))
+		}
+		if (!isEqual(addImport.getBundleSymbolicName(), currentImport.getBundleSymbolicName())) {
 			return false;
-		if (!isEqual(addImport.getBundleVersionRange(), currentImport.getBundleVersionRange()))
+		}
+		if (!isEqual(addImport.getBundleVersionRange(), currentImport.getBundleVersionRange())) {
 			return false;
+		}
 		return isEqual(addImport.getAttributes(), currentImport.getAttributes());
 	}
 
@@ -783,13 +825,16 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	void unload() {
 		StateImpl currentState = (StateImpl) getContainingState();
 		StateReader reader = currentState == null ? null : currentState.getReader();
-		if (reader == null)
+		if (reader == null) {
 			throw new IllegalStateException("BundleDescription does not belong to a reader."); //$NON-NLS-1$
+		}
 		synchronized (currentState.monitor) {
-			if ((stateBits & LAZY_LOADED) == 0)
+			if ((stateBits & LAZY_LOADED) == 0) {
 				return;
-			if (!isFullyLoaded())
+			}
+			if (!isFullyLoaded()) {
 				return;
+			}
 			synchronized (this.monitor) {
 				setFullyLoaded(false);
 				lazyData = null;
@@ -808,14 +853,16 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		synchronized (this.monitor) {
 			checkLazyData();
 			if (lazyData.dynamicStamps == null) {
-				if (timestamp == null)
+				if (timestamp == null) {
 					return;
+				}
 				lazyData.dynamicStamps = new HashMap<>();
 			}
-			if (timestamp == null)
+			if (timestamp == null) {
 				lazyData.dynamicStamps.remove(requestedPackage);
-			else
+			} else {
 				lazyData.dynamicStamps.put(requestedPackage, timestamp);
+			}
 		}
 	}
 
@@ -843,8 +890,9 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	}
 
 	private void checkLazyData() {
-		if (lazyData == null)
+		if (lazyData == null) {
 			lazyData = new LazyData();
+		}
 	}
 
 	static final class LazyData {
@@ -888,15 +936,19 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 
 	Object getDirective(String key) {
 		synchronized (this.monitor) {
-			if (Constants.MANDATORY_DIRECTIVE.equals(key))
+			if (Constants.MANDATORY_DIRECTIVE.equals(key)) {
 				return mandatory;
-			if (Constants.SINGLETON_DIRECTIVE.equals(key))
+			}
+			if (Constants.SINGLETON_DIRECTIVE.equals(key)) {
 				return isSingleton() ? Boolean.TRUE : Boolean.FALSE;
+			}
 			if (Constants.FRAGMENT_ATTACHMENT_DIRECTIVE.equals(key)) {
-				if (!attachFragments())
+				if (!attachFragments()) {
 					return Constants.FRAGMENT_ATTACHMENT_NEVER;
-				if (dynamicFragments())
+				}
+				if (dynamicFragments()) {
 					return Constants.FRAGMENT_ATTACHMENT_ALWAYS;
+				}
 				return Constants.FRAGMENT_ATTACHMENT_RESOLVETIME;
 			}
 		}
@@ -905,8 +957,9 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 
 	void setDirective(String key, Object value) {
 		// only pay attention to mandatory directive for now; others are set with setState method
-		if (Constants.MANDATORY_DIRECTIVE.equals(key))
+		if (Constants.MANDATORY_DIRECTIVE.equals(key)) {
 			mandatory = (String[]) value;
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -926,21 +979,25 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	public Map<String, String> getDeclaredDirectives() {
 		Map<String, String> result = new HashMap<>(2);
 		Map<String, String> arbitrary = getArbitraryDirectives();
-		if (arbitrary != null)
+		if (arbitrary != null) {
 			result.putAll(arbitrary);
+		}
 		if (!attachFragments()) {
 			result.put(Constants.FRAGMENT_ATTACHMENT_DIRECTIVE, Constants.FRAGMENT_ATTACHMENT_NEVER);
 		} else {
-			if (dynamicFragments())
+			if (dynamicFragments()) {
 				result.put(Constants.FRAGMENT_ATTACHMENT_DIRECTIVE, Constants.FRAGMENT_ATTACHMENT_ALWAYS);
-			else
+			} else {
 				result.put(Constants.FRAGMENT_ATTACHMENT_DIRECTIVE, Constants.FRAGMENT_ATTACHMENT_RESOLVETIME);
+			}
 		}
-		if (isSingleton())
+		if (isSingleton()) {
 			result.put(Constants.SINGLETON_DIRECTIVE, Boolean.TRUE.toString());
+		}
 		String[] mandatoryDirective = (String[]) getDirective(Constants.MANDATORY_DIRECTIVE);
-		if (mandatoryDirective != null)
+		if (mandatoryDirective != null) {
 			result.put(Constants.MANDATORY_DIRECTIVE, ExportPackageDescriptionImpl.toString(mandatoryDirective));
+		}
 		return Collections.unmodifiableMap(result);
 	}
 
@@ -948,8 +1005,9 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	public Map<String, Object> getDeclaredAttributes() {
 		Map<String, Object> result = new HashMap<>(1);
 		synchronized (this.monitor) {
-			if (attributes != null)
+			if (attributes != null) {
 				result.putAll(attributes);
+			}
 		}
 		result.put(BundleRevision.BUNDLE_NAMESPACE, getName());
 		result.put(Constants.BUNDLE_VERSION_ATTRIBUTE, getVersion());
@@ -970,13 +1028,15 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		}
 		if (namespace == null || BundleRevision.PACKAGE_NAMESPACE.equals(namespace)) {
 			ImportPackageSpecification[] imports = getImportPackages();
-			for (ImportPackageSpecification importPkg : imports)
+			for (ImportPackageSpecification importPkg : imports) {
 				result.add(importPkg.getRequirement());
+			}
 		}
 		GenericSpecification[] genericSpecifications = getGenericRequires();
 		for (GenericSpecification requirement : genericSpecifications) {
-			if (namespace == null || namespace.equals(requirement.getType()))
+			if (namespace == null || namespace.equals(requirement.getType())) {
 				result.add(requirement.getRequirement());
+			}
 		}
 		return Collections.unmodifiableList(result);
 	}
@@ -999,13 +1059,15 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		}
 		if (namespace == null || BundleRevision.PACKAGE_NAMESPACE.equals(namespace)) {
 			ExportPackageDescription[] exports = getExportPackages();
-			for (ExportPackageDescription exportPkg : exports)
+			for (ExportPackageDescription exportPkg : exports) {
 				result.add(exportPkg.getCapability());
+			}
 		}
 		GenericDescription[] genericCapabilities = getGenericCapabilities();
 		for (GenericDescription capabilitiy : genericCapabilities) {
-			if (namespace == null || namespace.equals(capabilitiy.getType()))
+			if (namespace == null || namespace.equals(capabilitiy.getType())) {
 				result.add(capabilitiy.getCapability());
+			}
 		}
 		return Collections.unmodifiableList(result);
 	}
@@ -1018,8 +1080,9 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	@Override
 	public Bundle getBundle() {
 		Object ref = getUserObject();
-		if (ref instanceof BundleReference)
+		if (ref instanceof BundleReference) {
 			return ((BundleReference) ref).getBundle();
+		}
 		return null;
 	}
 
@@ -1031,8 +1094,9 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	@Override
 	public BundleWiring getWiring() {
 		synchronized (this.monitor) {
-			if (bundleWiring != null || !isResolved())
+			if (bundleWiring != null || !isResolved()) {
 				return bundleWiring;
+			}
 			return bundleWiring = new DescriptionWiring();
 		}
 	}
@@ -1045,10 +1109,11 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 
 		public BundleWireImpl(StateWire wire) {
 			VersionConstraint declaredRequirement = wire.getDeclaredRequirement();
-			if (declaredRequirement instanceof HostSpecification)
+			if (declaredRequirement instanceof HostSpecification) {
 				this.capability = ((BaseDescriptionImpl) wire.getDeclaredCapability()).getCapability(BundleRevision.HOST_NAMESPACE);
-			else
+			} else {
 				this.capability = wire.getDeclaredCapability().getCapability();
+			}
 			this.provider = wire.getCapabilityHost().getWiring();
 			this.requirement = declaredRequirement.getRequirement();
 			this.requirer = wire.getRequirementHost().getWiring();
@@ -1085,8 +1150,9 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 
 		@Override
 		public boolean equals(Object obj) {
-			if (!(obj instanceof BundleWireImpl))
+			if (!(obj instanceof BundleWireImpl)) {
 				return false;
+			}
 			BundleWireImpl other = (BundleWireImpl) obj;
 			return capability.equals(other.getCapability()) && requirement.equals(other.getRequirement()) && provider.equals(other.getProviderWiring()) && requirer.equals(other.getRequirerWiring());
 		}
@@ -1165,16 +1231,19 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 
 		@Override
 		public List<BundleCapability> getCapabilities(String namespace) {
-			if (!isInUse())
+			if (!isInUse()) {
 				return null;
+			}
 			List<BundleCapability> result = new ArrayList<>();
 			GenericDescription[] genericCapabilities = getSelectedGenericCapabilities();
 			for (GenericDescription capabilitiy : genericCapabilities) {
-				if (namespace == null || namespace.equals(capabilitiy.getType()))
+				if (namespace == null || namespace.equals(capabilitiy.getType())) {
 					result.add(capabilitiy.getCapability());
+				}
 			}
-			if (host != null)
+			if (host != null) {
 				return result;
+			}
 			if (getSymbolicName() != null) {
 				if (namespace == null || BundleRevision.BUNDLE_NAMESPACE.equals(namespace)) {
 					result.add(BundleDescriptionImpl.this.getCapability());
@@ -1185,8 +1254,9 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			}
 			if (namespace == null || BundleRevision.PACKAGE_NAMESPACE.equals(namespace)) {
 				ExportPackageDescription[] exports = getSelectedExports();
-				for (ExportPackageDescription exportPkg : exports)
+				for (ExportPackageDescription exportPkg : exports) {
 					result.add(exportPkg.getCapability());
+				}
 			}
 			return result;
 		}
@@ -1199,13 +1269,15 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		@Override
 		public List<BundleRequirement> getRequirements(String namespace) {
 			List<BundleWire> requiredWires = getRequiredWires(namespace);
-			if (requiredWires == null)
+			if (requiredWires == null) {
 				// happens if not in use
 				return null;
+			}
 			List<BundleRequirement> requirements = new ArrayList<>(requiredWires.size());
 			for (BundleWire wire : requiredWires) {
-				if (!requirements.contains(wire.getRequirement()))
+				if (!requirements.contains(wire.getRequirement())) {
 					requirements.add(wire.getRequirement());
+				}
 			}
 			// get dynamic imports
 			if (getHost() == null && (namespace == null || BundleRevision.PACKAGE_NAMESPACE.equals(namespace))) {
@@ -1215,16 +1287,18 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 					for (ImportPackageSpecification impPackage : imports) {
 						if (ImportPackageSpecification.RESOLUTION_DYNAMIC.equals(impPackage.getDirective(Constants.RESOLUTION_DIRECTIVE))) {
 							BundleRequirement req = impPackage.getRequirement();
-							if (!requirements.contains(req))
+							if (!requirements.contains(req)) {
 								requirements.add(req);
+							}
 						}
 					}
 				}
 				ImportPackageSpecification[] addedDynamic = getAddedDynamicImportPackages();
 				for (ImportPackageSpecification dynamicImport : addedDynamic) {
 					BundleRequirement req = dynamicImport.getRequirement();
-					if (!requirements.contains(req))
+					if (!requirements.contains(req)) {
 						requirements.add(req);
+					}
 				}
 			}
 			return requirements;
@@ -1237,17 +1311,20 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 
 		@Override
 		public List<BundleWire> getProvidedWires(String namespace) {
-			if (!isInUse())
+			if (!isInUse()) {
 				return null;
+			}
 			BundleDescription[] dependentBundles = getDependents();
 			List<BundleWire> unorderedResult = new ArrayList<>();
 			for (BundleDescription dependent : dependentBundles) {
 				List<BundleWire> dependentWires = dependent.getWiring().getRequiredWires(namespace);
-				if (dependentWires != null)
+				if (dependentWires != null) {
 					for (BundleWire bundleWire : dependentWires) {
-						if (bundleWire.getProviderWiring() == this)
+						if (bundleWire.getProviderWiring() == this) {
 							unorderedResult.add(bundleWire);
+						}
 					}
+				}
 			}
 			List<BundleWire> orderedResult = new ArrayList<>(unorderedResult.size());
 			List<BundleCapability> capabilities = getCapabilities(namespace);
@@ -1270,8 +1347,9 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 
 		@Override
 		public List<BundleWire> getRequiredWires(String namespace) {
-			if (!isInUse())
+			if (!isInUse()) {
 				return null;
+			}
 			List<BundleWire> result = Collections.emptyList();
 			Map<String, List<StateWire>> wireMap = getWires();
 			if (namespace == null) {
@@ -1284,8 +1362,9 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 				return result;
 			}
 			List<StateWire> wires = wireMap.get(namespace);
-			if (wires == null)
+			if (wires == null) {
 				return result;
+			}
 			result = new ArrayList<>(wires.size());
 			for (StateWire wire : wires) {
 				result.add(new BundleWireImpl(wire));

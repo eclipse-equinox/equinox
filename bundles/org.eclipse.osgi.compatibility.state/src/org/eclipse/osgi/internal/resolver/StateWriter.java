@@ -59,8 +59,9 @@ class StateWriter {
 
 	private int addToObjectTable(Object object) {
 		Integer cur = objectTable.get(object);
-		if (cur != null)
+		if (cur != null) {
 			return cur.intValue();
+		}
 		objectTable.put(object, Integer.valueOf(objectTable.size()));
 		// return the index of the object just added (i.e. size - 1)
 		return (objectTable.size() - 1);
@@ -77,8 +78,9 @@ class StateWriter {
 	}
 
 	private boolean writePrefix(Object object, DataOutputStream out) throws IOException {
-		if (writeIndex(object, out))
+		if (writeIndex(object, out)) {
 			return true;
+		}
 		// add this object to the object table first
 		int index = addToObjectTable(object);
 		out.writeByte(StateReader.OBJECT);
@@ -88,8 +90,9 @@ class StateWriter {
 
 	private void writeStateDeprecated(StateImpl state, DataOutputStream out) throws IOException {
 		out.write(StateReader.STATE_CACHE_VERSION);
-		if (writePrefix(state, out))
+		if (writePrefix(state, out)) {
 			return;
+		}
 		out.writeLong(state.getTimeStamp());
 		// write the platform property keys
 		String[] platformPropKeys = state.getPlatformPropertyKeys();
@@ -105,8 +108,9 @@ class StateWriter {
 		BundleDescription[] bundles = state.getBundles();
 		StateHelperImpl.getInstance().sortBundles(bundles);
 		out.writeInt(bundles.length);
-		if (bundles.length == 0)
+		if (bundles.length == 0) {
 			return;
+		}
 		for (BundleDescription bundle : bundles) {
 			writeBundleDescription(bundle, out, false);
 		}
@@ -145,8 +149,9 @@ class StateWriter {
 				fosState = new FileOutputStream(stateFile);
 				outState = new DataOutputStream(new BufferedOutputStream(fosState));
 				outState.write(StateReader.STATE_CACHE_VERSION);
-				if (writePrefix(state, outState))
+				if (writePrefix(state, outState)) {
 					return;
+				}
 				outState.writeLong(state.getTimeStamp());
 				// write the platform property keys
 				String[] platformPropKeys = state.getPlatformPropertyKeys();
@@ -205,9 +210,9 @@ class StateWriter {
 	}
 
 	private void writePlatformProp(Object obj, DataOutputStream out) throws IOException {
-		if (!(obj instanceof String) && !(obj instanceof String[]))
+		if (!(obj instanceof String) && !(obj instanceof String[])) {
 			out.writeByte(StateReader.NULL);
-		else {
+		} else {
 			out.writeByte(StateReader.OBJECT);
 			if (obj instanceof String) {
 				out.writeInt(1);
@@ -237,8 +242,9 @@ class StateWriter {
 			out.writeByte(StateReader.OBJECT);
 			out.writeInt(index);
 			forcedWrite.add(bundle);
-		} else if (writePrefix(bundle, out))
+		} else if (writePrefix(bundle, out)) {
 			return;
+		}
 		// first write out non-lazy loaded data
 		out.writeLong(bundle.getBundleId()); // ID must be the first thing
 		writeBaseDescription(bundle, out);
@@ -256,9 +262,10 @@ class StateWriter {
 
 		List<BundleDescription> dependencies = ((BundleDescriptionImpl) bundle).getBundleDependencies();
 		out.writeInt(dependencies.size());
-		for (BundleDescription bundleDescription : dependencies)
+		for (BundleDescription bundleDescription : dependencies) {
 			writeBundleDescription(bundleDescription, out, force);
 		// the rest is lazy loaded data
+		}
 	}
 
 	private void writeBundleDescriptionLazyData(BundleDescription bundle, DataOutputStream out) throws IOException {
@@ -335,9 +342,9 @@ class StateWriter {
 		}
 
 		Map<String, Long> dynamicStamps = ((BundleDescriptionImpl) bundle).getDynamicStamps();
-		if (dynamicStamps == null)
+		if (dynamicStamps == null) {
 			out.writeInt(0);
-		else {
+		} else {
 			out.writeInt(dynamicStamps.size());
 			for (String pkg : dynamicStamps.keySet()) {
 				writeStringOrNull(pkg, out);
@@ -346,9 +353,9 @@ class StateWriter {
 		}
 
 		GenericDescription[] genericCapabilities = bundle.getGenericCapabilities();
-		if (genericCapabilities == null)
+		if (genericCapabilities == null) {
 			out.writeInt(0);
-		else {
+		} else {
 			out.writeInt(genericCapabilities.length);
 			for (GenericDescription genericCapability : genericCapabilities) {
 				writeGenericDescription(genericCapability, out);
@@ -356,9 +363,9 @@ class StateWriter {
 		}
 
 		GenericSpecification[] genericRequires = bundle.getGenericRequires();
-		if (genericRequires == null)
+		if (genericRequires == null) {
 			out.writeInt(0);
-		else {
+		} else {
 			out.writeInt(genericRequires.length);
 			for (GenericSpecification genericRequire : genericRequires) {
 				writeGenericSpecification((GenericSpecificationImpl) genericRequire, out);
@@ -366,9 +373,9 @@ class StateWriter {
 		}
 
 		GenericDescription[] selectedCapabilities = bundle.getSelectedGenericCapabilities();
-		if (selectedCapabilities == null)
+		if (selectedCapabilities == null) {
 			out.writeInt(0);
-		else {
+		} else {
 			out.writeInt(selectedCapabilities.length);
 			for (GenericDescription selectedCapability : selectedCapabilities) {
 				writeGenericDescription(selectedCapability, out);
@@ -376,9 +383,9 @@ class StateWriter {
 		}
 
 		GenericDescription[] resolvedCapabilities = bundle.getResolvedGenericRequires();
-		if (resolvedCapabilities == null)
+		if (resolvedCapabilities == null) {
 			out.writeInt(0);
-		else {
+		} else {
 			out.writeInt(resolvedCapabilities.length);
 			for (GenericDescription resolvedCapability : resolvedCapabilities) {
 				writeGenericDescription(resolvedCapability, out);
@@ -399,8 +406,9 @@ class StateWriter {
 	}
 
 	private void writeBundleSpec(BundleSpecificationImpl bundle, DataOutputStream out) throws IOException {
-		if (writePrefix(bundle, out))
+		if (writePrefix(bundle, out)) {
 			return;
+		}
 		writeVersionConstraint(bundle, out);
 		writeBundleDescription((BundleDescription) bundle.getSupplier(), out, false);
 		out.writeBoolean(bundle.isExported());
@@ -410,8 +418,9 @@ class StateWriter {
 	}
 
 	private void writeExportPackageDesc(ExportPackageDescriptionImpl exportPackageDesc, DataOutputStream out) throws IOException {
-		if (writePrefix(exportPackageDesc, out))
+		if (writePrefix(exportPackageDesc, out)) {
 			return;
+		}
 		writeBaseDescription(exportPackageDesc, out);
 		writeBundleDescription(exportPackageDesc.getExporter(), out, false);
 		writeMap(out, exportPackageDesc.getAttributes());
@@ -421,8 +430,9 @@ class StateWriter {
 	}
 
 	private void writeGenericDescription(GenericDescription description, DataOutputStream out) throws IOException {
-		if (writePrefix(description, out))
+		if (writePrefix(description, out)) {
 			return;
+		}
 		writeBaseDescription(description, out);
 		writeBundleDescription(description.getSupplier(), out, false);
 		writeStringOrNull(description.getType() == GenericDescription.DEFAULT_TYPE ? null : description.getType(), out);
@@ -439,16 +449,18 @@ class StateWriter {
 	}
 
 	private void writeGenericSpecification(GenericSpecificationImpl specification, DataOutputStream out) throws IOException {
-		if (writePrefix(specification, out))
+		if (writePrefix(specification, out)) {
 			return;
+		}
 		writeVersionConstraint(specification, out);
 		writeStringOrNull(specification.getType() == GenericDescription.DEFAULT_TYPE ? null : specification.getType(), out);
 		GenericDescription[] suppliers = specification.getSuppliers();
 		out.writeInt(suppliers == null ? 0 : suppliers.length);
-		if (suppliers != null)
+		if (suppliers != null) {
 			for (GenericDescription supplier : suppliers) {
 				writeGenericDescription(supplier, out);
 			}
+		}
 		out.writeInt(specification.getResolution());
 		writeStringOrNull(specification.getMatchingFilter(), out);
 		writeMap(out, specification.getAttributes());
@@ -467,8 +479,9 @@ class StateWriter {
 		out.writeInt(numDescs);
 		int supplierIndex = -1;
 		for (int i = 0; i < numDescs; i++) {
-			if (nativeDescs[i] == nativeCodeSpecification.getSupplier())
+			if (nativeDescs[i] == nativeCodeSpecification.getSupplier()) {
 				supplierIndex = i;
+			}
 			writeNativeCodeDescription(nativeDescs[i], out);
 		}
 		out.writeInt(supplierIndex);
@@ -489,8 +502,9 @@ class StateWriter {
 
 	private void writeVersionRanges(VersionRange[] ranges, DataOutputStream out) throws IOException {
 		out.writeInt(ranges == null ? 0 : ranges.length);
-		if (ranges == null)
+		if (ranges == null) {
 			return;
+		}
 		for (VersionRange range : ranges) {
 			writeVersionRange(range, out);
 		}
@@ -498,8 +512,9 @@ class StateWriter {
 
 	private void writeStringArray(String[] strings, DataOutputStream out) throws IOException {
 		out.writeInt(strings == null ? 0 : strings.length);
-		if (strings == null)
+		if (strings == null) {
 			return;
+		}
 		for (String string : strings) {
 			writeStringOrNull(string, out);
 		}
@@ -546,8 +561,9 @@ class StateWriter {
 
 	private void writeList(DataOutputStream out, List<?> list) throws IOException {
 		byte type = getListType(list);
-		if (type == -2)
+		if (type == -2) {
 			return; // don't understand the list type
+		}
 		out.writeByte(8);
 		out.writeByte(type);
 		out.writeInt(list.size());
@@ -590,39 +606,48 @@ class StateWriter {
 		} else if (requirement instanceof GenericSpecificationImpl) {
 			out.writeByte(3);
 			writeGenericSpecification((GenericSpecificationImpl) requirement, out);
-		} else
+		} else {
 			throw new IllegalArgumentException("Unknown requiement type: " + requirement.getClass()); //$NON-NLS-1$
+		}
 
 		BaseDescription capability = wire.getDeclaredCapability();
-		if (capability instanceof BundleDescription)
+		if (capability instanceof BundleDescription) {
 			writeBundleDescription((BundleDescription) capability, out, false);
-		else if (capability instanceof ExportPackageDescriptionImpl)
+		} else if (capability instanceof ExportPackageDescriptionImpl) {
 			writeExportPackageDesc((ExportPackageDescriptionImpl) capability, out);
-		else if (capability instanceof GenericDescription)
+		} else if (capability instanceof GenericDescription) {
 			writeGenericDescription((GenericDescription) capability, out);
-		else
+		} else {
 			throw new IllegalArgumentException("Unknown capability type: " + requirement.getClass()); //$NON-NLS-1$
+		}
 
 		writeBundleDescription(wire.getRequirementHost(), out, false);
 		writeBundleDescription(wire.getCapabilityHost(), out, false);
 	}
 
 	private byte getListType(List<?> list) {
-		if (list.size() == 0)
+		if (list.size() == 0) {
 			return -1;
+		}
 		Object type = list.get(0);
-		if (type instanceof String)
+		if (type instanceof String) {
 			return 0;
-		if (type instanceof Integer)
+		}
+		if (type instanceof Integer) {
 			return 3;
-		if (type instanceof Long)
+		}
+		if (type instanceof Long) {
 			return 4;
-		if (type instanceof Double)
+		}
+		if (type instanceof Double) {
 			return 5;
-		if (type instanceof Version)
+		}
+		if (type instanceof Version) {
 			return 6;
-		if (type instanceof StateWire)
+		}
+		if (type instanceof StateWire) {
 			return 7;
+		}
 		return -2;
 	}
 
@@ -643,15 +668,17 @@ class StateWriter {
 	}
 
 	private void writeImportPackageSpec(ImportPackageSpecificationImpl importPackageSpec, DataOutputStream out) throws IOException {
-		if (writePrefix(importPackageSpec, out))
+		if (writePrefix(importPackageSpec, out)) {
 			return;
+		}
 		writeVersionConstraint(importPackageSpec, out);
 		// TODO this is a hack until the state dynamic loading is cleaned up
 		// we should only write the supplier if we are resolved
-		if (importPackageSpec.getBundle().isResolved())
+		if (importPackageSpec.getBundle().isResolved()) {
 			writeExportPackageDesc((ExportPackageDescriptionImpl) importPackageSpec.getSupplier(), out);
-		else
+		} else {
 			out.writeByte(StateReader.NULL);
+		}
 
 		writeStringOrNull(importPackageSpec.getBundleSymbolicName(), out);
 		writeVersionRange(importPackageSpec.getBundleVersionRange(), out);
@@ -666,8 +693,9 @@ class StateWriter {
 			out.writeByte(StateReader.OBJECT);
 			out.writeInt(index);
 			forcedWrite.add(host);
-		} else if (writePrefix(host, out))
+		} else if (writePrefix(host, out)) {
 			return;
+		}
 		writeVersionConstraint(host, out);
 		BundleDescription[] hosts = host.getHosts();
 		if (hosts == null) {
@@ -718,8 +746,9 @@ class StateWriter {
 			return true;
 		}
 		int index = getFromObjectTable(object);
-		if (index == -1)
+		if (index == -1) {
 			return false;
+		}
 		out.writeByte(StateReader.INDEX);
 		out.writeInt(index);
 		return true;
@@ -736,9 +765,9 @@ class StateWriter {
 	}
 
 	private void writeStringOrNull(String string, DataOutputStream out) throws IOException {
-		if (string == null)
+		if (string == null) {
 			out.writeByte(StateReader.NULL);
-		else {
+		} else {
 			byte[] data = string.getBytes(StandardCharsets.UTF_8);
 
 			if (data.length > 65535) {
@@ -753,8 +782,9 @@ class StateWriter {
 	}
 
 	private void writeQualifier(String string, DataOutputStream out) throws IOException {
-		if (string != null && string.length() == 0)
+		if (string != null && string.length() == 0) {
 			string = null;
+		}
 		writeStringOrNull(string, out);
 	}
 }

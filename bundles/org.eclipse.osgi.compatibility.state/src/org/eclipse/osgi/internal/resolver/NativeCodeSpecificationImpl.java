@@ -37,8 +37,9 @@ public class NativeCodeSpecificationImpl extends VersionConstraintImpl implement
 	@Override
 	public NativeCodeDescription[] getPossibleSuppliers() {
 		synchronized (this.monitor) {
-			if (possibleSuppliers == null)
+			if (possibleSuppliers == null) {
 				return EMPTY_NATIVECODEDESCRIPTIONS;
+			}
 			return possibleSuppliers;
 		}
 	}
@@ -65,11 +66,13 @@ public class NativeCodeSpecificationImpl extends VersionConstraintImpl implement
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean isSatisfiedBy(BaseDescription supplier) {
-		if (!(supplier instanceof NativeCodeDescription))
+		if (!(supplier instanceof NativeCodeDescription)) {
 			return false;
+		}
 		State containingState = getBundle().getContainingState();
-		if (containingState == null)
+		if (containingState == null) {
 			return false;
+		}
 		Dictionary<Object, Object>[] platformProps = containingState.getPlatformProperties();
 		NativeCodeDescription nativeSupplier = (NativeCodeDescription) supplier;
 		Filter filter = nativeSupplier.getFilter();
@@ -77,12 +80,13 @@ public class NativeCodeSpecificationImpl extends VersionConstraintImpl implement
 		for (int i = 0; i < platformProps.length && !match; i++) {
 			@SuppressWarnings("rawtypes")
 			Dictionary props = platformProps[i];
-			if (filter != null && !filter.matchCase(props))
+			if (filter != null && !filter.matchCase(props)) {
 				continue;
+			}
 			String[] osNames = nativeSupplier.getOSNames();
-			if (osNames.length == 0)
+			if (osNames.length == 0) {
 				match = true;
-			else {
+			} else {
 				Collection<?> platformOSAliases;
 				Object platformOS = platformProps[i].get(Constants.FRAMEWORK_OS_NAME);
 				if (platformOS instanceof Collection) {
@@ -107,14 +111,15 @@ public class NativeCodeSpecificationImpl extends VersionConstraintImpl implement
 					}
 				}
 			}
-			if (!match)
+			if (!match) {
 				continue;
+			}
 			match = false;
 
 			String[] processors = nativeSupplier.getProcessors();
-			if (processors.length == 0)
+			if (processors.length == 0) {
 				match = true;
-			else {
+			} else {
 				Collection<?> platformProcessorAliases;
 				Object platformProcessor = platformProps[i].get(Constants.FRAMEWORK_PROCESSOR);
 				if (platformProcessor instanceof Collection) {
@@ -139,29 +144,33 @@ public class NativeCodeSpecificationImpl extends VersionConstraintImpl implement
 					}
 				}
 			}
-			if (!match)
+			if (!match) {
 				continue;
+			}
 			match = false;
 
 			String[] languages = nativeSupplier.getLanguages();
-			if (languages.length == 0)
+			if (languages.length == 0) {
 				match = true;
-			else {
+			} else {
 				Object platformLanguage = platformProps[i].get(Constants.FRAMEWORK_LANGUAGE);
-				if (platformLanguage != null)
+				if (platformLanguage != null) {
 					for (int j = 0; j < languages.length && !match; j++) {
-						if ((platformLanguage instanceof String) ? ((String) platformLanguage).equalsIgnoreCase(languages[j]) : platformLanguage.equals(languages[j]))
+						if ((platformLanguage instanceof String) ? ((String) platformLanguage).equalsIgnoreCase(languages[j]) : platformLanguage.equals(languages[j])) {
 							match = true;
+						}
 					}
+				}
 			}
-			if (!match)
+			if (!match) {
 				continue;
+			}
 			match = false;
 
 			VersionRange[] osVersions = nativeSupplier.getOSVersions();
-			if (osVersions.length == 0 || platformProps[i].get(Constants.FRAMEWORK_OS_VERSION) == null)
+			if (osVersions.length == 0 || platformProps[i].get(Constants.FRAMEWORK_OS_VERSION) == null) {
 				match = true;
-			else {
+			} else {
 				Version osversion;
 				try {
 					osversion = Version.parseVersion((String) platformProps[i].get(Constants.FRAMEWORK_OS_VERSION));
@@ -169,8 +178,9 @@ public class NativeCodeSpecificationImpl extends VersionConstraintImpl implement
 					osversion = Version.emptyVersion;
 				}
 				for (int j = 0; j < osVersions.length && !match; j++) {
-					if (osVersions[j].isIncluded(osversion))
+					if (osVersions[j].isIncluded(osversion)) {
 						match = true;
+					}
 				}
 			}
 		}
@@ -187,8 +197,9 @@ public class NativeCodeSpecificationImpl extends VersionConstraintImpl implement
 		StringBuilder sb = new StringBuilder();
 		NativeCodeDescription[] suppliers = getPossibleSuppliers();
 		for (int i = 0; i < suppliers.length; i++) {
-			if (i > 0)
+			if (i > 0) {
 				sb.append(", "); //$NON-NLS-1$
+			}
 			sb.append(suppliers[i].toString());
 		}
 

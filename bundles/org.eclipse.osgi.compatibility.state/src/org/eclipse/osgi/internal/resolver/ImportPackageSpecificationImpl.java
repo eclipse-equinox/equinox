@@ -38,8 +38,9 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 	public Map<String, Object> getDirectives() {
 		synchronized (this.monitor) {
 			Map<String, Object> result = new HashMap<>(5);
-			if (resolution != null)
+			if (resolution != null) {
 				result.put(Constants.RESOLUTION_DIRECTIVE, resolution);
+			}
 			return result;
 		}
 	}
@@ -47,24 +48,27 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 	@Override
 	public Object getDirective(String key) {
 		synchronized (this.monitor) {
-			if (key.equals(Constants.RESOLUTION_DIRECTIVE))
+			if (key.equals(Constants.RESOLUTION_DIRECTIVE)) {
 				return resolution;
+			}
 			return null;
 		}
 	}
 
 	Object setDirective(String key, Object value) {
 		synchronized (this.monitor) {
-			if (key.equals(Constants.RESOLUTION_DIRECTIVE))
+			if (key.equals(Constants.RESOLUTION_DIRECTIVE)) {
 				return resolution = (String) value;
+			}
 			return null;
 		}
 	}
 
 	void setDirectives(Map<String, ?> directives) {
 		synchronized (this.monitor) {
-			if (directives == null)
+			if (directives == null) {
 				return;
+			}
 			resolution = (String) directives.get(Constants.RESOLUTION_DIRECTIVE);
 		}
 	}
@@ -96,8 +100,9 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 	@Override
 	public VersionRange getBundleVersionRange() {
 		synchronized (this.monitor) {
-			if (bundleVersionRange == null)
+			if (bundleVersionRange == null) {
 				return VersionRange.emptyRange;
+			}
 			return bundleVersionRange;
 		}
 	}
@@ -115,8 +120,9 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 	}
 
 	public boolean isSatisfiedBy(BaseDescription supplier, boolean checkEE) {
-		if (!(supplier instanceof ExportPackageDescription))
+		if (!(supplier instanceof ExportPackageDescription)) {
 			return false;
+		}
 		ExportPackageDescriptionImpl pkgDes = (ExportPackageDescriptionImpl) supplier;
 
 		// If we are in strict mode, check to see if the export specifies friends.
@@ -127,56 +133,68 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 			StateImpl state = (StateImpl) getBundle().getContainingState();
 			boolean strict = state == null ? false : state.inStrictMode();
 			if (strict) {
-				if (internal.booleanValue())
+				if (internal.booleanValue()) {
 					return false;
+				}
 				boolean found = false;
-				if (friends != null && getBundle().getSymbolicName() != null)
+				if (friends != null && getBundle().getSymbolicName() != null) {
 					for (String friend : friends) {
 						if (getBundle().getSymbolicName().equals(friend)) {
 							found = true;
 						}
 					}
-				if (!found)
+				}
+				if (!found) {
 					return false;
+				}
 			}
 		}
 		String exporterSymbolicName = getBundleSymbolicName();
 		if (exporterSymbolicName != null) {
 			BundleDescription exporter = pkgDes.getExporter();
-			if (!exporterSymbolicName.equals(exporter.getSymbolicName()))
+			if (!exporterSymbolicName.equals(exporter.getSymbolicName())) {
 				return false;
-			if (getBundleVersionRange() != null && !getBundleVersionRange().isIncluded(exporter.getVersion()))
+			}
+			if (getBundleVersionRange() != null && !getBundleVersionRange().isIncluded(exporter.getVersion())) {
 				return false;
+			}
 		}
 
 		String name = getName();
 		// shortcut '*'
 		// NOTE: wildcards are supported only in cases where this is a dynamic import
-		if (!"*".equals(name) && !(name.endsWith(".*") && pkgDes.getName().startsWith(name.substring(0, name.length() - 1))) && !pkgDes.getName().equals(name)) //$NON-NLS-1$ //$NON-NLS-2$
+		if (!"*".equals(name) && !(name.endsWith(".*") && pkgDes.getName().startsWith(name.substring(0, name.length() - 1))) && !pkgDes.getName().equals(name)) { //$NON-NLS-1$ //$NON-NLS-2$
 			return false;
-		if (getVersionRange() != null && !getVersionRange().isIncluded(pkgDes.getVersion()))
+		}
+		if (getVersionRange() != null && !getVersionRange().isIncluded(pkgDes.getVersion())) {
 			return false;
+		}
 
 		Map<String, ?> importAttrs = getAttributes();
 		if (importAttrs != null) {
 			Map<String, ?> exportAttrs = pkgDes.getAttributes();
-			if (exportAttrs == null)
+			if (exportAttrs == null) {
 				return false;
+			}
 			for (String importKey : importAttrs.keySet()) {
 				Object importValue = importAttrs.get(importKey);
 				Object exportValue = exportAttrs.get(importKey);
-				if (exportValue == null || !importValue.equals(exportValue))
+				if (exportValue == null || !importValue.equals(exportValue)) {
 					return false;
+				}
 			}
 		}
 		String[] mandatory = (String[]) pkgDes.getDirective(Constants.MANDATORY_DIRECTIVE);
-		if (!hasMandatoryAttributes(mandatory))
+		if (!hasMandatoryAttributes(mandatory)) {
 			return false;
+		}
 		// finally check the ee index
-		if (!checkEE)
+		if (!checkEE) {
 			return true;
-		if (((BundleDescriptionImpl) getBundle()).getEquinoxEE() < 0)
+		}
+		if (((BundleDescriptionImpl) getBundle()).getEquinoxEE() < 0) {
 			return true;
+		}
 		int eeIndex = ((Integer) pkgDes.getDirective(ExportPackageDescriptionImpl.EQUINOX_EE)).intValue();
 		return eeIndex < 0 || eeIndex == ((BundleDescriptionImpl) getBundle()).getEquinoxEE();
 	}
@@ -187,17 +205,21 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 			Map<String, ?> importAttrs = getAttributes();
 			for (String mandatory : checkMandatory) {
 				if (Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE.equals(mandatory)) {
-					if (getBundleSymbolicName() == null)
+					if (getBundleSymbolicName() == null) {
 						return false;
+					}
 				} else if (Constants.BUNDLE_VERSION_ATTRIBUTE.equals(mandatory)) {
-					if (bundleVersionRange == null)
+					if (bundleVersionRange == null) {
 						return false;
+					}
 				} else if (Constants.PACKAGE_SPECIFICATION_VERSION.equals(mandatory) || Constants.VERSION_ATTRIBUTE.equals(mandatory)) {
-					if (getVersionRange() == null)
+					if (getVersionRange() == null) {
 						return false;
+					}
 				} else { // arbitrary attribute
-					if (importAttrs == null)
+					if (importAttrs == null) {
 						return false;
+					}
 					if (importAttrs.get(mandatory) == null) {
 						return false;
 					}
@@ -235,13 +257,15 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 	protected Map<String, String> getInternalDirectives() {
 		synchronized (this.monitor) {
 			Map<String, String> result = new HashMap<>(5);
-			if (arbitraryDirectives != null)
+			if (arbitraryDirectives != null) {
 				result.putAll(arbitraryDirectives);
+			}
 			if (resolution != null) {
-				if (ImportPackageSpecification.RESOLUTION_STATIC.equals(resolution))
+				if (ImportPackageSpecification.RESOLUTION_STATIC.equals(resolution)) {
 					result.put(Constants.RESOLUTION_DIRECTIVE, Constants.RESOLUTION_MANDATORY);
-				else
+				} else {
 					result.put(Constants.RESOLUTION_DIRECTIVE, resolution);
+				}
 			}
 			result.put(Constants.FILTER_DIRECTIVE, createFilterDirective());
 			return result;
@@ -254,14 +278,18 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 		synchronized (this.monitor) {
 			addFilterAttribute(filter, BundleRevision.PACKAGE_NAMESPACE, getName(), false);
 			VersionRange range = getVersionRange();
-			if (range != null && range != VersionRange.emptyRange)
+			if (range != null && range != VersionRange.emptyRange) {
 				addFilterAttribute(filter, Constants.VERSION_ATTRIBUTE, range);
-			if (symbolicName != null)
+			}
+			if (symbolicName != null) {
 				addFilterAttribute(filter, Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, symbolicName);
-			if (bundleVersionRange != null)
+			}
+			if (bundleVersionRange != null) {
 				addFilterAttribute(filter, Constants.BUNDLE_VERSION_ATTRIBUTE, bundleVersionRange);
-			if (attributes != null)
+			}
+			if (attributes != null) {
 				addFilterAttributes(filter, attributes);
+			}
 		}
 		filter.append(')');
 		return filter.toString();

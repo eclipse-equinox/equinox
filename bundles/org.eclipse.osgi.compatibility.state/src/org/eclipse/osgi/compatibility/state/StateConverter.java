@@ -86,8 +86,9 @@ class StateConverter {
 		result.setUserObject(resource);
 		GenericDescription[] genericDescs = result.getGenericCapabilities();
 		for (GenericDescription genericDesc : genericDescs) {
-			if (IdentityNamespace.IDENTITY_NAMESPACE.equals(genericDesc.getType()))
+			if (IdentityNamespace.IDENTITY_NAMESPACE.equals(genericDesc.getType())) {
 				genericDesc.setUserObject(osgiIdentity);
+			}
 		}
 		return result;
 
@@ -191,8 +192,9 @@ class StateConverter {
 	private String createOSGiRequirement(Requirement requirement, String namespace, String... versions) {
 		Map<String, String> directives = new HashMap<>(requirement.getDirectives());
 		String filter = directives.remove(Namespace.REQUIREMENT_FILTER_DIRECTIVE);
-		if (filter == null)
+		if (filter == null) {
 			throw new IllegalArgumentException("No filter directive found:" + requirement); //$NON-NLS-1$
+		}
 		FilterImpl parser;
 		try {
 			parser = FilterImpl.newInstance(filter);
@@ -201,14 +203,16 @@ class StateConverter {
 		}
 		Map<String, String> matchingAttributes = parser.getStandardOSGiAttributes(versions);
 		String name = matchingAttributes.remove(namespace);
-		if (name == null)
+		if (name == null) {
 			throw new IllegalArgumentException("Invalid requirement: " + requirement); //$NON-NLS-1$
+		}
 		return name + toString(matchingAttributes, "=", true) + toString(directives, ":=", true); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	static <V> String toString(Map<String, V> map, String assignment, boolean stringsOnly) {
-		if (map.isEmpty())
+		if (map.isEmpty()) {
 			return ""; //$NON-NLS-1$
+		}
 		Set<Entry<String, V>> set = map.entrySet();
 		StringBuilder sb = new StringBuilder();
 		for (Entry<String, V> entry : set) {
@@ -218,14 +222,16 @@ class StateConverter {
 			if (value instanceof List) {
 				@SuppressWarnings("unchecked")
 				List<Object> list = (List<Object>) value;
-				if (list.size() == 0)
+				if (list.size() == 0) {
 					continue;
+				}
 				Object component = list.get(0);
 				String className = component.getClass().getName();
 				String type = className.substring(className.lastIndexOf('.') + 1);
 				sb.append(key).append(':').append("List<").append(type).append(">").append(assignment).append('"'); //$NON-NLS-1$ //$NON-NLS-2$
-				for (Object object : list)
+				for (Object object : list) {
 					sb.append(object).append(',');
+				}
 				sb.setLength(sb.length() - 1);
 				sb.append('"');
 			} else {

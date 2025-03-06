@@ -173,21 +173,25 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		bundle.setLocation(original.getLocation());
 		BundleSpecification[] originalRequired = original.getRequiredBundles();
 		BundleSpecification[] newRequired = new BundleSpecification[originalRequired.length];
-		for (int i = 0; i < newRequired.length; i++)
+		for (int i = 0; i < newRequired.length; i++) {
 			newRequired[i] = createBundleSpecification(originalRequired[i]);
+		}
 		bundle.setRequiredBundles(newRequired);
 		ExportPackageDescription[] originalExports = original.getExportPackages();
 		ExportPackageDescription[] newExports = new ExportPackageDescription[originalExports.length];
-		for (int i = 0; i < newExports.length; i++)
+		for (int i = 0; i < newExports.length; i++) {
 			newExports[i] = createExportPackageDescription(originalExports[i]);
+		}
 		bundle.setExportPackages(newExports);
 		ImportPackageSpecification[] originalImports = original.getImportPackages();
 		ImportPackageSpecification[] newImports = new ImportPackageSpecification[originalImports.length];
-		for (int i = 0; i < newImports.length; i++)
+		for (int i = 0; i < newImports.length; i++) {
 			newImports[i] = createImportPackageSpecification(originalImports[i]);
+		}
 		bundle.setImportPackages(newImports);
-		if (original.getHost() != null)
+		if (original.getHost() != null) {
 			bundle.setHost(createHostSpecification(original.getHost()));
+		}
 		bundle.setStateBit(BundleDescriptionImpl.SINGLETON, original.isSingleton());
 		bundle.setStateBit(BundleDescriptionImpl.ATTACH_FRAGMENTS, original.attachFragments());
 		bundle.setStateBit(BundleDescriptionImpl.DYNAMIC_FRAGMENTS, original.dynamicFragments());
@@ -206,8 +210,9 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 	}
 
 	private NativeCodeSpecification createNativeCodeSpecification(NativeCodeSpecification original) {
-		if (original == null)
+		if (original == null) {
 			return null;
+		}
 		NativeCodeSpecificationImpl result = new NativeCodeSpecificationImpl();
 		result.setName(original.getName());
 		result.setOptional(original.isOptional());
@@ -232,8 +237,9 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 	}
 
 	private GenericDescription[] createGenericCapabilities(GenericDescription[] genericCapabilities) {
-		if (genericCapabilities == null || genericCapabilities.length == 0)
+		if (genericCapabilities == null || genericCapabilities.length == 0) {
 			return null;
+		}
 		GenericDescription[] result = new GenericDescription[genericCapabilities.length];
 		for (int i = 0; i < genericCapabilities.length; i++) {
 			GenericDescriptionImpl cap = new GenericDescriptionImpl();
@@ -246,8 +252,9 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 	}
 
 	private GenericSpecification[] createGenericRequires(GenericSpecification[] genericRequires) {
-		if (genericRequires == null || genericRequires.length == 0)
+		if (genericRequires == null || genericRequires.length == 0) {
 			return null;
+		}
 		GenericSpecification[] result = new GenericSpecification[genericRequires.length];
 		for (int i = 0; i < genericRequires.length; i++) {
 			GenericSpecificationImpl req = new GenericSpecificationImpl();
@@ -382,13 +389,15 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		Dictionary<String, Object> attrs = attributes == null ? new Hashtable<>() : new Hashtable<>(attributes);
 		if (version != null) {
 			Object versionObj = attrs.get(Constants.VERSION_ATTRIBUTE);
-			if (!(versionObj instanceof Version) && version != null)
+			if (!(versionObj instanceof Version) && version != null) {
 				attrs.put(Constants.VERSION_ATTRIBUTE, version);
+			}
 		}
 		if (name != null) {
 			Object nameObj = attrs.get(result.getType());
-			if (!(nameObj instanceof String))
+			if (!(nameObj instanceof String)) {
 				attrs.put(result.getType(), name);
+			}
 		}
 		result.setAttributes(attrs);
 		result.setDirectives(directives);
@@ -403,10 +412,12 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		result.setType(type);
 		result.setMatchingFilter(matchingFilter, true);
 		int resolution = 0;
-		if (optional)
+		if (optional) {
 			resolution |= GenericSpecification.RESOLUTION_OPTIONAL;
-		if (multiple)
+		}
+		if (multiple) {
 			resolution |= GenericSpecification.RESOLUTION_MULTIPLE;
+		}
 		result.setResolution(resolution);
 		return result;
 	}
@@ -445,8 +456,9 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 	@Override
 	public State createState(boolean createResolver) {
 		State result = internalCreateState();
-		if (createResolver)
+		if (createResolver) {
 			result.setResolver(new ResolverImpl(false));
+		}
 		return result;
 	}
 
@@ -499,8 +511,9 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 
 	private State internalReadStateDeprecated(StateImpl toRestore, DataInputStream stream, long expectedTimestamp) throws IOException {
 		StateReader reader = new StateReader();
-		if (!reader.loadStateDeprecated(toRestore, stream, expectedTimestamp))
+		if (!reader.loadStateDeprecated(toRestore, stream, expectedTimestamp)) {
 			return null;
+		}
 		return toRestore;
 	}
 
@@ -524,8 +537,9 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 			}
 		}
 		StateReader reader = new StateReader(stateFile, lazyFile, false);
-		if (!reader.loadState(toRestore, expectedTimestamp))
+		if (!reader.loadState(toRestore, expectedTimestamp)) {
 			return null;
+		}
 		return toRestore;
 	}
 
@@ -540,8 +554,9 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 
 	@Override
 	public void writeState(State state, File stateDirectory) throws IOException {
-		if (stateDirectory == null)
+		if (stateDirectory == null) {
 			throw new IOException();
+		}
 		StateWriter writer = new StateWriter();
 		File stateFile = new File(stateDirectory, StateReader.STATE_FILE);
 		File lazyFile = new File(stateDirectory, StateReader.LAZY_FILE);
@@ -563,8 +578,9 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 	}
 
 	private void internalWriteStateDeprecated(State state, DataOutputStream stream) throws IOException {
-		if (state.getFactory() != this)
+		if (state.getFactory() != this) {
 			throw new IllegalArgumentException();
+		}
 		StateWriter writer = new StateWriter();
 		writer.saveStateDeprecated((StateImpl) state, stream);
 	}
@@ -573,11 +589,13 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 	public List<BundleSpecification> createBundleSpecifications(String declaration) {
 		try {
 			ManifestElement[] elements = ManifestElement.parseHeader(Constants.REQUIRE_BUNDLE, declaration);
-			if (elements == null)
+			if (elements == null) {
 				return Collections.emptyList();
+			}
 			List<BundleSpecification> result = new ArrayList<>(elements.length);
-			for (ManifestElement element : elements)
+			for (ManifestElement element : elements) {
 				result.add(StateBuilder.createRequiredBundle(element));
+			}
 			return result;
 		} catch (BundleException e) {
 			throw new IllegalArgumentException("Declaration is invalid: " + declaration, e); //$NON-NLS-1$
@@ -588,11 +606,13 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 	public List<HostSpecification> createHostSpecifications(String declaration) {
 		try {
 			ManifestElement[] elements = ManifestElement.parseHeader(Constants.FRAGMENT_HOST, declaration);
-			if (elements == null)
+			if (elements == null) {
 				return Collections.emptyList();
+			}
 			List<HostSpecification> result = new ArrayList<>(elements.length);
-			for (ManifestElement element : elements)
+			for (ManifestElement element : elements) {
 				result.add(StateBuilder.createHostSpecification(element, null));
+			}
 			return result;
 		} catch (BundleException e) {
 			throw new IllegalArgumentException("Declaration is invalid: " + declaration, e); //$NON-NLS-1$
@@ -603,11 +623,13 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 	public List<ImportPackageSpecification> createImportPackageSpecifications(String declaration) {
 		try {
 			ManifestElement[] elements = ManifestElement.parseHeader(Constants.IMPORT_PACKAGE, declaration);
-			if (elements == null)
+			if (elements == null) {
 				return Collections.emptyList();
+			}
 			List<ImportPackageSpecification> result = new ArrayList<>(elements.length);
-			for (ManifestElement element : elements)
+			for (ManifestElement element : elements) {
 				StateBuilder.addImportPackages(element, result, 2, false);
+			}
 			return result;
 		} catch (BundleException e) {
 			throw new IllegalArgumentException("Declaration is invalid: " + declaration, e); //$NON-NLS-1$
@@ -618,8 +640,9 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 	public List<GenericDescription> createGenericDescriptions(String declaration) {
 		try {
 			ManifestElement[] elements = ManifestElement.parseHeader(Constants.PROVIDE_CAPABILITY, declaration);
-			if (elements == null)
+			if (elements == null) {
 				return Collections.emptyList();
+			}
 			return StateBuilder.createOSGiCapabilities(elements, new ArrayList<>(elements.length), (Integer) null);
 		} catch (BundleException e) {
 			throw new IllegalArgumentException("Declaration is invalid: " + declaration, e); //$NON-NLS-1$
@@ -630,8 +653,9 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 	public List<GenericSpecification> createGenericSpecifications(String declaration) {
 		try {
 			ManifestElement[] elements = ManifestElement.parseHeader(Constants.REQUIRE_CAPABILITY, declaration);
-			if (elements == null)
+			if (elements == null) {
 				return Collections.emptyList();
+			}
 			return StateBuilder.createOSGiRequires(elements, new ArrayList<>(elements.length));
 		} catch (BundleException e) {
 			throw new IllegalArgumentException("Declaration is invalid: " + declaration, e); //$NON-NLS-1$
@@ -642,11 +666,13 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 	public List<ExportPackageDescription> createExportPackageDescriptions(String declaration) {
 		try {
 			ManifestElement[] elements = ManifestElement.parseHeader(Constants.IMPORT_PACKAGE, declaration);
-			if (elements == null)
+			if (elements == null) {
 				return Collections.emptyList();
+			}
 			List<ExportPackageDescription> result = new ArrayList<>(elements.length);
-			for (ManifestElement element : elements)
+			for (ManifestElement element : elements) {
 				StateBuilder.addExportPackages(element, result, false);
+			}
 			return result;
 		} catch (BundleException e) {
 			throw new IllegalArgumentException("Declaration is invalid: " + declaration, e); //$NON-NLS-1$

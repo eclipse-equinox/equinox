@@ -56,24 +56,33 @@ final class BundleDeltaImpl implements BundleDelta {
 
 	private static String toTypeString(int type) {
 		StringBuilder typeStr = new StringBuilder();
-		if ((type & BundleDelta.ADDED) != 0)
+		if ((type & BundleDelta.ADDED) != 0) {
 			typeStr.append("ADDED,"); //$NON-NLS-1$
-		if ((type & BundleDelta.REMOVED) != 0)
+		}
+		if ((type & BundleDelta.REMOVED) != 0) {
 			typeStr.append("REMOVED,"); //$NON-NLS-1$
-		if ((type & BundleDelta.RESOLVED) != 0)
+		}
+		if ((type & BundleDelta.RESOLVED) != 0) {
 			typeStr.append("RESOLVED,"); //$NON-NLS-1$
-		if ((type & BundleDelta.UNRESOLVED) != 0)
+		}
+		if ((type & BundleDelta.UNRESOLVED) != 0) {
 			typeStr.append("UNRESOLVED,"); //$NON-NLS-1$
-		if ((type & BundleDelta.LINKAGE_CHANGED) != 0)
+		}
+		if ((type & BundleDelta.LINKAGE_CHANGED) != 0) {
 			typeStr.append("LINKAGE_CHANGED,"); //$NON-NLS-1$
-		if ((type & BundleDelta.UPDATED) != 0)
+		}
+		if ((type & BundleDelta.UPDATED) != 0) {
 			typeStr.append("UPDATED,"); //$NON-NLS-1$
-		if ((type & BundleDelta.REMOVAL_PENDING) != 0)
+		}
+		if ((type & BundleDelta.REMOVAL_PENDING) != 0) {
 			typeStr.append("REMOVAL_PENDING,"); //$NON-NLS-1$
-		if ((type & BundleDelta.REMOVAL_COMPLETE) != 0)
+		}
+		if ((type & BundleDelta.REMOVAL_COMPLETE) != 0) {
 			typeStr.append("REMOVAL_COMPLETE,"); //$NON-NLS-1$
-		if (typeStr.length() > 0)
+		}
+		if (typeStr.length() > 0) {
 			typeStr.deleteCharAt(typeStr.length() - 1);
+		}
 		return typeStr.toString();
 	}
 
