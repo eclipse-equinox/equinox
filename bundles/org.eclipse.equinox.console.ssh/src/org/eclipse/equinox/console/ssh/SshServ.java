@@ -117,11 +117,13 @@ public class SshServ extends Thread {
 						try {
 							authenticator = context.getService(reference);
 							// first positive match wins; continue looking otherwise
-							if (authenticator.authenticate(username, key, session))
+							if (authenticator.authenticate(username, key, session)) {
 								return true;
+							}
 						} finally {
-							if (null != authenticator)
+							if (null != authenticator) {
 								context.ungetService(reference);
+							}
 						}
 					}
 				} catch (InvalidSyntaxException e) {
