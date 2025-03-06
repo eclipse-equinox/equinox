@@ -73,8 +73,9 @@ public class FilterManager implements ExtensionPointTracker.Listener {
 	public void added(IExtension extension) {
 		IConfigurationElement[] elements = extension.getConfigurationElements();
 		for (IConfigurationElement serviceSelectorElement : elements) {
-			if (!SERVICESELECTOR.equals(serviceSelectorElement.getName()))
+			if (!SERVICESELECTOR.equals(serviceSelectorElement.getName())) {
 				continue;
+			}
 
 			org.osgi.framework.Filter serviceSelector = null;
 			String clazz = serviceSelectorElement.getAttribute(CLASS);
@@ -89,8 +90,9 @@ public class FilterManager implements ExtensionPointTracker.Listener {
 				}
 			} else {
 				String filter = serviceSelectorElement.getAttribute(FILTER);
-				if (filter == null)
+				if (filter == null) {
 					return;
+				}
 
 				try {
 					serviceSelector = FrameworkUtil.createFilter(filter);
@@ -101,20 +103,23 @@ public class FilterManager implements ExtensionPointTracker.Listener {
 				}
 			}
 
-			if (!serviceSelector.match(reference))
+			if (!serviceSelector.match(reference)) {
 				return;
+			}
 
 			break;
 		}
 
 		for (IConfigurationElement filterElement : elements) {
-			if (!FILTER.equals(filterElement.getName()))
+			if (!FILTER.equals(filterElement.getName())) {
 				continue;
+			}
 
 			FilterWrapper wrapper = new FilterWrapper(filterElement);
 			String alias = filterElement.getAttribute(ALIAS);
-			if (alias == null)
+			if (alias == null) {
 				continue; // alias is mandatory - ignore this.
+			}
 
 			Dictionary<String, String> initparams = new Hashtable<>();
 			IConfigurationElement[] initParams = filterElement.getChildren(INIT_PARAM);
@@ -125,20 +130,23 @@ public class FilterManager implements ExtensionPointTracker.Listener {
 			}
 
 			boolean loadOnStartup = Boolean.valueOf(filterElement.getAttribute(LOAD_ON_STARTUP)).booleanValue();
-			if (loadOnStartup)
+			if (loadOnStartup) {
 				wrapper.setLoadOnStartup();
+			}
 
 			String httpContextId = filterElement.getAttribute(HTTPCONTEXT_ID);
 			if (httpContextId == null) {
 				httpContextId = filterElement.getAttribute(HTTPCONTEXT_NAME);
 			}
 
-			if (httpContextId != null && httpContextId.indexOf('.') == -1)
+			if (httpContextId != null && httpContextId.indexOf('.') == -1) {
 				httpContextId = filterElement.getNamespaceIdentifier() + "." + httpContextId; //$NON-NLS-1$
+			}
 
 			if (httpRegistryManager.addFilterContribution(alias, wrapper, initparams, httpContextId,
-					extension.getContributor()))
+					extension.getContributor())) {
 				registered.put(filterElement, wrapper);
+			}
 		}
 	}
 
@@ -147,8 +155,9 @@ public class FilterManager implements ExtensionPointTracker.Listener {
 		IConfigurationElement[] elements = extension.getConfigurationElements();
 		for (IConfigurationElement filterElement : elements) {
 			Filter filter = registered.remove(filterElement);
-			if (filter != null)
+			if (filter != null) {
 				httpRegistryManager.removeFilterContribution(filter);
+			}
 		}
 	}
 
@@ -170,8 +179,9 @@ public class FilterManager implements ExtensionPointTracker.Listener {
 		@Override
 		public void init(FilterConfig filterConfig) throws ServletException {
 			this.config = filterConfig;
-			if (loadOnStartup)
+			if (loadOnStartup) {
 				initializeDelegate();
+			}
 		}
 
 		@Override
