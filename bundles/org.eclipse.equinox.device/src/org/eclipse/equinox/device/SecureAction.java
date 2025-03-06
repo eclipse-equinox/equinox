@@ -41,8 +41,9 @@ public class SecureAction {
 	 * @return The new Thread
 	 */
 	public Thread createThread(final Runnable target, final String name) {
-		if (System.getSecurityManager() == null)
+		if (System.getSecurityManager() == null) {
 			return new Thread(target, name);
+		}
 		return AccessController.doPrivileged((PrivilegedAction<Thread>) () -> new Thread(target, name), controlContext);
 	}
 
