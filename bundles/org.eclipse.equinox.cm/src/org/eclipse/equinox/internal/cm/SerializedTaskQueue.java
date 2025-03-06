@@ -44,8 +44,9 @@ public class SerializedTaskQueue {
 				}
 			};
 			thread.start();
-		} else
+		} else {
 			notify();
+		}
 	}
 
 	synchronized Runnable nextTask(int maxWait) {

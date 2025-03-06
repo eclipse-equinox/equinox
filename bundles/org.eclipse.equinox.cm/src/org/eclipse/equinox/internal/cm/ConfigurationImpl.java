@@ -94,8 +94,9 @@ class ConfigurationImpl implements Configuration {
 	}
 
 	void checkLocked() {
-		if (!lock.isHeldByCurrentThread())
+		if (!lock.isHeldByCurrentThread()) {
 			throw new IllegalStateException("Thread not lock owner"); //$NON-NLS-1$
+		}
 	}
 
 	boolean bind(String callerLocation) {
@@ -167,8 +168,9 @@ class ConfigurationImpl implements Configuration {
 	}
 
 	private void checkDeleted() {
-		if (deleted)
+		if (deleted) {
 			throw new IllegalStateException("deleted"); //$NON-NLS-1$
+		}
 	}
 
 	private void checkReadOnly() {
@@ -192,8 +194,9 @@ class ConfigurationImpl implements Configuration {
 		try {
 			checkDeleted();
 			configurationAdminFactory.checkConfigurePermission(bundleLocation, null);
-			if (bundleLocation != null)
+			if (bundleLocation != null) {
 				return bundleLocation;
+			}
 			return null;
 		} finally {
 			unlock();
@@ -203,8 +206,9 @@ class ConfigurationImpl implements Configuration {
 	String getFactoryPid(boolean checkDeleted) {
 		lock();
 		try {
-			if (checkDeleted)
+			if (checkDeleted) {
 				checkDeleted();
+			}
 			return factoryPid;
 		} finally {
 			unlock();
@@ -219,8 +223,9 @@ class ConfigurationImpl implements Configuration {
 	String getPid(boolean checkDeleted) {
 		lock();
 		try {
-			if (checkDeleted)
+			if (checkDeleted) {
 				checkDeleted();
+			}
 			return pid;
 		} finally {
 			unlock();
@@ -237,8 +242,9 @@ class ConfigurationImpl implements Configuration {
 		lock();
 		try {
 			checkDeleted();
-			if (dictionary == null)
+			if (dictionary == null) {
 				return null;
+			}
 
 			Dictionary<String, Object> copy = dictionary.copy();
 			fileAutoProperties(copy, this, false, false);
@@ -251,8 +257,9 @@ class ConfigurationImpl implements Configuration {
 	Dictionary<String, Object> getAllProperties(boolean includeStorageKeys) {
 		lock();
 		try {
-			if (deleted)
+			if (deleted) {
 				return null;
+			}
 			Dictionary<String, Object> copy = getProperties();
 			if (copy == null) {
 				if (!includeStorageKeys) {
@@ -325,8 +332,9 @@ class ConfigurationImpl implements Configuration {
 		try {
 			checkDeleted();
 			checkReadOnly();
-			if (dictionary == null)
+			if (dictionary == null) {
 				dictionary = new ConfigurationDictionary();
+			}
 			changeCount++;
 			save();
 			configurationAdminFactory.notifyConfigurationUpdated(this, factoryPid != null);
@@ -524,12 +532,14 @@ class ConfigurationImpl implements Configuration {
 					Object copyOfArray = Array.newInstance(value.getClass().getComponentType(), arrayLength);
 					System.arraycopy(value, 0, copyOfArray, 0, arrayLength);
 					newDictionary.put(key, copyOfArray);
-				} else if (value instanceof Collection)
+				} else if (value instanceof Collection) {
 					newDictionary.put(key, new Vector<>((Collection<?>) value));
-				else
+				} else {
 					newDictionary.put(key, properties.get(key));
-			} else
+				}
+			} else {
 				throw new IllegalArgumentException(key + " is already present or is a case variant."); //$NON-NLS-1$
+			}
 		}
 		newDictionary.remove(Constants.SERVICE_PID);
 		newDictionary.remove(ConfigurationAdmin.SERVICE_FACTORYPID);

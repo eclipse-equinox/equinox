@@ -84,8 +84,9 @@ public class ConfigurationAdminFactory implements ServiceFactory<ConfigurationAd
 
 	@Override
 	public void bundleChanged(BundleEvent event) {
-		if (event.getType() == BundleEvent.UNINSTALLED)
+		if (event.getType() == BundleEvent.UNINSTALLED) {
 			configurationStore.unbindConfigurations(event.getBundle());
+		}
 	}
 
 	public void checkConfigurePermission(String location, String forBundleLocation) throws SecurityException {
@@ -145,17 +146,19 @@ public class ConfigurationAdminFactory implements ServiceFactory<ConfigurationAd
 	}
 
 	void notifyConfigurationUpdated(ConfigurationImpl config, boolean isFactory) {
-		if (isFactory)
+		if (isFactory) {
 			managedServiceFactoryTracker.notifyUpdated(config);
-		else
+		} else {
 			managedServiceTracker.notifyUpdated(config);
+		}
 	}
 
 	void notifyConfigurationDeleted(ConfigurationImpl config, boolean isFactory) {
-		if (isFactory)
+		if (isFactory) {
 			managedServiceFactoryTracker.notifyDeleted(config);
-		else
+		} else {
 			managedServiceTracker.notifyDeleted(config);
+		}
 	}
 
 	void notifyLocationChanged(ConfigurationImpl config, String oldLocation, boolean isFactory) {

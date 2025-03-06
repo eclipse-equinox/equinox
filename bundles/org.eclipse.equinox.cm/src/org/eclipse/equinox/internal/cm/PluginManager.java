@@ -41,8 +41,9 @@ public class PluginManager {
 	public Dictionary<String, Object> modifyConfiguration(ServiceReference<?> managedReference,
 			ConfigurationImpl config) {
 		Dictionary<String, Object> properties = config.getProperties();
-		if (properties == null)
+		if (properties == null) {
 			return null;
+		}
 
 		for (ServiceReference<ConfigurationPlugin> reference : pluginTracker.getServiceReferences()) {
 			Collection<?> pids = getStringProperty(reference.getProperty(ConfigurationPlugin.CM_TARGET));
@@ -51,8 +52,9 @@ public class PluginManager {
 				if (pid == null) {
 					pid = config.getPid();
 				}
-				if (!pids.contains(pid))
+				if (!pids.contains(pid)) {
 					continue;
+				}
 			}
 			ConfigurationPlugin plugin = pluginTracker.getService(reference);
 			if (plugin != null) {
@@ -70,8 +72,9 @@ public class PluginManager {
 
 	@SuppressWarnings("unchecked")
 	private Collection<Object> getStringProperty(Object value) {
-		if (value == null)
+		if (value == null) {
 			return null;
+		}
 		if (value instanceof String) {
 			return Collections.singleton(value);
 		}
@@ -88,8 +91,9 @@ public class PluginManager {
 
 	static Integer getRank(ServiceReference<ConfigurationPlugin> ref) {
 		Object ranking = ref.getProperty(ConfigurationPlugin.CM_RANKING);
-		if (ranking == null || !(ranking instanceof Integer))
+		if (ranking == null || !(ranking instanceof Integer)) {
 			return ZERO;
+		}
 		return ((Integer) ranking);
 	}
 

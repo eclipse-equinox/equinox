@@ -23,8 +23,9 @@ public class TargetMap {
 
 	public List<List<String>> add(ServiceReference<?> ref) {
 		List<String> specifiedPids = getPids(ref.getProperty(Constants.SERVICE_PID));
-		if (specifiedPids.isEmpty())
+		if (specifiedPids.isEmpty()) {
 			return Collections.EMPTY_LIST;
+		}
 
 		Bundle b = ref.getBundle();
 		String bsn = b.getSymbolicName();
@@ -67,8 +68,9 @@ public class TargetMap {
 
 	public static List<String> getPids(Object pid) {
 		List<String> specifiedPids = Collections.EMPTY_LIST;
-		if (pid == null)
+		if (pid == null) {
 			return specifiedPids;
+		}
 
 		if (pid instanceof String) {
 			specifiedPids = Collections.singletonList((String) pid);

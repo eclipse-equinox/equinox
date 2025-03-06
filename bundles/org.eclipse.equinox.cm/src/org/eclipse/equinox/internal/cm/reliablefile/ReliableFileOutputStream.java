@@ -103,10 +103,11 @@ public class ReliableFileOutputStream extends FilterOutputStream {
 
 		this.reliable = reliable;
 		outputOpen = true;
-		if (append)
+		if (append) {
 			crc = reliable.getFileChecksum();
-		else
+		} else {
 			crc = reliable.getChecksumCalculator();
+		}
 	}
 
 	/**
@@ -128,8 +129,9 @@ public class ReliableFileOutputStream extends FilterOutputStream {
 	}
 
 	public File closeIntermediateFile() throws IOException {
-		if (reliable == null)
+		if (reliable == null) {
 			throw new IOException("ReliableFile stream not open"); //$NON-NLS-1$
+		}
 		if (outputOpen) {
 			// tag on our signature and checksum
 			reliable.writeChecksumSignature(out, crc);
@@ -180,8 +182,9 @@ public class ReliableFileOutputStream extends FilterOutputStream {
 	}
 
 	public void abort() {
-		if (reliable == null)
+		if (reliable == null) {
 			return;
+		}
 		if (outputOpen) {
 			try {
 				out.close();

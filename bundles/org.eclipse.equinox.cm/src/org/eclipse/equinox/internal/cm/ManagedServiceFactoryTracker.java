@@ -155,8 +155,9 @@ class ManagedServiceFactoryTracker extends ServiceTracker<ManagedServiceFactory,
 	@Override
 	public ManagedServiceFactory addingService(ServiceReference<ManagedServiceFactory> reference) {
 		ManagedServiceFactory service = context.getService(reference);
-		if (service == null)
+		if (service == null) {
 			return null;
+		}
 
 		addReference(reference, service);
 		return service;
@@ -241,8 +242,9 @@ class ManagedServiceFactoryTracker extends ServiceTracker<ManagedServiceFactory,
 						break qualifiedPids;
 					}
 				} finally {
-					for (ConfigurationImpl config : configs)
+					for (ConfigurationImpl config : configs) {
 						config.unlock();
+					}
 				}
 			}
 		}
