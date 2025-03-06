@@ -69,8 +69,9 @@ public class JSPContextFinder extends ClassLoader implements PrivilegedAction<Ar
 					}
 				}
 				// stop at the framework classloader or the first bundle classloader
-				if (Activator.getBundle(stack[i]) != null)
+				if (Activator.getBundle(stack[i]) != null) {
 					break;
+				}
 			}
 		}
 		return result;
@@ -86,17 +87,21 @@ public class JSPContextFinder extends ClassLoader implements PrivilegedAction<Ar
 	// must
 	// not be used as a delegate, otherwise we endup in endless recursion.
 	private boolean checkClassLoader(ClassLoader classloader) {
-		if (classloader == null || classloader == getParent())
+		if (classloader == null || classloader == getParent()) {
 			return false;
-		for (ClassLoader parent = classloader.getParent(); parent != null; parent = parent.getParent())
-			if (parent == this)
+		}
+		for (ClassLoader parent = classloader.getParent(); parent != null; parent = parent.getParent()) {
+			if (parent == this) {
 				return false;
+			}
+		}
 		return true;
 	}
 
 	private ArrayList<ClassLoader> findClassLoaders() {
-		if (System.getSecurityManager() == null)
+		if (System.getSecurityManager() == null) {
 			return basicFindClassLoaders();
+		}
 		return AccessController.doPrivileged(this);
 	}
 
@@ -109,8 +114,9 @@ public class JSPContextFinder extends ClassLoader implements PrivilegedAction<Ar
 	// False is returned when a cycle is being detected
 	private boolean startLoading(String name) {
 		Set<String> classesAndResources = cycleDetector.get();
-		if (classesAndResources != null && classesAndResources.contains(name))
+		if (classesAndResources != null && classesAndResources.contains(name)) {
 			return false;
+		}
 
 		if (classesAndResources == null) {
 			classesAndResources = new HashSet<>(3);
@@ -127,16 +133,18 @@ public class JSPContextFinder extends ClassLoader implements PrivilegedAction<Ar
 	@Override
 	protected Class<?> loadClass(String arg0, boolean arg1) throws ClassNotFoundException {
 		// Shortcut cycle
-		if (startLoading(arg0) == false)
+		if (startLoading(arg0) == false) {
 			throw new ClassNotFoundException(arg0);
+		}
 
 		try {
-			for (ClassLoader classLoader : findClassLoaders())
+			for (ClassLoader classLoader : findClassLoaders()) {
 				try {
 					return classLoader.loadClass(arg0);
 				} catch (ClassNotFoundException e) {
 					// go to the next class loader
 				}
+			}
 			return super.loadClass(arg0, arg1);
 		} finally {
 			stopLoading(arg0);
@@ -146,14 +154,16 @@ public class JSPContextFinder extends ClassLoader implements PrivilegedAction<Ar
 	@Override
 	public URL getResource(String arg0) {
 		// Shortcut cycle
-		if (startLoading(arg0) == false)
+		if (startLoading(arg0) == false) {
 			return null;
+		}
 		try {
 			for (ClassLoader classLoader : findClassLoaders()) {
 				URL result = classLoader.getResource(arg0);
-				if (result != null)
+				if (result != null) {
 					return result;
 				// go to the next class loader
+				}
 			}
 			return super.getResource(arg0);
 		} finally {
@@ -164,14 +174,16 @@ public class JSPContextFinder extends ClassLoader implements PrivilegedAction<Ar
 	@Override
 	protected Enumeration<URL> findResources(String arg0) throws IOException {
 		// Shortcut cycle
-		if (startLoading(arg0) == false)
+		if (startLoading(arg0) == false) {
 			return null;
+		}
 		try {
 			for (ClassLoader classLoader : findClassLoaders()) {
 				Enumeration<URL> result = classLoader.getResources(arg0);
-				if (result != null && result.hasMoreElements())
+				if (result != null && result.hasMoreElements()) {
 					return result;
 				// go to the next class loader
+				}
 			}
 			return super.findResources(arg0);
 		} finally {

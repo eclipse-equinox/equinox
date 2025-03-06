@@ -77,19 +77,22 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer<Pack
 	}
 
 	public static Bundle[] getFragments(Bundle bundle) {
-		if (packageAdmin == null)
+		if (packageAdmin == null) {
 			throw new IllegalStateException("Not started"); //$NON-NLS-1$
+		}
 
 		return packageAdmin.getFragments(bundle);
 	}
 
 	public static Bundle getJasperBundle() {
 		Bundle bundle = getBundle(org.apache.jasper.servlet.JspServlet.class);
-		if (bundle != null)
+		if (bundle != null) {
 			return bundle;
+		}
 
-		if (thisBundle == null)
+		if (thisBundle == null) {
 			throw new IllegalStateException("Not started"); //$NON-NLS-1$
+		}
 
 		ExportedPackage[] exportedPackages = packageAdmin.getExportedPackages("org.apache.jasper.servlet"); //$NON-NLS-1$
 		for (ExportedPackage exportedPackage : exportedPackages) {
