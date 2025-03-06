@@ -97,10 +97,11 @@ public class StructuredTextStringRecordTest extends StructuredTextTestBase {
 		for (int i = 0; i < poolSize; i++) {
 			String str = Integer.toString(i);
 			sr = StructuredTextStringRecord.getRecord(str);
-			if (i < lim)
+			if (i < lim) {
 				assertFalse(null == sr);
-			else
+			} else {
 				assertTrue(null == sr);
+			}
 		}
 
 		for (int i = lim; i <= poolSize; i++) {

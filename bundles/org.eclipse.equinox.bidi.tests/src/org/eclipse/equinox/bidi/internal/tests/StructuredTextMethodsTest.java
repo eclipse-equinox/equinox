@@ -68,8 +68,9 @@ public class StructuredTextMethodsTest extends StructuredTextTestBase {
 		@Override
 		public boolean skipProcessing(IStructuredTextExpert expert, String text, StructuredTextCharTypes charTypes) {
 			byte charType = charTypes.getBidiTypeAt(0);
-			if (charType == AL)
+			if (charType == AL) {
 				return true;
+			}
 			return false;
 		}
 
@@ -82,8 +83,9 @@ public class StructuredTextMethodsTest extends StructuredTextTestBase {
 		public int getDirection(IStructuredTextExpert expert, String text, StructuredTextCharTypes charTypes) {
 			for (int i = 0; i < text.length(); i++) {
 				byte charType = charTypes.getBidiTypeAt(i);
-				if (charType == AL)
+				if (charType == AL) {
 					return dirArabic;
+				}
 			}
 			return dirHebrew;
 		}
