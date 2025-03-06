@@ -51,20 +51,25 @@ public class StructuredTextMath extends StructuredTextTypeHandler {
 	@Override
 	public int getDirection(IStructuredTextExpert expert, String text, StructuredTextCharTypes charTypes) {
 		String language = expert.getEnvironment().getLanguage();
-		if (!language.equals("ar")) //$NON-NLS-1$
+		if (!language.equals("ar")) { //$NON-NLS-1$
 			return IStructuredTextExpert.DIR_LTR;
+		}
 		boolean flagAN = false;
 		for (int i = 0; i < text.length(); i++) {
 			byte charType = charTypes.getBidiTypeAt(i);
-			if (charType == AL)
+			if (charType == AL) {
 				return IStructuredTextExpert.DIR_RTL;
-			if (charType == L || charType == R)
+			}
+			if (charType == L || charType == R) {
 				return IStructuredTextExpert.DIR_LTR;
-			if (charType == AN)
+			}
+			if (charType == AN) {
 				flagAN = true;
+			}
 		}
-		if (flagAN)
+		if (flagAN) {
 			return IStructuredTextExpert.DIR_RTL;
+		}
 		return IStructuredTextExpert.DIR_LTR;
 	}
 }

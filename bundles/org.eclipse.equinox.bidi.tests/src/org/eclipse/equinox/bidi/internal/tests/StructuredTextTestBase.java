@@ -35,30 +35,31 @@ public class StructuredTextTestBase {
 
 		for (int i = 0; i < len; i++) {
 			char c = chars[i];
-			if (c >= 'A' && c <= 'Z')
+			if (c >= 'A' && c <= 'Z') {
 				chars[i] = (char) (c + 'a' - 'A');
-			else if (c >= 0x05D0 && c < 0x05EA)
+			} else if (c >= 0x05D0 && c < 0x05EA) {
 				chars[i] = (char) (c + 'A' - 0x05D0);
-			else if (c == 0x05EA)
+			} else if (c == 0x05EA) {
 				chars[i] = '~';
-			else if (c == 0x0644)
+			} else if (c == 0x0644) {
 				chars[i] = '#';
-			else if (c >= 0x0665 && c <= 0x0669)
+			} else if (c >= 0x0665 && c <= 0x0669) {
 				chars[i] = (char) (c + '5' - 0x0665);
-			else if (c == LRM)
+			} else if (c == LRM) {
 				chars[i] = '@';
-			else if (c == RLM)
+			} else if (c == RLM) {
 				chars[i] = '&';
-			else if (c == LRE)
+			} else if (c == LRE) {
 				chars[i] = '>';
-			else if (c == RLE)
+			} else if (c == RLE) {
 				chars[i] = '<';
-			else if (c == PDF)
+			} else if (c == PDF) {
 				chars[i] = '^';
-			else if (c == '\n')
+			} else if (c == '\n') {
 				chars[i] = '|';
-			else if (c == '\r')
+			} else if (c == '\r') {
 				chars[i] = '`';
+			}
 		}
 		return new String(chars);
 	}
@@ -69,28 +70,29 @@ public class StructuredTextTestBase {
 
 		for (int i = 0; i < len; i++) {
 			char c = chars[i];
-			if (c >= '5' && c <= '9')
+			if (c >= '5' && c <= '9') {
 				chars[i] = (char) (0x0665 + c - '5');
-			else if (c >= 'A' && c <= 'Z')
+			} else if (c >= 'A' && c <= 'Z') {
 				chars[i] = (char) (0x05D0 + c - 'A');
-			else if (c == '~')
+			} else if (c == '~') {
 				chars[i] = (char) (0x05EA);
-			else if (c == '#')
+			} else if (c == '#') {
 				chars[i] = (char) (0x0644);
-			else if (c == '@')
+			} else if (c == '@') {
 				chars[i] = LRM;
-			else if (c == '&')
+			} else if (c == '&') {
 				chars[i] = RLM;
-			else if (c == '>')
+			} else if (c == '>') {
 				chars[i] = LRE;
-			else if (c == '<')
+			} else if (c == '<') {
 				chars[i] = RLE;
-			else if (c == '^')
+			} else if (c == '^') {
 				chars[i] = PDF;
-			else if (c == '|')
+			} else if (c == '|') {
 				chars[i] = '\n';
-			else if (c == '`')
+			} else if (c == '`') {
 				chars[i] = '\r';
+			}
 		}
 		return new String(chars);
 	}
