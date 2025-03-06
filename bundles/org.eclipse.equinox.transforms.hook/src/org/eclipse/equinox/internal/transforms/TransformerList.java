@@ -83,17 +83,19 @@ public class TransformerList extends ServiceTracker<Object, Object> {
 		transformers.clear();
 		ServiceReference<Object>[] serviceReferences = getServiceReferences();
 		stale = false;
-		if (serviceReferences == null)
+		if (serviceReferences == null) {
 			return;
+		}
 
 		for (ServiceReference<Object> serviceReference : serviceReferences) {
 			String type = serviceReference.getProperty(TransformTuple.TRANSFORMER_TYPE).toString();
-			if (type == null || transformers.get(type) != null)
+			if (type == null || transformers.get(type) != null) {
 				continue;
+			}
 			Object object = getService(serviceReference);
-			if (object instanceof StreamTransformer)
+			if (object instanceof StreamTransformer) {
 				transformers.put(type, (StreamTransformer) object);
-			else {
+			} else {
 				ProxyStreamTransformer transformer;
 				try {
 					transformer = new ProxyStreamTransformer(object);
