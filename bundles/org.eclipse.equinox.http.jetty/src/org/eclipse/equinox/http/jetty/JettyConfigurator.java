@@ -66,7 +66,8 @@ public class JettyConfigurator {
 
 	private static void checkConfigurationPermission() throws SecurityException {
 		SecurityManager sm = System.getSecurityManager();
-		if (sm != null)
+		if (sm != null) {
 			sm.checkPermission(configurationPermission);
+		}
 	}
 }
