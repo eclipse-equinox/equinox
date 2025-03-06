@@ -90,29 +90,34 @@ public final class StandardRegionFilter implements RegionFilter {
 	}
 
 	private static boolean match(Collection<Filter> filters, Map<String, ?> attrs) {
-		if (filters == null)
+		if (filters == null) {
 			return false;
+		}
 		for (Filter filter : filters) {
-			if (filter == ALL || filter.matches(attrs))
+			if (filter == ALL || filter.matches(attrs)) {
 				return true;
+			}
 		}
 		return false;
 	}
 
 	private static boolean match(Collection<Filter> filters, ServiceReference<?> service) {
-		if (filters == null)
+		if (filters == null) {
 			return false;
+		}
 		for (Filter filter : filters) {
-			if (filter == ALL || filter.match(service))
+			if (filter == ALL || filter.match(service)) {
 				return true;
+			}
 		}
 		return false;
 	}
 
 	@Override
 	public boolean isAllowed(ServiceReference<?> service) {
-		if (match(filters.get(VISIBLE_OSGI_SERVICE_NAMESPACE), service))
+		if (match(filters.get(VISIBLE_OSGI_SERVICE_NAMESPACE), service)) {
 			return true;
+		}
 		return matchAll(VISIBLE_OSGI_SERVICE_NAMESPACE, service);
 	}
 
@@ -126,8 +131,9 @@ public final class StandardRegionFilter implements RegionFilter {
 	 */
 	@Override
 	public boolean isAllowed(String namespace, Map<String, ?> attributes) {
-		if (match(filters.get(namespace), attributes))
+		if (match(filters.get(namespace), attributes)) {
 			return true;
+		}
 		return matchAll(namespace, attributes);
 	}
 

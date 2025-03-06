@@ -57,8 +57,9 @@ public final class RegionManager implements BundleActivator {
 	public void start(BundleContext bc) throws BundleException, IOException, InvalidSyntaxException {
 		this.bundleContext = bc;
 		this.domain = bc.getProperty(REGION_DOMAIN_PROP);
-		if (this.domain == null)
+		if (this.domain == null) {
 			this.domain = REGION_DOMAIN_PROP;
+		}
 		digraph = loadRegionDigraph();
 		registerRegionHooks(digraph);
 		// after registering the region hooks we need to verify no ophans exist
@@ -92,8 +93,9 @@ public final class RegionManager implements BundleActivator {
 			digraphMBean.unregisterMbean();
 			digraphMBean = null;
 		}
-		for (ServiceRegistration<?> registration : registrations)
+		for (ServiceRegistration<?> registration : registrations) {
 			registration.unregister();
+		}
 		saveDigraph();
 	}
 

@@ -160,20 +160,25 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 
 	private RegionFilter createConnection(Region tailRegion, RegionFilter filter, Region headRegion, boolean replace)
 			throws BundleException {
-		if (tailRegion == null)
+		if (tailRegion == null) {
 			throw new IllegalArgumentException("The tailRegion must not be null."); //$NON-NLS-1$
-		if (!replace && filter == null)
+		}
+		if (!replace && filter == null) {
 			throw new IllegalArgumentException("The filter must not be null."); //$NON-NLS-1$
-		if (headRegion == null)
+		}
+		if (headRegion == null) {
 			throw new IllegalArgumentException("The headRegion must not be null."); //$NON-NLS-1$
+		}
 		if (headRegion.equals(tailRegion)) {
 			throw new BundleException("Cannot connect region '" + headRegion + "' to itself", //$NON-NLS-1$ //$NON-NLS-2$
 					BundleException.UNSUPPORTED_OPERATION);
 		}
-		if (tailRegion.getRegionDigraph() != this)
+		if (tailRegion.getRegionDigraph() != this) {
 			throw new IllegalArgumentException("The tailRegion does not belong to this digraph."); //$NON-NLS-1$
-		if (headRegion.getRegionDigraph() != this)
+		}
+		if (headRegion.getRegionDigraph() != this) {
 			throw new IllegalArgumentException("The headRegion does not belong to this digraph."); //$NON-NLS-1$
+		}
 
 		FilteredRegion existing = null;
 		boolean tailAdded = false;
@@ -307,8 +312,9 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 	 */
 	@Override
 	public void removeRegion(Region region) {
-		if (region == null)
+		if (region == null) {
 			throw new IllegalArgumentException("The region cannot be null."); //$NON-NLS-1$
+		}
 		notifyRemoving(region);
 		synchronized (this.monitor) {
 			if (this.defaultRegion != null && this.defaultRegion.equals(region)) {
@@ -399,8 +405,9 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 	}
 
 	private Set<RegionLifecycleListener> getListeners() {
-		if (this.bundleContext == null)
+		if (this.bundleContext == null) {
 			return Collections.emptySet();
+		}
 		Set<RegionLifecycleListener> listeners = new HashSet<>();
 		try {
 			Collection<ServiceReference<RegionLifecycleListener>> listenerServiceReferences = this.bundleContext
@@ -462,12 +469,14 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 	}
 
 	private void replace(RegionDigraph digraph, boolean check) throws BundleException {
-		if (!(digraph instanceof StandardRegionDigraph))
+		if (!(digraph instanceof StandardRegionDigraph)) {
 			throw new IllegalArgumentException("Only digraphs of type '" + StandardRegionDigraph.class.getName() //$NON-NLS-1$
 					+ "' are allowed: " + digraph.getClass().getName()); //$NON-NLS-1$
+		}
 		StandardRegionDigraph replacement = (StandardRegionDigraph) digraph;
-		if (check && replacement.origin != this)
+		if (check && replacement.origin != this) {
 			throw new IllegalArgumentException("The replacement digraph is not a copy of this digraph."); //$NON-NLS-1$
+		}
 
 		// notify removing first, and outside the monitor lock
 		final Set<Region> removed = getRegions();
