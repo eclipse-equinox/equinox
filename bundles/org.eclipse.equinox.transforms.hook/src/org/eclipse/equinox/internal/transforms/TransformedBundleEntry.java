@@ -52,8 +52,9 @@ public class TransformedBundleEntry extends BundleEntry {
 	public URL getFileURL() {
 		try {
 			File file = bundleFile.getFile(getName(), false);
-			if (file != null)
+			if (file != null) {
 				return file.toURL();
+			}
 		} catch (MalformedURLException e) {
 			// This can not happen.
 		}

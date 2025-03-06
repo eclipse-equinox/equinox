@@ -77,11 +77,13 @@ public class TransformInstanceListData extends ServiceTracker<URL, URL> {
 	 * @return the transforms types currently held by this list
 	 */
 	public synchronized String[] getTransformTypes() {
-		if (stale)
+		if (stale) {
 			rebuildTransformMap();
+		}
 
-		if (transformerToTuple.size() == 0)
+		if (transformerToTuple.size() == 0) {
 			return EMPTY_TYPES;
+		}
 		return transformerToTuple.keySet().toArray(new String[transformerToTuple.size()]);
 	}
 
@@ -92,8 +94,9 @@ public class TransformInstanceListData extends ServiceTracker<URL, URL> {
 	 * @return the transforms currently held by this list
 	 */
 	public synchronized TransformTuple[] getTransformsFor(String type) {
-		if (stale)
+		if (stale) {
 			rebuildTransformMap();
+		}
 
 		return transformerToTuple.get(type);
 	}
@@ -107,8 +110,9 @@ public class TransformInstanceListData extends ServiceTracker<URL, URL> {
 	 * @return the presence of associated transforms.
 	 */
 	public synchronized boolean hasTransformsFor(Bundle bundle) {
-		if (stale)
+		if (stale) {
 			rebuildTransformMap();
+		}
 
 		String bundleName = bundle.getSymbolicName();
 		Boolean hasTransformsFor = bundleIdToTransformPresence.get(bundleName);
@@ -138,8 +142,9 @@ public class TransformInstanceListData extends ServiceTracker<URL, URL> {
 
 		ServiceReference<URL>[] serviceReferences = getServiceReferences();
 		stale = false;
-		if (serviceReferences == null)
+		if (serviceReferences == null) {
 			return;
+		}
 
 		for (ServiceReference<URL> serviceReference : serviceReferences) {
 			String type = serviceReference.getProperty(TransformTuple.TRANSFORMER_TYPE).toString();
@@ -153,8 +158,9 @@ public class TransformInstanceListData extends ServiceTracker<URL, URL> {
 					System.arraycopy(existing, 0, newTransforms, 0, existing.length);
 					System.arraycopy(transforms, 0, newTransforms, existing.length, transforms.length);
 					transformerToTuple.put(type, newTransforms);
-				} else
+				} else {
 					transformerToTuple.put(type, transforms);
+				}
 				for (TransformTuple transform : transforms) {
 					rawTuples.add(transform);
 				}

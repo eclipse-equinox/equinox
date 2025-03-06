@@ -67,8 +67,9 @@ public class TransformedBundleFile extends BundleFileWrapper {
 	public BundleEntry getEntry(String path) {
 
 		final BundleEntry original = delegate.getEntry(path);
-		if (generation.getRevision() == null || path == null || original == null)
+		if (generation.getRevision() == null || path == null || original == null) {
 			return original;
+		}
 
 		LazyInputStream stream = new LazyInputStream(new InputStreamProvider() {
 
@@ -78,8 +79,9 @@ public class TransformedBundleFile extends BundleFileWrapper {
 			}
 		});
 		InputStream wrappedStream = getInputStream(stream, generation.getRevision().getBundle(), path);
-		if (wrappedStream == null)
+		if (wrappedStream == null) {
 			return original;
+		}
 		return new TransformedBundleEntry(this, original, wrappedStream);
 	}
 
@@ -95,15 +97,18 @@ public class TransformedBundleFile extends BundleFileWrapper {
 		String namespace = bundle.getSymbolicName();
 
 		String[] transformTypes = transformerHook.getTransformTypes();
-		if (transformTypes.length == 0)
+		if (transformTypes.length == 0) {
 			return null;
+		}
 		for (String transformType : transformTypes) {
 			StreamTransformer transformer = transformerHook.getTransformer(transformType);
-			if (transformer == null)
+			if (transformer == null) {
 				continue;
+			}
 			TransformTuple[] transformTuples = transformerHook.getTransformsFor(transformType);
-			if (transformTuples == null)
+			if (transformTuples == null) {
 				continue;
+			}
 			for (TransformTuple transformTuple : transformTuples) {
 				if (match(transformTuple.bundlePattern, namespace) && match(transformTuple.pathPattern, path)) {
 					try {
@@ -140,18 +145,21 @@ public class TransformedBundleFile extends BundleFileWrapper {
 	public File getFile(String path, boolean nativeCode) {
 		File originalFile = delegate.getFile(path, nativeCode);
 
-		if (originalFile == null)
+		if (originalFile == null) {
 			return null;
-		if (!hasTransforms(path))
+		}
+		if (!hasTransforms(path)) {
 			return originalFile;
+		}
 		try {
 			File nested = getExtractFile(path);
 			if (nested != null) {
 				if (nested.exists()) {
-					if (nested.isDirectory())
+					if (nested.isDirectory()) {
 						// must ensure the complete directory is extracted (bug
 						// 182585)
 						extractDirectory(path);
+					}
 				} else {
 					if (originalFile.isDirectory()) {
 						if (!nested.mkdirs()) {
@@ -160,8 +168,9 @@ public class TransformedBundleFile extends BundleFileWrapper {
 						extractDirectory(path);
 					} else {
 						InputStream in = getEntry(path).getInputStream();
-						if (in == null)
+						if (in == null) {
 							return null;
+						}
 						/* the entry has not been cached */
 						/* create the necessary directories */
 						File dir = new File(nested.getParent());
@@ -192,8 +201,9 @@ public class TransformedBundleFile extends BundleFileWrapper {
 	 *         transform associated with it.
 	 */
 	private boolean hasTransforms(String path) {
-		if (!transformerHook.hasTransformers())
+		if (!transformerHook.hasTransformers()) {
 			return false;
+		}
 		return transformerHook.hasTransformsFor(generation.getRevision().getBundle());
 	}
 
@@ -212,8 +222,9 @@ public class TransformedBundleFile extends BundleFileWrapper {
 
 		while (entries.hasMoreElements()) {
 			String entryPath = entries.nextElement();
-			if (entryPath.startsWith(dirName))
+			if (entryPath.startsWith(dirName)) {
 				getFile(entryPath, false);
+			}
 		}
 		return getExtractFile(dirName);
 	}
@@ -224,10 +235,11 @@ public class TransformedBundleFile extends BundleFileWrapper {
 		/*
 		 * if name has a leading slash
 		 */
-		if ((name.length() > 1) && (name.charAt(0) == File.separatorChar))
+		if ((name.length() > 1) && (name.charAt(0) == File.separatorChar)) {
 			path = path.concat(name);
-		else
+		} else {
 			path = path + File.separator + name;
+		}
 		return generation.getExtractFile(path);
 	}
 

@@ -34,8 +34,9 @@ public class TransformerHook
 
 	@Override
 	public BundleFileWrapper wrapBundleFile(BundleFile bundleFile, Generation generation, boolean base) {
-		if (transformers == null || templates == null)
+		if (transformers == null || templates == null) {
 			return null;
+		}
 		return new TransformedBundleFile(this, generation, bundleFile);
 	}
 

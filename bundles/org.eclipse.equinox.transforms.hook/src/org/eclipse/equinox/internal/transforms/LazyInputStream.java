@@ -34,14 +34,16 @@ public class LazyInputStream extends InputStream {
 	 * @param provider the input stream provider. Must not be <code>null</code>.
 	 */
 	public LazyInputStream(InputStreamProvider provider) {
-		if (provider == null)
+		if (provider == null) {
 			throw new IllegalArgumentException();
+		}
 		this.provider = provider;
 	}
 
 	private void initOriginal() throws IOException {
-		if (original == null)
+		if (original == null) {
 			original = provider.getInputStream();
+		}
 	}
 
 	@Override

@@ -53,8 +53,9 @@ public class CSVParser {
 					continue;
 				}
 				currentLine = currentLine.trim();
-				if (currentLine.length() == 0)
+				if (currentLine.length() == 0) {
 					continue;
+				}
 				StringTokenizer toker = new StringTokenizer(currentLine, ","); //$NON-NLS-1$
 				try {
 					String bundlePatternString = toker.nextToken().trim();
