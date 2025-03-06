@@ -48,8 +48,9 @@ public class SingleOperationFuture<ResultType> extends AbstractFuture<ResultType
 	@Override
 	public synchronized ResultType get() throws InterruptedException, OperationCanceledException {
 		throwIfCanceled();
-		while (!isDone())
+		while (!isDone()) {
 			wait();
+		}
 		throwIfCanceled();
 		return resultValue;
 	}
@@ -58,16 +59,19 @@ public class SingleOperationFuture<ResultType> extends AbstractFuture<ResultType
 	public synchronized ResultType get(long waitTimeInMillis)
 			throws InterruptedException, TimeoutException, OperationCanceledException {
 		// If waitTime out of bounds then throw illegal argument exception
-		if (waitTimeInMillis < 0)
+		if (waitTimeInMillis < 0) {
 			throw new IllegalArgumentException("waitTimeInMillis must be => 0"); //$NON-NLS-1$
+		}
 		// If we've been canceled then throw
 		throwIfCanceled();
 		// If we've previously experienced a timeout then throw
-		if (timeoutException != null)
+		if (timeoutException != null) {
 			throw timeoutException;
+		}
 		// If we're already done, then return result
-		if (isDone())
+		if (isDone()) {
 			return resultValue;
+		}
 		// Otherwise, wait for some time, then throw if canceled during wait,
 		// return value if
 		// Compute start time and set waitTime
@@ -78,11 +82,13 @@ public class SingleOperationFuture<ResultType> extends AbstractFuture<ResultType
 		for (;;) {
 			wait(waitTime);
 			throwIfCanceled();
-			if (isDone())
+			if (isDone()) {
 				return resultValue;
+			}
 			waitTime = waitTimeInMillis - (System.currentTimeMillis() - startTime);
-			if (waitTime <= 0)
+			if (waitTime <= 0) {
 				throw createTimeoutException(waitTimeInMillis);
+			}
 		}
 	}
 
@@ -105,8 +111,9 @@ public class SingleOperationFuture<ResultType> extends AbstractFuture<ResultType
 				@Override
 				public void handleException(Throwable exception) {
 					synchronized (SingleOperationFuture.this) {
-						if (!isCanceled())
+						if (!isCanceled()) {
 							setException(exception);
+						}
 					}
 				}
 
@@ -115,8 +122,9 @@ public class SingleOperationFuture<ResultType> extends AbstractFuture<ResultType
 					@SuppressWarnings("unchecked")
 					ResultType result = (ResultType) runnable.run(getProgressMonitor());
 					synchronized (SingleOperationFuture.this) {
-						if (!isCanceled())
+						if (!isCanceled()) {
 							set(result);
+						}
 					}
 				}
 			});
@@ -137,10 +145,12 @@ public class SingleOperationFuture<ResultType> extends AbstractFuture<ResultType
 
 	@Override
 	public synchronized boolean cancel() {
-		if (isDone())
+		if (isDone()) {
 			return false;
-		if (isCanceled())
+		}
+		if (isCanceled()) {
 			return false;
+		}
 		setStatus(new Status(IStatus.CANCEL, PLUGIN_ID, IStatus.CANCEL, "Operation canceled", null)); //$NON-NLS-1$ //$NON-NLS-2$
 		getProgressMonitor().setCanceled(true);
 		notifyAll();
