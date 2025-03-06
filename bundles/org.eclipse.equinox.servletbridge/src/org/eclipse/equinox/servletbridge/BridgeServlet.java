@@ -106,8 +106,9 @@ public class BridgeServlet extends HttpServlet {
 			framework.start();
 			frameworkStarted = true;
 		} finally {
-			if (!frameworkStarted)
+			if (!frameworkStarted) {
 				setInstance(null);
+			}
 		}
 	}
 
@@ -132,8 +133,9 @@ public class BridgeServlet extends HttpServlet {
 	protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		String pathInfo = req.getPathInfo();
 		// Check if this is being handled by an extension mapping
-		if (pathInfo == null && isExtensionMapping(req.getServletPath()))
+		if (pathInfo == null && isExtensionMapping(req.getServletPath())) {
 			req = new ExtensionMappingRequest(req);
+		}
 
 		if (req.getAttribute(INCLUDE_REQUEST_URI_ATTRIBUTE) == null) {
 			if (enableFrameworkControls) {
@@ -148,8 +150,9 @@ public class BridgeServlet extends HttpServlet {
 			// Check if this is being handled by an extension mapping
 			if (includePathInfo == null || includePathInfo.length() == 0) {
 				String servletPath = (String) req.getAttribute(INCLUDE_SERVLET_PATH_ATTRIBUTE);
-				if (isExtensionMapping(servletPath))
+				if (isExtensionMapping(servletPath)) {
 					req = new IncludedExtensionMappingRequest(req);
+				}
 			}
 		}
 
@@ -169,13 +172,15 @@ public class BridgeServlet extends HttpServlet {
 	}
 
 	private boolean isExtensionMapping(String servletPath) {
-		if (servletPath == null)
+		if (servletPath == null) {
 			return false;
+		}
 
 		String lastSegment = servletPath;
 		int lastSlash = servletPath.lastIndexOf('/');
-		if (lastSlash != -1)
+		if (lastSlash != -1) {
 			lastSegment = servletPath.substring(lastSlash + 1);
+		}
 
 		return lastSegment.indexOf('.') != -1;
 	}
@@ -219,18 +224,20 @@ public class BridgeServlet extends HttpServlet {
 			resp.getWriter().write("Platform Redeployed"); //$NON-NLS-1$
 			return true;
 		} else if (pathInfo.equals("/sp_test")) { //$NON-NLS-1$
-			if (delegate == null)
+			if (delegate == null) {
 				resp.getWriter().write("Servlet delegate not registered."); //$NON-NLS-1$
-			else
+			} else {
 				resp.getWriter().write("Servlet delegate registered - " + delegate.getClass().getName()); //$NON-NLS-1$
+			}
 			return true;
 		}
 		return false;
 	}
 
 	private static synchronized void setInstance(BridgeServlet servlet) {
-		if ((instance != null) && (servlet != null))
+		if ((instance != null) && (servlet != null)) {
 			throw new IllegalStateException("instance already set"); //$NON-NLS-1$
+		}
 		instance = servlet;
 	}
 
@@ -240,8 +247,9 @@ public class BridgeServlet extends HttpServlet {
 	}
 
 	private synchronized HttpServlet acquireDelegateReference() {
-		if (delegate != null)
+		if (delegate != null) {
 			++delegateReferenceCount;
+		}
 		return delegate;
 	}
 
@@ -259,12 +267,14 @@ public class BridgeServlet extends HttpServlet {
 			return;
 		}
 
-		if (servletDelegate == null)
+		if (servletDelegate == null) {
 			throw new NullPointerException("cannot register a null servlet delegate"); //$NON-NLS-1$
+		}
 
 		synchronized (instance) {
-			if (instance.delegate != null)
+			if (instance.delegate != null) {
 				throw new IllegalStateException("A Servlet Proxy is already registered"); //$NON-NLS-1$
+			}
 
 			try {
 				servletDelegate.init(instance.getServletConfig());
@@ -292,11 +302,13 @@ public class BridgeServlet extends HttpServlet {
 		}
 
 		synchronized (instance) {
-			if (instance.delegate == null)
+			if (instance.delegate == null) {
 				throw new IllegalStateException("No servlet delegate is registered"); //$NON-NLS-1$
+			}
 
-			if (instance.delegate != servletDelegate)
+			if (instance.delegate != servletDelegate) {
 				throw new IllegalStateException("Servlet delegate does not match registered servlet delegate"); //$NON-NLS-1$
+			}
 
 			HttpServlet oldProxy = instance.delegate;
 			instance.delegate = null;
