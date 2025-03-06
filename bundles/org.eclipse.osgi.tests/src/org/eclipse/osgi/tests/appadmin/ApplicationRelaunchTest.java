@@ -75,17 +75,19 @@ public class ApplicationRelaunchTest extends TestCase {
 			if (refs != null) {
 				for (int i = 0; i < refs.length; i++) {
 					availableApps += refs[i].getProperty(ApplicationDescriptor.APPLICATION_PID);
-					if (i < refs.length - 1)
+					if (i < refs.length - 1) {
 						availableApps += ","; //$NON-NLS-1$
+					}
 				}
 			}
 			fail("Could not find app pid: " + appName + " available apps are: " + availableApps); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		ApplicationDescriptor result = (ApplicationDescriptor) getContext().getService(refs[0]);
-		if (result != null)
+		if (result != null) {
 			getContext().ungetService(refs[0]);
-		else
+		} else {
 			fail("Could not get application descriptor service: " + appName); //$NON-NLS-1$
+		}
 		return result;
 	}
 

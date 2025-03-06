@@ -138,12 +138,15 @@ public class AbstractBundleTests {
 	}
 
 	protected static void assertEqualEvent(String message, Object expected, Object actual) {
-		if (expected == null && actual == null)
+		if (expected == null && actual == null) {
 			return;
-		if ((expected == null || actual == null))
+		}
+		if ((expected == null || actual == null)) {
 			assertEquals(message, toString(expected), toString(actual));
-		if (isEqual(expected, actual))
+		}
+		if (isEqual(expected, actual)) {
 			return;
+		}
 		assertEquals(message, toString(expected), toString(actual));
 	}
 
@@ -165,10 +168,11 @@ public class AbstractBundleTests {
 	}
 
 	private static String toString(Object object) {
-		if (object instanceof BundleEvent)
+		if (object instanceof BundleEvent) {
 			return toString((BundleEvent) object);
-		else if (object instanceof FrameworkEvent)
+		} else if (object instanceof FrameworkEvent) {
 			return toString((FrameworkEvent) object);
+		}
 		return object.toString();
 	}
 
@@ -309,8 +313,9 @@ public class AbstractBundleTests {
 	}
 
 	static public FrameworkEvent stop(Framework equinox, boolean quietly, long timeout) {
-		if (equinox == null)
+		if (equinox == null) {
 			return null;
+		}
 		final String uuid = getUUID(equinox);
 		try {
 			equinox.stop();

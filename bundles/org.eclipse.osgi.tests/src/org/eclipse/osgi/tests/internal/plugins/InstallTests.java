@@ -49,9 +49,10 @@ public class InstallTests {
 					OSGiTestsActivator.TEST_FILES_ROOT + "internal/plugins/installTests/bundle03"); //$NON-NLS-1$
 			// success - should allow manifests with no version.
 		} finally {
-			if (installed != null)
+			if (installed != null) {
 				// clean-up - only runs if we end-up accepting an invalid manifest
 				installed.uninstall();
+			}
 		}
 	}
 
@@ -71,9 +72,10 @@ public class InstallTests {
 			// success - the manifest was invalid
 			assertEquals("Expected manifest error", BundleException.MANIFEST_ERROR, be.getType()); //$NON-NLS-1$
 		} finally {
-			if (installed != null)
+			if (installed != null) {
 				// clean-up - only runs if we end-up accepting an invalid manifest
 				installed.uninstall();
+			}
 		}
 	}
 
@@ -93,9 +95,10 @@ public class InstallTests {
 			// success - the manifest was invalid
 			assertEquals("Expected manifest error", BundleException.MANIFEST_ERROR, be.getType()); //$NON-NLS-1$
 		} finally {
-			if (installed != null)
+			if (installed != null) {
 				// clean-up - only runs if we end-up accepting an invalid manifest
 				installed.uninstall();
+			}
 		}
 	}
 
@@ -116,9 +119,10 @@ public class InstallTests {
 			// success - the manifest was invalid
 			assertEquals("Expected manifest error", BundleException.MANIFEST_ERROR, be.getType()); //$NON-NLS-1$
 		} finally {
-			if (installed != null)
+			if (installed != null) {
 				// clean-up - only runs if we end-up accepting an invalid manifest
 				installed.uninstall();
+			}
 		}
 	}
 
@@ -138,9 +142,10 @@ public class InstallTests {
 			// success - the manifest was invalid
 			assertEquals("Expected manifest error", BundleException.MANIFEST_ERROR, be.getType()); //$NON-NLS-1$
 		} finally {
-			if (installed != null)
+			if (installed != null) {
 				// clean-up - only runs if we end-up accepting an invalid manifest
 				installed.uninstall();
+			}
 		}
 	}
 
@@ -163,9 +168,10 @@ public class InstallTests {
 			}
 
 		} finally {
-			if (installed != null)
+			if (installed != null) {
 				// clean-up - only runs if we end-up accepting an invalid manifest
 				installed.uninstall();
+			}
 		}
 	}
 
@@ -198,10 +204,12 @@ public class InstallTests {
 			}
 
 		} finally {
-			if (host != null)
+			if (host != null) {
 				host.uninstall();
-			if (fragment != null)
+			}
+			if (fragment != null) {
 				fragment.uninstall();
+			}
 
 		}
 	}
@@ -221,9 +229,10 @@ public class InstallTests {
 			// success - the manifest was invalid
 			assertEquals("Expected unsupported error", BundleException.UNSUPPORTED_OPERATION, be.getType()); //$NON-NLS-1$
 		} finally {
-			if (installed != null)
+			if (installed != null) {
 				// clean-up - only runs if we end-up accepting an invalid manifest
 				installed.uninstall();
+			}
 		}
 	}
 

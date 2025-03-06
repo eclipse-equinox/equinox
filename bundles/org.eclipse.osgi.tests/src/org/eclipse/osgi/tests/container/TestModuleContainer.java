@@ -151,8 +151,9 @@ public class TestModuleContainer extends AbstractTest {
 		ExecutorService executor = Executors.newFixedThreadPool(10);
 		Bundle[] bundles = context.getBundles();
 		for (final Bundle bundle : bundles) {
-			if (bundle.getBundleId() == 0)
+			if (bundle.getBundleId() == 0) {
 				continue;
+			}
 			executor.execute(() -> {
 				try {
 					ModuleRevisionBuilder builder = OSGiManifestBuilderFactory

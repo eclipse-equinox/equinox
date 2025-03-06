@@ -66,13 +66,15 @@ public class Activator implements BundleActivator {
 	}
 
 	private void assertEquals(String expected, String actual) {
-		if (!expected.equals(actual))
+		if (!expected.equals(actual)) {
 			throw new RuntimeException("Expected: \"" + expected + "\" but got: \"" + actual + "\"");
+		}
 	}
 
 	private void assertNotNull(String msg, Package pkg) {
-		if (pkg == null)
+		if (pkg == null) {
 			throw new RuntimeException(msg);
+		}
 	}
 
 	@Override

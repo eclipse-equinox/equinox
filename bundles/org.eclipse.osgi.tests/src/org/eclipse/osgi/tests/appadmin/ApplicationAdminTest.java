@@ -99,17 +99,19 @@ public class ApplicationAdminTest extends TestCase {
 				if (refs != null) {
 					for (int i = 0; i < refs.length; i++) {
 						availableApps += refs[i].getProperty(ApplicationDescriptor.APPLICATION_PID);
-						if (i < refs.length - 1)
+						if (i < refs.length - 1) {
 							availableApps += ","; //$NON-NLS-1$
+						}
 					}
 				}
 				fail("Could not find app pid: " + appName + " available apps are: " + availableApps); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			ApplicationDescriptor result = (ApplicationDescriptor) getContext().getService(refs[0]);
-			if (result != null)
+			if (result != null) {
 				getContext().ungetService(refs[0]);
-			else
+			} else {
 				fail("Could not get application descriptor service: " + appName); //$NON-NLS-1$
+			}
 			return result;
 		} catch (InvalidSyntaxException e) {
 			fail("Could not create app filter", e); //$NON-NLS-1$
@@ -153,18 +155,22 @@ public class ApplicationAdminTest extends TestCase {
 			} catch (Throwable t) {
 				// nothing
 			}
-			if (invalidKeys || invalidValues)
+			if (invalidKeys || invalidValues) {
 				fail("Should have failed with invalid arguments"); //$NON-NLS-1$
+			}
 		} catch (InvalidSyntaxException e) {
 			fail("Failed to schedule an application", e); //$NON-NLS-1$
 		} catch (IllegalArgumentException e) {
-			if (!invalidKeys)
+			if (!invalidKeys) {
 				fail("Failed to schedule an application", e); //$NON-NLS-1$
+			}
 		} catch (ApplicationException e) {
-			if (!invalidValues)
+			if (!invalidValues) {
 				fail("Failed to schedule an application", e); //$NON-NLS-1$
-			if (e.getErrorCode() != ApplicationException.APPLICATION_INVALID_STARTUP_ARGUMENT)
+			}
+			if (e.getErrorCode() != ApplicationException.APPLICATION_INVALID_STARTUP_ARGUMENT) {
 				fail("Failed to schedule an application", e); //$NON-NLS-1$
+			}
 		}
 	}
 
@@ -326,8 +332,9 @@ public class ApplicationAdminTest extends TestCase {
 			@Override
 			public void modifiedService(ServiceReference reference, Object service) {
 				if (!"org.eclipse.equinox.app.stopped" //$NON-NLS-1$
-						.equals(reference.getProperty(ApplicationHandle.APPLICATION_STATE)))
+						.equals(reference.getProperty(ApplicationHandle.APPLICATION_STATE))) {
 					return;
+				}
 				try {
 					result[0] = ((ApplicationHandle) service).getExitValue(10000);
 				} catch (Exception e) {
@@ -730,8 +737,9 @@ public class ApplicationAdminTest extends TestCase {
 				}
 			}
 		} catch (ApplicationException e) {
-			if (!hasMax || i != cardinality)
+			if (!hasMax || i != cardinality) {
 				fail("Unexpected ApplicationException", e); //$NON-NLS-1$
+			}
 			assertEquals("check error code", ApplicationException.APPLICATION_NOT_LAUNCHABLE, e.getErrorCode()); //$NON-NLS-1$
 		} finally {
 			for (Object element : instances) {
@@ -757,8 +765,9 @@ public class ApplicationAdminTest extends TestCase {
 			instances.add(app.launch(null));
 			instances.add(app.launch(null));
 		} catch (ApplicationException e) {
-			if (instances.size() == 0)
+			if (instances.size() == 0) {
 				fail("Unable to launch a main threaded application", e); //$NON-NLS-1$
+			}
 			assertEquals("check error code", ApplicationException.APPLICATION_NOT_LAUNCHABLE, e.getErrorCode()); //$NON-NLS-1$
 		} finally {
 			for (Object element : instances) {
@@ -1014,11 +1023,13 @@ public class ApplicationAdminTest extends TestCase {
 		} catch (InterruptedException e) {
 			fail("got interupted", e); //$NON-NLS-1$
 		} finally {
-			if (badHandle != null)
+			if (badHandle != null) {
 				badHandle.destroy();
+			}
 			tracker.close();
-			if (scheduledApp != null)
+			if (scheduledApp != null) {
 				scheduledApp.remove();
+			}
 		}
 	}
 
@@ -1178,24 +1189,27 @@ public class ApplicationAdminTest extends TestCase {
 			ServiceReference[] refs = getContext().getServiceReferences(schedAppClass.getName(),
 					"(" + ScheduledApplication.SCHEDULE_ID + "=" + scheduleID + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			if (refs == null || refs.length == 0) {
-				if (!failOnMissing)
+				if (!failOnMissing) {
 					return null;
+				}
 				refs = getContext().getServiceReferences(ScheduledApplication.class.getName(), null);
 				String availableScheds = ""; //$NON-NLS-1$
 				if (refs != null) {
 					for (int i = 0; i < refs.length; i++) {
 						availableScheds += refs[i].getProperty(ScheduledApplication.SCHEDULE_ID);
-						if (i < refs.length - 1)
+						if (i < refs.length - 1) {
 							availableScheds += ","; //$NON-NLS-1$
+						}
 					}
 				}
 				fail("Could not find schedule: " + scheduleID + " available apps are: " + availableScheds); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			ScheduledApplication result = (ScheduledApplication) getContext().getService(refs[0]);
-			if (result != null)
+			if (result != null) {
 				getContext().ungetService(refs[0]);
-			else
+			} else {
 				fail("Could not get scheduled application: " + scheduleID); //$NON-NLS-1$
+			}
 			return result;
 		} catch (InvalidSyntaxException e) {
 			fail("Could not create app filter", e); //$NON-NLS-1$
@@ -1275,11 +1289,13 @@ public class ApplicationAdminTest extends TestCase {
 		}
 
 		private boolean eventFound(String instance, String state) {
-			if (events.size() == 0)
+			if (events.size() == 0) {
 				return false;
+			}
 			String[] event = (String[]) events.get(events.size() - 1);
-			if (instance.equals(event[0]) && state.equals(event[1]))
+			if (instance.equals(event[0]) && state.equals(event[1])) {
 				return true;
+			}
 			return false;
 		}
 	}
@@ -1362,11 +1378,13 @@ public class ApplicationAdminTest extends TestCase {
 		}
 
 		private boolean eventFound(String pid, String type, Boolean locked, Boolean launchable) {
-			if (events.size() == 0)
+			if (events.size() == 0) {
 				return false;
+			}
 			Object[] event = (Object[]) events.get(events.size() - 1);
-			if (pid.equals(event[0]) && type.equals(event[1]) && locked.equals(event[2]) && launchable.equals(event[3]))
+			if (pid.equals(event[0]) && type.equals(event[1]) && locked.equals(event[2]) && launchable.equals(event[3])) {
 				return true;
+			}
 			return false;
 		}
 	}

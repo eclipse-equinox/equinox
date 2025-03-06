@@ -66,12 +66,13 @@ public class ExitValueApp implements IApplication, Runnable {
 	public synchronized void stop() {
 		active = false;
 		notifyAll();
-		while (!stopped)
+		while (!stopped) {
 			try {
 				wait(100);
 			} catch (InterruptedException e) {
 				// do nothing
 			}
+		}
 	}
 
 	@Override

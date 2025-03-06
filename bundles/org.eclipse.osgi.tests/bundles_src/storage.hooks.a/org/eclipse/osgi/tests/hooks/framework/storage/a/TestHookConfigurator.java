@@ -74,8 +74,9 @@ public class TestHookConfigurator implements HookConfigurator {
 			@Override
 			public void validate() throws IllegalStateException {
 				TestHookConfigurator.validateCalled = true;
-				if (TestHookConfigurator.invalid)
+				if (TestHookConfigurator.invalid) {
 					throw new IllegalStateException();
+				}
 			}
 
 			@Override
@@ -135,8 +136,9 @@ public class TestHookConfigurator implements HookConfigurator {
 				return null;
 			}
 			Class<?> factoryClass = TestStorageHookFactory.class;
-			if (invalidFactoryClass)
+			if (invalidFactoryClass) {
 				factoryClass = StorageHookFactory.class;
+			}
 			return new TestStorageHook(generation, factoryClass);
 		}
 

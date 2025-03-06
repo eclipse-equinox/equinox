@@ -20,8 +20,9 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 
 	@Override
 	public void start(BundleContext context) throws Exception {
-		if (context.getProperty("test.bug300692") == null)
+		if (context.getProperty("test.bug300692") == null) {
 			return;
+		}
 		if (context.getProperty("test.bug300692.listener") != null) {
 			context.addBundleListener(this);
 		}
@@ -37,8 +38,9 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 
 	@Override
 	public void bundleChanged(BundleEvent event) {
-		if (event.getType() != BundleEvent.LAZY_ACTIVATION)
+		if (event.getType() != BundleEvent.LAZY_ACTIVATION) {
 			return;
+		}
 		Class clazz = BMultiChain1.class;
 		System.out.println(clazz.getName());
 	}

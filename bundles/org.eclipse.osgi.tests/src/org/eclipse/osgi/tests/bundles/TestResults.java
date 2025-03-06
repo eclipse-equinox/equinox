@@ -32,8 +32,9 @@ public class TestResults {
 			} catch (InterruptedException e) {
 				// do nothing
 			}
-			if (currentSize == events.size() && (System.currentTimeMillis() - initialTime) >= 5000)
+			if (currentSize == events.size() && (System.currentTimeMillis() - initialTime) >= 5000) {
 				break; // no new events occurred; break out
+			}
 		}
 		Object[] result = events.toArray();
 		events.clear();

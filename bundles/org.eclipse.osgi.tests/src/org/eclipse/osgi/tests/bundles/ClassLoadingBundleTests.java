@@ -928,12 +928,13 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		// install a bundle
 		Bundle osgiA = installer.installBundle("osgi.lazystart.a"); //$NON-NLS-1$
 		SynchronousBundleListener testLoadClassListener = event -> {
-			if (event.getType() == BundleEvent.LAZY_ACTIVATION)
+			if (event.getType() == BundleEvent.LAZY_ACTIVATION) {
 				try {
 					event.getBundle().loadClass("osgi.lazystart.a.ATest"); //$NON-NLS-1$
 				} catch (ClassNotFoundException e) {
 					simpleResults.addEvent(e);
 				}
+			}
 		};
 		OSGiTestsActivator.getContext().addBundleListener(testLoadClassListener);
 		try {
@@ -953,12 +954,13 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		Bundle osgiA = installer.installBundle("osgi.lazystart.a"); //$NON-NLS-1$
 		osgiA.start(Bundle.START_ACTIVATION_POLICY);
 		SynchronousBundleListener testLoadClassListener = event -> {
-			if (event.getType() == BundleEvent.LAZY_ACTIVATION)
+			if (event.getType() == BundleEvent.LAZY_ACTIVATION) {
 				try {
 					event.getBundle().loadClass("osgi.lazystart.a.ATest"); //$NON-NLS-1$
 				} catch (ClassNotFoundException e) {
 					simpleResults.addEvent(e);
 				}
+			}
 		};
 		OSGiTestsActivator.getContext().addBundleListener(testLoadClassListener);
 		try {
@@ -977,12 +979,13 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		// install a bundle
 		Bundle test = installer.installBundle("test"); //$NON-NLS-1$
 		SynchronousBundleListener testLoadClassListener = event -> {
-			if (event.getType() == BundleEvent.STARTED)
+			if (event.getType() == BundleEvent.STARTED) {
 				try {
 					event.getBundle().stop();
 				} catch (BundleException e) {
 					simpleResults.addEvent(e);
 				}
+			}
 		};
 		OSGiTestsActivator.getContext().addBundleListener(testLoadClassListener);
 		try {
@@ -1003,12 +1006,13 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		Bundle test = installer.installBundle("test"); //$NON-NLS-1$
 		test.start();
 		SynchronousBundleListener testLoadClassListener = event -> {
-			if (event.getType() == BundleEvent.STARTED)
+			if (event.getType() == BundleEvent.STARTED) {
 				try {
 					event.getBundle().stop();
 				} catch (BundleException e) {
 					simpleResults.addEvent(e);
 				}
+			}
 		};
 		// clear the results from the initial start
 		simpleResults.getResults(0);
@@ -1032,8 +1036,9 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		// install a bundle and call start(START_ACTIVATION_POLICY) twice
 		Bundle osgiA = installer.installBundle("osgi.lazystart.a"); //$NON-NLS-1$
 		installer.resolveBundles(new Bundle[] { osgiA });
-		if (osgiA.getState() == Bundle.STARTING)
+		if (osgiA.getState() == Bundle.STARTING) {
 			osgiA.stop();
+		}
 		osgiA.start(Bundle.START_ACTIVATION_POLICY);
 		Object[] expectedEvents = new Object[0];
 		Object[] actualEvents = simpleResults.getResults(0);
@@ -1175,9 +1180,10 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		assertFalse(dResource.toExternalForm(), dResource.getFile().endsWith("/")); //$NON-NLS-1$
 
 		dResource = test.getEntry("a/b/c/d/"); //$NON-NLS-1$
-		if (dResource != null) // note that File bundles will return non-null whilc jar'ed bundles will return
-								// null
+		if (dResource != null) { // note that File bundles will return non-null whilc jar'ed bundles will return
+			// null
 			assertFalse(dResource.toExternalForm(), dResource.getFile().endsWith("/")); //$NON-NLS-1$
+		}
 
 	}
 
@@ -1204,16 +1210,18 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		assertFalse(dResource.toExternalForm(), dResource.getFile().endsWith("/")); //$NON-NLS-1$
 
 		dResource = test.getResource("a/b/c/d/"); //$NON-NLS-1$
-		if (dResource != null) // note that File bundles will return non-null whilc jar'ed bundles will return
-								// null
+		if (dResource != null) { // note that File bundles will return non-null whilc jar'ed bundles will return
+			// null
 			assertFalse(dResource.toExternalForm(), dResource.getFile().endsWith("/")); //$NON-NLS-1$
+		}
 
 	}
 
 	@Test
 	public void testBootGetResources01() throws Exception {
-		if (System.getProperty(Constants.FRAMEWORK_BOOTDELEGATION) != null)
+		if (System.getProperty(Constants.FRAMEWORK_BOOTDELEGATION) != null) {
 			return; // cannot really test this if this property is set
+		}
 		// make sure there is only one manifest found
 		Bundle test = installer.installBundle("test"); //$NON-NLS-1$
 		Enumeration<URL> manifests = test.getResources("META-INF/MANIFEST.MF"); //$NON-NLS-1$
@@ -1232,8 +1240,9 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 	public void testBootGetResources02() throws Exception {
 		// properly test bug 375783 when used as a parent class loader
 		// This will fail on the IBM VM (see bug 409314)
-		if (System.getProperty(Constants.FRAMEWORK_BOOTDELEGATION) != null)
+		if (System.getProperty(Constants.FRAMEWORK_BOOTDELEGATION) != null) {
 			return; // cannot really test this if this property is set
+		}
 		Bundle test = installer.installBundle("test"); //$NON-NLS-1$
 		installer.resolveBundles(new Bundle[] { test });
 		BundleWiring wiring = test.adapt(BundleWiring.class);
@@ -1602,8 +1611,9 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		Enumeration<URL> testFiles = registeredA.getResources("resources/test.txt"); //$NON-NLS-1$
 		assertNotNull("testFiles", testFiles); //$NON-NLS-1$
 		ArrayList<String> texts = new ArrayList<>();
-		while (testFiles.hasMoreElements())
+		while (testFiles.hasMoreElements()) {
 			texts.add(readURL(testFiles.nextElement()));
+		}
 		assertEquals("test.txt number", 1, texts.size()); //$NON-NLS-1$
 		assertTrue("buddy.registered.a", texts.contains("buddy.registered.a")); //$NON-NLS-1$ //$NON-NLS-2$
 
@@ -1613,8 +1623,9 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		testFiles = registeredA.getResources("resources/test.txt"); //$NON-NLS-1$
 		assertNotNull("testFiles", testFiles); //$NON-NLS-1$
 		texts = new ArrayList<>();
-		while (testFiles.hasMoreElements())
+		while (testFiles.hasMoreElements()) {
 			texts.add(readURL(testFiles.nextElement()));
+		}
 
 		// The real test
 		assertEquals("test.txt number", 3, texts.size()); //$NON-NLS-1$
@@ -1733,8 +1744,9 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		Enumeration<URL> testFiles = dependentA.getResources("resources/test.txt"); //$NON-NLS-1$
 		assertNotNull("testFiles", testFiles); //$NON-NLS-1$
 		ArrayList<String> texts = new ArrayList<>();
-		while (testFiles.hasMoreElements())
+		while (testFiles.hasMoreElements()) {
 			texts.add(readURL(testFiles.nextElement()));
+		}
 		assertEquals("test.txt number", 1, texts.size()); //$NON-NLS-1$
 		assertTrue("buddy.dependent.a", texts.contains("buddy.dependent.a")); //$NON-NLS-1$ //$NON-NLS-2$
 
@@ -1744,8 +1756,9 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		testFiles = dependentA.getResources("resources/test.txt"); //$NON-NLS-1$
 		assertNotNull("testFiles", testFiles); //$NON-NLS-1$
 		texts = new ArrayList<>();
-		while (testFiles.hasMoreElements())
+		while (testFiles.hasMoreElements()) {
 			texts.add(readURL(testFiles.nextElement()));
+		}
 		assertEquals("test.txt number", 3, texts.size()); //$NON-NLS-1$
 		assertTrue("buddy.dependent.a", texts.contains("buddy.dependent.a")); //$NON-NLS-1$//$NON-NLS-2$
 		assertTrue("buddy.dependent.a.test1", texts.contains("buddy.dependent.a.test1")); //$NON-NLS-1$ //$NON-NLS-2$

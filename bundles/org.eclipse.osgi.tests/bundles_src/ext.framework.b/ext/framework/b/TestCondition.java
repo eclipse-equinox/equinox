@@ -41,12 +41,14 @@ public class TestCondition implements Condition {
 	}
 
 	static public Condition getCondition(final Bundle bundle, ConditionInfo info) {
-		if (!TestCondition.class.getName().equals(info.getType()))
+		if (!TestCondition.class.getName().equals(info.getType())) {
 			throw new IllegalArgumentException(
 					"ConditionInfo must be of type \"" + TestCondition.class.getName() + "\""); //$NON-NLS-1$ //$NON-NLS-2$
+		}
 		String[] args = info.getArgs();
-		if (args.length != 4)
+		if (args.length != 4) {
 			throw new IllegalArgumentException("Illegal number of args: " + args.length); //$NON-NLS-1$
+		}
 		String identity = args[0] + '_' + bundle.getBundleId();
 		boolean mut = Boolean.valueOf(args[1]).booleanValue();
 		boolean post = Boolean.valueOf(args[2]).booleanValue();
@@ -90,16 +92,18 @@ public class TestCondition implements Condition {
 
 	@Override
 	public boolean isSatisfied(Condition[] conditions, Dictionary context) {
-		if (!isPostponed())
+		if (!isPostponed()) {
 			throw new IllegalStateException("Should not call isSatisfied(Condition[] conditions, Dictionary context)"); //$NON-NLS-1$
+		}
 		for (Condition condition : conditions) {
 			Boolean isSatisfied = (Boolean) context.get(condition);
 			if (isSatisfied == null) {
 				isSatisfied = Boolean.valueOf(condition.isSatisfied());
 				context.put(condition, isSatisfied);
 			}
-			if (!isSatisfied.booleanValue())
+			if (!isSatisfied.booleanValue()) {
 				return false;
+			}
 		}
 		return true;
 	}
@@ -111,8 +115,9 @@ public class TestCondition implements Condition {
 
 	@Override
 	public boolean equals(Object o) {
-		if (!(o instanceof TestCondition))
+		if (!(o instanceof TestCondition)) {
 			return false;
+		}
 		TestCondition otherCondition = (TestCondition) o;
 		return id.equals(otherCondition.id) && postponed == otherCondition.postponed
 				&& satisfied == otherCondition.satisfied && mutable == otherCondition.mutable

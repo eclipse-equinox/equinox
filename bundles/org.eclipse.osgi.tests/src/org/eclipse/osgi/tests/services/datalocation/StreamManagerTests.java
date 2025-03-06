@@ -58,15 +58,18 @@ public class StreamManagerTests {
 
 	@After
 	public void tearDown() throws Exception {
-		if (manager1 != null)
+		if (manager1 != null) {
 			manager1.close();
-		if (manager2 != null)
+		}
+		if (manager2 != null) {
 			manager2.close();
+		}
 		rm(base);
-		if (reliableFile == null)
+		if (reliableFile == null) {
 			System.getProperties().remove("osgi.useReliableFiles");
-		else
+		} else {
 			System.setProperty("osgi.useReliableFiles", reliableFile);
+		}
 	}
 
 	private void rm(File folder) {
@@ -209,8 +212,9 @@ public class StreamManagerTests {
 			assertNotNull(fmos);
 			try (DataOutputStream bufferedOut = new DataOutputStream(new BufferedOutputStream(fmos))) {
 				// 200 K of integers (200 * 1024 / 4)
-				for (int i = 0; i < (200 * 1024 / 4); i++)
+				for (int i = 0; i < (200 * 1024 / 4); i++) {
 					bufferedOut.writeInt(i);
+				}
 			}
 		}
 		manager1.close();
@@ -223,8 +227,9 @@ public class StreamManagerTests {
 		try (InputStream is = manager2.getInputStream(fileName)) {
 			assertNotNull(is);
 			try (DataInputStream bufferedIn = new DataInputStream(new BufferedInputStream(is))) {
-				for (int i = 0; i < (200 * 1024 / 4); i++)
+				for (int i = 0; i < (200 * 1024 / 4); i++) {
 					assertEquals("Wrong content found", i, bufferedIn.readInt());
+				}
 			}
 		}
 		manager2.close();
@@ -309,10 +314,11 @@ public class StreamManagerTests {
 
 	private void testAbort(boolean reliable) throws IOException {
 		String fileName;
-		if (reliable)
+		if (reliable) {
 			fileName = "abortFileReliable.txt";
-		else
+		} else {
 			fileName = "abortFileStd.txt";
+		}
 		File file1 = new File(base, fileName + ".1");
 		File file2 = new File(base, fileName + ".2");
 		File file3 = new File(base, fileName + ".3");
@@ -371,10 +377,11 @@ public class StreamManagerTests {
 
 	private void testGetOutputStreamSet(boolean reliable) throws IOException {
 		File mgrDir;
-		if (reliable)
+		if (reliable) {
 			mgrDir = new File(base, "getSetReliable");
-		else
+		} else {
 			mgrDir = new File(base, "getSetStd");
+		}
 		String fileName1 = "testSet1.txt";
 		String fileName2 = "testSet2.txt";
 		File file1_1 = new File(mgrDir, fileName1 + ".1");
@@ -436,10 +443,11 @@ public class StreamManagerTests {
 
 	private void testAbortSet(boolean reliable) throws IOException {
 		File mgrDir;
-		if (reliable)
+		if (reliable) {
 			mgrDir = new File(base, "abortSetReliable");
-		else
+		} else {
 			mgrDir = new File(base, "abortSetStd");
+		}
 		String fileName1 = "test1.txt";
 		String fileName2 = "test2.txt";
 		String fileName3 = "test3.txt";

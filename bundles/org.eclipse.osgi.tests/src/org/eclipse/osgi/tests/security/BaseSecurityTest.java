@@ -95,8 +95,9 @@ public class BaseSecurityTest extends TestCase {
 
 	@Override
 	protected void tearDown() throws Exception {
-		if (trustReg != null)
+		if (trustReg != null) {
 			trustReg.unregister();
+		}
 	}
 
 	public static void copy(InputStream in, File dst) throws IOException {
@@ -145,15 +146,17 @@ public class BaseSecurityTest extends TestCase {
 
 	protected static File getEntryFile(String entryPath) throws IOException {
 		URL entryURL = OSGiTestsActivator.getBundle().getEntry(entryPath);
-		if (entryURL == null)
+		if (entryURL == null) {
 			return null;
+		}
 		return new File(FileLocator.toFileURL(entryURL).toExternalForm().substring(5));
 	}
 
 	protected static File copyEntryFile(String entryPath) throws IOException {
 		URL entryURL = OSGiTestsActivator.getBundle().getEntry(entryPath);
-		if (entryURL == null)
+		if (entryURL == null) {
 			return null;
+		}
 		File tempFolder = OSGiTestsActivator.getContext().getDataFile("temp");
 		tempFolder.mkdirs();
 		File result = File.createTempFile("entry", ".jar", tempFolder);

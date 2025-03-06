@@ -147,8 +147,9 @@ public class SecurityManagerTests extends AbstractBundleTests {
 	@Override
 	public void tearDown() throws Exception {
 		super.tearDown();
-		if (getSecurityManager() != null)
+		if (getSecurityManager() != null) {
 			System.setSecurityManager(null);
+		}
 		Policy.setPolicy(previousPolicy);
 	}
 
@@ -519,12 +520,13 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		testBundle.start();
 		StartLevel sl = (StartLevel) systemContext
 				.getService(systemContext.getServiceReference(StartLevel.class.getName()));
-		if (sl.getStartLevel() != 10)
+		if (sl.getStartLevel() != 10) {
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e1) {
 				// nothing
 			}
+		}
 		assertEquals("Wrong startlevel", 10, sl.getStartLevel()); //$NON-NLS-1$
 		stop(equinox);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$

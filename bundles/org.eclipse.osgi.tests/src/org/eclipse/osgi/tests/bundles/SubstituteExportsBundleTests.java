@@ -443,8 +443,9 @@ public class SubstituteExportsBundleTests extends AbstractBundleTests {
 
 	private void contains(String message, Bundle[] bundles, Bundle b) {
 		boolean found = false;
-		for (int i = 0; i < bundles.length && !found; i++)
+		for (int i = 0; i < bundles.length && !found; i++) {
 			found = bundles[i] == b;
+		}
 		assertTrue(message + b, found);
 	}
 }

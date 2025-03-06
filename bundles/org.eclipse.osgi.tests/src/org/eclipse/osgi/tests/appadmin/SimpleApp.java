@@ -27,8 +27,9 @@ public class SimpleApp implements IApplication {
 		System.out.println("started simple app");
 		System.out.flush();
 		HashMap results = (HashMap) context.getArguments().get(ApplicationAdminTest.testResults);
-		if (results != null)
+		if (results != null) {
 			results.put(ApplicationAdminTest.simpleResults, ApplicationAdminTest.SUCCESS);
+		}
 		context.applicationRunning();
 		while (active) {
 			try {
@@ -48,12 +49,13 @@ public class SimpleApp implements IApplication {
 	public synchronized void stop() {
 		active = false;
 		notifyAll();
-		while (!stopped)
+		while (!stopped) {
 			try {
 				wait(100);
 			} catch (InterruptedException e) {
 				// do nothing
 			}
+		}
 	}
 
 }

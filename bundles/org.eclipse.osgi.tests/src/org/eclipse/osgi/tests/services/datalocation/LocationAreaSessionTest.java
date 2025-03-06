@@ -87,8 +87,9 @@ public class LocationAreaSessionTest extends TestCase {
 			@Override
 			public void runBare() throws Throwable {
 				// Note that java.io locking only seems to work reliably on windows
-				if (!Constants.OS_WIN32.equals(System.getProperty("osgi.os")))
+				if (!Constants.OS_WIN32.equals(System.getProperty("osgi.os"))) {
 					return;
+				}
 				doLock(testLocationLockDir, JAVA_IO, false, true);
 			}
 		});
@@ -109,8 +110,9 @@ public class LocationAreaSessionTest extends TestCase {
 		suite.addTest(new TestCase("testReleaseJavaIO") {
 			@Override
 			public void runBare() throws Throwable {
-				if (!Constants.OS_WIN32.equals(System.getProperty("osgi.os")))
+				if (!Constants.OS_WIN32.equals(System.getProperty("osgi.os"))) {
 					return;
+				}
 				doRelease();
 			}
 		});
@@ -140,10 +142,11 @@ public class LocationAreaSessionTest extends TestCase {
 		try {
 			doLock(testLocationDir, release, succeed);
 		} finally {
-			if (oldLockingValue == null)
+			if (oldLockingValue == null) {
 				System.getProperties().remove(LocationHelper.PROP_OSGI_LOCKING);
-			else
+			} else {
 				System.setProperty(LocationHelper.PROP_OSGI_LOCKING, oldLockingValue);
+			}
 		}
 	}
 
@@ -161,30 +164,38 @@ public class LocationAreaSessionTest extends TestCase {
 			testLocation = configLocation.createLocation(null, new File(testLocationDir).toURL(), false);
 			testLocation.setURL(testLocation.getDefault(), false);
 			// try locking location
-			if (succeed ? testLocation.isLocked() : !testLocation.isLocked())
+			if (succeed ? testLocation.isLocked() : !testLocation.isLocked()) {
 				fail("location should " + (succeed ? "not " : "") + "be locked");
-			if (succeed ? !testLocation.lock() : testLocation.lock())
+			}
+			if (succeed ? !testLocation.lock() : testLocation.lock()) {
 				fail((succeed ? "Could not" : "Could") + " lock location");
-			if (!testLocation.isLocked())
+			}
+			if (!testLocation.isLocked()) {
 				fail("location should be locked");
+			}
 		} finally {
-			if (release && testLocation != null)
+			if (release && testLocation != null) {
 				testLocation.release();
-			if (!release)
+			}
+			if (!release) {
 				lockedTestLocation = testLocation;
+			}
 			OSGiTestsActivator.getContext().ungetService(refs[0]);
 		}
 	}
 
 	static void doRelease() throws IOException {
 		try {
-			if (lockedTestLocation == null)
+			if (lockedTestLocation == null) {
 				fail("lockedTestLocation == null !!");
-			if (!lockedTestLocation.isLocked())
+			}
+			if (!lockedTestLocation.isLocked()) {
 				fail("lockedTestLocation is not locked!!");
+			}
 			lockedTestLocation.release();
-			if (lockedTestLocation.isLocked())
+			if (lockedTestLocation.isLocked()) {
 				fail("lockedTestLocation is still locked!!");
+			}
 		} finally {
 			lockedTestLocation = null;
 		}
@@ -199,14 +210,16 @@ public class LocationAreaSessionTest extends TestCase {
 	}
 
 	public void testSessionFailLockJavaIO() throws Exception {
-		if (!Constants.OS_WIN32.equals(System.getProperty("osgi.os")))
+		if (!Constants.OS_WIN32.equals(System.getProperty("osgi.os"))) {
 			return;
+		}
 		doLock(System.getProperty(TEST_LOCATION_DIR), JAVA_IO, true, false);
 	}
 
 	public void testSessionSuccessLockJavaIO() throws Exception {
-		if (!Constants.OS_WIN32.equals(System.getProperty("osgi.os")))
+		if (!Constants.OS_WIN32.equals(System.getProperty("osgi.os"))) {
 			return;
+		}
 		doLock(System.getProperty(TEST_LOCATION_DIR), JAVA_IO, true, true);
 	}
 }

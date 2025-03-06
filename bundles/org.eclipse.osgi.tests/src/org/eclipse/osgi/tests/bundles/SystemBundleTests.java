@@ -425,12 +425,13 @@ public class SystemBundleTests extends AbstractBundleTests {
 		FrameworkEvent success = update(equinox);
 		assertEquals("Wait for stop event type is wrong", FrameworkEvent.STOPPED_UPDATE, success.getType()); //$NON-NLS-1$
 		// TODO delay hack to allow the framework to get started again
-		for (int i = 0; i < 5 && Bundle.ACTIVE != equinox.getState(); i++)
+		for (int i = 0; i < 5 && Bundle.ACTIVE != equinox.getState(); i++) {
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 				// nothing
 			}
+		}
 		assertEquals("Wrong state for SystemBundle", Bundle.ACTIVE, equinox.getState()); //$NON-NLS-1$
 		stop(equinox);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
@@ -1060,10 +1061,12 @@ public class SystemBundleTests extends AbstractBundleTests {
 
 		final Bundle testFinal1 = test1;
 		ServiceRegistration reg = systemContext.registerService(WeavingHook.class, wovenClass -> {
-			if (!testFinal1.equals(wovenClass.getBundleWiring().getBundle()))
+			if (!testFinal1.equals(wovenClass.getBundleWiring().getBundle())) {
 				return;
-			if (!"substitutes.x.Ax".equals(wovenClass.getClassName()))
+			}
+			if (!"substitutes.x.Ax".equals(wovenClass.getClassName())) {
 				return;
+			}
 			List dynamicImports = wovenClass.getDynamicImports();
 			dynamicImports.add("*");
 		}, null);
@@ -1087,10 +1090,12 @@ public class SystemBundleTests extends AbstractBundleTests {
 
 		final Bundle testFinal2 = test2;
 		reg = systemContext.registerService(WeavingHook.class, wovenClass -> {
-			if (!testFinal2.equals(wovenClass.getBundleWiring().getBundle()))
+			if (!testFinal2.equals(wovenClass.getBundleWiring().getBundle())) {
 				return;
-			if (!"exporter.importer.test.Test1".equals(wovenClass.getClassName()))
+			}
+			if (!"exporter.importer.test.Test1".equals(wovenClass.getClassName())) {
 				return;
+			}
 			List dynamicImports = wovenClass.getDynamicImports();
 			dynamicImports.add("*");
 		}, null);
@@ -1267,8 +1272,9 @@ public class SystemBundleTests extends AbstractBundleTests {
 	private void checkActive(Bundle b) throws InterruptedException {
 		// just a hack to make sure we are restarted
 		Thread.sleep(500);
-		if (b.getState() != Bundle.ACTIVE)
+		if (b.getState() != Bundle.ACTIVE) {
 			Thread.sleep(500);
+		}
 	}
 
 	@Test
@@ -1286,10 +1292,12 @@ public class SystemBundleTests extends AbstractBundleTests {
 
 		final Bundle testFinal1 = test1;
 		ServiceRegistration reg = systemContext.registerService(WeavingHook.class, wovenClass -> {
-			if (!testFinal1.equals(wovenClass.getBundleWiring().getBundle()))
+			if (!testFinal1.equals(wovenClass.getBundleWiring().getBundle())) {
 				return;
-			if (!"substitutes.x.Ax".equals(wovenClass.getClassName()))
+			}
+			if (!"substitutes.x.Ax".equals(wovenClass.getClassName())) {
 				return;
+			}
 			List dynamicImports = wovenClass.getDynamicImports();
 			dynamicImports.add("*");
 		}, null);
@@ -1353,10 +1361,12 @@ public class SystemBundleTests extends AbstractBundleTests {
 		Bundle chainTestB = systemContext.installBundle(installer.getBundleLocation("chain.test.b")); //$NON-NLS-1$
 		Bundle chainTestC = systemContext.installBundle(installer.getBundleLocation("chain.test.c")); //$NON-NLS-1$
 		systemContext.registerService(WeavingHook.class, wovenClass -> {
-			if (!chainTestD.equals(wovenClass.getBundleWiring().getBundle()))
+			if (!chainTestD.equals(wovenClass.getBundleWiring().getBundle())) {
 				return;
-			if (!"chain.test.d.DMultipleChain1".equals(wovenClass.getClassName()))
+			}
+			if (!"chain.test.d.DMultipleChain1".equals(wovenClass.getClassName())) {
 				return;
+			}
 			List dynamicImports = wovenClass.getDynamicImports();
 			dynamicImports.add("*");
 		}, null);
@@ -2005,8 +2015,9 @@ public class SystemBundleTests extends AbstractBundleTests {
 
 		File[] bundles = new File[bundleCount];
 
-		for (int i = 0; i < bundleCount; i++)
+		for (int i = 0; i < bundleCount; i++) {
 			bundles[i] = createBundle(outputDir, "-b" + i, false, false); //$NON-NLS-1$
+		}
 
 		return bundles;
 	}

@@ -53,10 +53,12 @@ public class Activator implements BundleActivator {
 		ServiceRegistration registration = context.registerService(String.class.getName(), "test", props);
 		props.put("test", "value2");
 		registration.setProperties(props);
-		if (!serviceChanged[0])
+		if (!serviceChanged[0]) {
 			throw new Exception("did not call service listener");
-		if (!modifiedService[0])
+		}
+		if (!modifiedService[0]) {
 			throw new Exception("did not call tracker customer");
+		}
 	}
 
 	@Override

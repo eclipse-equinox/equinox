@@ -77,8 +77,9 @@ public class ServiceHookTests extends AbstractBundleTests {
 				(FindHook) (context, name, filter, allServices, references) -> {
 					try {
 						synchronized (hookCalled) {
-							if (!startTest[0])
+							if (!startTest[0]) {
 								return;
+							}
 							hookCalled[++hookCalled[0]] = 1;
 						}
 						assertEquals("wrong context in hook", testContext, context); //$NON-NLS-1$
@@ -110,8 +111,9 @@ public class ServiceHookTests extends AbstractBundleTests {
 				(FindHook) (context, name, filter, allServices, references) -> {
 					try {
 						synchronized (hookCalled) {
-							if (!startTest[0])
+							if (!startTest[0]) {
 								return;
+							}
 							hookCalled[++hookCalled[0]] = 2;
 						}
 						assertEquals("wrong context in hook", testContext, context); //$NON-NLS-1$
@@ -141,8 +143,9 @@ public class ServiceHookTests extends AbstractBundleTests {
 				(FindHook) (context, name, filter, allServices, references) -> {
 					try {
 						synchronized (hookCalled) {
-							if (!startTest[0])
+							if (!startTest[0]) {
 								return;
+							}
 							hookCalled[++hookCalled[0]] = 3;
 						}
 						assertEquals("wrong context in hook", testContext, context); //$NON-NLS-1$
@@ -173,8 +176,9 @@ public class ServiceHookTests extends AbstractBundleTests {
 				(FindHook) (context, name, filter, allServices, references) -> {
 					try {
 						synchronized (hookCalled) {
-							if (!startTest[0])
+							if (!startTest[0]) {
 								return;
+							}
 							hookCalled[++hookCalled[0]] = 4;
 						}
 						assertEquals("wrong context in hook", testContext, context); //$NON-NLS-1$
@@ -249,20 +253,27 @@ public class ServiceHookTests extends AbstractBundleTests {
 			assertTrue("missing service 3", refList.contains(reg3.getReference())); //$NON-NLS-1$
 		} finally {
 			// unregister hook and services
-			if (regHook1 != null)
+			if (regHook1 != null) {
 				regHook1.unregister();
-			if (regHook2 != null)
+			}
+			if (regHook2 != null) {
 				regHook2.unregister();
-			if (regHook3 != null)
+			}
+			if (regHook3 != null) {
 				regHook3.unregister();
-			if (regHook4 != null)
+			}
+			if (regHook4 != null) {
 				regHook4.unregister();
-			if (reg1 != null)
+			}
+			if (reg1 != null) {
 				reg1.unregister();
-			if (reg2 != null)
+			}
+			if (reg2 != null) {
 				reg2.unregister();
-			if (reg3 != null)
+			}
+			if (reg3 != null) {
 				reg3.unregister();
+			}
 		}
 	}
 
@@ -402,12 +413,15 @@ public class ServiceHookTests extends AbstractBundleTests {
 
 		} finally {
 			// unregister hook and services
-			if (regHook != null)
+			if (regHook != null) {
 				regHook.unregister();
-			if (reg1 != null)
+			}
+			if (reg1 != null) {
 				reg1.unregister();
-			if (sl != null)
+			}
+			if (sl != null) {
 				testContext.removeServiceListener(sl);
+			}
 		}
 	}
 

@@ -444,15 +444,17 @@ public class BasicTest extends AbstractResourceTest {
 	}
 
 	private void assertNotRequirementMatches(Requirement requirement, Capability capability) {
-		if (!(requirement instanceof BundleRequirement) || !(capability instanceof BundleCapability))
+		if (!(requirement instanceof BundleRequirement) || !(capability instanceof BundleCapability)) {
 			return;
+		}
 		assertFalse("Requirement matches capability",
 				((BundleRequirement) requirement).matches((BundleCapability) capability));
 	}
 
 	private void assertRequirementMatches(Requirement requirement, Capability capability) {
-		if (!(requirement instanceof BundleRequirement) || !(capability instanceof BundleCapability))
+		if (!(requirement instanceof BundleRequirement) || !(capability instanceof BundleCapability)) {
 			return;
+		}
 		assertTrue("Requirement does not match capability",
 				((BundleRequirement) requirement).matches((BundleCapability) capability));
 	}

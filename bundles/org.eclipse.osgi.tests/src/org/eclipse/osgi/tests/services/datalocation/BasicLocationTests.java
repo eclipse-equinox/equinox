@@ -91,18 +91,22 @@ public class BasicLocationTests {
 	}
 
 	private void checkLocation(Location location, boolean leading, boolean trailing, String scheme) {
-		if (location == null)
+		if (location == null) {
 			return;
+		}
 		URL url = location.getURL();
-		if (scheme != null)
+		if (scheme != null) {
 			assertEquals(scheme, url.getProtocol());
-		if (!url.getProtocol().equals("file"))
+		}
+		if (!url.getProtocol().equals("file")) {
 			return;
+		}
 		assertTrue(url.toExternalForm() + " should " + (trailing ? "" : "not") + " have a trailing slash",
 				url.getFile().endsWith("/") == trailing);
-		if (OS.isWindows())
+		if (OS.isWindows()) {
 			assertTrue(url.toExternalForm() + " should " + (leading ? "" : "not") + " have a leading slash",
 					url.getFile().startsWith("/") == leading);
+		}
 	}
 
 	private void fail(String message, Throwable exception) {

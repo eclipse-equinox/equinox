@@ -103,10 +103,12 @@ public class ServiceTrackerTests extends AbstractBundleTests {
 			clearResults(results);
 
 		} finally {
-			if (reg != null)
+			if (reg != null) {
 				reg.unregister();
-			if (testTracker != null)
+			}
+			if (testTracker != null) {
 				testTracker.close();
+			}
 		}
 	}
 
@@ -183,10 +185,12 @@ public class ServiceTrackerTests extends AbstractBundleTests {
 			clearResults(results);
 
 		} finally {
-			if (reg != null)
+			if (reg != null) {
 				reg.unregister();
-			if (testTracker != null)
+			}
+			if (testTracker != null) {
 				testTracker.close();
+			}
 		}
 	}
 
@@ -254,15 +258,18 @@ public class ServiceTrackerTests extends AbstractBundleTests {
 			assertFalse("Did call removedService", results[2]); //$NON-NLS-1$
 			clearResults(results);
 		} finally {
-			if (reg != null)
+			if (reg != null) {
 				reg.unregister();
-			if (testTracker != null)
+			}
+			if (testTracker != null) {
 				testTracker.close();
+			}
 		}
 	}
 
 	private void clearResults(boolean[] results) {
-		for (int i = 0; i < results.length; i++)
+		for (int i = 0; i < results.length; i++) {
 			results[i] = false;
+		}
 	}
 }

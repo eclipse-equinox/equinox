@@ -245,10 +245,11 @@ public class DiscardBundleTests extends AbstractBundleTests {
 				stop(equinox);
 				touchFile(bundleFile);
 				equinox = restart(equinox, configuration);
-				if (discard)
+				if (discard) {
 					assertDiscarded(location, equinox);
-				else
+				} else {
 					assertNotDiscarded(location, equinox);
+				}
 			} finally {
 				try {
 					equinox.getBundleContext().getBundle(location).uninstall();
@@ -277,8 +278,9 @@ public class DiscardBundleTests extends AbstractBundleTests {
 	}
 
 	private void touchFile(File file) {
-		if (file.isDirectory())
+		if (file.isDirectory()) {
 			file = new File(file, BUNDLE_MANIFEST);
+		}
 		assertTrue("Could not set last modified: " + file, file.setLastModified(file.lastModified() + 1000));
 	}
 }

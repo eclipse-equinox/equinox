@@ -95,8 +95,9 @@ public class ExtendedLogReaderServiceTest {
 		TestListener listener = new TestListener();
 		reader.addLogListener(listener, (b, loggerName, logLevel) -> false);
 
-		if (log.isLoggable(LogService.LOG_INFO))
+		if (log.isLoggable(LogService.LOG_INFO)) {
 			fail();
+		}
 
 		reader.addLogListener(listener, (b, loggerName, logLevel) -> true);
 		log.log(LogService.LOG_INFO, "info");
@@ -120,8 +121,9 @@ public class ExtendedLogReaderServiceTest {
 			throw new RuntimeException("Expected error for testBadFilter.");
 		});
 
-		if (log.isLoggable(LogService.LOG_INFO))
+		if (log.isLoggable(LogService.LOG_INFO)) {
 			fail();
+		}
 	}
 
 	@Test
@@ -159,8 +161,9 @@ public class ExtendedLogReaderServiceTest {
 
 		assertTrue(entry.getLoggerName().equals("test"));
 		assertTrue(entry.getThreadName().equals(threadName));
-		if (threadId >= 0)
+		if (threadId >= 0) {
 			assertTrue(entry.getThreadId() == threadId);
+		}
 		assertTrue(entry.getContext() == logReference);
 		assertTrue(entry.getSequenceNumber() > sequenceNumberBefore);
 	}

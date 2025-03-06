@@ -95,13 +95,15 @@ public class DebugOptionsTestCase {
 
 	@After
 	public void tearDown() throws Exception {
-		if (debugOptions == null)
+		if (debugOptions == null) {
 			return;
+		}
 		debugOptions.setDebugEnabled(false);
 		debugOptions = null;
 		OSGiTestsActivator.getContext().ungetService(ref);
-		if (reg != null)
+		if (reg != null) {
 			reg.unregister();
+		}
 	}
 
 	private String getName() {
@@ -175,8 +177,9 @@ public class DebugOptionsTestCase {
 
 	@Test
 	public void testDyanmicEnablement01() {
-		if (debugOptions.isDebugEnabled())
+		if (debugOptions.isDebugEnabled()) {
 			return; // cannot test
+		}
 		debugOptions.setDebugEnabled(true);
 		assertTrue("Debug is not enabled", debugOptions.isDebugEnabled()); //$NON-NLS-1$
 		listener.clear();
@@ -190,8 +193,9 @@ public class DebugOptionsTestCase {
 
 	@Test
 	public void testDyanmicEnablement02() {
-		if (debugOptions.isDebugEnabled())
+		if (debugOptions.isDebugEnabled()) {
 			return; // cannot test
+		}
 		debugOptions.setDebugEnabled(true);
 		assertTrue("Debug is not enabled", debugOptions.isDebugEnabled()); //$NON-NLS-1$
 		listener.clear();
@@ -206,8 +210,9 @@ public class DebugOptionsTestCase {
 	@Test
 	public void testDyanmicEnablement03() {
 		listener.clear();
-		if (debugOptions.isDebugEnabled())
+		if (debugOptions.isDebugEnabled()) {
 			return; // cannot test
+		}
 		TestDebugOptionsListener anotherListener = new TestDebugOptionsListener();
 		Dictionary anotherProps = new Hashtable();
 		anotherProps.put(DebugOptions.LISTENER_SYMBOLICNAME, "anotherListener"); //$NON-NLS-1$
@@ -247,8 +252,9 @@ public class DebugOptionsTestCase {
 
 	@Test
 	public void testDyanmicEnablement04() {
-		if (debugOptions.isDebugEnabled())
+		if (debugOptions.isDebugEnabled()) {
 			return; // cannot test
+		}
 		debugOptions.setDebugEnabled(true);
 		listener.clear();
 		assertTrue("Debug is not enabled", debugOptions.isDebugEnabled()); //$NON-NLS-1$
@@ -1188,8 +1194,9 @@ public class DebugOptionsTestCase {
 	}
 
 	private static String decodeString(final String inputString) {
-		if (inputString == null || inputString.indexOf(TRACE_ELEMENT_DELIMITER_ENCODED) < 0)
+		if (inputString == null || inputString.indexOf(TRACE_ELEMENT_DELIMITER_ENCODED) < 0) {
 			return inputString;
+		}
 		final StringBuilder tempBuffer = new StringBuilder(inputString);
 		int currentIndex = tempBuffer.indexOf(TRACE_ELEMENT_DELIMITER_ENCODED);
 		while (currentIndex >= 0) {
@@ -1540,8 +1547,9 @@ public class DebugOptionsTestCase {
 		@Override
 		public void optionsChanged(DebugOptions options) {
 			called = true;
-			if (checkValues == null)
+			if (checkValues == null) {
 				return;
+			}
 			for (Object element : checkValues.entrySet()) {
 				Map.Entry entry = (Entry) element;
 				String debugValue = options.getOption((String) entry.getKey());

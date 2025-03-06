@@ -80,8 +80,9 @@ public class Activator implements BundleActivator {
 			readloop: while (true) {
 				for (; bytesread < length; bytesread += readcount) {
 					readcount = in.read(classbytes, bytesread, length - bytesread);
-					if (readcount <= 0) /* if we didn't read anything */
+					if (readcount <= 0) { /* if we didn't read anything */
 						break readloop; /* leave the loop */
+					}
 				}
 				byte[] oldbytes = classbytes;
 				length += 1024;

@@ -2370,8 +2370,9 @@ public class StateResolverTest extends AbstractStateTest {
 
 		assertEquals("1.0", 3, aResolvedImports.length); //$NON-NLS-1$
 		assertEquals("1.1", 3, bSelectedExports.length); //$NON-NLS-1$
-		for (int i = 0; i < aResolvedImports.length; i++)
+		for (int i = 0; i < aResolvedImports.length; i++) {
 			assertEquals("1.2", bSelectedExports[i], aResolvedImports[i]); //$NON-NLS-1$
+		}
 		assertEquals("2.0", 1, aSelectedExports.length); //$NON-NLS-1$
 		assertEquals("2.1", 1, bResolvedImports.length); //$NON-NLS-1$
 		assertEquals("2.2", aSelectedExports[0], bResolvedImports[0]); //$NON-NLS-1$
@@ -4934,8 +4935,9 @@ public class StateResolverTest extends AbstractStateTest {
 			Filter filter = FrameworkUtil.createFilter(reqFilterSpec);
 			assertTrue("Cannot match requirement filter: " + filter, filter.matches(matchingAttrs));
 		} else {
-			if (reqFilter)
+			if (reqFilter) {
 				fail("Requirement must have filter directive: " + req);
+			}
 		}
 		if (directivesFilterSpec != null) {
 			Filter directivesFilter = FrameworkUtil.createFilter(directivesFilterSpec);

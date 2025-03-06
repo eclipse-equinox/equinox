@@ -55,13 +55,16 @@ public class ServiceExceptionTests extends AbstractBundleTests {
 			listener.waitForEvent("Failed to fire ServiceException"); //$NON-NLS-1$
 			OSGiTestsActivator.getContext().ungetService(refs[0]);
 			Error error = wrongObjectFactory.getUngetFailure();
-			if (error != null)
+			if (error != null) {
 				throw error;
+			}
 		} finally {
-			if (reg != null)
+			if (reg != null) {
 				reg.unregister();
-			if (listener != null)
+			}
+			if (listener != null) {
 				OSGiTestsActivator.getContext().removeFrameworkListener(listener);
+			}
 		}
 	}
 
@@ -87,13 +90,16 @@ public class ServiceExceptionTests extends AbstractBundleTests {
 			listener.waitForEvent("Failed to fire ServiceException"); //$NON-NLS-1$
 			OSGiTestsActivator.getContext().ungetService(refs[0]);
 			Error error = nullObjectFactory.getUngetFailure();
-			if (error != null)
+			if (error != null) {
 				throw error;
+			}
 		} finally {
-			if (reg != null)
+			if (reg != null) {
 				reg.unregister();
-			if (listener != null)
+			}
+			if (listener != null) {
 				OSGiTestsActivator.getContext().removeFrameworkListener(listener);
+			}
 		}
 	}
 
@@ -120,13 +126,16 @@ public class ServiceExceptionTests extends AbstractBundleTests {
 			listener.waitForEvent("Failed to fire ServiceException"); //$NON-NLS-1$
 			OSGiTestsActivator.getContext().ungetService(refs[0]);
 			Error error = runtimeExceptionFactory.getUngetFailure();
-			if (error != null)
+			if (error != null) {
 				throw error;
+			}
 		} finally {
-			if (reg != null)
+			if (reg != null) {
 				reg.unregister();
-			if (listener != null)
+			}
+			if (listener != null) {
 				OSGiTestsActivator.getContext().removeFrameworkListener(listener);
+			}
 		}
 	}
 
@@ -153,13 +162,16 @@ public class ServiceExceptionTests extends AbstractBundleTests {
 			listener.waitForEvent("Failed to fire ServiceException"); //$NON-NLS-1$
 			OSGiTestsActivator.getContext().ungetService(refs[0]);
 			Error error = errorFactory.getUngetFailure();
-			if (error != null)
+			if (error != null) {
 				throw error;
+			}
 		} finally {
-			if (reg != null)
+			if (reg != null) {
 				reg.unregister();
-			if (listener != null)
+			}
+			if (listener != null) {
 				OSGiTestsActivator.getContext().removeFrameworkListener(listener);
+			}
 		}
 	}
 
@@ -173,20 +185,24 @@ public class ServiceExceptionTests extends AbstractBundleTests {
 
 		@Override
 		public Object getService(Bundle bundle, ServiceRegistration registration) {
-			if (serviceOrThrowable instanceof RuntimeException)
+			if (serviceOrThrowable instanceof RuntimeException) {
 				throw (RuntimeException) serviceOrThrowable;
-			if (serviceOrThrowable instanceof Error)
+			}
+			if (serviceOrThrowable instanceof Error) {
 				throw (Error) serviceOrThrowable;
+			}
 			return serviceOrThrowable;
 		}
 
 		@Override
 		public synchronized void ungetService(Bundle bundle, ServiceRegistration registration, Object service) {
 			try {
-				if (serviceOrThrowable instanceof RuntimeException)
+				if (serviceOrThrowable instanceof RuntimeException) {
 					Assert.fail("Unexpected call to ungetService: " + serviceOrThrowable); //$NON-NLS-1$
-				if (serviceOrThrowable instanceof Error)
+				}
+				if (serviceOrThrowable instanceof Error) {
 					Assert.fail("Unexpected call to ungetService: " + serviceOrThrowable); //$NON-NLS-1$
+				}
 			} catch (Error error) {
 				ungetFailure = error;
 			}
@@ -211,14 +227,18 @@ public class ServiceExceptionTests extends AbstractBundleTests {
 
 		@Override
 		public void frameworkEvent(FrameworkEvent event) {
-			if (event.getBundle() != registrationBundle)
+			if (event.getBundle() != registrationBundle) {
 				return;
-			if (!(event.getThrowable() instanceof ServiceException))
+			}
+			if (!(event.getThrowable() instanceof ServiceException)) {
 				return;
-			if (event.getThrowable().getCause() != exception)
+			}
+			if (event.getThrowable().getCause() != exception) {
 				return;
-			if (((ServiceException) event.getThrowable()).getType() != exceptionType)
+			}
+			if (((ServiceException) event.getThrowable()).getType() != exceptionType) {
 				return;
+			}
 			notifyWaiter();
 		}
 
@@ -232,8 +252,9 @@ public class ServiceExceptionTests extends AbstractBundleTests {
 				wait(10000);
 
 				// still waiting for event; we now fail
-				if (waitForEvent)
+				if (waitForEvent) {
 					Assert.fail(failMessage);
+				}
 			}
 		}
 	}
