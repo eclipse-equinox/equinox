@@ -94,8 +94,9 @@ public class UserAdminStore {
 			AccessController.doPrivileged((PrivilegedExceptionAction) () -> {
 				Preferences propertyNode = rootNode.node(role.getName() + "/" + propertiesNode); //$NON-NLS-1$
 				propertyNode.clear();
-				if (propertyNode.nodeExists(typesNode))
+				if (propertyNode.nodeExists(typesNode)) {
 					propertyNode.node(typesNode).removeNode();
+				}
 				propertyNode.flush();
 				return (null);
 			});
@@ -134,8 +135,9 @@ public class UserAdminStore {
 			AccessController.doPrivileged((PrivilegedExceptionAction) () -> {
 				Preferences propertyNode = rootNode.node(role.getName() + "/" + propertiesNode); //$NON-NLS-1$
 				propertyNode.remove(key);
-				if (propertyNode.nodeExists(typesNode))
+				if (propertyNode.nodeExists(typesNode)) {
 					propertyNode.node(typesNode).remove(key);
+				}
 				propertyNode.flush();
 				return (null);
 			});
@@ -150,8 +152,9 @@ public class UserAdminStore {
 			AccessController.doPrivileged((PrivilegedExceptionAction) () -> {
 				Preferences credentialNode = rootNode.node(role.getName() + "/" + credentialsNode); //$NON-NLS-1$
 				credentialNode.clear();
-				if (credentialNode.nodeExists(typesNode))
+				if (credentialNode.nodeExists(typesNode)) {
 					credentialNode.node(typesNode).removeNode();
+				}
 				credentialNode.flush();
 				return (null);
 			});
@@ -193,8 +196,9 @@ public class UserAdminStore {
 			AccessController.doPrivileged((PrivilegedExceptionAction) () -> {
 				Preferences credentialNode = rootNode.node(role.getName() + "/" + credentialsNode); //$NON-NLS-1$
 				credentialNode.remove(key);
-				if (credentialNode.nodeExists(typesNode))
+				if (credentialNode.nodeExists(typesNode)) {
 					credentialNode.node(typesNode).remove(key);
+				}
 				credentialNode.flush();
 				return (null);
 			});
@@ -289,10 +293,11 @@ public class UserAdminStore {
 		// load properties
 		Preferences propsTypesNode = propsNode.node(typesNode);
 		for (String key : keys) {
-			if (propsTypesNode.getBoolean(key, true))
+			if (propsTypesNode.getBoolean(key, true)) {
 				value = propsNode.get(key, null);
-			else
+			} else {
 				value = propsNode.getByteArray(key, null);
+			}
 			properties.put(key, value, false);
 		}
 
@@ -304,10 +309,11 @@ public class UserAdminStore {
 			keys = credNode.keys();
 			UserAdminHashtable credentials = (UserAdminHashtable) ((User) role).getCredentials();
 			for (String key : keys) {
-				if (credTypesNode.getBoolean(key, true))
+				if (credTypesNode.getBoolean(key, true)) {
 					credValue = credNode.get(key, null);
-				else
+				} else {
 					credValue = credNode.getByteArray(key, null);
+				}
 				credentials.put(key, credValue, false);
 			}
 		}
@@ -350,10 +356,11 @@ public class UserAdminStore {
 			role = (Role) useradmin.createRole(Role.anyoneString, org.osgi.service.useradmin.Role.ROLE, true);
 		}
 		/* modified to solve defect 95982 */
-		if (role != null)
+		if (role != null) {
 			loadRole(rootNode.node(Role.anyoneString), role);
-		else
+		} else {
 			loadRole(rootNode.node(Role.anyoneString), null);
+		}
 	}
 
 }
