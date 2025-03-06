@@ -106,8 +106,9 @@ public class HttpServerManager implements ManagedServiceFactory {
 
 		ServerConnector httpsConnector = createHttpsConnector(dictionary, server, http_config);
 
-		if (null != customizer)
+		if (null != customizer) {
 			httpConnector = (ServerConnector) customizer.customizeHttpConnector(httpConnector, dictionary);
+		}
 
 		if (httpConnector != null) {
 			try {
@@ -118,8 +119,9 @@ public class HttpServerManager implements ManagedServiceFactory {
 			server.addConnector(httpConnector);
 		}
 
-		if (null != customizer)
+		if (null != customizer) {
 			httpsConnector = (ServerConnector) customizer.customizeHttpsConnector(httpsConnector, dictionary);
+		}
 
 		if (httpsConnector != null) {
 			try {
@@ -141,33 +143,39 @@ public class HttpServerManager implements ManagedServiceFactory {
 
 		if (httpConnector != null) {
 			int port = httpConnector.getLocalPort();
-			if (port == -1)
+			if (port == -1) {
 				port = httpConnector.getPort();
+			}
 			holder.setInitParameter(JettyConstants.HTTP_PORT, Integer.toString(port));
 			String host = httpConnector.getHost();
-			if (host != null)
+			if (host != null) {
 				holder.setInitParameter(JettyConstants.HTTP_HOST, host);
+			}
 		}
 		if (httpsConnector != null) {
 			int port = httpsConnector.getLocalPort();
-			if (port == -1)
+			if (port == -1) {
 				port = httpsConnector.getPort();
+			}
 			holder.setInitParameter(JettyConstants.HTTPS_PORT, Integer.toString(port));
 			String host = httpsConnector.getHost();
-			if (host != null)
+			if (host != null) {
 				holder.setInitParameter(JettyConstants.HTTPS_HOST, host);
+			}
 		}
 		String otherInfo = Details.getString(dictionary, JettyConstants.OTHER_INFO, null);
-		if (otherInfo != null)
+		if (otherInfo != null) {
 			holder.setInitParameter(JettyConstants.OTHER_INFO, otherInfo);
+		}
 
 		ServletContextHandler httpContext = createHttpContext(dictionary);
 		holder.setInitParameter(JettyConstants.CONTEXT_PATH, httpContext.getContextPath());
 		httpContext.addServlet(holder, "/*"); //$NON-NLS-1$
 		server.setHandler(httpContext);
 
-		if (null != customizer)
+		if (null != customizer) {
 			httpContext = (ServletContextHandler) customizer.customizeContext(httpContext, dictionary);
+		}
 
 		try {
 			DefaultSessionIdManager idMgr = new DefaultSessionIdManager(server);
@@ -269,8 +277,9 @@ public class HttpServerManager implements ManagedServiceFactory {
 
 	private JettyCustomizer createJettyCustomizer(@SuppressWarnings("rawtypes") Dictionary dictionary) {
 		String customizerClass = (String) dictionary.get(JettyConstants.CUSTOMIZER_CLASS);
-		if (null == customizerClass)
+		if (null == customizerClass) {
 			return null;
+		}
 
 		try {
 			return (JettyCustomizer) Class.forName(customizerClass).getDeclaredConstructor().newInstance();

@@ -121,14 +121,16 @@ public class Activator implements BundleActivator {
 
 		// HTTP Port
 		int httpPort = Details.getIntProp(context, JettyConstants.HTTP_PORT, -1);
-		if (httpPort == -1)
+		if (httpPort == -1) {
 			httpPort = Details.getInt(context, ORG_OSGI_SERVICE_HTTP_PORT, 0);
+		}
 		defaultSettings.put(JettyConstants.HTTP_PORT, Integer.valueOf(httpPort));
 
 		// HTTP Host (default is 0.0.0.0)
 		String httpHost = Details.getStringProp(context, JettyConstants.HTTP_HOST, null);
-		if (httpHost != null)
+		if (httpHost != null) {
 			defaultSettings.put(JettyConstants.HTTP_HOST, httpHost);
+		}
 
 		// HTTPS Enabled (default is false)
 		Boolean httpsEnabled = Details.getBooleanProp(context, JettyConstants.HTTPS_ENABLED, false);
@@ -150,53 +152,64 @@ public class Activator implements BundleActivator {
 			// HTTPS Port
 
 			int httpsPort = Details.getIntProp(context, JettyConstants.HTTPS_PORT, -1);
-			if (httpsPort == -1)
+			if (httpsPort == -1) {
 				httpsPort = Details.getInt(context, ORG_OSGI_SERVICE_HTTP_PORT_SECURE, 443);
+			}
 			defaultSettings.put(JettyConstants.HTTPS_PORT, Integer.valueOf(httpsPort));
 
 			// HTTPS Host (default is 0.0.0.0)
 			String httpsHost = Details.getStringProp(context, JettyConstants.HTTPS_HOST, null);
-			if (httpsHost != null)
+			if (httpsHost != null) {
 				defaultSettings.put(JettyConstants.HTTPS_HOST, httpsHost);
+			}
 
 			// SSL SETTINGS
 			String keystore = Details.getStringProp(context, JettyConstants.SSL_KEYSTORE, null);
-			if (keystore != null)
+			if (keystore != null) {
 				defaultSettings.put(JettyConstants.SSL_KEYSTORE, keystore);
+			}
 
 			String password = Details.getStringProp(context, JettyConstants.SSL_PASSWORD, null);
-			if (password != null)
+			if (password != null) {
 				defaultSettings.put(JettyConstants.SSL_PASSWORD, password);
+			}
 
 			String keypassword = Details.getStringProp(context, JettyConstants.SSL_KEYPASSWORD, null);
-			if (keypassword != null)
+			if (keypassword != null) {
 				defaultSettings.put(JettyConstants.SSL_KEYPASSWORD, keypassword);
+			}
 
 			String needclientauth = Details.getStringProp(context, JettyConstants.SSL_NEEDCLIENTAUTH, null);
-			if (needclientauth != null)
+			if (needclientauth != null) {
 				defaultSettings.put(JettyConstants.SSL_NEEDCLIENTAUTH, Boolean.valueOf(needclientauth));
+			}
 
 			String wantclientauth = Details.getStringProp(context, JettyConstants.SSL_WANTCLIENTAUTH, null);
-			if (wantclientauth != null)
+			if (wantclientauth != null) {
 				defaultSettings.put(JettyConstants.SSL_WANTCLIENTAUTH, Boolean.valueOf(wantclientauth));
+			}
 
 			String protocol = Details.getStringProp(context, JettyConstants.SSL_PROTOCOL, null);
-			if (protocol != null)
+			if (protocol != null) {
 				defaultSettings.put(JettyConstants.SSL_PROTOCOL, protocol);
+			}
 
 			String algorithm = Details.getStringProp(context, JettyConstants.SSL_ALGORITHM, null);
-			if (algorithm != null)
+			if (algorithm != null) {
 				defaultSettings.put(JettyConstants.SSL_ALGORITHM, algorithm);
+			}
 
 			String keystoretype = Details.getStringProp(context, JettyConstants.SSL_KEYSTORETYPE, null);
-			if (keystoretype != null)
+			if (keystoretype != null) {
 				defaultSettings.put(JettyConstants.SSL_KEYSTORETYPE, keystoretype);
+			}
 		}
 
 		// Servlet Context Path
 		String contextpath = Details.getStringProp(context, JettyConstants.CONTEXT_PATH, null);
-		if (contextpath != null)
+		if (contextpath != null) {
 			defaultSettings.put(JettyConstants.CONTEXT_PATH, contextpath);
+		}
 
 		// Session Inactive Interval (timeout)
 		String sessionInactiveInterval = Details.getStringProp(context, JettyConstants.CONTEXT_SESSIONINACTIVEINTERVAL,
@@ -222,27 +235,31 @@ public class Activator implements BundleActivator {
 
 		// Other Info
 		String otherInfo = Details.getStringProp(context, JettyConstants.OTHER_INFO, null);
-		if (otherInfo != null)
+		if (otherInfo != null) {
 			defaultSettings.put(JettyConstants.OTHER_INFO, otherInfo);
+		}
 
 		// customizer
 		String customizerClass = Details.getStringProp(context, JettyConstants.CUSTOMIZER_CLASS, null);
-		if (customizerClass != null)
+		if (customizerClass != null) {
 			defaultSettings.put(JettyConstants.CUSTOMIZER_CLASS, customizerClass);
+		}
 
 		return defaultSettings;
 	}
 
 	public static synchronized void startServer(String pid, Dictionary<String, ?> settings) throws Exception {
-		if (staticServerManager == null)
+		if (staticServerManager == null) {
 			throw new IllegalStateException("Inactive"); //$NON-NLS-1$
+		}
 
 		staticServerManager.updated(pid, settings);
 	}
 
 	public static synchronized void stopServer(String pid) throws Exception {
-		if (staticServerManager != null)
+		if (staticServerManager != null) {
 			staticServerManager.deleted(pid);
+		}
 	}
 
 	private static synchronized void setStaticServerManager(HttpServerManager httpServerManager) {
