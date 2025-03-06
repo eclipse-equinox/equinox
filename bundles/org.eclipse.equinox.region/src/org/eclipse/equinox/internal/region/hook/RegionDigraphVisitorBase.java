@@ -133,8 +133,9 @@ abstract class RegionDigraphVisitorBase<C> implements RegionDigraphVisitor {
 		candidates.removeAll(allowed);
 		// apply the filter across remaining candidates
 		filter(candidates, regionFilter);
-		if (candidates.isEmpty())
+		if (candidates.isEmpty()) {
 			return false; // this filter does not apply; avoid traversing this edge
+		}
 		// push the filtered candidates for the next region
 		pushFiltered(candidates);
 		// push the allowed

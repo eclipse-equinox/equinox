@@ -55,8 +55,9 @@ public class EquinoxStateHelper {
 		// never uses BundleDescriptions.
 		// It is only useful if the region hooks are used with the old Equinox State API
 		Long result = equinoxSupport == null ? null : equinoxSupport.getBundleId(revision);
-		if (result == null)
+		if (result == null) {
 			throw new RuntimeException(String.format("Cannot determine bundle id of BundleRevision '%s'", revision)); //$NON-NLS-1$
+		}
 		return result;
 	}
 

@@ -31,10 +31,12 @@ public final class StandardRegionFilterBuilder implements RegionFilterBuilder {
 	@SuppressWarnings("deprecation")
 	@Override
 	public RegionFilterBuilder allow(String namespace, String filter) throws InvalidSyntaxException {
-		if (namespace == null)
+		if (namespace == null) {
 			throw new IllegalArgumentException("The namespace must not be null."); //$NON-NLS-1$
-		if (filter == null)
+		}
+		if (filter == null) {
 			throw new IllegalArgumentException("The filter must not be null."); //$NON-NLS-1$
+		}
 		synchronized (this.monitor) {
 			Collection<Filter> namespaceFilters = getNamespaceFilters(namespace);
 			namespaceFilters.add(createFilter(filter));
@@ -55,8 +57,9 @@ public final class StandardRegionFilterBuilder implements RegionFilterBuilder {
 	@SuppressWarnings("deprecation")
 	@Override
 	public RegionFilterBuilder allowAll(String namespace) {
-		if (namespace == null)
+		if (namespace == null) {
 			throw new IllegalArgumentException("The namespace must not be null."); //$NON-NLS-1$
+		}
 		synchronized (this.monitor) {
 			Collection<Filter> namespaceFilters = getNamespaceFilters(namespace);
 			// remove any other filters since this will override them all.

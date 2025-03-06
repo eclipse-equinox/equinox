@@ -53,10 +53,12 @@ public final class BundleIdBasedRegion implements Region {
 			BundleIdToRegionMapping bundleIdToRegionMapping, BundleContext bundleContext,
 			ThreadLocal<Region> threadLocal) {
 		BundleIdBasedRegion.validateName(regionName);
-		if (regionDigraph == null)
+		if (regionDigraph == null) {
 			throw new IllegalArgumentException("The region digraph must not be null"); //$NON-NLS-1$
-		if (bundleIdToRegionMapping == null)
+		}
+		if (bundleIdToRegionMapping == null) {
 			throw new IllegalArgumentException("The bundle id to region mapping must not be null"); //$NON-NLS-1$
+		}
 		this.regionName = regionName;
 		this.regionDigraph = regionDigraph;
 		this.bundleIdToRegionMapping = bundleIdToRegionMapping;
@@ -65,10 +67,12 @@ public final class BundleIdBasedRegion implements Region {
 	}
 
 	private static void validateName(String name) {
-		if (name == null)
+		if (name == null) {
 			throw new IllegalArgumentException("The region name must not be null"); //$NON-NLS-1$
-		if (invalidName.matcher(name).find())
+		}
+		if (invalidName.matcher(name).find()) {
 			throw new IllegalArgumentException("The region name has invalid characters: " + name); //$NON-NLS-1$
+		}
 	}
 
 	/**
@@ -112,9 +116,10 @@ public final class BundleIdBasedRegion implements Region {
 	}
 
 	private Bundle installBundle0(String location, InputStream input, boolean appendRegionName) throws BundleException {
-		if (this.bundleContext == null)
+		if (this.bundleContext == null) {
 			throw new BundleException("This region is not connected to an OSGi Framework.", //$NON-NLS-1$
 					BundleException.INVALID_OPERATION);
+		}
 		setRegionThreadLocal();
 		try {
 			input = checkFileProtocol(location, input);
@@ -128,8 +133,9 @@ public final class BundleIdBasedRegion implements Region {
 	}
 
 	private InputStream checkFileProtocol(String location, InputStream input) throws BundleException {
-		if (input != null || location.startsWith(FILE_SCHEME))
+		if (input != null || location.startsWith(FILE_SCHEME)) {
 			return input;
+		}
 		try {
 			return new URL(location).openStream();
 		} catch (MalformedURLException e) {
@@ -148,13 +154,15 @@ public final class BundleIdBasedRegion implements Region {
 	}
 
 	private void setRegionThreadLocal() {
-		if (this.threadLocal != null)
+		if (this.threadLocal != null) {
 			this.threadLocal.set(this);
+		}
 	}
 
 	private void removeRegionThreadLocal() {
-		if (this.threadLocal != null)
+		if (this.threadLocal != null) {
 			this.threadLocal.remove();
+		}
 	}
 
 	/**
@@ -162,8 +170,9 @@ public final class BundleIdBasedRegion implements Region {
 	 */
 	@Override
 	public Bundle getBundle(String symbolicName, Version version) {
-		if (bundleContext == null)
+		if (bundleContext == null) {
 			return null; // this region is not connected to an OSGi framework
+		}
 
 		Set<Long> bundleIds = getBundleIds();
 		for (long bundleId : bundleIds) {

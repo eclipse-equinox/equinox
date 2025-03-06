@@ -35,9 +35,10 @@ public final class StandardRegionDigraphPersistence implements RegionDigraphPers
 	private static final int PERSISTENT_VERSION = 1;
 
 	static void writeRegionDigraph(DataOutputStream out, RegionDigraph digraph) throws IOException {
-		if (!(digraph instanceof StandardRegionDigraph))
+		if (!(digraph instanceof StandardRegionDigraph)) {
 			throw new IllegalArgumentException("Only digraphs of type '" + StandardRegionDigraph.class.getName() //$NON-NLS-1$
 					+ "' are allowed: " + digraph.getClass().getName()); //$NON-NLS-1$
+		}
 		Map<Region, Set<FilteredRegion>> filteredRegions = ((StandardRegionDigraph) digraph).getFilteredRegions();
 
 		try {
@@ -146,8 +147,9 @@ public final class StandardRegionDigraphPersistence implements RegionDigraphPers
 		int numIds = in.readInt();
 		for (int i = 0; i < numIds; i++) {
 			long id = in.readLong();
-			if (context == null || context.getBundle(id) != null)
+			if (context == null || context.getBundle(id) != null) {
 				region.addBundle(id);
+			}
 		}
 		return region;
 	}
@@ -157,13 +159,15 @@ public final class StandardRegionDigraphPersistence implements RegionDigraphPers
 		// read tail region name
 		String tailName = in.readUTF();
 		Region tail = digraph.getRegion(tailName);
-		if (tail == null)
+		if (tail == null) {
 			throw new IOException("Could not find tail region: " + tailName); //$NON-NLS-1$
+		}
 		// read head region name
 		String headName = in.readUTF();
 		Region head = digraph.getRegion(headName);
-		if (head == null)
+		if (head == null) {
 			throw new IOException("Could not find head region: " + headName); //$NON-NLS-1$
+		}
 		// read the sharing policy
 		Map<String, Collection<Filter>> filters = new HashMap<>();
 		// read the number of name spaces

@@ -77,8 +77,9 @@ public final class StandardManageableRegionDigraph implements ManageableRegionDi
 		this.frameworkUUID = bundleContext.getProperty(Constants.FRAMEWORK_UUID);
 		this.regionObjectNameCreator = new RegionObjectNameCreator(domain, this.frameworkUUID);
 		String name = this.domain + ":type=RegionDigraph"; //$NON-NLS-1$
-		if (frameworkUUID != null)
+		if (frameworkUUID != null) {
 			name += ",frameworkUUID=" + frameworkUUID; //$NON-NLS-1$
+		}
 		try {
 			mbeanName = new ObjectName(name);
 		} catch (MalformedObjectNameException e) {
