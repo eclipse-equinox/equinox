@@ -88,8 +88,9 @@ public abstract class EventAdapter {
 	 * Utility function for converting classes into strings
 	 */
 	public String[] classes2strings(Class<?>[] classes) {
-		if ((classes == null) || (classes.length == 0))
+		if ((classes == null) || (classes.length == 0)) {
 			return null;
+		}
 		String[] strings = new String[classes.length];
 		for (int i = 0; i < classes.length; i++) {
 			strings[i] = classes[i].getName();

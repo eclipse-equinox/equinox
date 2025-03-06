@@ -207,8 +207,9 @@ public class EventHandlerWrapper {
 		} catch (Throwable t) {
 			if (event.getTopic().startsWith("org/osgi/service/log/LogEntry")) { //$NON-NLS-1$
 				Object exception = event.getProperty("exception"); //$NON-NLS-1$
-				if (exception instanceof LogTopicException)
+				if (exception instanceof LogTopicException) {
 					return;// avoid endless event dispatching
+				}
 				// wrap exception in a LogTopicException to detect endless event dispatching
 				t = new LogTopicException(t);
 			}
