@@ -79,8 +79,9 @@ public class StorageAbstractTest {
 		}
 
 		String requiredID = getModuleID();
-		if (requiredID != null)
+		if (requiredID != null) {
 			options.put(IProviderHints.REQUIRED_MODULE_ID, requiredID);
+		}
 
 		options.put(IProviderHints.PROMPT_USER, Boolean.FALSE);
 		return options;
