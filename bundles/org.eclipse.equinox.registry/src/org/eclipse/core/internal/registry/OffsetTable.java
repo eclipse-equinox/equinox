@@ -30,15 +30,17 @@ public final class OffsetTable {
 	}
 
 	public int get(int key) {
-		if (key < valueTable.length)
+		if (key < valueTable.length) {
 			return valueTable[key];
+		}
 		return Integer.MIN_VALUE; // should not happen; will be converted to exception higher in the call stack
 	}
 
 	public void removeKey(int key) {
-		if (key < valueTable.length) // registry elements added in the running session will have IDs outside of the
-										// valid offset range
+		if (key < valueTable.length) { // registry elements added in the running session will have IDs outside of the
+			// valid offset range
 			valueTable[key] = Integer.MIN_VALUE;
+		}
 	}
 
 	public void put(int key, int value) {
@@ -63,8 +65,9 @@ public final class OffsetTable {
 		int tableSize = in.readInt();
 		OffsetTable result = new OffsetTable(tableSize);
 		result.valueTable = new int[tableSize];
-		for (int i = 0; i < tableSize; i++)
+		for (int i = 0; i < tableSize; i++) {
 			result.valueTable[i] = in.readInt();
+		}
 		return result;
 	}
 

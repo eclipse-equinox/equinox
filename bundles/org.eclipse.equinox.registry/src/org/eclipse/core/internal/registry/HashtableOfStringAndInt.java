@@ -37,8 +37,9 @@ public final class HashtableOfStringAndInt implements Cloneable {
 		this.elementSize = 0;
 		this.threshold = size; // size represents the expected number of elements
 		int extraRoom = (int) (size * 1.75f);
-		if (this.threshold == extraRoom)
+		if (this.threshold == extraRoom) {
 			extraRoom++;
+		}
 		this.keyTable = new String[extraRoom];
 		this.valueTable = new int[extraRoom];
 	}
@@ -65,8 +66,9 @@ public final class HashtableOfStringAndInt implements Cloneable {
 		int keyLength = key.length();
 		String currentKey;
 		while ((currentKey = keyTable[index]) != null) {
-			if (currentKey.length() == keyLength && currentKey.equals(key))
+			if (currentKey.length() == keyLength && currentKey.equals(key)) {
 				return true;
+			}
 			index = (index + 1) % keyTable.length;
 		}
 		return false;
@@ -77,8 +79,9 @@ public final class HashtableOfStringAndInt implements Cloneable {
 		int keyLength = key.length();
 		String currentKey;
 		while ((currentKey = keyTable[index]) != null) {
-			if (currentKey.length() == keyLength && currentKey.equals(key))
+			if (currentKey.length() == keyLength && currentKey.equals(key)) {
 				return valueTable[index];
+			}
 			index = (index + 1) % keyTable.length;
 		}
 		return MISSING_ELEMENT;
@@ -89,16 +92,18 @@ public final class HashtableOfStringAndInt implements Cloneable {
 		int keyLength = key.length();
 		String currentKey;
 		while ((currentKey = keyTable[index]) != null) {
-			if (currentKey.length() == keyLength && currentKey.equals(key))
+			if (currentKey.length() == keyLength && currentKey.equals(key)) {
 				return valueTable[index] = value;
+			}
 			index = (index + 1) % keyTable.length;
 		}
 		keyTable[index] = key;
 		valueTable[index] = value;
 
 		// assumes the threshold is never equal to the size of the table
-		if (++elementSize > threshold)
+		if (++elementSize > threshold) {
 			rehash();
+		}
 		return value;
 	}
 
@@ -123,9 +128,11 @@ public final class HashtableOfStringAndInt implements Cloneable {
 	private void rehash() {
 		HashtableOfStringAndInt newHashtable = new HashtableOfStringAndInt((int) (elementSize * GROWTH_FACTOR));
 		String currentKey;
-		for (int i = keyTable.length; --i >= 0;)
-			if ((currentKey = keyTable[i]) != null)
+		for (int i = keyTable.length; --i >= 0;) {
+			if ((currentKey = keyTable[i]) != null) {
 				newHashtable.put(currentKey, valueTable[i]);
+			}
+		}
 
 		this.keyTable = newHashtable.keyTable;
 		this.valueTable = newHashtable.valueTable;
@@ -140,9 +147,11 @@ public final class HashtableOfStringAndInt implements Cloneable {
 	public String toString() {
 		String s = ""; //$NON-NLS-1$
 		int object;
-		for (int i = 0, length = valueTable.length; i < length; i++)
-			if ((object = valueTable[i]) != MISSING_ELEMENT)
+		for (int i = 0, length = valueTable.length; i < length; i++) {
+			if ((object = valueTable[i]) != MISSING_ELEMENT) {
 				s += new String(keyTable[i]) + " -> " + object + "\n"; //$NON-NLS-2$ //$NON-NLS-1$
+			}
+		}
 		return s;
 	}
 
@@ -151,8 +160,9 @@ public final class HashtableOfStringAndInt implements Cloneable {
 		int[] result = new int[size()];
 		int j = 0;
 		for (int i = 0; i < keyTableLength; i++) {
-			if (keyTable[i] != null)
+			if (keyTable[i] != null) {
 				result[j++] = valueTable[i];
+			}
 		}
 		return result;
 	}
@@ -174,9 +184,11 @@ public final class HashtableOfStringAndInt implements Cloneable {
 	public void save(DataOutputStream out, RegistryObjectManager objectManager) throws IOException {
 		HashtableOfStringAndInt filteredHashtable = new HashtableOfStringAndInt((int) (elementSize * GROWTH_FACTOR));
 		String currentKey;
-		for (int i = keyTable.length; --i >= 0;)
-			if ((currentKey = keyTable[i]) != null && objectManager.shouldPersist(valueTable[i]))
+		for (int i = keyTable.length; --i >= 0;) {
+			if ((currentKey = keyTable[i]) != null && objectManager.shouldPersist(valueTable[i])) {
 				filteredHashtable.put(currentKey, valueTable[i]);
+			}
+		}
 		filteredHashtable.save(out);
 	}
 
@@ -201,8 +213,9 @@ public final class HashtableOfStringAndInt implements Cloneable {
 				keyTable[i] = key;
 				valueTable[i] = value;
 			} else {
-				if (key != null)
+				if (key != null) {
 					put(key, value);
+				}
 			}
 		}
 	}
@@ -211,9 +224,9 @@ public final class HashtableOfStringAndInt implements Cloneable {
 	private static final byte OBJECT = 1;
 
 	private void writeStringOrNull(String string, DataOutputStream out) throws IOException {
-		if (string == null)
+		if (string == null) {
 			out.writeByte(NULL);
-		else {
+		} else {
 			out.writeByte(OBJECT);
 			out.writeUTF(string);
 		}
@@ -221,8 +234,9 @@ public final class HashtableOfStringAndInt implements Cloneable {
 
 	private String readStringOrNull(DataInputStream in) throws IOException {
 		byte type = in.readByte();
-		if (type == NULL)
+		if (type == NULL) {
 			return null;
+		}
 		return in.readUTF();
 	}
 

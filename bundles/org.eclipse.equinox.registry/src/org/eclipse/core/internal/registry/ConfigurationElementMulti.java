@@ -37,30 +37,35 @@ public class ConfigurationElementMulti extends ConfigurationElement {
 
 	@Override
 	String getAttribute(String attrName, String locale) {
-		if (propertiesAndValue.length <= 1)
+		if (propertiesAndValue.length <= 1) {
 			return null;
+		}
 		// round down to an even size
 		int size = propertiesAndValue.length - (propertiesAndValue.length % 2);
 		int index = -1;
 		for (int i = 0, j = 0; i < size; i += 2, j++) {
-			if (!(propertiesAndValue[i].equals(attrName)))
+			if (!(propertiesAndValue[i].equals(attrName))) {
 				continue;
+			}
 			index = j;
 			break;
 		}
-		if (index == -1)
+		if (index == -1) {
 			return null;
+		}
 
 		String result = getTranslatedAtIndex(index, locale);
-		if (result != null)
+		if (result != null) {
 			return result;
+		}
 		return propertiesAndValue[index * 2 + 1]; // return non-translated value
 	}
 
 	@Override
 	String getValue(String locale) {
-		if (propertiesAndValue.length == 0 || propertiesAndValue.length % 2 == 0)
+		if (propertiesAndValue.length == 0 || propertiesAndValue.length % 2 == 0) {
 			return null;
+		}
 		int index = propertiesAndValue.length - 1;
 		return getTranslatedAtIndex(index, locale);
 	}
@@ -72,27 +77,31 @@ public class ConfigurationElementMulti extends ConfigurationElement {
 			translated = registry.translate(propertiesNonTranslated, getContributor(), locale);
 			translatedProperties.put(locale, translated);
 			registry.getObjectManager().markDirty();
-		} else
+		} else {
 			translated = translatedProperties.get(locale);
+		}
 
-		if (translated != null)
+		if (translated != null) {
 			return translated[index];
+		}
 		return null;
 	}
 
 	private String[] getNonTranslated() {
 		int size = propertiesAndValue.length / 2;
 		boolean hasValue = ((propertiesAndValue.length % 2) == 1);
-		if (hasValue)
+		if (hasValue) {
 			size++;
+		}
 		String[] propertiesNonTranslated = new String[size];
 		int pos = 0;
 		for (int i = 1; i < propertiesAndValue.length; i += 2) {
 			propertiesNonTranslated[pos] = propertiesAndValue[i];
 			pos++;
 		}
-		if (hasValue)
+		if (hasValue) {
 			propertiesNonTranslated[pos] = propertiesAndValue[propertiesAndValue.length - 1];
+		}
 		return propertiesNonTranslated;
 	}
 

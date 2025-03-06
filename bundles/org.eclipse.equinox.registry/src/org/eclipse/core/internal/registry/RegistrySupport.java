@@ -31,15 +31,19 @@ import org.eclipse.core.runtime.IStatus;
 public class RegistrySupport {
 
 	static public String translate(String key, ResourceBundle resources) {
-		if (key == null)
+		if (key == null) {
 			return null;
-		if (resources == null)
+		}
+		if (resources == null) {
 			return key;
+		}
 		String trimmedKey = key.trim();
-		if (trimmedKey.length() == 0)
+		if (trimmedKey.length() == 0) {
 			return key;
-		if (trimmedKey.charAt(0) != '%')
+		}
+		if (trimmedKey.charAt(0) != '%') {
 			return key;
+		}
 		return resources.getString(trimmedKey.substring(1));
 	}
 
@@ -61,18 +65,20 @@ public class RegistrySupport {
 		}
 		statusMsg += message;
 
-		if (prefix != null)
+		if (prefix != null) {
 			statusMsg = prefix + statusMsg;
+		}
 		System.out.println(statusMsg);
 
 		// print out children as well
 		IStatus[] children = status.getChildren();
 		if (children.length != 0) {
 			String newPrefix;
-			if (prefix == null)
+			if (prefix == null) {
 				newPrefix = "\t"; //$NON-NLS-1$
-			else
+			} else {
 				newPrefix = prefix + "\t"; //$NON-NLS-1$
+			}
 			for (IStatus child : children) {
 				log(child, newPrefix);
 			}

@@ -78,8 +78,9 @@ public final class RegistryFactory {
 	 */
 	public static IExtensionRegistry getRegistry() {
 		IRegistryProvider defaultRegistryProvider = RegistryProviderFactory.getDefault();
-		if (defaultRegistryProvider == null)
+		if (defaultRegistryProvider == null) {
 			return null;
+		}
 		return defaultRegistryProvider.getRegistry();
 	}
 

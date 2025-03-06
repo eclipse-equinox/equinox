@@ -54,13 +54,15 @@ public class KeyedHashSet {
 				elements[i] = element;
 				elementCount++;
 				// grow if necessary
-				if (shouldGrow())
+				if (shouldGrow()) {
 					expand();
+				}
 				return true;
 			}
 			if (elements[i].compare(element)) {
-				if (replace)
+				if (replace) {
 					elements[i] = element;
+				}
 				return replace;
 			}
 		}
@@ -71,13 +73,15 @@ public class KeyedHashSet {
 				elements[i] = element;
 				elementCount++;
 				// grow if necessary
-				if (shouldGrow())
+				if (shouldGrow()) {
 					expand();
+				}
 				return true;
 			}
 			if (elements[i].compare(element)) {
-				if (replace)
+				if (replace) {
 					elements[i] = element;
+				}
 				return replace;
 			}
 		}
@@ -99,8 +103,9 @@ public class KeyedHashSet {
 	public Object[] elements(Object[] result) {
 		int j = 0;
 		for (KeyedElement element : elements) {
-			if (element != null)
+			if (element != null) {
 				result[j++] = element;
+			}
 		}
 		return result;
 	}
@@ -119,8 +124,9 @@ public class KeyedHashSet {
 				int hash = hash(element);
 				while (elements[hash] != null) {
 					hash++;
-					if (hash > maxArrayIndex)
+					if (hash > maxArrayIndex) {
 						hash = 0;
+					}
 				}
 				elements[hash] = element;
 			}
@@ -131,26 +137,31 @@ public class KeyedHashSet {
 	 * Returns the set element with the given id, or null if not found.
 	 */
 	public KeyedElement get(KeyedElement key) {
-		if (elementCount == 0)
+		if (elementCount == 0) {
 			return null;
+		}
 		int hash = hash(key);
 
 		// search the last half of the array
 		for (int i = hash; i < elements.length; i++) {
 			KeyedElement element = elements[i];
-			if (element == null)
+			if (element == null) {
 				return null;
-			if (element.compare(key))
+			}
+			if (element.compare(key)) {
 				return element;
+			}
 		}
 
 		// search the beginning of the array
 		for (int i = 0; i < hash - 1; i++) {
 			KeyedElement element = elements[i];
-			if (element == null)
+			if (element == null) {
 				return null;
-			if (element.compare(key))
+			}
+			if (element.compare(key)) {
 				return element;
+			}
 		}
 
 		// nothing found so return null
@@ -161,26 +172,31 @@ public class KeyedHashSet {
 	 * Returns the set element with the given id, or null if not found.
 	 */
 	public KeyedElement getByKey(Object key) {
-		if (elementCount == 0)
+		if (elementCount == 0) {
 			return null;
+		}
 		int hash = keyHash(key);
 
 		// search the last half of the array
 		for (int i = hash; i < elements.length; i++) {
 			KeyedElement element = elements[i];
-			if (element == null)
+			if (element == null) {
 				return null;
-			if (element.getKey().equals(key))
+			}
+			if (element.getKey().equals(key)) {
 				return element;
+			}
 		}
 
 		// search the beginning of the array
 		for (int i = 0; i < hash - 1; i++) {
 			KeyedElement element = elements[i];
-			if (element == null)
+			if (element == null) {
 				return null;
-			if (element.getKey().equals(key))
+			}
+			if (element.getKey().equals(key)) {
 				return element;
+			}
 		}
 
 		// nothing found so return null
@@ -207,38 +223,43 @@ public class KeyedHashSet {
 
 		int target = anIndex;
 		int index = anIndex + 1;
-		if (index >= elements.length)
+		if (index >= elements.length) {
 			index = 0;
+		}
 		KeyedElement element = elements[index];
 		while (element != null) {
 			int hashIndex = hash(element);
 			boolean match;
-			if (index < target)
+			if (index < target) {
 				match = !(hashIndex > target || hashIndex <= index);
-			else
+			} else {
 				match = !(hashIndex > target && hashIndex <= index);
+			}
 			if (match) {
 				elements[target] = element;
 				target = index;
 			}
 			index++;
-			if (index >= elements.length)
+			if (index >= elements.length) {
 				index = 0;
+			}
 			element = elements[index];
 		}
 		elements[target] = null;
 	}
 
 	public boolean remove(KeyedElement toRemove) {
-		if (elementCount == 0)
+		if (elementCount == 0) {
 			return false;
+		}
 
 		int hash = hash(toRemove);
 
 		for (int i = hash; i < elements.length; i++) {
 			KeyedElement element = elements[i];
-			if (element == null)
+			if (element == null) {
 				return false;
+			}
 			if (element.compare(toRemove)) {
 				rehashTo(i);
 				elementCount--;
@@ -248,8 +269,9 @@ public class KeyedHashSet {
 
 		for (int i = 0; i < hash - 1; i++) {
 			KeyedElement element = elements[i];
-			if (element == null)
+			if (element == null) {
 				return false;
+			}
 			if (element.compare(toRemove)) {
 				rehashTo(i);
 				elementCount--;
@@ -260,14 +282,16 @@ public class KeyedHashSet {
 	}
 
 	public boolean removeByKey(Object key) {
-		if (elementCount == 0)
+		if (elementCount == 0) {
 			return false;
+		}
 		int hash = keyHash(key);
 
 		for (int i = hash; i < elements.length; i++) {
 			KeyedElement element = elements[i];
-			if (element == null)
+			if (element == null) {
 				return false;
+			}
 			if (element.getKey().equals(key)) {
 				rehashTo(i);
 				elementCount--;
@@ -277,8 +301,9 @@ public class KeyedHashSet {
 
 		for (int i = 0; i < hash - 1; i++) {
 			KeyedElement element = elements[i];
-			if (element == null)
+			if (element == null) {
 				return false;
+			}
 			if (element.getKey().equals(key)) {
 				rehashTo(i);
 				elementCount--;
@@ -304,10 +329,11 @@ public class KeyedHashSet {
 		boolean first = true;
 		for (KeyedElement element : elements) {
 			if (element != null) {
-				if (first)
+				if (first) {
 					first = false;
-				else
+				} else {
 					result.append(", "); //$NON-NLS-1$
+				}
 				result.append(element);
 			}
 		}

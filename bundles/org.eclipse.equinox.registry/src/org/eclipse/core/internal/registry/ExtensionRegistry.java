@@ -112,8 +112,9 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	 * @param isCacheReadOnly whether the file cache is read only
 	 */
 	protected void setFileManager(File cacheBase, boolean isCacheReadOnly) {
-		if (cacheStorageManager != null)
+		if (cacheStorageManager != null) {
 			cacheStorageManager.close(); // close existing file manager first
+		}
 
 		if (cacheBase != null) {
 			cacheStorageManager = new StorageManager(cacheBase, isCacheReadOnly ? "none" : null, isCacheReadOnly); //$NON-NLS-1$
@@ -170,8 +171,9 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 		System.arraycopy(existingExtensions, 0, newExtensions, 0, existingExtensions.length);
 		newExtensions[newExtensions.length - 1] = extension;
 		link(extPoint, newExtensions);
-		if (eventDelta != null)
+		if (eventDelta != null) {
 			eventDelta.rememberExtension(extPoint, extension);
+		}
 		return recordChange(extPoint, extension, IExtensionDelta.ADDED);
 	}
 
@@ -182,14 +184,17 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	private String addExtensionPoint(int extPoint) {
 		ExtensionPoint extensionPoint = (ExtensionPoint) registryObjects.getObject(extPoint,
 				RegistryObjectManager.EXTENSION_POINT);
-		if (eventDelta != null)
+		if (eventDelta != null) {
 			eventDelta.rememberExtensionPoint(extensionPoint);
+		}
 		int[] orphans = registryObjects.removeOrphans(extensionPoint.getUniqueIdentifier());
-		if (orphans == null)
+		if (orphans == null) {
 			return null;
+		}
 		link(extensionPoint, orphans);
-		if (eventDelta != null)
+		if (eventDelta != null) {
 			eventDelta.rememberExtensions(extensionPoint, orphans);
+		}
 		return recordChange(extensionPoint, orphans, IExtensionDelta.ADDED);
 	}
 
@@ -198,13 +203,15 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 		Set<String> affectedNamespaces = new HashSet<>();
 		for (int extPoint : element.getExtensionPoints()) {
 			String namespace = this.addExtensionPoint(extPoint);
-			if (namespace != null)
+			if (namespace != null) {
 				affectedNamespaces.add(namespace);
+			}
 		}
 		for (int extension : element.getExtensions()) {
 			String namespace = this.addExtension(extension);
-			if (namespace != null)
+			if (namespace != null) {
 				affectedNamespaces.add(namespace);
+			}
 		}
 		return affectedNamespaces;
 	}
@@ -238,8 +245,9 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 
 	private void basicAdd(Contribution element, boolean link) {
 		registryObjects.addContribution(element);
-		if (!link)
+		if (!link) {
 			return;
+		}
 		Set<String> affectedNamespaces = addExtensionsAndExtensionPoints(element);
 		setObjectManagers(affectedNamespaces, registryObjects
 				.createDelegatingObjectManager(registryObjects.getAssociatedObjects(element.getContributorId())));
@@ -249,8 +257,9 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 		for (String namespace : affectedNamespaces) {
 			getDelta(namespace).setObjectManager(manager);
 		}
-		if (eventDelta != null)
+		if (eventDelta != null) {
 			eventDelta.setObjectManager(manager);
+		}
 	}
 
 	private void basicRemove(String contributorId) {
@@ -307,8 +316,9 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	public IConfigurationElement[] getConfigurationElementsFor(String extensionPointId) {
 		// this is just a convenience API - no need to do any sync'ing here
 		int lastdot = extensionPointId.lastIndexOf('.');
-		if (lastdot == -1)
+		if (lastdot == -1) {
 			return new IConfigurationElement[0];
+		}
 		return getConfigurationElementsFor(extensionPointId.substring(0, lastdot),
 				extensionPointId.substring(lastdot + 1));
 	}
@@ -324,8 +334,9 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	public IConfigurationElement[] getConfigurationElementsFor(String pluginId, String extensionPointSimpleId) {
 		// this is just a convenience API - no need to do any sync'ing here
 		IExtensionPoint extPoint = this.getExtensionPoint(pluginId, extensionPointSimpleId);
-		if (extPoint == null)
+		if (extPoint == null) {
 			return new IConfigurationElement[0];
+		}
 		return extPoint.getConfigurationElements();
 	}
 
@@ -341,16 +352,18 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 			String extensionId) {
 		// this is just a convenience API - no need to do any sync'ing here
 		IExtension extension = this.getExtension(pluginId, extensionPointName, extensionId);
-		if (extension == null)
+		if (extension == null) {
 			return new IConfigurationElement[0];
+		}
 		return extension.getConfigurationElements();
 	}
 
 	private RegistryDelta getDelta(String namespace) {
 		// is there a delta for the plug-in?
 		RegistryDelta existingDelta = (RegistryDelta) deltas.get(namespace);
-		if (existingDelta != null)
+		if (existingDelta != null) {
 			return existingDelta;
+		}
 
 		// if not, create one
 		RegistryDelta delta = new RegistryDelta();
@@ -366,11 +379,13 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	 */
 	@Override
 	public IExtension getExtension(String extensionId) {
-		if (extensionId == null)
+		if (extensionId == null) {
 			return null;
+		}
 		int lastdot = extensionId.lastIndexOf('.');
-		if (lastdot == -1)
+		if (lastdot == -1) {
 			return null;
+		}
 		String namespace = extensionId.substring(0, lastdot);
 
 		ExtensionHandle[] extensions;
@@ -381,8 +396,9 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 			access.exitRead();
 		}
 		for (ExtensionHandle suspect : extensions) {
-			if (extensionId.equals(suspect.getUniqueIdentifier()))
+			if (extensionId.equals(suspect.getUniqueIdentifier())) {
 				return suspect;
+			}
 		}
 		return null;
 	}
@@ -398,8 +414,9 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	public IExtension getExtension(String extensionPointId, String extensionId) {
 		// this is just a convenience API - no need to do any sync'ing here
 		int lastdot = extensionPointId.lastIndexOf('.');
-		if (lastdot == -1)
+		if (lastdot == -1) {
 			return null;
+		}
 		return getExtension(extensionPointId.substring(0, lastdot), extensionPointId.substring(lastdot + 1),
 				extensionId);
 	}
@@ -415,8 +432,9 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	public IExtension getExtension(String pluginId, String extensionPointName, String extensionId) {
 		// this is just a convenience API - no need to do any sync'ing here
 		IExtensionPoint extPoint = getExtensionPoint(pluginId, extensionPointName);
-		if (extPoint != null)
+		if (extPoint != null) {
 			return extPoint.getExtension(extensionId);
+		}
 		return null;
 	}
 
@@ -502,8 +520,9 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 
 	@Override
 	public IExtension[] getExtensions(IContributor contributor) {
-		if (!(contributor instanceof RegistryContributor))
+		if (!(contributor instanceof RegistryContributor)) {
 			throw new IllegalArgumentException(); // should never happen
+		}
 		String contributorId = ((RegistryContributor) contributor).getActualId();
 		access.enterRead();
 		try {
@@ -515,8 +534,9 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 
 	@Override
 	public IExtensionPoint[] getExtensionPoints(IContributor contributor) {
-		if (!(contributor instanceof RegistryContributor))
+		if (!(contributor instanceof RegistryContributor)) {
 			throw new IllegalArgumentException(); // should never happen
+		}
 		String contributorId = ((RegistryContributor) contributor).getActualId();
 		access.enterRead();
 		try {
@@ -548,8 +568,9 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 
 	@Override
 	public boolean hasContributor(IContributor contributor) {
-		if (!(contributor instanceof RegistryContributor))
+		if (!(contributor instanceof RegistryContributor)) {
 			throw new IllegalArgumentException(); // should never happen
+		}
 		String contributorId = ((RegistryContributor) contributor).getActualId();
 		return hasContributor(contributorId);
 	}
@@ -573,8 +594,9 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	 */
 	private String recordChange(ExtensionPoint extPoint, int extension, int kind) {
 		// avoid computing deltas when there are no listeners
-		if (listeners.isEmpty())
+		if (listeners.isEmpty()) {
 			return null;
+		}
 		ExtensionDelta extensionDelta = new ExtensionDelta();
 		extensionDelta.setExtension(extension);
 		extensionDelta.setExtensionPoint(extPoint.getObjectId());
@@ -587,11 +609,13 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	 * Records a set of extension additions/removals.
 	 */
 	private String recordChange(ExtensionPoint extPoint, int[] extensions, int kind) {
-		if (listeners.isEmpty())
+		if (listeners.isEmpty()) {
 			return null;
+		}
 		String namespace = extPoint.getNamespace();
-		if (extensions == null || extensions.length == 0)
+		if (extensions == null || extensions.length == 0) {
 			return namespace;
+		}
 		RegistryDelta pluginDelta = getDelta(extPoint.getNamespace());
 		for (int extension : extensions) {
 			ExtensionDelta extensionDelta = new ExtensionDelta();
@@ -605,17 +629,20 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 
 	public void remove(String removedContributorId, long timestamp) {
 		remove(removedContributorId);
-		if (timestamp != 0)
+		if (timestamp != 0) {
 			aggregatedTimestamp.remove(timestamp);
+		}
 	}
 
 	@Override
 	public void removeContributor(IContributor contributor, Object key) {
-		if (!(contributor instanceof RegistryContributor))
+		if (!(contributor instanceof RegistryContributor)) {
 			throw new IllegalArgumentException(); // should never happen
-		if (!checkReadWriteAccess(key, true))
+		}
+		if (!checkReadWriteAccess(key, true)) {
 			throw new IllegalArgumentException(
 					"Unauthorized access to the ExtensionRegistry.removeContributor() method. Check if proper access token is supplied."); //$NON-NLS-1$
+		}
 		String contributorId = ((RegistryContributor) contributor).getActualId();
 		remove(contributorId);
 	}
@@ -655,13 +682,16 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 		int[] newExtensions = RegistryObjectManager.EMPTY_INT_ARRAY;
 		if (existingExtensions.length > 1) {
 			newExtensions = new int[existingExtensions.length - 1];
-			for (int i = 0, j = 0; i < existingExtensions.length; i++)
-				if (existingExtensions[i] != extension.getObjectId())
+			for (int i = 0, j = 0; i < existingExtensions.length; i++) {
+				if (existingExtensions[i] != extension.getObjectId()) {
 					newExtensions[j++] = existingExtensions[i];
+				}
+			}
 		}
 		link(extPoint, newExtensions);
-		if (eventDelta != null)
+		if (eventDelta != null) {
 			eventDelta.rememberExtension(extPoint, extensionId);
+		}
 		return recordChange(extPoint, extension.getObjectId(), IExtensionDelta.REMOVED);
 	}
 
@@ -685,15 +715,17 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 		Set<String> affectedNamespaces = new HashSet<>();
 		for (int extension : registryObjects.getExtensionsFrom(contributorId)) {
 			String namespace = this.removeExtension(extension);
-			if (namespace != null)
+			if (namespace != null) {
 				affectedNamespaces.add(namespace);
+			}
 		}
 
 		// remove extension points
 		for (int extPoint : registryObjects.getExtensionPointsFrom(contributorId)) {
 			String namespace = this.removeExtensionPoint(extPoint);
-			if (namespace != null)
+			if (namespace != null) {
 				affectedNamespaces.add(namespace);
+			}
 		}
 		return affectedNamespaces;
 	}
@@ -715,10 +747,11 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	public ExtensionRegistry(RegistryStrategy registryStrategy, Object masterToken, Object userToken) {
 		isMultiLanguage = "true".equals(RegistryProperties.getProperty(IRegistryConstants.PROP_MULTI_LANGUAGE)); //$NON-NLS-1$
 
-		if (registryStrategy != null)
+		if (registryStrategy != null) {
 			strategy = registryStrategy;
-		else
+		} else {
 			strategy = new RegistryStrategy(null, null);
+		}
 
 		this.masterToken = masterToken;
 		this.userToken = userToken;
@@ -731,8 +764,9 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 			// Try to read the registry from the cache first. If that fails, create a new
 			// registry
 			long start = 0;
-			if (debug())
+			if (debug()) {
 				start = System.currentTimeMillis();
+			}
 
 			// The cache is made of several files, find the real names of these other files.
 			// If all files are found, try to initialize the objectManager
@@ -747,8 +781,9 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 					theTableReader.setOrphansFile(cacheStorageManager.lookup(TableReader.ORPHANS, false));
 					long timestamp = strategy.getContributionsTimestamp();
 					isRegistryFilledFromCache = registryObjects.init(timestamp);
-					if (isRegistryFilledFromCache)
+					if (isRegistryFilledFromCache) {
 						aggregatedTimestamp.set(timestamp);
+					}
 				} catch (IOException e) {
 					// The registry will be rebuilt from the xml files. Make sure to clear anything
 					// filled
@@ -770,19 +805,22 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 				}
 			}
 
-			if (debug() && isRegistryFilledFromCache)
+			if (debug() && isRegistryFilledFromCache) {
 				System.out.println("Reading registry cache: " + (System.currentTimeMillis() - start)); //$NON-NLS-1$
+			}
 
 			if (debug()) {
-				if (!isRegistryFilledFromCache)
+				if (!isRegistryFilledFromCache) {
 					System.out.println("Reloading registry from manifest files..."); //$NON-NLS-1$
-				else
+				} else {
 					System.out.println("Using registry cache..."); //$NON-NLS-1$
+				}
 			}
 		}
 
-		if (debugEvents())
+		if (debugEvents()) {
 			addRegistryChangeListener(System.out::println);
+		}
 
 		// Do extra start processing if specified in the registry strategy
 		strategy.onStart(this); // preserve for backward compatibility; might be removed later
@@ -810,8 +848,9 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 
 		stopChangeEventScheduler();
 
-		if (cacheStorageManager == null)
+		if (cacheStorageManager == null) {
 			return;
+		}
 
 		if (!registryObjects.isDirty() || cacheStorageManager.isReadOnly()) {
 			cacheStorageManager.close();
@@ -863,12 +902,13 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 			// explicitly obtain timestamps for all contributions. Note that this logic
 			// maintains a problem described in the bug 104267 for contributions that
 			// don't use the timestamp tracking mechanism.
-			if (aggregatedTimestamp.isModifed())
+			if (aggregatedTimestamp.isModifed()) {
 				timestamp = aggregatedTimestamp.getContentsTimestamp(); // use timestamp tracking
-			else
+			} else {
 				timestamp = strategy.getContributionsTimestamp(); // use legacy approach
+			}
 
-			if (theTableWriter.saveCache(registryObjects, timestamp))
+			if (theTableWriter.saveCache(registryObjects, timestamp)) {
 				cacheStorageManager.update(
 						new String[] { TableReader.TABLE, TableReader.MAIN, TableReader.EXTRA,
 								TableReader.CONTRIBUTIONS, TableReader.CONTRIBUTORS, TableReader.NAMESPACES,
@@ -876,6 +916,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 						new String[] { tableFile.getName(), mainFile.getName(), extraFile.getName(),
 								contributionsFile.getName(), contributorsFile.getName(), namespacesFile.getName(),
 								orphansFile.getName() });
+			}
 		} catch (IOException e) {
 			// Ignore the exception since we can recompute the cache
 		}
@@ -889,13 +930,14 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	 */
 	public void clearRegistryCache() {
 		for (String key : new String[] { TableReader.TABLE, TableReader.MAIN, TableReader.EXTRA,
-				TableReader.CONTRIBUTIONS, TableReader.ORPHANS })
+				TableReader.CONTRIBUTIONS, TableReader.ORPHANS }) {
 			try {
 				cacheStorageManager.remove(key);
 			} catch (IOException e) {
 				log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, IStatus.ERROR,
 						RegistryMessages.meta_registryCacheReadProblems, e));
 			}
+		}
 		aggregatedTimestamp.reset();
 	}
 
@@ -910,16 +952,18 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	// Override to provide domain-specific elements to be stored in the extension
 	// registry
 	protected void setElementFactory() {
-		if (isMultiLanguage)
+		if (isMultiLanguage) {
 			theRegistryObjectFactory = new RegistryObjectFactoryMulti(this);
-		else
+		} else {
 			theRegistryObjectFactory = new RegistryObjectFactory(this);
+		}
 	}
 
 	// Lazy initialization.
 	public RegistryObjectFactory getElementFactory() {
-		if (theRegistryObjectFactory == null)
+		if (theRegistryObjectFactory == null) {
 			setElementFactory();
+		}
 		return theRegistryObjectFactory;
 	}
 
@@ -938,8 +982,9 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	 * and only translated values is cached.
 	 */
 	public String translate(String key, ResourceBundle resources) {
-		if (isMultiLanguage)
+		if (isMultiLanguage) {
 			return key;
+		}
 		return strategy.translate(key, resources);
 	}
 
@@ -964,8 +1009,9 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	protected boolean checkCache() {
 		for (int index = 0; index < strategy.getLocationsLength(); index++) {
 			File possibleCacheLocation = strategy.getStorage(index);
-			if (possibleCacheLocation == null)
+			if (possibleCacheLocation == null) {
 				break; // bail out on the first null
+			}
 			setFileManager(possibleCacheLocation, strategy.isCacheReadOnly(index));
 			if (cacheStorageManager != null) {
 				// check this new location:
@@ -975,8 +1021,9 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 				} catch (IOException e) {
 					// Ignore the exception. The registry will be rebuilt from the xml files.
 				}
-				if (cacheFile != null && cacheFile.isFile())
+				if (cacheFile != null && cacheFile.isFile()) {
 					return true; // found the appropriate location
+				}
 			}
 		}
 		return false;
@@ -1022,15 +1069,19 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 
 				// notification order - on addition: extension points; then extensions
 				if (extendedDelta.isAddition()) {
-					if (extensionPoints != null)
+					if (extensionPoints != null) {
 						extensionListener.added(extensionPoints);
-					if (extensions != null)
+					}
+					if (extensions != null) {
 						extensionListener.added(extensions);
+					}
 				} else { // on removal: extensions; then extension points
-					if (extensions != null)
+					if (extensions != null) {
 						extensionListener.removed(extensions);
-					if (extensionPoints != null)
+					}
+					if (extensionPoints != null) {
 						extensionListener.removed(extensionPoints);
+					}
 				}
 			}
 		}
@@ -1038,8 +1089,9 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 			((RegistryDelta) delta).getObjectManager().close();
 		}
 		IObjectManager manager = extendedDelta.getObjectManager();
-		if (manager != null)
+		if (manager != null) {
 			manager.close();
+		}
 		return result;
 	}
 
@@ -1087,8 +1139,9 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 				QueueElement element;
 				synchronized (queue) {
 					try {
-						while (queue.isEmpty())
+						while (queue.isEmpty()) {
 							queue.wait();
+						}
 					} catch (InterruptedException e) {
 						return;
 					}
@@ -1117,29 +1170,34 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	 * @return true is the key grants read/write access to the registry
 	 */
 	private boolean checkReadWriteAccess(Object key, boolean persist) {
-		if (masterToken == key)
+		if (masterToken == key) {
 			return true;
-		if (userToken == key && !persist)
+		}
+		if (userToken == key && !persist) {
 			return true;
+		}
 		return false;
 	}
 
 	public boolean addContribution(InputStream is, IContributor contributor, boolean persist, String contributionName,
 			ResourceBundle translationBundle, Object key, long timestamp) {
 		boolean result = addContribution(is, contributor, persist, contributionName, translationBundle, key);
-		if (timestamp != 0)
+		if (timestamp != 0) {
 			aggregatedTimestamp.add(timestamp);
+		}
 		return result;
 	}
 
 	@Override
 	public boolean addContribution(InputStream is, IContributor contributor, boolean persist, String contributionName,
 			ResourceBundle translationBundle, Object key) {
-		if (!checkReadWriteAccess(key, persist))
+		if (!checkReadWriteAccess(key, persist)) {
 			throw new IllegalArgumentException(
 					"Unauthorized access to the ExtensionRegistry.addContribution() method. Check if proper access token is supplied."); //$NON-NLS-1$
-		if (contributionName == null)
+		}
+		if (contributionName == null) {
 			contributionName = ""; //$NON-NLS-1$
+		}
 
 		RegistryContributor internalContributor = (RegistryContributor) contributor;
 		registryObjects.addContributor(internalContributor); // only adds a contributor if it is not already present
@@ -1157,8 +1215,9 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 			int status = problems.getSeverity();
 			if (status != IStatus.OK) {
 				log(problems);
-				if (status == IStatus.ERROR || status == IStatus.CANCEL)
+				if (status == IStatus.ERROR || status == IStatus.CANCEL) {
 					return false;
+				}
 			}
 		} catch (ParserConfigurationException | SAXException | IOException e) {
 			logError(ownerName, contributionName, e);
@@ -1211,9 +1270,10 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	 */
 	public boolean addExtensionPoint(String identifier, IContributor contributor, boolean persist, String label,
 			String schemaReference, Object token) throws IllegalArgumentException {
-		if (!checkReadWriteAccess(token, persist))
+		if (!checkReadWriteAccess(token, persist)) {
 			throw new IllegalArgumentException(
 					"Unauthorized access to the ExtensionRegistry.addExtensionPoint() method. Check if proper access token is supplied."); //$NON-NLS-1$
+		}
 
 		RegistryContributor internalContributor = (RegistryContributor) contributor;
 		registryObjects.addContributor(internalContributor); // only adds a contributor if it is not already present
@@ -1225,8 +1285,9 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, 0, message, null));
 			throw new NullPointerException(message);
 		}
-		if (schemaReference == null)
+		if (schemaReference == null) {
 			schemaReference = ""; //$NON-NLS-1$
+		}
 
 		// addition wraps in a contribution
 		Contribution contribution = getElementFactory().createContribution(contributorId, persist);
@@ -1309,9 +1370,10 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	public boolean addExtension(String identifier, IContributor contributor, boolean persist, String label,
 			String extensionPointId, ConfigurationElementDescription configurationElements, Object token)
 			throws IllegalArgumentException {
-		if (!checkReadWriteAccess(token, persist))
+		if (!checkReadWriteAccess(token, persist)) {
 			throw new IllegalArgumentException(
 					"Unauthorized access to the ExtensionRegistry.addExtensionPoint() method. Check if proper access token is supplied."); //$NON-NLS-1$
+		}
 		// prepare namespace information
 		RegistryContributor internalContributor = (RegistryContributor) contributor;
 		registryObjects.addContributor(internalContributor); // only adds a contributor if it is not already present
@@ -1338,10 +1400,11 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 		currentExtension.setLabel(extensionLabelNLS);
 
 		String targetExtensionPointId;
-		if (extensionPointId.indexOf('.') == -1) // No dots -> namespace name added at the start
+		if (extensionPointId.indexOf('.') == -1) { // No dots -> namespace name added at the start
 			targetExtensionPointId = contribution.getDefaultNamespace() + '.' + extensionPointId;
-		else
+		} else { // No dots -> namespace name added at the start
 			targetExtensionPointId = extensionPointId;
+		}
 		currentExtension.setExtensionPointIdentifier(targetExtensionPointId);
 
 		// if we have an Id specified, check for duplicates. Only issue warning if
@@ -1394,12 +1457,14 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 				properties[i * 2 + 1] = translate(descriptionProperties[i].getValue(), null);
 			}
 			currentConfigurationElement.setProperties(properties);
-		} else
+		} else {
 			currentConfigurationElement.setProperties(RegistryObjectManager.EMPTY_STRING_ARRAY);
+		}
 
 		String value = description.getValue();
-		if (value != null)
+		if (value != null) {
 			currentConfigurationElement.setValue(value);
+		}
 
 		getObjectManager().add(currentConfigurationElement, true);
 
@@ -1427,40 +1492,45 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 
 	@Override
 	public boolean removeExtension(IExtension extension, Object token) throws IllegalArgumentException {
-		if (!(extension instanceof ExtensionHandle))
+		if (!(extension instanceof ExtensionHandle)) {
 			return false;
+		}
 		return removeObject(((ExtensionHandle) extension).getObject(), false, token);
 	}
 
 	@Override
 	public boolean removeExtensionPoint(IExtensionPoint extensionPoint, Object token) throws IllegalArgumentException {
-		if (!(extensionPoint instanceof ExtensionPointHandle))
+		if (!(extensionPoint instanceof ExtensionPointHandle)) {
 			return false;
+		}
 		return removeObject(((ExtensionPointHandle) extensionPoint).getObject(), true, token);
 	}
 
 	private boolean removeObject(RegistryObject registryObject, boolean isExtensionPoint, Object token) {
-		if (!checkReadWriteAccess(token, registryObject.shouldPersist()))
+		if (!checkReadWriteAccess(token, registryObject.shouldPersist())) {
 			throw new IllegalArgumentException(
 					"Unauthorized access to the ExtensionRegistry.removeExtension() method. Check if proper access token is supplied."); //$NON-NLS-1$
+		}
 		int id = registryObject.getObjectId();
 
 		access.enterWrite();
 		try {
 			eventDelta = CombinedEventDelta.recordRemoval();
 			String namespace;
-			if (isExtensionPoint)
+			if (isExtensionPoint) {
 				namespace = removeExtensionPoint(id);
-			else
+			} else {
 				namespace = removeExtension(id);
+			}
 			Map<Integer, RegistryObject> removed = new HashMap<>(1);
 			removed.put(Integer.valueOf(id), registryObject);
 			// There is some asymmetry between extension and extension point removal.
 			// Removing extension point makes
 			// extensions "orphans" but does not remove them. As a result, only extensions
 			// needs to be processed.
-			if (!isExtensionPoint)
+			if (!isExtensionPoint) {
 				registryObjects.addAssociatedObjects(removed, registryObject);
+			}
 			registryObjects.removeObjects(removed);
 			registryObjects.addNavigableObjects(removed);
 			IObjectManager manager = registryObjects.createDelegatingObjectManager(removed);
@@ -1510,8 +1580,9 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	}
 
 	public void logMultiLangError() {
-		if (mlErrorLogged) // only log this error ones
+		if (mlErrorLogged) { // only log this error ones
 			return;
+		}
 		log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, 0, RegistryMessages.registry_non_multi_lang,
 				new IllegalArgumentException()));
 		mlErrorLogged = true;

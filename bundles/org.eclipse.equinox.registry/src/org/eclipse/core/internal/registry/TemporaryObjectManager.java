@@ -53,8 +53,9 @@ public class TemporaryObjectManager implements IObjectManager {
 		int nbrId = ids.length;
 		switch (type) {
 		case RegistryObjectManager.EXTENSION_POINT:
-			if (nbrId == 0)
+			if (nbrId == 0) {
 				return ExtensionPointHandle.EMPTY_ARRAY;
+			}
 			results = new ExtensionPointHandle[nbrId];
 			for (int i = 0; i < nbrId; i++) {
 				results[i] = new ExtensionPointHandle(this, ids[i]);
@@ -62,8 +63,9 @@ public class TemporaryObjectManager implements IObjectManager {
 			break;
 
 		case RegistryObjectManager.EXTENSION:
-			if (nbrId == 0)
+			if (nbrId == 0) {
 				return ExtensionHandle.EMPTY_ARRAY;
+			}
 			results = new ExtensionHandle[nbrId];
 			for (int i = 0; i < nbrId; i++) {
 				results[i] = new ExtensionHandle(this, ids[i]);
@@ -71,8 +73,9 @@ public class TemporaryObjectManager implements IObjectManager {
 			break;
 
 		case RegistryObjectManager.CONFIGURATION_ELEMENT:
-			if (nbrId == 0)
+			if (nbrId == 0) {
 				return ConfigurationElementHandle.EMPTY_ARRAY;
+			}
 			results = new ConfigurationElementHandle[nbrId];
 			for (int i = 0; i < nbrId; i++) {
 				results[i] = new ConfigurationElementHandle(this, ids[i]);
@@ -80,8 +83,9 @@ public class TemporaryObjectManager implements IObjectManager {
 			break;
 
 		case RegistryObjectManager.THIRDLEVEL_CONFIGURATION_ELEMENT:
-			if (nbrId == 0)
+			if (nbrId == 0) {
 				return ConfigurationElementHandle.EMPTY_ARRAY;
+			}
 			results = new ThirdLevelConfigurationElementHandle[nbrId];
 			for (int i = 0; i < nbrId; i++) {
 				results[i] = new ThirdLevelConfigurationElementHandle(this, ids[i]);
@@ -101,8 +105,9 @@ public class TemporaryObjectManager implements IObjectManager {
 				result = actualObjects.get(Integer.valueOf(id));
 			}
 		}
-		if (result == null)
+		if (result == null) {
 			throw new InvalidRegistryObjectException();
+		}
 		return result;
 	}
 

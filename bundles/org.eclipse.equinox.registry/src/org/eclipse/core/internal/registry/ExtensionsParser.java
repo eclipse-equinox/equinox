@@ -178,8 +178,9 @@ public class ExtensionsParser extends DefaultHandler {
 	@Override
 	public void characters(char[] ch, int start, int length) {
 		int state = stateStack.peek().intValue();
-		if (state != CONFIGURATION_ELEMENT_STATE)
+		if (state != CONFIGURATION_ELEMENT_STATE) {
 			return;
+		}
 		if (state == CONFIGURATION_ELEMENT_STATE) {
 			// Accept character data within an element, is when it is
 			// part of a configuration element (i.e. an element within an EXTENSION element
@@ -192,8 +193,9 @@ public class ExtensionsParser extends DefaultHandler {
 			} else {
 				configurationElementValue = configurationElementValue + value;
 			}
-			if (configurationElementValue != null)
+			if (configurationElementValue != null) {
 				currentConfigElement.setValue(configurationElementValue);
+			}
 		}
 	}
 
@@ -261,8 +263,9 @@ public class ExtensionsParser extends DefaultHandler {
 				stateStack.pop();
 				// Finish up extension object
 				Extension currentExtension = (Extension) objectStack.pop();
-				if (currentExtension.getNamespaceIdentifier() == null)
+				if (currentExtension.getNamespaceIdentifier() == null) {
 					currentExtension.setNamespaceIdentifier(contribution.getDefaultNamespace());
+				}
 				currentExtension.setContributorId(contribution.getContributorId());
 				scratchVectors[EXTENSION_INDEX].add(currentExtension);
 			}
@@ -328,8 +331,9 @@ public class ExtensionsParser extends DefaultHandler {
 			if (object instanceof ExtensionPoint) {
 				String id = ((ExtensionPoint) object).getUniqueIdentifier();
 				objectManager.removeExtensionPoint(id);
-			} else
+			} else {
 				objectManager.remove(object.getObjectId(), true);
+			}
 		}
 	}
 
@@ -391,25 +395,29 @@ public class ExtensionsParser extends DefaultHandler {
 		// If we get to this point, the element name is one we don't currently accept.
 		// Set the state to indicate that this element will be ignored
 		stateStack.push(Integer.valueOf(IGNORED_ELEMENT_STATE));
-		if (!compatibilityMode)
+		if (!compatibilityMode) {
 			unknownElement(PLUGIN, elementName);
+		}
 	}
 
 	private void logStatus(SAXParseException ex) {
 		String name = ex.getSystemId();
-		if (name == null)
+		if (name == null) {
 			name = locationName;
-		if (name == null)
+		}
+		if (name == null) {
 			name = ""; //$NON-NLS-1$
-		else
+		} else {
 			name = name.substring(1 + name.lastIndexOf("/")); //$NON-NLS-1$
+		}
 
 		String msg;
-		if (name.equals("")) //$NON-NLS-1$
+		if (name.equals("")) { //$NON-NLS-1$
 			msg = NLS.bind(RegistryMessages.parse_error, ex.getMessage());
-		else
+		} else { //$NON-NLS-1$
 			msg = NLS.bind(RegistryMessages.parse_errorNameLineColumn, (new Object[] { name,
-					Integer.toString(ex.getLineNumber()), Integer.toString(ex.getColumnNumber()), ex.getMessage() }));
+			Integer.toString(ex.getLineNumber()), Integer.toString(ex.getColumnNumber()), ex.getMessage() }));
+		}
 		error(new Status(IStatus.WARNING, RegistryMessages.OWNER_NAME, PARSE_PROBLEM, msg, ex));
 	}
 
@@ -421,16 +429,19 @@ public class ExtensionsParser extends DefaultHandler {
 		this.objectManager = registryObjects;
 		// initialize the parser with this object
 		this.contribution = currentNamespace;
-		if (registry.debug())
+		if (registry.debug()) {
 			start = System.currentTimeMillis();
+		}
 
-		if (factory == null)
+		if (factory == null) {
 			throw new SAXException(RegistryMessages.parse_xmlParserNotAvailable);
+		}
 
 		try {
 			locationName = in.getSystemId();
-			if (locationName == null)
+			if (locationName == null) {
 				locationName = manifestName;
+			}
 			factory.setNamespaceAware(true);
 			try {
 				factory.setFeature("http://xml.org/sax/features/string-interning", true); //$NON-NLS-1$
@@ -478,9 +489,9 @@ public class ExtensionsParser extends DefaultHandler {
 			String attrName = attributes.getLocalName(i);
 			String attrValue = attributes.getValue(i).trim();
 
-			if (attrName.equals(EXTENSION_NAME))
+			if (attrName.equals(EXTENSION_NAME)) {
 				currentExtension.setLabel(translate(attrValue));
-			else if (attrName.equals(EXTENSION_ID)) {
+			} else if (attrName.equals(EXTENSION_ID)) {
 				int simpleIdStart = attrValue.lastIndexOf('.');
 				if ((simpleIdStart != -1) && extractNamespaces) {
 					simpleId = attrValue.substring(simpleIdStart + 1);
@@ -497,11 +508,13 @@ public class ExtensionsParser extends DefaultHandler {
 				if (attrValue.lastIndexOf('.') == -1) {
 					String baseId = contribution.getDefaultNamespace();
 					targetName = baseId + '.' + attrValue;
-				} else
+				} else {
 					targetName = attrValue;
+				}
 				currentExtension.setExtensionPointIdentifier(targetName);
-			} else
+			} else {
 				unknownAttribute(attrName, EXTENSION);
+			}
 		}
 		if (currentExtension.getExtensionPointIdentifier() == null) {
 			missingAttribute(EXTENSION_TARGET, EXTENSION);
@@ -534,8 +547,9 @@ public class ExtensionsParser extends DefaultHandler {
 					}
 				}
 			}
-			if (processedExtensionIds == null)
+			if (processedExtensionIds == null) {
 				processedExtensionIds = new ArrayList<>(10);
+			}
 			processedExtensionIds.add(uniqueId);
 		}
 
@@ -545,27 +559,30 @@ public class ExtensionsParser extends DefaultHandler {
 
 	// todo: Are all three methods needed??
 	private void missingAttribute(String attribute, String element) {
-		if (locator == null)
+		if (locator == null) {
 			internalError(NLS.bind(RegistryMessages.parse_missingAttribute, attribute, element));
-		else
+		} else {
 			internalError(NLS.bind(RegistryMessages.parse_missingAttributeLine,
 					(new String[] { attribute, element, Integer.toString(locator.getLineNumber()) })));
+		}
 	}
 
 	private void unknownAttribute(String attribute, String element) {
-		if (locator == null)
+		if (locator == null) {
 			internalError(NLS.bind(RegistryMessages.parse_unknownAttribute, attribute, element));
-		else
+		} else {
 			internalError(NLS.bind(RegistryMessages.parse_unknownAttributeLine,
 					(new String[] { attribute, element, Integer.toString(locator.getLineNumber()) })));
+		}
 	}
 
 	private void unknownElement(String parent, String element) {
-		if (locator == null)
+		if (locator == null) {
 			internalError(NLS.bind(RegistryMessages.parse_unknownElement, element, parent));
-		else
+		} else {
 			internalError(NLS.bind(RegistryMessages.parse_unknownElementLine,
 					(new String[] { element, parent, Integer.toString(locator.getLineNumber()) })));
+		}
 	}
 
 	private void parseExtensionPointAttributes(Attributes attributes) {
@@ -578,9 +595,9 @@ public class ExtensionsParser extends DefaultHandler {
 			String attrName = attributes.getLocalName(i);
 			String attrValue = attributes.getValue(i).trim();
 
-			if (attrName.equals(EXTENSION_POINT_NAME))
+			if (attrName.equals(EXTENSION_POINT_NAME)) {
 				currentExtPoint.setLabel(translate(attrValue));
-			else if (attrName.equals(EXTENSION_POINT_ID)) {
+			} else if (attrName.equals(EXTENSION_POINT_ID)) {
 				String uniqueId;
 				String namespaceName;
 				int simpleIdStart = attrValue.lastIndexOf('.');
@@ -594,10 +611,11 @@ public class ExtensionsParser extends DefaultHandler {
 				currentExtPoint.setUniqueIdentifier(uniqueId);
 				currentExtPoint.setNamespace(namespaceName);
 
-			} else if (attrName.equals(EXTENSION_POINT_SCHEMA))
+			} else if (attrName.equals(EXTENSION_POINT_SCHEMA)) {
 				currentExtPoint.setSchema(attrValue);
-			else
+			} else {
 				unknownAttribute(attrName, EXTENSION_POINT);
+			}
 		}
 		if (currentExtPoint.getSimpleIdentifier() == null || currentExtPoint.getLabel() == null) {
 			String attribute = currentExtPoint.getSimpleIdentifier() == null ? EXTENSION_POINT_ID
@@ -620,8 +638,9 @@ public class ExtensionsParser extends DefaultHandler {
 			stateStack.push(Integer.valueOf(IGNORED_ELEMENT_STATE));
 			return;
 		}
-		if (currentExtPoint.getNamespace() == null)
+		if (currentExtPoint.getNamespace() == null) {
 			currentExtPoint.setNamespace(contribution.getDefaultNamespace());
+		}
 		currentExtPoint.setContributorId(contribution.getContributorId());
 		addedRegistryObjects.add(currentExtPoint);
 
@@ -667,8 +686,9 @@ public class ExtensionsParser extends DefaultHandler {
 			break;
 		default:
 			stateStack.push(Integer.valueOf(IGNORED_ELEMENT_STATE));
-			if (!compatibilityMode)
+			if (!compatibilityMode) {
 				internalError(NLS.bind(RegistryMessages.parse_unknownTopElement, elementName));
+			}
 		}
 	}
 
@@ -741,8 +761,9 @@ public class ExtensionsParser extends DefaultHandler {
 	 */
 	private Extension[] fixRenamedExtensionPoints(Extension[] extensions) {
 		if (extensions == null || versionAtLeast(VERSION_3_0)
-				|| RegistryProperties.getProperty(NO_EXTENSION_MUNGING) != null)
+				|| RegistryProperties.getProperty(NO_EXTENSION_MUNGING) != null) {
 			return extensions;
+		}
 		for (Extension extension : extensions) {
 			String oldPointId = extension.getExtensionPointIdentifier();
 			String newPointId = extensionPointMap.get(oldPointId);
@@ -768,16 +789,18 @@ public class ExtensionsParser extends DefaultHandler {
 	 * is a major version; X2 is a minor version and so on.
 	 */
 	private boolean versionAtLeast(String testVersion) {
-		if (schemaVersion == null)
+		if (schemaVersion == null) {
 			return false;
+		}
 
 		StringTokenizer testVersionTokenizer = new StringTokenizer(testVersion, "."); //$NON-NLS-1$
 		StringTokenizer schemaVersionTokenizer = new StringTokenizer(schemaVersion, "."); //$NON-NLS-1$
 		while (testVersionTokenizer.hasMoreTokens() && schemaVersionTokenizer.hasMoreTokens()) {
 			try {
 				if (Integer.parseInt(schemaVersionTokenizer.nextToken()) < Integer
-						.parseInt(testVersionTokenizer.nextToken()))
+						.parseInt(testVersionTokenizer.nextToken())) {
 					return false;
+				}
 			} catch (NumberFormatException e) {
 				return false;
 			}

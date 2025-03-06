@@ -87,11 +87,13 @@ public class RegistryCommandProvider implements CommandProvider {
 
 	public void _pt(CommandInterpreter ci) throws Exception {
 		String extensionPointId = getArgument(ci);
-		if (extensionPointId == null)
+		if (extensionPointId == null) {
 			return;
+		}
 		IExtensionPoint extpt = RegistryFactory.getRegistry().getExtensionPoint(extensionPointId);
-		if (extpt == null)
+		if (extpt == null) {
 			return;
+		}
 		ci.print("Extension point: "); //$NON-NLS-1$
 		displayExtensionPoint(extpt, ci);
 		IExtension[] exts = extpt.getExtensions();
@@ -142,14 +144,16 @@ public class RegistryCommandProvider implements CommandProvider {
 	}
 
 	private void displayExtensionPoint(IExtensionPoint extentionPoint, CommandInterpreter ci) {
-		if (extentionPoint == null)
+		if (extentionPoint == null) {
 			return;
+		}
 		ci.println(extentionPoint.getUniqueIdentifier() + " [from " + extentionPoint.getContributor().getName() + ']'); //$NON-NLS-1$
 	}
 
 	private void displayExtension(IExtension extention, CommandInterpreter ci, boolean full) {
-		if (extention == null)
+		if (extention == null) {
 			return;
+		}
 		if (full) {
 			ci.print("Id: " + extention.getUniqueIdentifier()); //$NON-NLS-1$
 			ci.print(" PointId: " + extention.getExtensionPointUniqueIdentifier()); //$NON-NLS-1$
@@ -167,8 +171,9 @@ public class RegistryCommandProvider implements CommandProvider {
 			ci.println(indent + spacing + attr + " = " + ce.getAttribute(attr)); //$NON-NLS-1$
 		}
 		String value = ce.getValue();
-		if (value != null)
+		if (value != null) {
 			ci.println(indent + spacing + value);
+		}
 		IConfigurationElement[] children = ce.getChildren();
 		for (IConfigurationElement child : children) {
 			displayConfigElement(ci, child, level + 1);
@@ -178,8 +183,9 @@ public class RegistryCommandProvider implements CommandProvider {
 
 	private String spacing(CommandInterpreter ci, int level) {
 		StringBuilder b = new StringBuilder();
-		for (int i = 0; i < level; i++)
+		for (int i = 0; i < level; i++) {
 			b.append(indent);
+		}
 		return b.toString();
 	}
 }

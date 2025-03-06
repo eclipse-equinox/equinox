@@ -91,8 +91,9 @@ public class RegistryStrategy {
 	 * @return number of possible cache locations for this registry
 	 */
 	public final int getLocationsLength() {
-		if (storageDirs == null)
+		if (storageDirs == null) {
 			return 0;
+		}
 		return storageDirs.length;
 	}
 
@@ -103,8 +104,9 @@ public class RegistryStrategy {
 	 * @return potential registry cache location
 	 */
 	public final File getStorage(int index) {
-		if (storageDirs != null)
+		if (storageDirs != null) {
 			return storageDirs[index];
+		}
 		return null;
 	}
 
@@ -116,8 +118,9 @@ public class RegistryStrategy {
 	 *         if the location is read/write
 	 */
 	public final boolean isCacheReadOnly(int index) {
-		if (cacheReadOnly != null)
+		if (cacheReadOnly != null) {
 			return cacheReadOnly[index];
+		}
 		return true;
 	}
 
@@ -290,8 +293,9 @@ public class RegistryStrategy {
 	 * @return status of the operation or <code>null</code>
 	 */
 	public final static IStatus processChangeEvent(Object[] listeners, Map<String, ?> deltas, Object registry) {
-		if (registry instanceof ExtensionRegistry)
+		if (registry instanceof ExtensionRegistry) {
 			return ((ExtensionRegistry) registry).processChangeEvent(listeners, deltas);
+		}
 		return null;
 	}
 

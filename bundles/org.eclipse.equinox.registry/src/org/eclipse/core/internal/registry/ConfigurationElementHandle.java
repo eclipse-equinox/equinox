@@ -66,8 +66,9 @@ public class ConfigurationElementHandle extends Handle implements IConfiguration
 		} catch (InvalidRegistryObjectException e) {
 			Status status = new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, IRegistryConstants.PLUGIN_ERROR,
 					"Invalid registry object", e); //$NON-NLS-1$
-			if (objectManager instanceof RegistryObjectManager)
+			if (objectManager instanceof RegistryObjectManager) {
 				((RegistryObjectManager) objectManager).getRegistry().log(status);
+			}
 			throw new CoreException(status);
 		}
 	}
@@ -83,8 +84,9 @@ public class ConfigurationElementHandle extends Handle implements IConfiguration
 		ConfigurationElement[] children = (ConfigurationElement[]) objectManager.getObjects(actualCE.getRawChildren(),
 				actualCE.noExtraData() ? RegistryObjectManager.CONFIGURATION_ELEMENT
 						: RegistryObjectManager.THIRDLEVEL_CONFIGURATION_ELEMENT);
-		if (children.length == 0)
+		if (children.length == 0) {
 			return ConfigurationElementHandle.EMPTY_ARRAY;
+		}
 
 		IConfigurationElement[] result = new IConfigurationElement[1];
 		int idx = 0;
@@ -100,8 +102,9 @@ public class ConfigurationElementHandle extends Handle implements IConfiguration
 								: RegistryObjectManager.THIRDLEVEL_CONFIGURATION_ELEMENT);
 			}
 		}
-		if (idx == 0)
+		if (idx == 0) {
 			return ConfigurationElementHandle.EMPTY_ARRAY;
+		}
 		return result;
 	}
 

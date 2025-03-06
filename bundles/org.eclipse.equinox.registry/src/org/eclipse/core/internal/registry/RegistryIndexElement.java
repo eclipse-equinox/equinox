@@ -35,50 +35,60 @@ public class RegistryIndexElement implements KeyedElement {
 	}
 
 	protected int[] getExtensions() {
-		if (extensions == null)
+		if (extensions == null) {
 			return RegistryIndexChildren.EMPTY_ARRAY;
+		}
 		return extensions.getChildren();
 	}
 
 	protected int[] getExtensionPoints() {
-		if (extensionPoints == null)
+		if (extensionPoints == null) {
 			return RegistryIndexChildren.EMPTY_ARRAY;
+		}
 		return extensionPoints.getChildren();
 	}
 
 	public boolean updateExtension(int id, boolean add) {
-		if (extensions == null)
+		if (extensions == null) {
 			extensions = new RegistryIndexChildren();
+		}
 
-		if (add)
+		if (add) {
 			return extensions.linkChild(id);
+		}
 		return extensions.unlinkChild(id);
 	}
 
 	public boolean updateExtensions(int[] IDs, boolean add) {
-		if (extensions == null)
+		if (extensions == null) {
 			extensions = new RegistryIndexChildren();
+		}
 
-		if (add)
+		if (add) {
 			return extensions.linkChildren(IDs);
+		}
 		return extensions.unlinkChildren(IDs);
 	}
 
 	public boolean updateExtensionPoint(int id, boolean add) {
-		if (extensionPoints == null)
+		if (extensionPoints == null) {
 			extensionPoints = new RegistryIndexChildren();
+		}
 
-		if (add)
+		if (add) {
 			return extensionPoints.linkChild(id);
+		}
 		return extensionPoints.unlinkChild(id);
 	}
 
 	public boolean updateExtensionPoints(int[] IDs, boolean add) {
-		if (extensionPoints == null)
+		if (extensionPoints == null) {
 			extensionPoints = new RegistryIndexChildren();
+		}
 
-		if (add)
+		if (add) {
 			return extensionPoints.linkChildren(IDs);
+		}
 		return extensionPoints.unlinkChildren(IDs);
 	}
 

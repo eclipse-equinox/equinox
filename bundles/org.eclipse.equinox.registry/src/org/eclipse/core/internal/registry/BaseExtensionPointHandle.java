@@ -60,14 +60,16 @@ public class BaseExtensionPointHandle extends Handle implements IExtensionPoint 
 
 	@Override
 	public IExtension getExtension(String extensionId) {
-		if (extensionId == null)
+		if (extensionId == null) {
 			return null;
+		}
 		for (int element : getExtensionPoint().getRawChildren()) {
 			// Here we directly get the object because it avoids the creation of garbage and
 			// because we'll need the object anyway to compare the value
 			if (extensionId.equals(((Extension) objectManager.getObject(element, RegistryObjectManager.EXTENSION))
-					.getUniqueIdentifier()))
+					.getUniqueIdentifier())) {
 				return (ExtensionHandle) objectManager.getHandle(element, RegistryObjectManager.EXTENSION);
+			}
 		}
 		return null;
 	}
@@ -78,8 +80,9 @@ public class BaseExtensionPointHandle extends Handle implements IExtensionPoint 
 		// elements information.
 		Extension[] tmpExtensions = (Extension[]) objectManager.getObjects(getExtensionPoint().getRawChildren(),
 				RegistryObjectManager.EXTENSION);
-		if (tmpExtensions.length == 0)
+		if (tmpExtensions.length == 0) {
 			return ConfigurationElementHandle.EMPTY_ARRAY;
+		}
 
 		ArrayList<Handle> result = new ArrayList<>();
 		for (Extension tmpExtension : tmpExtensions) {

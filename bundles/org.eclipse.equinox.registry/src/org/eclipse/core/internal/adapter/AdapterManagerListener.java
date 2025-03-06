@@ -43,8 +43,9 @@ public final class AdapterManagerListener implements IRegistryEventListener, IAd
 	@Override
 	public boolean addFactories(AdapterManager adapterManager) {
 		IExtensionPoint point = RegistryFactory.getRegistry().getExtensionPoint(ADAPTER_POINT_ID);
-		if (point == null)
+		if (point == null) {
 			return false;
+		}
 
 		boolean factoriesAdded = false;
 		IExtension[] extensions = point.getExtensions();
@@ -66,8 +67,9 @@ public final class AdapterManagerListener implements IRegistryEventListener, IAd
 		IConfigurationElement[] elements = extension.getConfigurationElements();
 		for (IConfigurationElement element : elements) {
 			AdapterFactoryProxy proxy = AdapterFactoryProxy.createProxy(element);
-			if (proxy != null)
+			if (proxy != null) {
 				theAdapterManager.registerFactory(proxy, proxy.getAdaptableType());
+			}
 		}
 	}
 

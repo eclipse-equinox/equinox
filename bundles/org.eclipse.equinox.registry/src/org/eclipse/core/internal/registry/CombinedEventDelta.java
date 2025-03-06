@@ -124,22 +124,27 @@ public class CombinedEventDelta {
 	}
 
 	public void rememberExtensions(ExtensionPoint extensionPoint, int[] exts) {
-		if (exts == null)
+		if (exts == null) {
 			return;
-		if (exts.length == 0)
+		}
+		if (exts.length == 0) {
 			return;
-		for (int ext : exts)
+		}
+		for (int ext : exts) {
 			rememberExtension(extensionPoint, ext);
+		}
 	}
 
 	public IExtensionPoint[] getExtensionPoints(String id) {
 		List<Integer> extensionPoints = null;
-		if (id != null && extPointsByID != null)
+		if (id != null && extPointsByID != null) {
 			extensionPoints = extPointsByID.get(id);
-		else if (id == null)
+		} else if (id == null) {
 			extensionPoints = allExtensionPoints;
-		if (extensionPoints == null) // no changes that fit the filter
+		}
+		if (extensionPoints == null) { // no changes that fit the filter
 			return null;
+		}
 		int size = extensionPoints.size();
 		ArrayList<IExtensionPoint> result = new ArrayList<>(size);
 		for (int i = 0; i < size; i++) {
@@ -147,8 +152,9 @@ public class CombinedEventDelta {
 			IExtensionPoint extensionPoint = new ExtensionPointHandle(objectManager, extPt.intValue());
 			result.add(extensionPoint);
 		}
-		if (result.size() == 0)
+		if (result.size() == 0) {
 			return null;
+		}
 		return result.toArray(new IExtensionPoint[result.size()]);
 	}
 
@@ -159,8 +165,9 @@ public class CombinedEventDelta {
 		} else if (id == null) {
 			extensions = allExtensions;
 		}
-		if (extensions == null) // no changes that fit the filter
+		if (extensions == null) { // no changes that fit the filter
 			return null;
+		}
 		int size = extensions.size();
 		ArrayList<IExtension> result = new ArrayList<>(size);
 		for (int i = 0; i < size; i++) {

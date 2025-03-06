@@ -34,8 +34,9 @@ public class RegistryProperties {
 
 	public static String getProperty(String propertyName) {
 		String propertyValue = registryProperties.getProperty(propertyName);
-		if (propertyValue != null)
+		if (propertyValue != null) {
 			return propertyValue;
+		}
 
 		return getContextProperty(propertyName);
 	}
@@ -54,8 +55,9 @@ public class RegistryProperties {
 	// if
 	// it was already set by Activator indicating that OSGi layer is present.
 	private static String getContextProperty(final String propertyName) {
-		if (context == null)
+		if (context == null) {
 			return System.getProperty(propertyName);
+		}
 
 		final String[] result = new String[1];
 		try {

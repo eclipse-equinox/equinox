@@ -79,8 +79,9 @@ public class ConfigurationElement extends RegistryObject {
 	}
 
 	String getValueAsIs() {
-		if (propertiesAndValue.length != 0 && propertiesAndValue.length % 2 == 1)
+		if (propertiesAndValue.length != 0 && propertiesAndValue.length % 2 == 1) {
 			return propertiesAndValue[propertiesAndValue.length - 1];
+		}
 		return null;
 	}
 
@@ -89,19 +90,22 @@ public class ConfigurationElement extends RegistryObject {
 	}
 
 	String getAttributeAsIs(String attrName) {
-		if (propertiesAndValue.length <= 1)
+		if (propertiesAndValue.length <= 1) {
 			return null;
+		}
 		int size = propertiesAndValue.length - (propertiesAndValue.length % 2);
 		for (int i = 0; i < size; i += 2) {
-			if (propertiesAndValue[i].equals(attrName))
+			if (propertiesAndValue[i].equals(attrName)) {
 				return propertiesAndValue[i + 1];
+			}
 		}
 		return null;
 	}
 
 	protected String[] getAttributeNames() {
-		if (propertiesAndValue.length <= 1)
+		if (propertiesAndValue.length <= 1) {
 			return RegistryObjectManager.EMPTY_STRING_ARRAY;
+		}
 
 		int size = propertiesAndValue.length / 2;
 		String[] result = new String[size];
@@ -161,8 +165,9 @@ public class ConfigurationElement extends RegistryObject {
 	}
 
 	public ConfigurationElement[] getChildren(String childrenName) {
-		if (getRawChildren().length == 0)
+		if (getRawChildren().length == 0) {
 			return ConfigurationElement.EMPTY_ARRAY;
+		}
 
 		ConfigurationElement[] result = new ConfigurationElement[1]; // Most of the time there is only one match
 		int idx = 0;
@@ -180,8 +185,9 @@ public class ConfigurationElement extends RegistryObject {
 				result[idx++] = toTest;
 			}
 		}
-		if (idx == 0)
+		if (idx == 0) {
 			result = ConfigurationElement.EMPTY_ARRAY;
+		}
 		return result;
 	}
 
@@ -213,15 +219,16 @@ public class ConfigurationElement extends RegistryObject {
 		Object initData = null;
 		int i;
 
-		if (attributeName != null)
+		if (attributeName != null) {
 			prop = getAttribute(attributeName);
-		else {
+		} else {
 			// property not specified, try as element value
 			prop = getValue();
 			if (prop != null) {
 				prop = prop.trim();
-				if (prop.equals("")) //$NON-NLS-1$
+				if (prop.equals("")) { //$NON-NLS-1$
 					prop = null;
+				}
 			}
 		}
 
@@ -243,11 +250,13 @@ public class ConfigurationElement extends RegistryObject {
 					initParms = new Hashtable<>(parms.length + 1);
 					for (i = 0; i < parms.length; i++) {
 						pname = parms[i].getAttribute("name"); //$NON-NLS-1$
-						if (pname != null)
+						if (pname != null) {
 							initParms.put(pname, parms[i].getAttribute("value")); //$NON-NLS-1$
+						}
 					}
-					if (!initParms.isEmpty())
+					if (!initParms.isEmpty()) {
 						initData = initParms;
+					}
 				}
 			} else {
 				// specified name is not a simple attribute nor child element
@@ -259,15 +268,17 @@ public class ConfigurationElement extends RegistryObject {
 			if (i != -1) {
 				executable = prop.substring(0, i).trim();
 				initData = prop.substring(i + 1).trim();
-			} else
+			} else {
 				executable = prop;
+			}
 
 			i = executable.indexOf('/');
 			if (i != -1) {
 				contributorName = executable.substring(0, i).trim();
 				className = executable.substring(i + 1).trim();
-			} else
+			} else {
 				className = executable;
+			}
 		}
 
 		// create a new instance
@@ -280,8 +291,9 @@ public class ConfigurationElement extends RegistryObject {
 			// We need to take into account both "old" and "new" style executable extensions
 			ConfigurationElementHandle confElementHandle = new ConfigurationElementHandle(registry.getObjectManager(),
 					getObjectId());
-			if (result instanceof IExecutableExtension)
+			if (result instanceof IExecutableExtension) {
 				((IExecutableExtension) result).setInitializationData(confElementHandle, attributeName, initData);
+			}
 		} catch (CoreException ce) {
 			// user code threw exception
 			throw ce;
@@ -292,8 +304,9 @@ public class ConfigurationElement extends RegistryObject {
 		}
 
 		// Deal with executable extension factories.
-		if (result instanceof IExecutableExtensionFactory)
+		if (result instanceof IExecutableExtensionFactory) {
 			result = ((IExecutableExtensionFactory) result).create();
+		}
 
 		return result;
 	}
