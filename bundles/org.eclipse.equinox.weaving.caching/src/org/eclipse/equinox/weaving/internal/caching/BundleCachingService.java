@@ -191,8 +191,9 @@ public class BundleCachingService implements ICachingService {
 				classbytes = new byte[length];
 				for (; bytesread < length; bytesread += readcount) {
 					readcount = in.read(classbytes, bytesread, length - bytesread);
-					if (readcount <= 0) /* if we didn't read anything */
+					if (readcount <= 0) { /* if we didn't read anything */
 						break; /* leave the loop */
+					}
 				}
 			} else /* BundleEntry does not know its own length! */ {
 				length = READ_BUFFER_SIZE;
@@ -200,8 +201,9 @@ public class BundleCachingService implements ICachingService {
 				readloop: while (true) {
 					for (; bytesread < length; bytesread += readcount) {
 						readcount = in.read(classbytes, bytesread, length - bytesread);
-						if (readcount <= 0) /* if we didn't read anything */
+						if (readcount <= 0) { /* if we didn't read anything */
 							break readloop; /* leave the loop */
+						}
 					}
 					final byte[] oldbytes = classbytes;
 					length += READ_BUFFER_SIZE;

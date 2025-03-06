@@ -92,13 +92,15 @@ public class Activator implements BundleActivator {
 		setDebugEnabled(bundleContext);
 
 		if (shouldRegister()) {
-			if (verbose)
+			if (verbose) {
 				System.err.println("[org.eclipse.equinox.weaving.caching] info starting standard caching service ..."); //$NON-NLS-1$
+			}
 			registerCachingServiceFactory(bundleContext);
 		} else {
-			if (verbose)
+			if (verbose) {
 				System.err.println(
 						"[org.eclipse.equinox.weaving.caching] warning cannot start standard caching service on J9 VM"); //$NON-NLS-1$
+			}
 		}
 	}
 
