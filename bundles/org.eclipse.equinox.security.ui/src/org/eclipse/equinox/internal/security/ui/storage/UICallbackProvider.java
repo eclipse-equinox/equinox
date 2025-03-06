@@ -60,21 +60,24 @@ public class UICallbackProvider implements IUICallbacks {
 
 	@Override
 	public void setupPasswordRecovery(final int size, final String moduleID, final IPreferencesContainer container) {
-		if (!StorageUtils.showUI(container))
+		if (!StorageUtils.showUI(container)) {
 			return;
+		}
 
 		UIJob reciverySetupJob = new UIJob(SecUIMessages.pswJobName) {
 			@Override
 			public IStatus runInUIThread(IProgressMonitor monitor) {
 				boolean reply = MessageDialog.openQuestion(StorageUtils.getShell(),
 						SecUIMessages.pswdRecoveryOptionTitle, SecUIMessages.pswdRecoveryOptionMsg);
-				if (!reply)
+				if (!reply) {
 					return Status.OK_STATUS;
+				}
 				ChallengeResponseDialog dialog = new ChallengeResponseDialog(size, StorageUtils.getShell());
 				dialog.open();
 				String[][] result = dialog.getResult();
-				if (result != null)
+				if (result != null) {
 					InternalExchangeUtils.setupRecovery(result, moduleID, container);
+				}
 				return Status.OK_STATUS;
 			}
 		};
@@ -129,14 +132,16 @@ public class UICallbackProvider implements IUICallbacks {
 				exception[0] = new StorageException(StorageException.INTERNAL_ERROR, SecUIMessages.initCancelled);
 			}
 		}
-		if (exception[0] != null)
+		if (exception[0] != null) {
 			throw exception[0];
+		}
 	}
 
 	@Override
 	public Boolean ask(final String msg) {
-		if (!StorageUtils.showUI(null)) // container-independent operation
+		if (!StorageUtils.showUI(null)) { // container-independent operation
 			return null;
+		}
 
 		return PlatformUI.getWorkbench().getDisplay().syncCall(
 				() -> MessageDialog.openConfirm(StorageUtils.getShell(), SecUIMessages.generalDialogTitle, msg));

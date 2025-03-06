@@ -28,8 +28,9 @@ public class StorageUtils {
 	public static Shell getShell() {
 		if (runningUI()) {
 			IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-			if (window != null)
+			if (window != null) {
 				return window.getShell();
+			}
 		}
 		return null;
 	}
@@ -38,10 +39,12 @@ public class StorageUtils {
 	 * Determines if it is a good idea to show UI prompts
 	 */
 	public static boolean showUI(IPreferencesContainer container) {
-		if (!runningUI() || InternalExchangeUtils.isJUnitApp())
+		if (!runningUI() || InternalExchangeUtils.isJUnitApp()) {
 			return false;
-		if (container == null)
+		}
+		if (container == null) {
 			return true;
+		}
 		if (container.getOption(IProviderHints.PROMPT_USER) instanceof Boolean prompt) {
 			return prompt.booleanValue();
 		}

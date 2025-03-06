@@ -123,7 +123,7 @@ public class Activator extends AbstractUIPlugin {
 		if (trustEngineTracker == null) {
 			String trustAuthorityProp = Activator.getBundleContext().getProperty(PROP_TRUST_ENGINE);
 			Filter filter = null;
-			if (trustAuthorityProp != null)
+			if (trustAuthorityProp != null) {
 				try {
 					filter = FrameworkUtil.createFilter("(&(" + Constants.OBJECTCLASS + "=" //$NON-NLS-1$ //$NON-NLS-2$
 							+ TrustEngine.class.getName() + ")(" + PROP_TRUST_ENGINE + "=" + trustAuthorityProp + "))"); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
@@ -131,10 +131,12 @@ public class Activator extends AbstractUIPlugin {
 					e.printStackTrace();
 					// do nothing just use no filter TODO we may want to log something
 				}
+			}
 			if (filter != null) {
 				trustEngineTracker = new ServiceTracker<>(bundleContext, filter, null);
-			} else
+			} else {
 				trustEngineTracker = new ServiceTracker<>(bundleContext, TrustEngine.class, null);
+			}
 			trustEngineTracker.open();
 		}
 		return trustEngineTracker.getServices(new TrustEngine[] {});
@@ -144,13 +146,14 @@ public class Activator extends AbstractUIPlugin {
 		if (authzEngineTracker == null) {
 			String implProp = Activator.getBundleContext().getProperty(PROP_AUTHZ_ENGINE);
 			Filter filter = null;
-			if (implProp != null)
+			if (implProp != null) {
 				try {
 					filter = FrameworkUtil.createFilter("(&(" + Constants.OBJECTCLASS + "=" //$NON-NLS-1$ //$NON-NLS-2$
 							+ AuthorizationEngine.class.getName() + ")(" + PROP_AUTHZ_ENGINE + "=" + implProp + "))"); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
 				} catch (InvalidSyntaxException e) {
 					// TODO:log the error
 				}
+			}
 			if (filter != null) {
 				authzEngineTracker = new ServiceTracker<>(Activator.getBundleContext(), filter, null);
 			} else {
@@ -166,13 +169,14 @@ public class Activator extends AbstractUIPlugin {
 		if (authzManagerTracker == null) {
 			String implProp = Activator.getBundleContext().getProperty(PROP_AUTHZ_MANAGER);
 			Filter filter = null;
-			if (implProp != null)
+			if (implProp != null) {
 				try {
 					filter = FrameworkUtil.createFilter("(&(" + Constants.OBJECTCLASS + "=" //$NON-NLS-1$ //$NON-NLS-2$
 							+ AuthorizationManager.class.getName() + ")(" + PROP_AUTHZ_MANAGER + "=" + implProp + "))"); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
 				} catch (InvalidSyntaxException e) {
 					// TODO:log the error
 				}
+			}
 			if (filter != null) {
 				authzManagerTracker = new ServiceTracker<>(Activator.getBundleContext(), filter, null);
 			} else {
@@ -216,8 +220,9 @@ public class Activator extends AbstractUIPlugin {
 
 	public boolean debugStorageContents() {
 		DebugOptions debugOptions = getDebugOptions();
-		if (debugOptions == null)
+		if (debugOptions == null) {
 			return false;
+		}
 		return debugOptions.getBooleanOption(OPTION_DEBUG, false) && //
 				debugOptions.getBooleanOption(OPTION_DEBUG_STORAGE, false);
 	}

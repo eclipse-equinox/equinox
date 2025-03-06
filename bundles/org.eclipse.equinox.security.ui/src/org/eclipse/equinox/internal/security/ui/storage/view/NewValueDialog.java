@@ -97,9 +97,9 @@ public class NewValueDialog extends TitleAreaDialog {
 	protected boolean validName() {
 		String tmp = keyText.getText();
 		boolean valid;
-		if ((tmp == null) || (tmp.length() == 0))
+		if ((tmp == null) || (tmp.length() == 0)) {
 			valid = false;
-		else {
+		} else {
 			valid = true;
 			for (String existingKey : existingKeys) {
 				if (existingKey.equals(tmp)) {
@@ -109,10 +109,11 @@ public class NewValueDialog extends TitleAreaDialog {
 			}
 			valid = (tmp.indexOf('/') == -1);
 		}
-		if (valid)
+		if (valid) {
 			setMessage(SecUIMessages.addValueMsg, IMessageProvider.NONE);
-		else
+		} else {
 			setMessage(SecUIMessages.addValueInvalid, IMessageProvider.ERROR);
+		}
 		return valid;
 	}
 

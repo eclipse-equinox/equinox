@@ -82,8 +82,9 @@ public class StorageLoginDialog extends TitleAreaDialog {
 		IDialogSettings settings = Activator.getDefault().getDialogSettings();
 		String settingsID = (confirmPassword) ? DIALOG_SETTINGS_SECTION_NEW : DIALOG_SETTINGS_SECTION_OLD;
 		IDialogSettings section = settings.getSection(settingsID);
-		if (section == null)
+		if (section == null) {
 			section = settings.addNewSection(settingsID);
+		}
 		return section;
 	}
 
@@ -115,12 +116,13 @@ public class StorageLoginDialog extends TitleAreaDialog {
 		Composite compositeTop = (Composite) super.createDialogArea(parent);
 
 		String titleMsg;
-		if (confirmPassword)
+		if (confirmPassword) {
 			titleMsg = SecUIMessages.passwordChangeTitle;
-		else if (passwordChange)
+		} else if (passwordChange) {
 			titleMsg = SecUIMessages.messageLoginChange;
-		else
+		} else {
 			titleMsg = SecUIMessages.dialogTitle;
+		}
 		setTitle(titleMsg);
 
 		Composite composite = new Composite(compositeTop, SWT.NONE);
@@ -133,8 +135,9 @@ public class StorageLoginDialog extends TitleAreaDialog {
 			new Label(composite, SWT.LEFT).setText(SecUIMessages.labelConfirm);
 			confirm = new Text(composite, SWT.LEFT | SWT.BORDER);
 			confirm.addModifyListener(event -> okButton.setEnabled(validatePassword()));
-		} else
+		} else {
 			confirm = null;
+		}
 
 		new Label(composite, SWT.LEFT); // filler
 		showPassword = new Button(composite, SWT.CHECK | SWT.RIGHT);
@@ -178,12 +181,14 @@ public class StorageLoginDialog extends TitleAreaDialog {
 		boolean selected = showPassword.getSelection();
 		if (selected) {
 			password.setEchoChar('\0');
-			if (confirm != null)
+			if (confirm != null) {
 				confirm.setEchoChar('\0');
+			}
 		} else {
 			password.setEchoChar('*');
-			if (confirm != null)
+			if (confirm != null) {
 				confirm.setEchoChar('*');
+			}
 		}
 	}
 

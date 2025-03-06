@@ -58,8 +58,9 @@ public abstract class SecurityContributionItemFactory {
 	public static final ContributionItemFactory SECURITY_STATUS = new ContributionItemFactory("securityStatus") {//$NON-NLS-1$
 		@Override
 		public IContributionItem create(IWorkbenchWindow window) {
-			if (window == null)
+			if (window == null) {
 				throw new IllegalArgumentException();
+			}
 			return new SecurityStatusControl(window, getId());
 		}
 	};

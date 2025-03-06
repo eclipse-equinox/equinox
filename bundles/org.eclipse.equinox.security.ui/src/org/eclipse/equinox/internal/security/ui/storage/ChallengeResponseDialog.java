@@ -103,25 +103,28 @@ public class ChallengeResponseDialog extends TitleAreaDialog {
 	protected void validateOK() {
 		boolean valid = true;
 		for (int i = 0; i < size; i++) {
-			if (questions[i] == null)
+			if (questions[i] == null) {
 				continue;
+			}
 			String question = questions[i].getText();
 			if (question == null || question.length() == 0) {
 				valid = false;
 				break;
 			}
-			if (answers[i] == null)
+			if (answers[i] == null) {
 				continue;
+			}
 			String answer = answers[i].getText();
 			if (answer == null || answer.length() == 0) {
 				valid = false;
 				break;
 			}
 		}
-		if (valid)
+		if (valid) {
 			setMessage(SecUIMessages.passwordMsg, IMessageProvider.NONE);
-		else
+		} else {
 			setMessage(SecUIMessages.passwordErrMsg, IMessageProvider.WARNING);
+		}
 		okButton.setEnabled(valid);
 	}
 
@@ -138,8 +141,9 @@ public class ChallengeResponseDialog extends TitleAreaDialog {
 	}
 
 	public String[][] getResult() {
-		if (questionsText == null || answersText == null)
+		if (questionsText == null || answersText == null) {
 			return null;
+		}
 		return new String[][] { questionsText, answersText };
 	}
 

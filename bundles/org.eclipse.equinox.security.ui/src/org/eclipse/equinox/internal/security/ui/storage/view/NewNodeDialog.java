@@ -67,16 +67,18 @@ public class NewNodeDialog extends TitleAreaDialog {
 	protected boolean validName() {
 		String tmp = nodeName.getText();
 		boolean valid;
-		if ((tmp == null) || (tmp.length() == 0))
+		if ((tmp == null) || (tmp.length() == 0)) {
 			valid = false;
-		else if (tmp.equals(IStorageConst.STORAGE_ID))
+		} else if (tmp.equals(IStorageConst.STORAGE_ID)) {
 			valid = false;
-		else
+		} else {
 			valid = (tmp.indexOf('/') == -1);
-		if (valid)
+		}
+		if (valid) {
 			setMessage(SecUIMessages.newNodeMsg, IMessageProvider.NONE);
-		else
+		} else {
 			setMessage(SecUIMessages.newNodeInvalid, IMessageProvider.ERROR);
+		}
 		return valid;
 	}
 

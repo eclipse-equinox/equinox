@@ -69,10 +69,11 @@ public class CertificateImportTrustEngineSelectPage extends WizardPage implement
 				trustEngineCombo.add(availableEngine.getName());
 			}
 		}
-		if (trustEngineCombo.getItemCount() == 0)
+		if (trustEngineCombo.getItemCount() == 0) {
 			setErrorMessage(SecurityUIMsg.WIZARD_ERROR_NO_WRITE_ENGINE);
-		else
+		} else {
 			trustEngineCombo.setVisibleItemCount(trustEngines.size());
+		}
 
 		addListeners();
 	}

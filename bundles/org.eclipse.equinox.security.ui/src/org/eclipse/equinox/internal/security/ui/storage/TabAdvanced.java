@@ -59,8 +59,9 @@ public class TabAdvanced {
 		int position = 0;
 		for (String cipherAlgorithm : availableCiphers.keySet()) {
 			cipherSelector.add(cipherAlgorithm, position);
-			if (defaultCipherAlgorithm.equals(cipherAlgorithm))
+			if (defaultCipherAlgorithm.equals(cipherAlgorithm)) {
 				cipherSelector.select(position);
+			}
 			position++;
 		}
 
@@ -70,8 +71,9 @@ public class TabAdvanced {
 	public void performDefaults() {
 		for (int i = 0; i < cipherSelector.getItemCount(); i++) {
 			String item = cipherSelector.getItem(i);
-			if (item.equals(IStorageConstants.DEFAULT_CIPHER))
+			if (item.equals(IStorageConstants.DEFAULT_CIPHER)) {
 				cipherSelector.select(i);
+			}
 		}
 	}
 

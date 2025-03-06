@@ -115,8 +115,9 @@ public class TabPassword {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if ((e.detail & SWT.CHECK) != 0)
+				if ((e.detail & SWT.CHECK) != 0) {
 					providerModified = true;
+				}
 				enableButtons();
 				updateDescription();
 			}
@@ -136,8 +137,9 @@ public class TabPassword {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				PasswordProviderDescription selectedModule = getSelectedModule();
-				if (selectedModule == null)
+				if (selectedModule == null) {
 					return;
+				}
 				String moduleID = getSelectedModuleID();
 				ISecurePreferences rootNode = SecurePreferencesFactory.getDefault();
 				if (selectedModule.hasHint(InternalExchangeUtils.HINT_PASSWORD_AUTOGEN)) {
@@ -168,8 +170,9 @@ public class TabPassword {
 				String moduleID = getSelectedModuleID();
 				ISecurePreferences rootNode = SecurePreferencesFactory.getDefault();
 				String[] questions = InternalExchangeUtils.getPasswordRecoveryQuestions(rootNode, moduleID);
-				if (questions.length == 0)
+				if (questions.length == 0) {
 					return; // no password recovery questions were setup
+				}
 				PasswordRecoveryDialog dialog = new PasswordRecoveryDialog(questions, shell, moduleID);
 				dialog.open();
 				enableLogout();
@@ -206,10 +209,11 @@ public class TabPassword {
 			TableItem item = new TableItem(providerTable, SWT.NONE);
 			item.setText(new String[] { module.getName(), Integer.toString(module.getPriority()) });
 			item.setData(module);
-			if (disabledModules == null)
+			if (disabledModules == null) {
 				item.setChecked(true);
-			else
+			} else {
 				item.setChecked(!disabledModules.contains(module.getId()));
+			}
 		}
 
 		TableLayout layout = new TableLayout();
@@ -217,23 +221,27 @@ public class TabPassword {
 		layout.addColumnData(new ColumnWeightData(1));
 		providerTable.setLayout(layout);
 
-		if (providerTable.getItemCount() > 0)
+		if (providerTable.getItemCount() > 0) {
 			providerTable.select(0);
+		}
 	}
 
 	protected PasswordProviderDescription getSelectedModule() {
-		if (providerTable == null)
+		if (providerTable == null) {
 			return null;
+		}
 		TableItem[] items = providerTable.getSelection();
-		if (items.length == 0)
+		if (items.length == 0) {
 			return null;
+		}
 		return ((PasswordProviderDescription) items[0].getData());
 	}
 
 	protected String getSelectedModuleID() {
 		PasswordProviderDescription selectedModule = getSelectedModule();
-		if (selectedModule == null)
+		if (selectedModule == null) {
 			return null;
+		}
 		return selectedModule.getId();
 	}
 
@@ -264,8 +272,9 @@ public class TabPassword {
 	}
 
 	public void performDefaults() {
-		if (providerTable == null)
+		if (providerTable == null) {
 			return;
+		}
 		Set<String> defaultDisabledModules = getDefaultDisabledModules();
 
 		TableItem[] items = providerTable.getItems();
@@ -281,8 +290,9 @@ public class TabPassword {
 	}
 
 	public void performOk() {
-		if (!providerModified)
+		if (!providerModified) {
 			return;
+		}
 		// save current selection
 		StringBuilder tmp = new StringBuilder();
 		boolean first = true;
@@ -291,10 +301,11 @@ public class TabPassword {
 			if (item.getChecked()) {
 				continue;
 			}
-			if (!first)
+			if (!first) {
 				tmp.append(',');
-			else
+			} else {
 				first = false;
+			}
 			tmp.append(((PasswordProviderDescription) item.getData()).getId());
 		}
 
@@ -329,8 +340,9 @@ public class TabPassword {
 			MessageBox messageBox = new MessageBox(shell, SWT.YES | SWT.NO | SWT.ICON_WARNING);
 			messageBox.setText(SecUIMessages.changePasswordWizardTitle);
 			messageBox.setMessage(SecUIMessages.wizardDecodeWarning);
-			if (messageBox.open() == SWT.YES)
+			if (messageBox.open() == SWT.YES) {
 				return false;
+			}
 		}
 
 		if (!reEncrypter.switchToNewPassword()) {
@@ -350,8 +362,9 @@ public class TabPassword {
 
 	protected void updateDescription() {
 		PasswordProviderDescription selectedModule = getSelectedModule();
-		if (selectedModule != null && detailsText != null)
+		if (selectedModule != null && detailsText != null) {
 			detailsText.setText(selectedModule.getDescription());
+		}
 	}
 
 	private HashSet<String> getDefaultDisabledModules() {
@@ -373,8 +386,9 @@ public class TabPassword {
 	}
 
 	private static HashSet<String> splitModuleIds(String joinedModuleIds) {
-		if (joinedModuleIds == null || joinedModuleIds.isEmpty())
+		if (joinedModuleIds == null || joinedModuleIds.isEmpty()) {
 			return null;
+		}
 		HashSet<String> modules = new HashSet<>();
 		String[] disabledProviders = joinedModuleIds.split(","); //$NON-NLS-1$
 		for (String disabledProvider : disabledProviders) {
