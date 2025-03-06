@@ -75,8 +75,9 @@ public class Bug500783_Test extends BaseTest {
 
 				while (true) {
 					int ch = rdr.read();
-					if (ch == -1)
+					if (ch == -1) {
 						break;
+					}
 					out.write(ch);
 				}
 				out.close();
