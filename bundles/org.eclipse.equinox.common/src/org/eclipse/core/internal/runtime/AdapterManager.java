@@ -110,8 +110,9 @@ public final class AdapterManager implements IAdapterManager {
 	 */
 	private void addFactoriesFor(String adaptableTypeName, Map<String, List<IAdapterFactory>> table) {
 		List<IAdapterFactory> factoryList = getFactories().get(adaptableTypeName);
-		if (factoryList == null)
+		if (factoryList == null) {
 			return;
+		}
 		for (IAdapterFactory factory : factoryList) {
 			if (factory instanceof IAdapterFactoryExt) {
 				String[] adapters = ((IAdapterFactoryExt) factory).getAdapterNames();
@@ -223,8 +224,9 @@ public final class AdapterManager implements IAdapterManager {
 				newInterfaces.add(interfac);
 			}
 		}
-		for (Class<?> clazz : newInterfaces)
+		for (Class<?> clazz : newInterfaces) {
 			computeInterfaceOrder(clazz.getInterfaces(), classes, seen);
+		}
 	}
 
 	/**

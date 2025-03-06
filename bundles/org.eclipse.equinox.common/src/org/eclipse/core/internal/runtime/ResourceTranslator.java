@@ -33,10 +33,12 @@ public class ResourceTranslator {
 
 	public static String getResourceString(Bundle bundle, String value, ResourceBundle resourceBundle) {
 		String s = value.trim();
-		if (!s.startsWith(KEY_PREFIX, 0))
+		if (!s.startsWith(KEY_PREFIX, 0)) {
 			return s;
-		if (s.startsWith(KEY_DOUBLE_PREFIX, 0))
+		}
+		if (s.startsWith(KEY_DOUBLE_PREFIX, 0)) {
 			return s.substring(1);
+		}
 
 		int ix = s.indexOf(' ');
 		String key = ix == -1 ? s : s.substring(0, ix);
@@ -50,8 +52,9 @@ public class ResourceTranslator {
 			}
 		}
 
-		if (resourceBundle == null)
+		if (resourceBundle == null) {
 			return dflt;
+		}
 
 		try {
 			return resourceBundle.getString(key.substring(1));
@@ -74,8 +77,9 @@ public class ResourceTranslator {
 	}
 
 	public static String[] getResourceString(Bundle bundle, String[] nonTranslated, String locale) {
-		if (bundle == null)
+		if (bundle == null) {
 			return nonTranslated;
+		}
 
 		ResourceBundle resourceBundle = null;
 		try {
@@ -94,8 +98,9 @@ public class ResourceTranslator {
 		try {
 			ManifestElement[] prereqs = ManifestElement.parseHeader(Constants.REQUIRE_BUNDLE,
 					b.getHeaders("").get(Constants.REQUIRE_BUNDLE)); //$NON-NLS-1$
-			if (prereqs == null)
+			if (prereqs == null) {
 				return false;
+			}
 			for (ManifestElement prereq : prereqs) {
 				if ("2.1".equals(prereq.getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE)) //$NON-NLS-1$
 						&& "org.eclipse.core.runtime".equals(prereq.getValue())) {//$NON-NLS-1$
@@ -120,11 +125,13 @@ public class ResourceTranslator {
 
 	private static void addFragments(Bundle host, ArrayList<URL> classpath) {
 		Activator activator = Activator.getDefault();
-		if (activator == null)
+		if (activator == null) {
 			return;
+		}
 		Bundle[] fragments = activator.getFragments(host);
-		if (fragments == null)
+		if (fragments == null) {
 			return;
+		}
 
 		for (Bundle fragment : fragments) {
 			addClasspathEntries(fragment, classpath);
@@ -137,12 +144,14 @@ public class ResourceTranslator {
 		try {
 			classpathElements = ManifestElement.parseHeader(Constants.BUNDLE_CLASSPATH,
 					b.getHeaders("").get(Constants.BUNDLE_CLASSPATH)); //$NON-NLS-1$
-			if (classpathElements == null)
+			if (classpathElements == null) {
 				return;
+			}
 			for (ManifestElement classpathElement : classpathElements) {
 				URL classpathEntry = b.getEntry(classpathElement.getValue());
-				if (classpathEntry != null)
+				if (classpathEntry != null) {
 					classpath.add(classpathEntry);
+				}
 			}
 		} catch (BundleException e) {
 			// ignore
@@ -154,14 +163,16 @@ public class ResourceTranslator {
 	}
 
 	private static void addDevEntries(Bundle b, ArrayList<URL> classpath) {
-		if (!DevClassPathHelper.inDevelopmentMode())
+		if (!DevClassPathHelper.inDevelopmentMode()) {
 			return;
+		}
 
 		String[] binaryPaths = DevClassPathHelper.getDevClassPath(b.getSymbolicName());
 		for (String binaryPath : binaryPaths) {
 			URL classpathEntry = b.getEntry(binaryPath);
-			if (classpathEntry != null)
+			if (classpathEntry != null) {
 				classpath.add(classpathEntry);
+			}
 		}
 	}
 }

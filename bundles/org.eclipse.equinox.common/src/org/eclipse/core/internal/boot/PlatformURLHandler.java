@@ -49,16 +49,19 @@ public class PlatformURLHandler extends AbstractURLStreamHandlerService {
 		// Note: openConnection() method is made public (rather than protected)
 		// to enable request delegation from proxy handlers
 		String spec = url.getFile().trim();
-		if (spec.startsWith("/")) //$NON-NLS-1$
+		if (spec.startsWith("/")) { //$NON-NLS-1$
 			spec = spec.substring(1);
+		}
 		int ix = spec.indexOf('/');
-		if (ix == -1)
+		if (ix == -1) {
 			throw new MalformedURLException(NLS.bind(CommonMessages.url_invalidURL, url.toExternalForm()));
+		}
 
 		String type = spec.substring(0, ix);
 		Constructor<?> construct = connectionType.get(type);
-		if (construct == null)
+		if (construct == null) {
 			throw new MalformedURLException(NLS.bind(CommonMessages.url_badVariant, type));
+		}
 
 		PlatformURLConnection connection = null;
 		try {

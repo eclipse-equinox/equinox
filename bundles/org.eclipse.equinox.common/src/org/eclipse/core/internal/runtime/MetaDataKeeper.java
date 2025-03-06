@@ -32,8 +32,9 @@ public class MetaDataKeeper {
 	 * @return non null
 	 */
 	public static synchronized DataArea getMetaArea() {
-		if (metaArea != null)
+		if (metaArea != null) {
 			return metaArea;
+		}
 
 		metaArea = new DataArea();
 		return metaArea;

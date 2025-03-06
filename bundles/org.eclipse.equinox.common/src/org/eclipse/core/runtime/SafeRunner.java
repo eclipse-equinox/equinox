@@ -99,10 +99,12 @@ public final class SafeRunner {
 	private static String getBundleIdOfSafeRunnable(ISafeRunnable code) {
 		Activator activator = Activator.getDefault();
 		String pluginId = null;
-		if (activator != null)
+		if (activator != null) {
 			pluginId = activator.getBundleId(code);
-		if (pluginId == null)
+		}
+		if (pluginId == null) {
 			return IRuntimeConstants.PI_COMMON;
+		}
 		return pluginId;
 	}
 

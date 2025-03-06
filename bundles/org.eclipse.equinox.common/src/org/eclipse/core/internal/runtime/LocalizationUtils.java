@@ -34,14 +34,17 @@ public class LocalizationUtils {
 	static public String safeLocalize(String key) {
 		try {
 			Class<?> messageClass = Class.forName("org.eclipse.core.internal.runtime.CommonMessages"); //$NON-NLS-1$
-			if (messageClass == null)
+			if (messageClass == null) {
 				return key;
+			}
 			Field field = messageClass.getDeclaredField(key);
-			if (field == null)
+			if (field == null) {
 				return key;
+			}
 			Object value = field.get(null);
-			if (value instanceof String)
+			if (value instanceof String) {
 				return (String) value;
+			}
 		} catch (ClassNotFoundException | NoClassDefFoundError | SecurityException | NoSuchFieldException
 				| IllegalArgumentException | IllegalAccessException e) {
 			// eat exception and fall through

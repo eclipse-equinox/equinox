@@ -109,13 +109,15 @@ public class Activator implements BundleActivator {
 		ServiceReference<ExtendedLogReaderService> readerRef = context
 				.getServiceReference(ExtendedLogReaderService.class);
 		ServiceReference<PackageAdmin> packageAdminRef = context.getServiceReference(PackageAdmin.class);
-		if (logRef == null || readerRef == null || packageAdminRef == null)
+		if (logRef == null || readerRef == null || packageAdminRef == null) {
 			return null;
+		}
 		ExtendedLogService logService = context.getService(logRef);
 		ExtendedLogReaderService readerService = context.getService(readerRef);
 		PackageAdmin packageAdmin = context.getService(packageAdminRef);
-		if (logService == null || readerService == null || packageAdmin == null)
+		if (logService == null || readerService == null || packageAdmin == null) {
 			return null;
+		}
 		PlatformLogWriter writer = new PlatformLogWriter(logService, packageAdmin, context.getBundle());
 		readerService.addLogListener(writer, writer);
 		return writer;
@@ -156,11 +158,13 @@ public class Activator implements BundleActivator {
 	 */
 	public Bundle getBundle(String symbolicName) {
 		PackageAdmin admin = getBundleAdmin();
-		if (admin == null)
+		if (admin == null) {
 			return null;
+		}
 		Bundle[] bundles = admin.getBundles(symbolicName, null);
-		if (bundles == null)
+		if (bundles == null) {
 			return null;
+		}
 		// Return the first bundle that is not installed or uninstalled
 		for (Bundle bundle : bundles) {
 			if ((bundle.getState() & (Bundle.INSTALLED | Bundle.UNINSTALLED)) == 0) {
@@ -182,8 +186,9 @@ public class Activator implements BundleActivator {
 	 */
 	public Bundle[] getFragments(Bundle host) {
 		PackageAdmin admin = getBundleAdmin();
-		if (admin == null)
+		if (admin == null) {
 			return new Bundle[0];
+		}
 		return admin.getFragments(host);
 	}
 
@@ -199,11 +204,13 @@ public class Activator implements BundleActivator {
 	 * <code>null</code> if the bundle could not be determined.
 	 */
 	public String getBundleId(Object object) {
-		if (object == null)
+		if (object == null) {
 			return null;
+		}
 		Bundle source = FrameworkUtil.getBundle(object.getClass());
-		if (source != null && source.getSymbolicName() != null)
+		if (source != null && source.getSymbolicName() != null) {
 			return source.getSymbolicName();
+		}
 		return null;
 	}
 
@@ -222,11 +229,13 @@ public class Activator implements BundleActivator {
 		}
 		BundleLocalization location = activator.localizationTracker.current().orElse(null);
 		ResourceBundle result = null;
-		if (location != null)
+		if (location != null) {
 			result = location.getLocalization(bundle, locale);
-		if (result == null)
+		}
+		if (result == null) {
 			throw new MissingResourceException(NLS.bind(CommonMessages.activator_resourceBundleNotFound, locale),
 					bundle.getSymbolicName(), ""); //$NON-NLS-1$
+		}
 		return result;
 	}
 
@@ -314,8 +323,9 @@ public class Activator implements BundleActivator {
 		PlatformURLConfigConnection.startup();
 
 		Location service = getInstallLocation();
-		if (service != null)
+		if (service != null) {
 			PlatformURLBaseConnection.startup(service.getURL());
+		}
 
 		Hashtable<String, String[]> properties = new Hashtable<>(1);
 		properties.put(URLConstants.URL_HANDLER_PROTOCOL, new String[] { PlatformURLHandler.PROTOCOL });

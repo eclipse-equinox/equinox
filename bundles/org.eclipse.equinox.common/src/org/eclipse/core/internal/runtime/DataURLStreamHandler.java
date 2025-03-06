@@ -33,8 +33,9 @@ class DataURLStreamHandler extends AbstractURLStreamHandlerService {
 
 	@Override
 	public URLConnection openConnection(URL u) throws IOException {
-		if (!PROTOCOL.equals(u.getProtocol()))
+		if (!PROTOCOL.equals(u.getProtocol())) {
 			throw new MalformedURLException("Unsupported protocol"); //$NON-NLS-1$
+		}
 		return new DataURLConnection(u);
 	}
 
@@ -59,8 +60,9 @@ class DataURLStreamHandler extends AbstractURLStreamHandlerService {
 
 		static ParseResult parse(String ssp) throws IOException {
 			int commaIndex = ssp.indexOf(',');
-			if (commaIndex < 0)
+			if (commaIndex < 0) {
 				throw new MalformedURLException("missing comma"); //$NON-NLS-1$
+			}
 
 			String paramSegment = ssp.substring(0, commaIndex);
 			String dataSegment = ssp.substring(commaIndex + 1);
@@ -73,12 +75,13 @@ class DataURLStreamHandler extends AbstractURLStreamHandlerService {
 			boolean first = true;
 			while (tokenizer.hasMoreTokens()) {
 				String token = tokenizer.nextToken();
-				if (first)
+				if (first) {
 					mediaType = token;
-				else if ("base64".equals(token)) //$NON-NLS-1$
+				} else if ("base64".equals(token)) { //$NON-NLS-1$
 					base64 = true;
-				else if (token.startsWith(CHARSET_TOKEN))
+				} else if (token.startsWith(CHARSET_TOKEN)) {
 					charset = Charset.forName(token.substring(CHARSET_TOKEN.length()));
+				}
 				first = false;
 			}
 
@@ -102,8 +105,9 @@ class DataURLStreamHandler extends AbstractURLStreamHandlerService {
 
 		@Override
 		public InputStream getInputStream() throws IOException {
-			if (parsed == null)
+			if (parsed == null) {
 				connect();
+			}
 
 			return new ByteArrayInputStream(parsed.data);
 		}

@@ -45,8 +45,9 @@ public class PlatformURLBaseConnection extends PlatformURLConnection {
 	@Override
 	protected URL resolve() throws IOException {
 		String spec = url.getFile().trim();
-		if (spec.startsWith("/")) //$NON-NLS-1$
+		if (spec.startsWith("/")) { //$NON-NLS-1$
 			spec = spec.substring(1);
+		}
 		if (!spec.startsWith(PLATFORM + "/")) { //$NON-NLS-1$
 			String message = NLS.bind(CommonMessages.url_badVariant, url);
 			throw new IOException(message);
@@ -57,8 +58,9 @@ public class PlatformURLBaseConnection extends PlatformURLConnection {
 
 	public static void startup(URL url) {
 		// register connection type for platform:/base/ handling
-		if (installURL != null)
+		if (installURL != null) {
 			return;
+		}
 		installURL = url;
 		PlatformURLHandler.register(PLATFORM, PlatformURLBaseConnection.class);
 	}

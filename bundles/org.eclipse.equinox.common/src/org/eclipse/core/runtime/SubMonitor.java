@@ -614,8 +614,9 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 			// returns
 			double remainForParent = totalParent * (1.0d - (usedForChildren / totalForChildren));
 			usedForChildren = (workRemaining * (1.0d - remainForParent / (totalParent - usedForParent)));
-		} else
+		} else {
 			usedForChildren = 0.0d;
+		}
 
 		totalParent = totalParent - usedForParent;
 		usedForParent = 0;
@@ -635,8 +636,9 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 			logProblem("You must allocate ticks using beginTask or setWorkRemaining before trying to consume them"); //$NON-NLS-1$
 		}
 
-		if (totalParent == 0 || totalForChildren == 0) // this monitor has no available work to report
+		if (totalParent == 0 || totalForChildren == 0) { // this monitor has no available work to report
 			return 0;
+		}
 
 		usedForChildren += ticks;
 
@@ -645,8 +647,9 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 			if (TracingOptions.debugProgressMonitors) {
 				logProblem("This progress monitor consumed more ticks than were allocated for it."); //$NON-NLS-1$
 			}
-		} else if (usedForChildren < 0.0)
+		} else if (usedForChildren < 0.0) {
 			usedForChildren = 0.0;
+		}
 
 		int parentPosition = (int) (totalParent * usedForChildren / totalForChildren);
 		int delta = parentPosition - usedForParent;
@@ -687,8 +690,9 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 
 	@Override
 	public void setTaskName(String name) {
-		if ((flags & SUPPRESS_SETTASKNAME) == 0)
+		if ((flags & SUPPRESS_SETTASKNAME) == 0) {
 			root.setTaskName(name);
+		}
 	}
 
 	/**
@@ -716,8 +720,9 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	}
 
 	private void beginTaskImpl(String name, int totalWork) {
-		if ((flags & SUPPRESS_BEGINTASK) == 0 && name != null)
+		if ((flags & SUPPRESS_BEGINTASK) == 0 && name != null) {
 			root.setTaskName(name);
+		}
 		setWorkRemaining(totalWork);
 		beginTaskCalled = true;
 	}
@@ -726,8 +731,9 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	public void done() {
 		cleanupActiveChild();
 		int delta = totalParent - usedForParent;
-		if (delta > 0)
+		if (delta > 0) {
 			root.worked(delta);
+		}
 
 		totalParent = 0;
 		usedForParent = 0;
@@ -740,14 +746,16 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 		cleanupActiveChild();
 
 		int delta = consume((work > 0.0d) ? work : 0.0d);
-		if (delta != 0)
+		if (delta != 0) {
 			root.worked(delta);
+		}
 	}
 
 	@Override
 	public void subTask(String name) {
-		if ((flags & SUPPRESS_SUBTASK) == 0)
+		if ((flags & SUPPRESS_SUBTASK) == 0) {
 			root.subTask(name);
+		}
 	}
 
 	@Override
@@ -1154,10 +1162,12 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	}
 
 	protected static boolean eq(Object o1, Object o2) {
-		if (o1 == null)
+		if (o1 == null) {
 			return (o2 == null);
-		if (o2 == null)
+		}
+		if (o2 == null) {
 			return false;
+		}
 		return o1.equals(o2);
 	}
 

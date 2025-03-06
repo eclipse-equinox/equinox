@@ -161,15 +161,18 @@ public class SubProgressMonitor extends ProgressMonitorWrapper {
 	public void done() {
 		// Ignore if more done calls than beginTask calls or if we are still
 		// in some nested beginTasks
-		if (nestedBeginTasks == 0 || --nestedBeginTasks > 0)
+		if (nestedBeginTasks == 0 || --nestedBeginTasks > 0) {
 			return;
+		}
 		// Send any remaining ticks and clear out the subtask text
 		double remaining = parentTicks - sentToParent;
-		if (remaining > 0)
+		if (remaining > 0) {
 			super.internalWorked(remaining);
+		}
 		// clear the sub task if there was one
-		if (hasSubTask)
+		if (hasSubTask) {
 			subTask(""); //$NON-NLS-1$
+		}
 		sentToParent = 0;
 	}
 

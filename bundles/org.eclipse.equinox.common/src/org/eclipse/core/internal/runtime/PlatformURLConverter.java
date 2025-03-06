@@ -32,24 +32,28 @@ public class PlatformURLConverter implements URLConverter {
 	@Override
 	public URL toFileURL(URL url) throws IOException {
 		URLConnection connection = url.openConnection();
-		if (!(connection instanceof PlatformURLConnection))
+		if (!(connection instanceof PlatformURLConnection)) {
 			return url;
+		}
 		URL result = ((PlatformURLConnection) connection).getURLAsLocal();
 		// if we have a bundle*: URL we should try to convert it
-		if (!result.getProtocol().startsWith(PlatformURLHandler.BUNDLE))
+		if (!result.getProtocol().startsWith(PlatformURLHandler.BUNDLE)) {
 			return result;
+		}
 		return FileLocator.toFileURL(result);
 	}
 
 	@Override
 	public URL resolve(URL url) throws IOException {
 		URLConnection connection = url.openConnection();
-		if (!(connection instanceof PlatformURLConnection))
+		if (!(connection instanceof PlatformURLConnection)) {
 			return url;
+		}
 		URL result = ((PlatformURLConnection) connection).getResolvedURL();
 		// if we have a bundle*: URL we should try to convert it
-		if (!result.getProtocol().startsWith(PlatformURLHandler.BUNDLE))
+		if (!result.getProtocol().startsWith(PlatformURLHandler.BUNDLE)) {
 			return result;
+		}
 		return FileLocator.resolve(result);
 	}
 }

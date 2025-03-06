@@ -92,15 +92,18 @@ public final class PluginVersionIdentifier {
 		// will not be evaluated each time (including cases when we would
 		// have passed by the assert).
 
-		if (major < 0)
+		if (major < 0) {
 			Assert.isTrue(false, NLS.bind(CommonMessages.parse_postiveMajor,
 					major + SEPARATOR + minor + SEPARATOR + service + SEPARATOR + qualifier));
-		if (minor < 0)
+		}
+		if (minor < 0) {
 			Assert.isTrue(false, NLS.bind(CommonMessages.parse_postiveMinor,
 					major + SEPARATOR + minor + SEPARATOR + service + SEPARATOR + qualifier));
-		if (service < 0)
+		}
+		if (service < 0) {
 			Assert.isTrue(false, NLS.bind(CommonMessages.parse_postiveService,
 					major + SEPARATOR + minor + SEPARATOR + service + SEPARATOR + qualifier));
+		}
 
 		this.version = new Version(major, minor, service, qualifier);
 	}
@@ -149,36 +152,45 @@ public final class PluginVersionIdentifier {
 		// Do the test outside of the assert so that they 'Policy.bind'
 		// will not be evaluated each time (including cases when we would
 		// have passed by the assert).
-		if (versionId == null)
+		if (versionId == null) {
 			Assert.isNotNull(null, CommonMessages.parse_emptyPluginVersion);
+		}
 		String s = versionId.trim();
-		if (s.equals("")) //$NON-NLS-1$
+		if (s.equals("")) { //$NON-NLS-1$
 			Assert.isTrue(false, CommonMessages.parse_emptyPluginVersion);
-		if (s.startsWith(SEPARATOR))
+		}
+		if (s.startsWith(SEPARATOR)) {
 			Assert.isTrue(false, NLS.bind(CommonMessages.parse_separatorStartVersion, s));
-		if (s.endsWith(SEPARATOR))
+		}
+		if (s.endsWith(SEPARATOR)) {
 			Assert.isTrue(false, NLS.bind(CommonMessages.parse_separatorEndVersion, s));
-		if (s.contains(SEPARATOR + SEPARATOR))
+		}
+		if (s.contains(SEPARATOR + SEPARATOR)) {
 			Assert.isTrue(false, NLS.bind(CommonMessages.parse_doubleSeparatorVersion, s));
+		}
 
 		StringTokenizer st = new StringTokenizer(s, SEPARATOR);
 		Vector<String> elements = new Vector<>(4);
 
-		while (st.hasMoreTokens())
+		while (st.hasMoreTokens()) {
 			elements.addElement(st.nextToken());
+		}
 
 		int elementSize = elements.size();
 
-		if (elementSize <= 0)
+		if (elementSize <= 0) {
 			Assert.isTrue(false, NLS.bind(CommonMessages.parse_oneElementPluginVersion, s));
-		if (elementSize > 4)
+		}
+		if (elementSize > 4) {
 			Assert.isTrue(false, NLS.bind(CommonMessages.parse_fourElementPluginVersion, s));
+		}
 
 		int[] numbers = new int[3];
 		try {
 			numbers[0] = Integer.parseInt(elements.elementAt(0));
-			if (numbers[0] < 0)
+			if (numbers[0] < 0) {
 				Assert.isTrue(false, NLS.bind(CommonMessages.parse_postiveMajor, s));
+			}
 		} catch (NumberFormatException nfe) {
 			Assert.isTrue(false, NLS.bind(CommonMessages.parse_numericMajorComponent, s));
 		}
@@ -186,10 +198,12 @@ public final class PluginVersionIdentifier {
 		try {
 			if (elementSize >= 2) {
 				numbers[1] = Integer.parseInt(elements.elementAt(1));
-				if (numbers[1] < 0)
+				if (numbers[1] < 0) {
 					Assert.isTrue(false, NLS.bind(CommonMessages.parse_postiveMinor, s));
-			} else
+				}
+			} else {
 				numbers[1] = 0;
+			}
 		} catch (NumberFormatException nfe) {
 			Assert.isTrue(false, NLS.bind(CommonMessages.parse_numericMinorComponent, s));
 		}
@@ -197,10 +211,12 @@ public final class PluginVersionIdentifier {
 		try {
 			if (elementSize >= 3) {
 				numbers[2] = Integer.parseInt(elements.elementAt(2));
-				if (numbers[2] < 0)
+				if (numbers[2] < 0) {
 					Assert.isTrue(false, NLS.bind(CommonMessages.parse_postiveService, s));
-			} else
+				}
+			} else {
 				numbers[2] = 0;
+			}
 		} catch (NumberFormatException nfe) {
 			Assert.isTrue(false, NLS.bind(CommonMessages.parse_numericServiceComponent, s));
 		}
@@ -210,10 +226,11 @@ public final class PluginVersionIdentifier {
 		result[0] = Integer.valueOf(numbers[0]);
 		result[1] = Integer.valueOf(numbers[1]);
 		result[2] = Integer.valueOf(numbers[2]);
-		if (elementSize >= 4)
+		if (elementSize >= 4) {
 			result[3] = elements.elementAt(3);
-		else
+		} else {
 			result[3] = ""; //$NON-NLS-1$
+		}
 		return result;
 	}
 
@@ -226,8 +243,9 @@ public final class PluginVersionIdentifier {
 	 */
 	@Override
 	public boolean equals(Object object) {
-		if (!(object instanceof PluginVersionIdentifier))
+		if (!(object instanceof PluginVersionIdentifier)) {
 			return false;
+		}
 		PluginVersionIdentifier v = (PluginVersionIdentifier) object;
 		return version.equals(v.version);
 	}
@@ -298,19 +316,24 @@ public final class PluginVersionIdentifier {
 	 * @since 2.0
 	 */
 	public boolean isGreaterOrEqualTo(PluginVersionIdentifier id) {
-		if (id == null)
+		if (id == null) {
 			return false;
-		if (getMajorComponent() > id.getMajorComponent())
+		}
+		if (getMajorComponent() > id.getMajorComponent()) {
 			return true;
-		if ((getMajorComponent() == id.getMajorComponent()) && (getMinorComponent() > id.getMinorComponent()))
+		}
+		if ((getMajorComponent() == id.getMajorComponent()) && (getMinorComponent() > id.getMinorComponent())) {
 			return true;
+		}
 		if ((getMajorComponent() == id.getMajorComponent()) && (getMinorComponent() == id.getMinorComponent())
-				&& (getServiceComponent() > id.getServiceComponent()))
+				&& (getServiceComponent() > id.getServiceComponent())) {
 			return true;
+		}
 		if ((getMajorComponent() == id.getMajorComponent()) && (getMinorComponent() == id.getMinorComponent())
 				&& (getServiceComponent() == id.getServiceComponent())
-				&& (getQualifierComponent().compareTo(id.getQualifierComponent()) >= 0))
+				&& (getQualifierComponent().compareTo(id.getQualifierComponent()) >= 0)) {
 			return true;
+		}
 		return false;
 	}
 
@@ -332,20 +355,27 @@ public final class PluginVersionIdentifier {
 	 *         given version identifier, and <code>false</code> otherwise
 	 */
 	public boolean isCompatibleWith(PluginVersionIdentifier id) {
-		if (id == null)
+		if (id == null) {
 			return false;
-		if (getMajorComponent() != id.getMajorComponent())
+		}
+		if (getMajorComponent() != id.getMajorComponent()) {
 			return false;
-		if (getMinorComponent() > id.getMinorComponent())
+		}
+		if (getMinorComponent() > id.getMinorComponent()) {
 			return true;
-		if (getMinorComponent() < id.getMinorComponent())
+		}
+		if (getMinorComponent() < id.getMinorComponent()) {
 			return false;
-		if (getServiceComponent() > id.getServiceComponent())
+		}
+		if (getServiceComponent() > id.getServiceComponent()) {
 			return true;
-		if (getServiceComponent() < id.getServiceComponent())
+		}
+		if (getServiceComponent() < id.getServiceComponent()) {
 			return false;
-		if (getQualifierComponent().compareTo(id.getQualifierComponent()) >= 0)
+		}
+		if (getQualifierComponent().compareTo(id.getQualifierComponent()) >= 0) {
 			return true;
+		}
 		return false;
 	}
 
@@ -365,18 +395,24 @@ public final class PluginVersionIdentifier {
 	 *         given version identifier, and <code>false</code> otherwise
 	 */
 	public boolean isEquivalentTo(PluginVersionIdentifier id) {
-		if (id == null)
+		if (id == null) {
 			return false;
-		if (getMajorComponent() != id.getMajorComponent())
+		}
+		if (getMajorComponent() != id.getMajorComponent()) {
 			return false;
-		if (getMinorComponent() != id.getMinorComponent())
+		}
+		if (getMinorComponent() != id.getMinorComponent()) {
 			return false;
-		if (getServiceComponent() > id.getServiceComponent())
+		}
+		if (getServiceComponent() > id.getServiceComponent()) {
 			return true;
-		if (getServiceComponent() < id.getServiceComponent())
+		}
+		if (getServiceComponent() < id.getServiceComponent()) {
 			return false;
-		if (getQualifierComponent().compareTo(id.getQualifierComponent()) >= 0)
+		}
+		if (getQualifierComponent().compareTo(id.getQualifierComponent()) >= 0) {
 			return true;
+		}
 		return false;
 	}
 
@@ -393,12 +429,14 @@ public final class PluginVersionIdentifier {
 	 * @since 2.0
 	 */
 	public boolean isPerfect(PluginVersionIdentifier id) {
-		if (id == null)
+		if (id == null) {
 			return false;
+		}
 		if ((getMajorComponent() != id.getMajorComponent()) || (getMinorComponent() != id.getMinorComponent())
 				|| (getServiceComponent() != id.getServiceComponent())
-				|| (!getQualifierComponent().equals(id.getQualifierComponent())))
+				|| (!getQualifierComponent().equals(id.getQualifierComponent()))) {
 			return false;
+		}
 		return true;
 	}
 
@@ -413,25 +451,33 @@ public final class PluginVersionIdentifier {
 
 		if (id == null) {
 			if (getMajorComponent() == 0 && getMinorComponent() == 0 && getServiceComponent() == 0
-					&& getQualifierComponent().equals("")) //$NON-NLS-1$
+					&& getQualifierComponent().equals("")) {
 				return false;
+			}
 			return true;
 		}
 
-		if (getMajorComponent() > id.getMajorComponent())
+		if (getMajorComponent() > id.getMajorComponent()) {
 			return true;
-		if (getMajorComponent() < id.getMajorComponent())
+		}
+		if (getMajorComponent() < id.getMajorComponent()) {
 			return false;
-		if (getMinorComponent() > id.getMinorComponent())
+		}
+		if (getMinorComponent() > id.getMinorComponent()) {
 			return true;
-		if (getMinorComponent() < id.getMinorComponent())
+		}
+		if (getMinorComponent() < id.getMinorComponent()) {
 			return false;
-		if (getServiceComponent() > id.getServiceComponent())
+		}
+		if (getServiceComponent() > id.getServiceComponent()) {
 			return true;
-		if (getServiceComponent() < id.getServiceComponent())
+		}
+		if (getServiceComponent() < id.getServiceComponent()) {
 			return false;
-		if (getQualifierComponent().compareTo(id.getQualifierComponent()) > 0)
+		}
+		if (getQualifierComponent().compareTo(id.getQualifierComponent()) > 0) {
 			return true;
+		}
 		return false;
 
 	}
