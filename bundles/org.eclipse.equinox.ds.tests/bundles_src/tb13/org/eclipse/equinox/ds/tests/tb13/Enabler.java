@@ -32,10 +32,11 @@ public class Enabler implements ComponentManager {
 
 	@Override
 	public void enableComponent(String name, boolean flag) {
-		if (flag)
+		if (flag) {
 			ctxt.enableComponent(name);
-		else
+		} else {
 			ctxt.disableComponent(name);
+		}
 	}
 
 	@Override

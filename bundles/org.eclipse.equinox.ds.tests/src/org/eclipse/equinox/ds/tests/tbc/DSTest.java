@@ -270,8 +270,9 @@ public class DSTest {
 	 */
 	private void clearConfigurations() throws IOException, InvalidSyntaxException {
 		ServiceReference cmSR = getContext().getServiceReference(ConfigurationAdmin.class.getName());
-		if (cmSR == null)
+		if (cmSR == null) {
 			return;
+		}
 		ConfigurationAdmin cm = (ConfigurationAdmin) getContext().getService(cmSR);
 		// clean configurations from previous tests
 		// clean factory configs for named service
@@ -642,8 +643,9 @@ public class DSTest {
 	@Test
 	public void testPropertiesHandling() throws Exception {
 		ConfigurationAdmin cm = (ConfigurationAdmin) trackerCM.getService();
-		if (cm == null)
+		if (cm == null) {
 			return; // cannot test without CM
+		}
 		ServiceReference ref;
 
 		// update the properties
@@ -907,8 +909,9 @@ public class DSTest {
 	 * Returns the number of available services for the passed tracker
 	 */
 	private int countAvailableServices(ServiceTracker tracker) {
-		if (tracker == null)
+		if (tracker == null) {
 			return -1;
+		}
 		ServiceReference[] refs = tracker.getServiceReferences();
 		return refs != null ? refs.length : 0;
 	}
@@ -1654,8 +1657,9 @@ public class DSTest {
 	@Test
 	public void testConfigurationPolicy() throws Exception {
 		ConfigurationAdmin cm = (ConfigurationAdmin) trackerCM.getService();
-		if (cm == null)
+		if (cm == null) {
 			return;
+		}
 
 		Bundle tb11 = installBundle("tb11");
 		tb11.start();
@@ -1758,8 +1762,9 @@ public class DSTest {
 	@Test
 	public void testConfigurationPolicyFactoryConf() throws Exception {
 		ConfigurationAdmin cm = (ConfigurationAdmin) trackerCM.getService();
-		if (cm == null)
+		if (cm == null) {
 			return;
+		}
 
 		Bundle tb11 = installBundle("tb11");
 		tb11.start();
@@ -1992,8 +1997,9 @@ public class DSTest {
 		bs = getBaseService(CC_BC_MAP_INT_NS110);
 		assertNotNull(bs);
 		ConfigurationAdmin cm = (ConfigurationAdmin) trackerCM.getService();
-		if (cm == null)
+		if (cm == null) {
 			return;
+		}
 		Configuration config = cm.getConfiguration(CC_BC_MAP_INT_NS110, null);
 		Dictionary properties = config.getProperties();
 		if (properties == null) {
@@ -2306,8 +2312,9 @@ public class DSTest {
 	@Test
 	public void testModified100() throws Exception {
 		ConfigurationAdmin cm = (ConfigurationAdmin) trackerCM.getService();
-		if (cm == null)
+		if (cm == null) {
 			return;
+		}
 
 		Bundle tb21 = installBundle("tb21");
 
@@ -2364,8 +2371,9 @@ public class DSTest {
 	@Test
 	public void testModified110() throws Exception {
 		ConfigurationAdmin cm = (ConfigurationAdmin) trackerCM.getService();
-		if (cm == null)
+		if (cm == null) {
 			return;
+		}
 
 		Bundle tb21a = installBundle("tb21a");
 
@@ -2493,8 +2501,9 @@ public class DSTest {
 	@Test
 	public void testModifiedSpecialCases() throws Exception {
 		ConfigurationAdmin cm = (ConfigurationAdmin) trackerCM.getService();
-		if (cm == null)
+		if (cm == null) {
 			return;
+		}
 
 		Bundle tb21a = installBundle("tb21a");
 
@@ -2597,8 +2606,9 @@ public class DSTest {
 	@Test
 	public void testConfigAdminOnOff() throws Exception {
 		ConfigurationAdmin cm = (ConfigurationAdmin) trackerCM.getService();
-		if (cm == null)
+		if (cm == null) {
 			return;
+		}
 
 		Hashtable props = new Hashtable(11);
 		props.put("config.base.data", Integer.valueOf(1));
@@ -3084,17 +3094,19 @@ public class DSTest {
 		BundleContext context = getContext();
 		String location = installer.getBundleLocation(bundle);
 		String reference = "reference:";
-		if (location.startsWith(reference))
+		if (location.startsWith(reference)) {
 			// Remove the "reference" protocol from the URL.
 			// (1) So that when running from a workspace, the test will modify a
 			// copy of the component.xml.
 			// (2) When running from a server, to get a readable input stream when
 			// extracting the JAR into a directory.
 			location = location.substring(location.indexOf(':') + 1);
-		if (!location.endsWith(".jar"))
+		}
+		if (!location.endsWith(".jar")) {
 			// If the bundle is already a directory, go ahead and install it in
 			// the typical fashion. Leave the "reference" protocol out.
 			return context.installBundle(location);
+		}
 		// The bundle is a JAR file and needs to be extracted and copied as a
 		// directory to the data storage area of the test harness bundle.
 		File file = context.getBundle().getDataFile(bundle);
@@ -3102,18 +3114,19 @@ public class DSTest {
 			for (ZipEntry ze = in.getNextEntry(); ze != null; ze = in.getNextEntry()) {
 				String name = ze.getName();
 				// Is the entry a directory?
-				if (ze.isDirectory())
+				if (ze.isDirectory()) {
 					// If so, continue to the next entry. Directories will be
 					// created later.
 					continue;
+				}
 				// If not, the contents of the file must be copied.
 				File destination;
 				// Does the file entry contain a directory?
 				int index = name.lastIndexOf('/');
-				if (index == -1)
+				if (index == -1) {
 					// If not, just create the destination file.
 					destination = new File(file, name);
-				else {
+				} else {
 					// If so, make sure the directory exists.
 					File dir = new File(file, name.substring(0, index));
 					dir.mkdirs();
@@ -3124,8 +3137,9 @@ public class DSTest {
 				byte[] bytes = new byte[1024];
 				int read;
 				try (FileOutputStream out = new FileOutputStream(destination)) {
-					while ((read = in.read(bytes)) != -1)
+					while ((read = in.read(bytes)) != -1) {
 						out.write(bytes, 0, read);
+					}
 				}
 				in.closeEntry();
 			}

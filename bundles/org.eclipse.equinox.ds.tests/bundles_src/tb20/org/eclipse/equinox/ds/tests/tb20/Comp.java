@@ -31,8 +31,9 @@ public class Comp implements PropertiesProvider {
 
 	@Override
 	public Dictionary getProperties() {
-		if (ctxt == null)
+		if (ctxt == null) {
 			return null;
+		}
 
 		return ctxt.getProperties();
 	}
