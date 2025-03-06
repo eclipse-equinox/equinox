@@ -55,8 +55,9 @@ public class ProxyContext {
 	}
 
 	public void destroy() {
-		if (proxyContextTempDir != null)
+		if (proxyContextTempDir != null) {
 			deleteDirectory(proxyContextTempDir);
+		}
 	}
 
 	public String getServletPath() {
@@ -140,8 +141,9 @@ public class ProxyContext {
 
 		public void destroy() {
 			File contextTempDir = (File) get(JAVAX_SERVLET_CONTEXT_TEMPDIR);
-			if (contextTempDir != null)
+			if (contextTempDir != null) {
 				deleteDirectory(contextTempDir);
+			}
 		}
 
 		public int addReference() {

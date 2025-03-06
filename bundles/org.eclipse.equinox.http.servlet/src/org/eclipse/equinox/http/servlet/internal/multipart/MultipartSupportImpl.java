@@ -75,8 +75,9 @@ public class MultipartSupportImpl implements MultipartSupport {
 		BundleContext bundleContext = (BundleContext) servletContext.getAttribute("osgi-bundlecontext"); //$NON-NLS-1$
 		Bundle bundle = bundleContext.getBundle();
 		AccessControlContext accessControlContext = bundle.adapt(AccessControlContext.class);
-		if (accessControlContext == null)
+		if (accessControlContext == null) {
 			return;
+		}
 		accessControlContext.checkPermission(new FilePermission(baseStorage.getAbsolutePath(), "read,write")); //$NON-NLS-1$
 	}
 
