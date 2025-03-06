@@ -72,23 +72,27 @@ public class WeavingAdaptorFactory {
 	public void dispose(final BundleContext context) {
 
 		context.removeServiceListener(weavingServiceListener);
-		if (Debug.DEBUG_WEAVE)
+		if (Debug.DEBUG_WEAVE) {
 			Debug.println("> Removed service listener for weaving service."); //$NON-NLS-1$
+		}
 
 		weavingServiceFactoryTracker.close();
-		if (Debug.DEBUG_WEAVE)
+		if (Debug.DEBUG_WEAVE) {
 			Debug.println("> Closed service tracker for weaving service."); //$NON-NLS-1$
+		}
 
 		cachingServiceFactoryTracker.close();
-		if (Debug.DEBUG_CACHE)
+		if (Debug.DEBUG_CACHE) {
 			Debug.println("> Closed service tracker for caching service."); //$NON-NLS-1$
+		}
 	}
 
 	protected ICachingService getCachingService(final ModuleClassLoader loader, final Bundle bundle,
 			final IWeavingService weavingService) {
-		if (Debug.DEBUG_CACHE)
+		if (Debug.DEBUG_CACHE) {
 			Debug.println("> WeavingAdaptorFactory.getCachingService() bundle=" //$NON-NLS-1$
 					+ bundle + ", weavingService=" + weavingService); //$NON-NLS-1$
+		}
 		ICachingService service = null;
 		String key = ""; //$NON-NLS-1$
 
@@ -99,29 +103,34 @@ public class WeavingAdaptorFactory {
 		if (cachingServiceFactory != null) {
 			service = cachingServiceFactory.createCachingService(loader, bundle, key);
 		}
-		if (Debug.DEBUG_CACHE)
+		if (Debug.DEBUG_CACHE) {
 			Debug.println("< WeavingAdaptorFactory.getCachingService() service=" //$NON-NLS-1$
 					+ service + ", key='" + key + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
 		return service;
 	}
 
 	public Bundle getHost(final Bundle fragment) {
-		if (Debug.DEBUG_GENERAL)
+		if (Debug.DEBUG_GENERAL) {
 			Debug.println("> WeavingAdaptorFactory.getHost() fragment=" + fragment); //$NON-NLS-1$
+		}
 
 		Bundle host = null;
-		if (packageAdminService != null)
+		if (packageAdminService != null) {
 			host = packageAdminService.getHosts(fragment)[0];
+		}
 
-		if (Debug.DEBUG_GENERAL)
+		if (Debug.DEBUG_GENERAL) {
 			Debug.println("< WeavingAdaptorFactory.getHost() " + host); //$NON-NLS-1$
+		}
 		return host;
 	}
 
 	protected IWeavingService getWeavingService(final ModuleClassLoader loader) {
-		if (Debug.DEBUG_WEAVE)
+		if (Debug.DEBUG_WEAVE) {
 			Debug.println("> WeavingAdaptorFactory.getWeavingService() baseClassLoader=" //$NON-NLS-1$
 					+ loader);
+		}
 
 		final Generation generation = loader.getClasspathManager().getGeneration();
 		final Bundle bundle = loader.getBundle();
@@ -138,16 +147,18 @@ public class WeavingAdaptorFactory {
 				}
 			}
 		}
-		if (Debug.DEBUG_WEAVE)
+		if (Debug.DEBUG_WEAVE) {
 			Debug.println("< WeavingAdaptorFactory.getWeavingService() service=" //$NON-NLS-1$
 					+ weavingService);
+		}
 		return weavingService;
 	}
 
 	public void initialize(final BundleContext context, final ISupplementerRegistry supplementerRegistry) {
-		if (Debug.DEBUG_GENERAL)
+		if (Debug.DEBUG_GENERAL) {
 			Debug.println("> WeavingAdaptorFactory.initialize() context=" //$NON-NLS-1$
 					+ context);
+		}
 		this.supplementerRegistry = supplementerRegistry;
 
 		initializePackageAdminService(context);
@@ -156,8 +167,9 @@ public class WeavingAdaptorFactory {
 		// Service tracker for weaving service
 		weavingServiceFactoryTracker = new ServiceTracker<>(context, IWeavingServiceFactory.class, null);
 		weavingServiceFactoryTracker.open();
-		if (Debug.DEBUG_WEAVE)
+		if (Debug.DEBUG_WEAVE) {
 			Debug.println("> Opened service tracker for weaving service."); //$NON-NLS-1$
+		}
 
 		// Service listener for weaving service
 		weavingServiceListener = new ServiceListener() {
@@ -173,9 +185,10 @@ public class WeavingAdaptorFactory {
 							final Bundle bundle = bundleEntries.next();
 							bundleEntries.remove();
 							bundlesToRefresh.add(bundle);
-							if (Debug.DEBUG_WEAVE)
+							if (Debug.DEBUG_WEAVE) {
 								Debug.println("> Updated bundle " //$NON-NLS-1$
 										+ bundle.getSymbolicName());
+							}
 						}
 					}
 
@@ -194,9 +207,10 @@ public class WeavingAdaptorFactory {
 							final Bundle bundle = bundleEntries.next();
 							bundleEntries.remove();
 							bundlesToRefresh.add(bundle);
-							if (Debug.DEBUG_WEAVE)
+							if (Debug.DEBUG_WEAVE) {
 								Debug.println("> Updated bundle " //$NON-NLS-1$
 										+ bundle.getSymbolicName());
+							}
 						}
 					}
 					if (bundlesToRefresh.size() > 0) {
@@ -219,37 +233,42 @@ public class WeavingAdaptorFactory {
 		// Service tracker for caching service
 		cachingServiceFactoryTracker = new ServiceTracker<>(context, ICachingServiceFactory.class, null);
 		cachingServiceFactoryTracker.open();
-		if (Debug.DEBUG_CACHE)
+		if (Debug.DEBUG_CACHE) {
 			Debug.println("> Opened service tracker for caching service."); //$NON-NLS-1$
+		}
 	}
 
 	private void initializePackageAdminService(final BundleContext context) {
-		if (Debug.DEBUG_GENERAL)
+		if (Debug.DEBUG_GENERAL) {
 			Debug.println("> AdaptorFactory.initializePackageAdminService() context=" //$NON-NLS-1$
 					+ context);
+		}
 
 		final ServiceReference<PackageAdmin> ref = context.getServiceReference(PackageAdmin.class);
 		if (ref != null) {
 			packageAdminService = context.getService(ref);
 		}
 
-		if (Debug.DEBUG_GENERAL)
+		if (Debug.DEBUG_GENERAL) {
 			Debug.println("< AdaptorFactory.initializePackageAdminService() " //$NON-NLS-1$
 					+ packageAdminService);
+		}
 	}
 
 	private void initializeStartLevelService(final BundleContext context) {
-		if (Debug.DEBUG_GENERAL)
+		if (Debug.DEBUG_GENERAL) {
 			Debug.println("> AdaptorFactory.initializeStartLevelService() context=" //$NON-NLS-1$
 					+ context);
+		}
 
 		final ServiceReference<StartLevel> ref = context.getServiceReference(StartLevel.class);
 		if (ref != null) {
 			startLevelService = context.getService(ref);
 		}
 
-		if (Debug.DEBUG_GENERAL)
+		if (Debug.DEBUG_GENERAL) {
 			Debug.println("< AdaptorFactory.initializeStartLevelService() " //$NON-NLS-1$
 					+ startLevelService);
+		}
 	}
 }

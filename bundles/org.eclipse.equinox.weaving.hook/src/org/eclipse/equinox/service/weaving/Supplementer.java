@@ -91,8 +91,9 @@ public class Supplementer {
 			return false;
 		}
 		final String wild_in = input.substring(0, input.length() - 1);
-		if (match.startsWith(wild_in))
+		if (match.startsWith(wild_in)) {
 			return true;
+		}
 
 		return false;
 	}
@@ -159,15 +160,17 @@ public class Supplementer {
 	public boolean matchesSupplementExporter(final ManifestElement[] exports) {
 		boolean matches = false;
 
-		if (supplementExporter != null)
+		if (supplementExporter != null) {
 			for (int i = 0; !matches && i < supplementExporter.length; i++) {
 				final ManifestElement supplementExport = supplementExporter[i];
 				for (int j = 0; !matches && j < exports.length; j++) {
 					final ManifestElement exportPackage = exports[j];
-					if (supplementExport.getValue().equals(exportPackage.getValue()))
+					if (supplementExport.getValue().equals(exportPackage.getValue())) {
 						matches = true;
+					}
 				}
 			}
+		}
 
 		return matches;
 	}
@@ -183,15 +186,17 @@ public class Supplementer {
 	public boolean matchesSupplementImporter(final ManifestElement[] imports) {
 		boolean matches = false;
 
-		if (supplementImporter != null)
+		if (supplementImporter != null) {
 			for (int i = 0; !matches && i < supplementImporter.length; i++) {
 				final ManifestElement supplementImport = supplementImporter[i];
 				for (int j = 0; !matches && j < imports.length; j++) {
 					final ManifestElement importPackage = imports[j];
-					if (supplementImport.getValue().equals(importPackage.getValue()))
+					if (supplementImport.getValue().equals(importPackage.getValue())) {
 						matches = true;
+					}
 				}
 			}
+		}
 
 		return matches;
 	}
@@ -207,12 +212,14 @@ public class Supplementer {
 	public boolean matchSupplementer(final String symbolicName) {
 		boolean matches = false;
 
-		if (supplementBundle != null)
+		if (supplementBundle != null) {
 			for (int i = 0; !matches && i < supplementBundle.length; i++) {
 				final ManifestElement bundle = supplementBundle[i];
-				if (equals_wild(bundle.getValue(), symbolicName))
+				if (equals_wild(bundle.getValue(), symbolicName)) {
 					matches = true;
+				}
 			}
+		}
 
 		return matches;
 	}

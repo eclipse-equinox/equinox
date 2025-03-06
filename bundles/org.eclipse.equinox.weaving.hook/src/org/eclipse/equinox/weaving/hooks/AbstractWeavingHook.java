@@ -46,8 +46,9 @@ public abstract class AbstractWeavingHook extends ClassLoaderHook implements Hoo
 	 */
 	@Override
 	public void addHooks(final HookRegistry hooks) {
-		if (verbose)
+		if (verbose) {
 			System.err.println("[org.eclipse.equinox.weaving.hook] info adding AspectJ hooks ..."); //$NON-NLS-1$
+		}
 
 		Debug.init(hooks.getConfiguration().getDebugOptions());
 		supplementerRegistry = new SupplementerRegistry(this);

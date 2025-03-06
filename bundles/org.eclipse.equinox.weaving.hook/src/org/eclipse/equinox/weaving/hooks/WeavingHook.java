@@ -48,8 +48,9 @@ public class WeavingHook extends AbstractWeavingHook {
 	private BundleContext bundleContext;
 
 	public WeavingHook() {
-		if (Debug.DEBUG_GENERAL)
+		if (Debug.DEBUG_GENERAL) {
 			Debug.println("- WeavingHook.<init>()");
+		}
 
 		this.adaptorFactory = new WeavingAdaptorFactory();
 		this.adaptors = new HashMap<>();
@@ -57,34 +58,39 @@ public class WeavingHook extends AbstractWeavingHook {
 
 	@Override
 	public void classLoaderCreated(final ModuleClassLoader classLoader) {
-		if (Debug.DEBUG_GENERAL)
+		if (Debug.DEBUG_GENERAL) {
 			Debug.println("> WeavingHook.initializedClassLoader() bundle=" + classLoader.getBundle().getSymbolicName()
 					+ ", loader=" + classLoader + ", bundleFile="
 					+ classLoader.getClasspathManager().getGeneration().getBundleFile());
+		}
 
 		final IWeavingAdaptor adaptor = createWeavingAdaptor(classLoader.getClasspathManager().getGeneration(),
 				classLoader);
 		this.adaptors.put(classLoader.getBundle().getBundleId(), adaptor);
 
-		if (Debug.DEBUG_GENERAL)
+		if (Debug.DEBUG_GENERAL) {
 			Debug.println("< WeavingHook.initializedClassLoader() adaptor=" + adaptor);
+		}
 	}
 
 	private IWeavingAdaptor createWeavingAdaptor(final Generation generation, final ModuleClassLoader classLoader) {
-		if (Debug.DEBUG_GENERAL)
+		if (Debug.DEBUG_GENERAL) {
 			Debug.println("> WeavingHook.createAspectJAdaptor() location="
 					+ generation.getRevision().getRevisions().getModule().getLocation());
+		}
 		IWeavingAdaptor adaptor = null;
 
 		if (adaptorFactory != null) {
 			adaptor = new WeavingAdaptor(generation, adaptorFactory, null, null, classLoader);
 		} else {
-			if (Debug.DEBUG_GENERAL)
+			if (Debug.DEBUG_GENERAL) {
 				Debug.println("- WeavingHook.createAspectJAdaptor() factory=" + adaptorFactory);
+			}
 		}
 
-		if (Debug.DEBUG_GENERAL)
+		if (Debug.DEBUG_GENERAL) {
 			Debug.println("< WeavingHook.createAspectJAdaptor() adaptor=" + adaptor);
+		}
 		return adaptor;
 	}
 
@@ -107,8 +113,9 @@ public class WeavingHook extends AbstractWeavingHook {
 	}
 
 	private void initialize(final BundleContext context) {
-		if (Debug.DEBUG_GENERAL)
+		if (Debug.DEBUG_GENERAL) {
 			Debug.println("> WeavingHook.initialize() context=" + context);
+		}
 
 		this.bundleContext = context;
 
@@ -135,8 +142,9 @@ public class WeavingHook extends AbstractWeavingHook {
 			}
 		}
 
-		if (Debug.DEBUG_GENERAL)
+		if (Debug.DEBUG_GENERAL) {
 			Debug.println("< WeavingHook.initialize() adaptorFactory=" + adaptorFactory);
+		}
 	}
 
 	/**
@@ -207,20 +215,22 @@ public class WeavingHook extends AbstractWeavingHook {
 			return null;
 		}
 		BundleFileWrapper wrapped = null;
-		if (Debug.DEBUG_BUNDLE)
+		if (Debug.DEBUG_BUNDLE) {
 			Debug.println("> WeavingHook.wrapBundleFile() bundle="
 					+ (generation.getRevision() != null ? generation.getRevision().getSymbolicName()
 							: generation.getBundleInfo().getBundleId())
 					+ " bundleFile=" + bundleFile + ", generation=" + generation + ", base=" + base + ", baseFile="
 					+ bundleFile.getBaseFile());
+		}
 
 		if (base) {
 			wrapped = new BaseWeavingBundleFile(new BundleAdaptorProvider(generation, this), bundleFile);
 		} else {
 			wrapped = new WeavingBundleFile(new BundleAdaptorProvider(generation, this), bundleFile);
 		}
-		if (Debug.DEBUG_BUNDLE)
+		if (Debug.DEBUG_BUNDLE) {
 			Debug.println("< WeavingHook.wrapBundleFile() wrapped=" + wrapped);
+		}
 		return wrapped;
 	}
 
