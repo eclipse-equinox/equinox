@@ -42,8 +42,9 @@ public class Util {
 	 *                                           <code>end &gt;= array.length</code>
 	 */
 	public static void qSortByString(Object[] array, int start, int stop) {
-		if (start >= stop)
+		if (start >= stop) {
 			return;
+		}
 
 		int left = start; // left index
 		int right = stop; // right index
@@ -102,14 +103,18 @@ public class Util {
 	@SuppressWarnings("unchecked")
 	public static void sort(Object[] array, int start, int end) {
 		int middle = (start + end) / 2;
-		if (start + 1 < middle)
+		if (start + 1 < middle) {
 			sort(array, start, middle);
-		if (middle + 1 < end)
+		}
+		if (middle + 1 < end) {
 			sort(array, middle, end);
-		if (start + 1 >= end)
+		}
+		if (start + 1 >= end) {
 			return; // this case can only happen when this method is called by the user
-		if (((Comparable<Object>) array[middle - 1]).compareTo(array[middle]) <= 0)
+		}
+		if (((Comparable<Object>) array[middle - 1]).compareTo(array[middle]) <= 0) {
 			return;
+		}
 		if (start + 2 == end) {
 			Object temp = array[start];
 			array[start] = array[middle];
@@ -121,8 +126,9 @@ public class Util {
 		while (i1 < middle && i2 < end) {
 			merge[i3++] = ((Comparable<Object>) array[i1]).compareTo(array[i2]) <= 0 ? array[i1++] : array[i2++];
 		}
-		if (i1 < middle)
+		if (i1 < middle) {
 			System.arraycopy(array, i1, merge, i3, middle - i1);
+		}
 		System.arraycopy(merge, 0, array, start, i2 - start);
 	}
 
@@ -198,15 +204,18 @@ public class Util {
 		}
 
 		StringBuilder padding = new StringBuilder(length - size);
-		for (int i = size; i < length; i++)
+		for (int i = size; i < length; i++) {
 			padding.append(pad);
+		}
 
 		StringBuilder stringBuffer = new StringBuilder(length);
-		if (onLeft)
+		if (onLeft) {
 			stringBuffer.append(padding);
+		}
 		stringBuffer.append(input);
-		if (!onLeft)
+		if (!onLeft) {
 			stringBuffer.append(padding);
+		}
 		return stringBuffer.toString();
 	}
 }

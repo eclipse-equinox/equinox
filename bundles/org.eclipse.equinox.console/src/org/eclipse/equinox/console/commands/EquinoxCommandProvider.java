@@ -463,8 +463,9 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 				Field match = null;
 				try {
 					match = Bundle.class.getField(desiredState.toUpperCase());
-					if (stateFilter == -1)
+					if (stateFilter == -1) {
 						stateFilter = 0;
+					}
 					stateFilter |= match.getInt(match);
 				} catch (NoSuchFieldException | IllegalAccessException e) {
 					System.out.println(ConsoleMsg.CONSOLE_INVALID_INPUT + ": " + desiredState); //$NON-NLS-1$
@@ -536,8 +537,9 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 		System.out.println(ConsoleMsg.CONSOLE_STATE_BUNDLE_FILE_NAME_HEADER);
 		for (int i = 0; i < size; i++) {
 			Bundle bundle = bundles[i];
-			if (!match(bundle, bsnSegments, stateFilter))
+			if (!match(bundle, bsnSegments, stateFilter)) {
 				continue;
+			}
 			System.out.print(bundle.getBundleId());
 			System.out.print(tab);
 			System.out.println(bundle.getLocation());
@@ -774,8 +776,9 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 
 		for (int i = 0; i < size; i++) {
 			Bundle bundle = bundles[i];
-			if (!match(bundle, bsnSegments, stateFilter))
+			if (!match(bundle, bsnSegments, stateFilter)) {
 				continue;
+			}
 			long id = bundle.getBundleId();
 			System.out.println(bundle);
 			System.out.print("  "); //$NON-NLS-1$
@@ -1114,19 +1117,22 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 			// clear the permissions from permission admin
 			securityAdmin.setDefaultPermissions(null);
 			String[] permLocations = securityAdmin.getLocations();
-			if (permLocations != null)
+			if (permLocations != null) {
 				for (String permLocation : permLocations) {
 					securityAdmin.setPermissions(permLocation, null);
 				}
+			}
 			ConditionalPermissionUpdate update = condPermAdmin.newConditionalPermissionUpdate();
 			update.getConditionalPermissionInfos().clear();
 			update.commit();
 		}
 		// clear the permissions from conditional permission admin
-		if (securityAdmin != null)
+		if (securityAdmin != null) {
 			for (Enumeration<ConditionalPermissionInfo> infos = condPermAdmin.getConditionalPermissionInfos(); infos
-					.hasMoreElements();)
+					.hasMoreElements();) {
 				infos.nextElement().delete();
+			}
+		}
 	}
 
 	/**
@@ -1363,13 +1369,15 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 			System.out.println(ConsoleMsg.CONSOLE_STATE_BUNDLE_TITLE);
 			for (Bundle b : bundles) {
 
-				if (!match(b, bsnSegments, stateFilter))
+				if (!match(b, bsnSegments, stateFilter)) {
 					continue;
+				}
 				String label = b.getSymbolicName();
-				if (label == null || label.length() == 0)
+				if (label == null || label.length() == 0) {
 					label = b.toString();
-				else
+				} else {
 					label = label + "_" + b.getVersion(); //$NON-NLS-1$
+				}
 				System.out.println(b.getBundleId() + "\t" + getStateName(b) + label); //$NON-NLS-1$
 				BundleRevision revision = b.adapt(BundleRevision.class);
 				BundleWiring wiring = b.adapt(BundleWiring.class);
@@ -1480,10 +1488,10 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 				// Instantiate the specified exception, if any.
 				Throwable toThrow;
 				// Was an exception specified?
-				if (throwable == null)
+				if (throwable == null) {
 					// If not, use the default.
 					toThrow = new IllegalStateException(message);
-				else {
+				} else {
 					// Instantiate the throwable with the message, if possible.
 					// Otherwise use the default constructor.
 					try {
@@ -1538,8 +1546,9 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 				sb.append(Util.toString(simpleClassName(t), 18)).append(" ").append(Util.toString(t.getName(), 21)) //$NON-NLS-1$
 						.append(" ").append(Util.toString(t.getThreadGroup().getName(), 16)) //$NON-NLS-1$
 						.append(Util.toString(Integer.valueOf(t.getPriority()), 3));
-				if (t.isDaemon())
+				if (t.isDaemon()) {
 					sb.append(" [daemon]"); //$NON-NLS-1$
+				}
 				System.out.println(sb.toString());
 			}
 		}

@@ -43,20 +43,23 @@ public class CommandProviderAdapter {
 			// first argument is the command
 			Method command = findCommand("_" + args[0]);
 			ArrayList<Object> argList = new ArrayList<>();
-			for (int i = 1; i < args.length; i++)
+			for (int i = 1; i < args.length; i++) {
 				argList.add(args[i]);
+			}
 			return command.invoke(commandProvider, new CustomCommandInterpreter(commandSession, argList));
 		} catch (InvocationTargetException e) {
-			if (e.getTargetException() instanceof Exception)
+			if (e.getTargetException() instanceof Exception) {
 				throw (Exception) e.getTargetException();
+			}
 			throw (Error) e.getTargetException();
 		}
 	}
 
 	private Method findCommand(Object commandName) {
 		for (Method command : commands) {
-			if (command.getName().equalsIgnoreCase(commandName.toString()))
+			if (command.getName().equalsIgnoreCase(commandName.toString())) {
 				return command;
+			}
 		}
 		throw new IllegalArgumentException("Cannot find the command method for: " + commandName);
 	}

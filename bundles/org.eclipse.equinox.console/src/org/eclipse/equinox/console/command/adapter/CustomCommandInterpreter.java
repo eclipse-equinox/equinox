@@ -171,8 +171,9 @@ public class CustomCommandInterpreter implements CommandInterpreter {
 	 */
 	@Override
 	public void printDictionary(Dictionary<?, ?> dic, String title) {
-		if (dic == null)
+		if (dic == null) {
 			return;
+		}
 
 		int count = dic.size();
 		String[] keys = new String[count];
@@ -208,8 +209,9 @@ public class CustomCommandInterpreter implements CommandInterpreter {
 				byte[] buffer = new byte[1024];
 				int read = 0;
 				try (InputStream in = entry.openStream()) {
-					while ((read = in.read(buffer)) != -1)
+					while ((read = in.read(buffer)) != -1) {
 						print(new String(buffer, 0, read));
+					}
 				}
 			} catch (Exception e) {
 				System.err.println(e);
