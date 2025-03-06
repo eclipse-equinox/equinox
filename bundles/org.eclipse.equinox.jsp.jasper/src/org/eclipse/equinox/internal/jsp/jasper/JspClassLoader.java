@@ -97,8 +97,9 @@ public class JspClassLoader extends URLClassLoader {
 
 	@Override
 	protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-		if (PARENT != null && name.startsWith(JAVA_PACKAGE))
+		if (PARENT != null && name.startsWith(JAVA_PACKAGE)) {
 			return PARENT.loadClass(name);
+		}
 		return super.loadClass(name, resolve);
 	}
 

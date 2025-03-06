@@ -278,21 +278,25 @@ public class JspServlet extends HttpServlet {
 		}
 
 		public URL getResource(String name) throws MalformedURLException {
-			if (alias != null && name.startsWith(alias))
+			if (alias != null && name.startsWith(alias)) {
 				name = name.substring(alias.length());
+			}
 
 			String resourceName = bundleResourcePath + name;
 			int lastSlash = resourceName.lastIndexOf('/');
-			if (lastSlash == -1)
+			if (lastSlash == -1) {
 				return null;
+			}
 
 			String path = resourceName.substring(0, lastSlash);
-			if (path.length() == 0)
+			if (path.length() == 0) {
 				path = "/"; //$NON-NLS-1$
+			}
 			String file = sanitizeEntryName(resourceName.substring(lastSlash + 1));
 			Enumeration<URL> entryPaths = bundle.findEntries(path, file, false);
-			if (entryPaths != null && entryPaths.hasMoreElements())
+			if (entryPaths != null && entryPaths.hasMoreElements()) {
 				return entryPaths.nextElement();
+			}
 
 			return delegate.getResource(name);
 		}
@@ -312,8 +316,9 @@ public class JspServlet extends HttpServlet {
 					buffer.append('\\').append(c);
 					break;
 				default:
-					if (buffer != null)
+					if (buffer != null) {
 						buffer.append(c);
+					}
 					break;
 				}
 			}
@@ -323,8 +328,9 @@ public class JspServlet extends HttpServlet {
 		public InputStream getResourceAsStream(String name) {
 			try {
 				URL resourceURL = getResource(name);
-				if (resourceURL != null)
+				if (resourceURL != null) {
 					return resourceURL.openStream();
+				}
 			} catch (IOException e) {
 				log("Error opening stream for resource '" + name + "'", e); //$NON-NLS-1$ //$NON-NLS-2$
 			}
@@ -335,8 +341,9 @@ public class JspServlet extends HttpServlet {
 			Set<String> result = delegate.getResourcePaths(name);
 			Enumeration<URL> e = bundle.findEntries(bundleResourcePath + name, null, false);
 			if (e != null) {
-				if (result == null)
+				if (result == null) {
 					result = new HashSet<>();
+				}
 				while (e.hasMoreElements()) {
 					URL entryURL = e.nextElement();
 					result.add(entryURL.getFile().substring(bundleResourcePath.length()));
