@@ -52,12 +52,14 @@ public class ConfigurationDictionary extends Dictionary<String, Object> implemen
 		Class<?> clazz = value.getClass();
 
 		// Is it in the set of simple types
-		if (simples.contains(clazz))
+		if (simples.contains(clazz)) {
 			return;
+		}
 
 		// Is it an array of primitives or simples
-		if (simpleArrays.contains(clazz) || primitiveArrays.contains(clazz))
+		if (simpleArrays.contains(clazz) || primitiveArrays.contains(clazz)) {
 			return;
+		}
 
 		// Is it a Collection of simples
 		if (value instanceof Collection) {
@@ -79,8 +81,9 @@ public class ConfigurationDictionary extends Dictionary<String, Object> implemen
 
 	@Override
 	public Object get(Object key) {
-		if (key == null)
+		if (key == null) {
 			throw new NullPointerException();
+		}
 		return configurationProperties.get(key);
 	}
 
@@ -96,8 +99,9 @@ public class ConfigurationDictionary extends Dictionary<String, Object> implemen
 
 	@Override
 	public Object put(String key, Object value) {
-		if (key == null || value == null)
+		if (key == null || value == null) {
 			throw new NullPointerException();
+		}
 
 		// Will throw an illegal argument exception if not a valid configuration
 		// property type
@@ -108,8 +112,9 @@ public class ConfigurationDictionary extends Dictionary<String, Object> implemen
 
 	@Override
 	public Object remove(Object key) {
-		if (key == null)
+		if (key == null) {
 			throw new NullPointerException();
+		}
 		return configurationProperties.remove(key);
 	}
 
@@ -128,10 +133,11 @@ public class ConfigurationDictionary extends Dictionary<String, Object> implemen
 				Object copyOfArray = Array.newInstance(value.getClass().getComponentType(), arrayLength);
 				System.arraycopy(value, 0, copyOfArray, 0, arrayLength);
 				result.configurationProperties.put(key, copyOfArray);
-			} else if (value instanceof Collection)
+			} else if (value instanceof Collection) {
 				result.configurationProperties.put(key, new ArrayList<>((Collection<?>) value));
-			else
+			} else {
 				result.configurationProperties.put(key, value);
+			}
 		}
 		return result;
 	}

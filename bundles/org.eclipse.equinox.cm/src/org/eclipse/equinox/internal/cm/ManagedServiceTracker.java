@@ -164,8 +164,9 @@ class ManagedServiceTracker extends ServiceTracker<ManagedService, ManagedServic
 	@Override
 	public ManagedService addingService(ServiceReference<ManagedService> reference) {
 		ManagedService service = context.getService(reference);
-		if (service == null)
+		if (service == null) {
 			return null;
+		}
 
 		addReference(reference, service);
 		return service;

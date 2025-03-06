@@ -41,14 +41,16 @@ class ConfigurationStore {
 	public ConfigurationStore(ConfigurationAdminFactory configurationAdminFactory, BundleContext context) {
 		this.configurationAdminFactory = configurationAdminFactory;
 		store = context.getDataFile(STORE_DIR);
-		if (store == null)
+		if (store == null) {
 			return; // no persistent store
+		}
 
 		store.mkdir();
 		for (File configurationFile : store.listFiles()) {
 			String configurationFileName = configurationFile.getName();
-			if (!configurationFileName.endsWith(CFG_EXT))
+			if (!configurationFileName.endsWith(CFG_EXT)) {
 				continue;
+			}
 
 			InputStream ris = null;
 			ObjectInputStream ois = null;
@@ -102,8 +104,9 @@ class ConfigurationStore {
 	}
 
 	public Object saveConfiguration(String pid, ConfigurationImpl config, final Object token) throws IOException {
-		if (store == null)
+		if (store == null) {
 			return null; // no persistent store
+		}
 
 		config.checkLocked();
 		final Dictionary<String, Object> configProperties = config.getAllProperties(true);
@@ -153,8 +156,9 @@ class ConfigurationStore {
 
 	public synchronized void removeConfiguration(String pid, final Object token) {
 		configurations.remove(pid);
-		if (store == null || token == null)
+		if (store == null || token == null) {
 			return; // no persistent store
+		}
 		AccessController.doPrivileged(new PrivilegedAction<>() {
 			@Override
 			public Object run() {
@@ -209,8 +213,9 @@ class ConfigurationStore {
 		for (Iterator<ConfigurationImpl> it = resultList.iterator(); it.hasNext();) {
 			ConfigurationImpl config = it.next();
 			String otherFactoryPid = config.getFactoryPid();
-			if (otherFactoryPid == null || !otherFactoryPid.equals(factoryPid))
+			if (otherFactoryPid == null || !otherFactoryPid.equals(factoryPid)) {
 				it.remove();
+			}
 		}
 		return resultList.toArray(new ConfigurationImpl[resultList.size()]);
 	}

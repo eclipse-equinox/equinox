@@ -57,14 +57,16 @@ public class EventDispatcher {
 	}
 
 	synchronized void setServiceReference(ServiceReference<ConfigurationAdmin> reference) {
-		if (configAdminReference == null)
+		if (configAdminReference == null) {
 			configAdminReference = reference;
+		}
 	}
 
 	public void dispatchEvent(int type, String factoryPid, String pid) {
 		final ConfigurationEvent event = createConfigurationEvent(type, factoryPid, pid);
-		if (event == null)
+		if (event == null) {
 			return;
+		}
 
 		ServiceReference<SynchronousConfigurationListener>[] syncRefs = syncTracker.getServiceReferences();
 		if (syncRefs != null) {
@@ -80,8 +82,9 @@ public class EventDispatcher {
 			}
 		}
 		ServiceReference<ConfigurationListener>[] refs = tracker.getServiceReferences();
-		if (refs == null)
+		if (refs == null) {
 			return;
+		}
 
 		for (final ServiceReference<ConfigurationListener> ref : refs) {
 			configurationAdminFactory.executeCoordinated(new Object(), () -> enqueue(event, ref));
@@ -106,8 +109,9 @@ public class EventDispatcher {
 	}
 
 	private synchronized ConfigurationEvent createConfigurationEvent(int type, String factoryPid, String pid) {
-		if (configAdminReference == null)
+		if (configAdminReference == null) {
 			return null;
+		}
 
 		return new ConfigurationEvent(configAdminReference, type, factoryPid, pid);
 	}

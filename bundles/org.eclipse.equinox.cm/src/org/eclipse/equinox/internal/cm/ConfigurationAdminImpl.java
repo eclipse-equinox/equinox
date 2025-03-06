@@ -95,8 +95,9 @@ class ConfigurationAdminImpl implements ConfigurationAdmin {
 
 	@Override
 	public Configuration[] listConfigurations(String filterString) throws InvalidSyntaxException {
-		if (filterString == null)
+		if (filterString == null) {
 			filterString = "(" + Constants.SERVICE_PID + "=*)"; //$NON-NLS-1$ //$NON-NLS-2$
+		}
 
 		ConfigurationImpl[] configs = configurationStore.listConfigurations(FrameworkUtil.createFilter(filterString));
 		if (configs == null) {
@@ -119,8 +120,9 @@ class ConfigurationAdminImpl implements ConfigurationAdmin {
 	}
 
 	private void checkPID(String pid) {
-		if (pid == null)
+		if (pid == null) {
 			throw new IllegalArgumentException("PID cannot be null"); //$NON-NLS-1$
+		}
 	}
 
 	static String getLocation(final Bundle bundle) {

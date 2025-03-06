@@ -37,8 +37,9 @@ public class Activator implements BundleActivator {
 	}
 
 	public static synchronized String getProperty(String key) {
-		if (bundleContext != null)
+		if (bundleContext != null) {
 			return bundleContext.getProperty(key);
+		}
 
 		return null;
 	}
