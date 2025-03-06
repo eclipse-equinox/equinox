@@ -66,8 +66,9 @@ public class Activator implements BundleActivator {
 	 */
 	@Override
 	public void stop(BundleContext context) throws Exception {
-		if (adapterManagerListener != null)
+		if (adapterManagerListener != null) {
 			adapterManagerListener.stop(); // before extension registry
+		}
 		stopRegistry();
 		RegistryProperties.setContext(null);
 		bundleContext = null;
@@ -86,11 +87,13 @@ public class Activator implements BundleActivator {
 		// use a string here instead of the class to prevent class loading.
 		ServiceReference<?> ref = getContext()
 				.getServiceReference("org.eclipse.osgi.service.environment.EnvironmentInfo"); //$NON-NLS-1$
-		if (ref == null)
+		if (ref == null) {
 			return;
+		}
 		String[] args = EquinoxUtils.getCommandLine(bundleContext, ref);
-		if (args == null || args.length == 0)
+		if (args == null || args.length == 0) {
 			return;
+		}
 		for (String arg : args) {
 			if (arg.equalsIgnoreCase(IRegistryConstants.NO_REGISTRY_CACHE)) {
 				RegistryProperties.setProperty(IRegistryConstants.PROP_NO_REGISTRY_CACHE, "true"); //$NON-NLS-1$
@@ -105,12 +108,14 @@ public class Activator implements BundleActivator {
 	public void startRegistry() throws CoreException {
 		// see if the customer suppressed the creation of default registry
 		String property = bundleContext.getProperty(IRegistryConstants.PROP_DEFAULT_REGISTRY);
-		if (property != null && property.equalsIgnoreCase("false")) //$NON-NLS-1$
+		if (property != null && property.equalsIgnoreCase("false")) { //$NON-NLS-1$
 			return;
+		}
 
 		// check to see if we need to use null as a userToken
-		if ("true".equals(bundleContext.getProperty(IRegistryConstants.PROP_REGISTRY_NULL_USER_TOKEN))) //$NON-NLS-1$
+		if ("true".equals(bundleContext.getProperty(IRegistryConstants.PROP_REGISTRY_NULL_USER_TOKEN))) { //$NON-NLS-1$
 			userRegistryKey = null;
+		}
 
 		// Determine primary and alternative registry locations. Eclipse extension
 		// registry cache
@@ -160,8 +165,9 @@ public class Activator implements BundleActivator {
 			registryRegistration.unregister();
 			defaultRegistry.stop(masterRegistryKey);
 		}
-		if (commandRegistration != null)
+		if (commandRegistration != null) {
 			commandRegistration.unregister();
+		}
 	}
 
 }

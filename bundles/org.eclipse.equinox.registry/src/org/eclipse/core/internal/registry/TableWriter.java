@@ -80,8 +80,9 @@ public class TableWriter {
 	public boolean saveCache(RegistryObjectManager manager, long timestamp) {
 		this.objectManager = manager;
 		try {
-			if (!openFiles())
+			if (!openFiles()) {
 				return false;
+			}
 			try {
 				saveExtensionRegistry(timestamp);
 			} catch (IOException io) {
@@ -102,12 +103,13 @@ public class TableWriter {
 			extraFileOutput = new FileOutputStream(extraDataFile);
 			extraOutput = new DataOutputStream(new BufferedOutputStream(extraFileOutput));
 		} catch (FileNotFoundException e) {
-			if (mainFileOutput != null)
+			if (mainFileOutput != null) {
 				try {
 					mainFileOutput.close();
 				} catch (IOException e1) {
 					// Ignore
 				}
+			}
 
 			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError,
 					RegistryMessages.meta_unableToCreateCache, e));
@@ -225,8 +227,9 @@ public class TableWriter {
 				RegistryIndexElement element = (RegistryIndexElement) e;
 				int[] extensionPoints = filter(element.getExtensionPoints());
 				int[] extensions = filter(element.getExtensions());
-				if (extensionPoints.length == 0 && extensions.length == 0)
+				if (extensionPoints.length == 0 && extensions.length == 0) {
 					continue;
+				}
 				RegistryIndexElement cachedElement = new RegistryIndexElement((String) element.getKey(),
 						extensionPoints, extensions);
 				cachedElements[cacheSize] = cachedElement;
@@ -309,8 +312,9 @@ public class TableWriter {
 	}
 
 	private void saveExtensionPoint(ExtensionPointHandle xpt) throws IOException {
-		if (!xpt.shouldPersist())
+		if (!xpt.shouldPersist()) {
 			return;
+		}
 		// save the file position
 		offsets.put(xpt.getId(), mainOutput.size());
 		// save the extensionPoint
@@ -323,8 +327,9 @@ public class TableWriter {
 	}
 
 	private void saveExtension(ExtensionHandle ext, DataOutputStream outputStream) throws IOException {
-		if (!ext.shouldPersist())
+		if (!ext.shouldPersist()) {
 			return;
+		}
 		offsets.put(ext.getId(), outputStream.size());
 		outputStream.writeInt(ext.getId());
 		writeStringOrNull(ext.getSimpleIdentifier(), outputStream);
@@ -343,8 +348,9 @@ public class TableWriter {
 
 	private void writeStringArray(String[] array, int size, DataOutputStream outputStream) throws IOException {
 		outputStream.writeInt(array == null ? 0 : size);
-		if (array == null)
+		if (array == null) {
 			return;
+		}
 		for (int i = 0; i < size; i++) {
 			writeStringOrNull(array[i], outputStream);
 		}
@@ -353,11 +359,13 @@ public class TableWriter {
 	// Save Configuration elements depth first
 	private void saveConfigurationElement(ConfigurationElementHandle element, DataOutputStream outputStream,
 			DataOutputStream extraOutputStream, int depth) throws IOException {
-		if (!element.shouldPersist())
+		if (!element.shouldPersist()) {
 			return;
+		}
 		DataOutputStream currentOutput = outputStream;
-		if (depth > 2)
+		if (depth > 2) {
 			currentOutput = extraOutputStream;
+		}
 
 		offsets.put(element.getId(), currentOutput.size());
 
@@ -408,13 +416,15 @@ public class TableWriter {
 				if (((ConfigurationElementHandle) ces[j]).shouldPersist()) {
 					save[j] = true;
 					countCElements++;
-				} else
+				} else {
 					save[j] = false;
+				}
 			}
 			outputStream.writeInt(countCElements);
 			for (int j = 0; j < ces.length; j++) {
-				if (save[j])
+				if (save[j]) {
 					saveConfigurationElement((ConfigurationElementHandle) ces[j], outputStream, extraOutput, 1);
+				}
 			}
 		}
 	}
@@ -434,9 +444,9 @@ public class TableWriter {
 	}
 
 	private void writeStringOrNull(String string, DataOutputStream out) throws IOException {
-		if (string == null)
+		if (string == null) {
 			out.writeByte(TableReader.NULL);
-		else {
+		} else {
 			byte[] data = string.getBytes(StandardCharsets.UTF_8);
 			if (data.length > 65535) {
 				out.writeByte(TableReader.LOBJECT);
@@ -454,8 +464,9 @@ public class TableWriter {
 		Map<String, int[]> filteredOrphans = new HashMap<>();
 		for (Entry<String, int[]> entry : orphans.entrySet()) {
 			int[] filteredValue = filter(entry.getValue());
-			if (filteredValue.length != 0)
+			if (filteredValue.length != 0) {
 				filteredOrphans.put(entry.getKey(), filteredValue);
+			}
 		}
 		try (FileOutputStream fosOrphan = new FileOutputStream(orphansFile);
 				DataOutputStream outputOrphan = new DataOutputStream(new BufferedOutputStream(fosOrphan))) {
@@ -488,8 +499,9 @@ public class TableWriter {
 			if (objectManager.shouldPersist(input[i])) {
 				save[i] = true;
 				resultSize++;
-			} else
+			} else {
 				save[i] = false;
+			}
 		}
 		int[] result = new int[resultSize];
 		int pos = 0;

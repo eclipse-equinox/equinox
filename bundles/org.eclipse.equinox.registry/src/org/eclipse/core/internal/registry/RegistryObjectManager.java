@@ -131,13 +131,15 @@ public class RegistryObjectManager implements IObjectManager {
 		if (existingContribution != null) { // move it from former to new contributions
 			removeContribution(Id);
 			newContributions.add(existingContribution);
-		} else
+		} else { // move it from former to new contributions
 			existingContribution = newContributions.getByKey(Id);
+		}
 
-		if (existingContribution != null) // merge
+		if (existingContribution != null) { // merge
 			((Contribution) existingContribution).mergeContribution(contribution);
-		else
+		} else { // merge
 			newContributions.add(contribution);
+		}
 
 		updateNamespaceIndex(contribution, true);
 	}
@@ -151,10 +153,11 @@ public class RegistryObjectManager implements IObjectManager {
 		String namespaceName = null;
 		for (RegistryObject currentObject : registryObjects) {
 			String tmp = null;
-			if (currentObject instanceof ExtensionPoint)
+			if (currentObject instanceof ExtensionPoint) {
 				tmp = ((ExtensionPoint) currentObject).getNamespace();
-			else if (currentObject instanceof Extension)
+			} else if (currentObject instanceof Extension) {
 				tmp = ((Extension) currentObject).getNamespaceIdentifier();
+			}
 
 			if (namespaceName == null) {
 				namespaceName = tmp;
@@ -184,8 +187,9 @@ public class RegistryObjectManager implements IObjectManager {
 		int[] contribExtensionPoints = contribution.getExtensionPoints();
 		RegistryObject[] extensionPointObjects = getObjects(contribExtensionPoints, EXTENSION_POINT);
 		String commonExptsNamespace = null;
-		if (contribExtensionPoints.length > 1)
+		if (contribExtensionPoints.length > 1) {
 			commonExptsNamespace = findCommonNamespaceIdentifier(extensionPointObjects);
+		}
 		if (commonExptsNamespace != null) {
 			RegistryIndexElement indexElement = getNamespaceIndex(commonExptsNamespace);
 			indexElement.updateExtensionPoints(contribExtensionPoints, added);
@@ -202,8 +206,9 @@ public class RegistryObjectManager implements IObjectManager {
 		int[] contrExtensions = contribution.getExtensions();
 		RegistryObject[] extensionObjects = getObjects(contrExtensions, EXTENSION);
 		String commonExtNamespace = null;
-		if (contrExtensions.length > 1)
+		if (contrExtensions.length > 1) {
 			commonExtNamespace = findCommonNamespaceIdentifier(extensionObjects);
+		}
 		if (commonExtNamespace != null) {
 			RegistryIndexElement indexElement = getNamespaceIndex(commonExtNamespace);
 			indexElement.updateExtensions(contrExtensions, added);
@@ -218,24 +223,28 @@ public class RegistryObjectManager implements IObjectManager {
 
 	synchronized int[] getExtensionPointsFrom(String id) {
 		KeyedElement tmp = newContributions.getByKey(id);
-		if (tmp == null)
+		if (tmp == null) {
 			tmp = getFormerContributions().getByKey(id);
-		if (tmp == null)
+		}
+		if (tmp == null) {
 			return EMPTY_INT_ARRAY;
+		}
 		return ((Contribution) tmp).getExtensionPoints();
 	}
 
 	synchronized boolean hasContribution(String id) {
 		Object result = newContributions.getByKey(id);
-		if (result == null)
+		if (result == null) {
 			result = getFormerContributions().getByKey(id);
+		}
 		return result != null;
 	}
 
 	private KeyedHashSet getFormerContributions() {
 		KeyedHashSet result;
-		if (fromCache == false)
+		if (fromCache == false) {
 			return new KeyedHashSet(0);
+		}
 
 		if (formerContributions == null || (result = ((KeyedHashSet) ((formerContributions instanceof SoftReference)
 				? ((SoftReference<?>) formerContributions).get()
@@ -252,22 +261,26 @@ public class RegistryObjectManager implements IObjectManager {
 			registryObject.setObjectId(id);
 		}
 		cache.put(registryObject.getObjectId(), registryObject);
-		if (hold)
+		if (hold) {
 			hold(registryObject);
+		}
 	}
 
 	private void remove(RegistryObject registryObject, boolean release) {
 		cache.remove(registryObject.getObjectId());
-		if (release)
+		if (release) {
 			release(registryObject);
+		}
 	}
 
 	synchronized void remove(int id, boolean release) {
 		RegistryObject toRemove = (RegistryObject) cache.get(id);
-		if (fileOffsets != null)
+		if (fileOffsets != null) {
 			fileOffsets.removeKey(id);
-		if (toRemove != null)
+		}
+		if (toRemove != null) {
 			remove(toRemove, release);
+		}
 	}
 
 	private void hold(RegistryObject toHold) {
@@ -285,12 +298,15 @@ public class RegistryObjectManager implements IObjectManager {
 
 	private Object basicGetObject(int id, byte type) {
 		Object result = cache.get(id);
-		if (result != null)
+		if (result != null) {
 			return result;
-		if (fromCache)
+		}
+		if (fromCache) {
 			result = load(id, type);
-		if (result == null)
+		}
+		if (result == null) {
 			throw new InvalidRegistryObjectException();
+		}
 		cache.put(id, result);
 		return result;
 	}
@@ -308,8 +324,9 @@ public class RegistryObjectManager implements IObjectManager {
 	// from the disk; object type is needed as well.
 	public boolean shouldPersist(int id) {
 		Object result = cache.get(id);
-		if (result != null)
+		if (result != null) {
 			return ((RegistryObject) result).shouldPersist();
+		}
 		return true;
 	}
 
@@ -348,8 +365,9 @@ public class RegistryObjectManager implements IObjectManager {
 
 	synchronized ExtensionPoint getExtensionPointObject(String xptUniqueId) {
 		int id;
-		if ((id = extensionPoints.get(xptUniqueId)) == HashtableOfStringAndInt.MISSING_ELEMENT)
+		if ((id = extensionPoints.get(xptUniqueId)) == HashtableOfStringAndInt.MISSING_ELEMENT) {
 			return null;
+		}
 		return (ExtensionPoint) getObject(id, EXTENSION_POINT);
 	}
 
@@ -377,8 +395,9 @@ public class RegistryObjectManager implements IObjectManager {
 		int nbrId = ids.length;
 		switch (type) {
 		case EXTENSION_POINT:
-			if (nbrId == 0)
+			if (nbrId == 0) {
 				return ExtensionPointHandle.EMPTY_ARRAY;
+			}
 			results = new ExtensionPointHandle[nbrId];
 			for (int i = 0; i < nbrId; i++) {
 				results[i] = new ExtensionPointHandle(this, ids[i]);
@@ -386,8 +405,9 @@ public class RegistryObjectManager implements IObjectManager {
 			break;
 
 		case EXTENSION:
-			if (nbrId == 0)
+			if (nbrId == 0) {
 				return ExtensionHandle.EMPTY_ARRAY;
+			}
 			results = new ExtensionHandle[nbrId];
 			for (int i = 0; i < nbrId; i++) {
 				results[i] = new ExtensionHandle(this, ids[i]);
@@ -395,8 +415,9 @@ public class RegistryObjectManager implements IObjectManager {
 			break;
 
 		case CONFIGURATION_ELEMENT:
-			if (nbrId == 0)
+			if (nbrId == 0) {
 				return ConfigurationElementHandle.EMPTY_ARRAY;
+			}
 			results = new ConfigurationElementHandle[nbrId];
 			for (int i = 0; i < nbrId; i++) {
 				results[i] = new ConfigurationElementHandle(this, ids[i]);
@@ -404,8 +425,9 @@ public class RegistryObjectManager implements IObjectManager {
 			break;
 
 		case THIRDLEVEL_CONFIGURATION_ELEMENT:
-			if (nbrId == 0)
+			if (nbrId == 0) {
 				return ConfigurationElementHandle.EMPTY_ARRAY;
+			}
 			results = new ThirdLevelConfigurationElementHandle[nbrId];
 			for (int i = 0; i < nbrId; i++) {
 				results[i] = new ThirdLevelConfigurationElementHandle(this, ids[i]);
@@ -421,18 +443,21 @@ public class RegistryObjectManager implements IObjectManager {
 
 	synchronized ExtensionPointHandle getExtensionPointHandle(String xptUniqueId) {
 		int id = extensionPoints.get(xptUniqueId);
-		if (id == HashtableOfStringAndInt.MISSING_ELEMENT)
+		if (id == HashtableOfStringAndInt.MISSING_ELEMENT) {
 			return null;
+		}
 		return (ExtensionPointHandle) getHandle(id, EXTENSION_POINT);
 	}
 
 	private Object load(int id, byte type) {
 		TableReader reader = registry.getTableReader();
-		if (fileOffsets == null)
+		if (fileOffsets == null) {
 			return null;
+		}
 		int offset = fileOffsets.get(id);
-		if (offset == Integer.MIN_VALUE)
+		if (offset == Integer.MIN_VALUE) {
 			return null;
+		}
 		switch (type) {
 		case CONFIGURATION_ELEMENT:
 			return reader.loadConfigurationElement(offset);
@@ -451,17 +476,20 @@ public class RegistryObjectManager implements IObjectManager {
 
 	synchronized int[] getExtensionsFrom(String contributorId) {
 		KeyedElement tmp = newContributions.getByKey(contributorId);
-		if (tmp == null)
+		if (tmp == null) {
 			tmp = getFormerContributions().getByKey(contributorId);
-		if (tmp == null)
+		}
+		if (tmp == null) {
 			return EMPTY_INT_ARRAY;
+		}
 		return ((Contribution) tmp).getExtensions();
 	}
 
 	synchronized boolean addExtensionPoint(ExtensionPoint currentExtPoint, boolean hold) {
 		String uniqueId = currentExtPoint.getUniqueIdentifier();
-		if (extensionPoints.get(uniqueId) != HashtableOfStringAndInt.MISSING_ELEMENT)
+		if (extensionPoints.get(uniqueId) != HashtableOfStringAndInt.MISSING_ELEMENT) {
 			return false;
+		}
 		add(currentExtPoint, hold);
 		extensionPoints.put(uniqueId, currentExtPoint.getObjectId());
 		return true;
@@ -469,8 +497,9 @@ public class RegistryObjectManager implements IObjectManager {
 
 	synchronized void removeExtensionPoint(String extensionPointId) {
 		int pointId = extensionPoints.removeKey(extensionPointId);
-		if (pointId == HashtableOfStringAndInt.MISSING_ELEMENT)
+		if (pointId == HashtableOfStringAndInt.MISSING_ELEMENT) {
 			return;
+		}
 		remove(pointId, true);
 	}
 
@@ -486,9 +515,10 @@ public class RegistryObjectManager implements IObjectManager {
 		boolean removed = newContributions.removeByKey(contributorId);
 		if (removed == false) {
 			removed = getFormerContributions().removeByKey(contributorId);
-			if (removed)
+			if (removed) {
 				formerContributions = getFormerContributions(); // This forces the removed namespace to stay around, so
 																// we do not forget about removed namespaces
+			}
 		}
 
 		if (removed) {
@@ -564,8 +594,9 @@ public class RegistryObjectManager implements IObjectManager {
 		Map<String, int[]> orphans = getOrphans();
 		int[] existingOrphanExtensions = orphans.get(extensionPoint);
 
-		if (existingOrphanExtensions == null)
+		if (existingOrphanExtensions == null) {
 			return;
+		}
 
 		markOrphansHasDirty(orphans);
 		int newSize = existingOrphanExtensions.length - 1;
@@ -575,9 +606,11 @@ public class RegistryObjectManager implements IObjectManager {
 		}
 
 		int[] newOrphanExtensions = new int[existingOrphanExtensions.length - 1];
-		for (int i = 0, j = 0; i < existingOrphanExtensions.length; i++)
-			if (extension != existingOrphanExtensions[i])
+		for (int i = 0, j = 0; i < existingOrphanExtensions.length; i++) {
+			if (extension != existingOrphanExtensions[i]) {
 				newOrphanExtensions[j++] = existingOrphanExtensions[i];
+			}
+		}
 
 		orphans.put(extensionPoint, newOrphanExtensions);
 		return;
@@ -608,10 +641,11 @@ public class RegistryObjectManager implements IObjectManager {
 	// return contributors marked as removed.
 	HashMap<String, RegistryContributor> getContributors() {
 		if (contributors == null) {
-			if (fromCache == false)
+			if (fromCache == false) {
 				contributors = new HashMap<>();
-			else
+			} else {
 				contributors = registry.getTableReader().loadContributors();
+			}
 		}
 		return contributors;
 	}
@@ -623,13 +657,15 @@ public class RegistryObjectManager implements IObjectManager {
 
 	synchronized RegistryContributor getContributor(String id) {
 		RegistryContributor contributor = getContributors().get(id);
-		if (contributor != null)
+		if (contributor != null) {
 			return contributor;
+		}
 		// check if we have it among removed contributors - potentially
 		// notification of removals might be processed after the contributor
 		// marked as removed:
-		if (removedContributors != null)
+		if (removedContributors != null) {
 			return removedContributors.get(id);
+		}
 		return null;
 	}
 
@@ -638,8 +674,9 @@ public class RegistryObjectManager implements IObjectManager {
 		String key = newContributor.getActualId();
 		if (!getContributors().containsKey(key)) {
 			isDirty = true;
-			if (removedContributors != null)
+			if (removedContributors != null) {
 				removedContributors.remove(key);
+			}
 			getContributors().put(key, newContributor);
 		}
 	}
@@ -648,18 +685,20 @@ public class RegistryObjectManager implements IObjectManager {
 		isDirty = true;
 		RegistryContributor removed = getContributors().remove(id);
 		if (removed != null) {
-			if (removedContributors == null)
+			if (removedContributors == null) {
 				removedContributors = new HashMap<>();
+			}
 			removedContributors.put(id, removed);
 		}
 	}
 
 	KeyedHashSet getNamespacesIndex() {
 		if (namespacesIndex == null) {
-			if (fromCache == false)
+			if (fromCache == false) {
 				namespacesIndex = new KeyedHashSet(0);
-			else
+			} else {
 				namespacesIndex = registry.getTableReader().loadNamespaces();
+			}
 		}
 		return namespacesIndex;
 	}
@@ -714,18 +753,21 @@ public class RegistryObjectManager implements IObjectManager {
 			if (object instanceof Extension) {
 				// add extension point
 				ExtensionPoint extPoint = getExtensionPointObject(((Extension) object).getExtensionPointIdentifier());
-				if (extPoint == null) // already removed?
+				if (extPoint == null) { // already removed?
 					continue;
+				}
 
 				Integer extPointIndex = Integer.valueOf(extPoint.getKeyHashCode());
-				if (!associatedObjects.containsKey(extPointIndex))
+				if (!associatedObjects.containsKey(extPointIndex)) {
 					result.put(Integer.valueOf(extPoint.getKeyHashCode()), extPoint);
+				}
 
 				// add all extensions for the extension point
 				for (int childId : extPoint.getRawChildren()) {
 					Extension tmp = (Extension) basicGetObject(childId, RegistryObjectManager.EXTENSION);
-					if (tmp == null) // already removed
+					if (tmp == null) { // already removed
 						continue;
+					}
 					Integer extensionIndex = Integer.valueOf(childId);
 					if (!associatedObjects.containsKey(extensionIndex)) {
 						result.put(extensionIndex, tmp);
@@ -740,8 +782,9 @@ public class RegistryObjectManager implements IObjectManager {
 				if (extensions != null) {
 					for (int orphanId : extensions) {
 						Extension tmp = (Extension) basicGetObject(orphanId, RegistryObjectManager.EXTENSION);
-						if (tmp == null) // already removed
+						if (tmp == null) { // already removed
 							continue;
+						}
 						Integer extensionIndex = Integer.valueOf(orphanId);
 						if (!associatedObjects.containsKey(extensionIndex)) {
 							result.put(extensionIndex, tmp);
@@ -760,8 +803,9 @@ public class RegistryObjectManager implements IObjectManager {
 		for (Object registryObject : associatedObjects.values()) {
 			RegistryObject toRemove = (RegistryObject) registryObject;
 			remove((toRemove).getObjectId(), true);
-			if (toRemove instanceof ExtensionPoint)
+			if (toRemove instanceof ExtensionPoint) {
 				removeExtensionPoint(((ExtensionPoint) toRemove).getUniqueIdentifier());
+			}
 		}
 	}
 
@@ -792,12 +836,14 @@ public class RegistryObjectManager implements IObjectManager {
 	private boolean unlinkChildFromContributions(KeyedElement[] contributions, int id) {
 		for (KeyedElement contribution : contributions) {
 			Contribution candidate = (Contribution) contribution;
-			if (candidate == null)
+			if (candidate == null) {
 				continue;
+			}
 			if (candidate.hasChild(id)) {
 				candidate.unlinkChild(id);
-				if (candidate.isEmpty())
+				if (candidate.isEmpty()) {
 					removeContribution(candidate.getContributorId());
+				}
 				return true;
 			}
 		}
@@ -805,8 +851,9 @@ public class RegistryObjectManager implements IObjectManager {
 	}
 
 	synchronized boolean unlinkChildFromContributions(int id) {
-		if (unlinkChildFromContributions(newContributions.elements, id))
+		if (unlinkChildFromContributions(newContributions.elements, id)) {
 			return true;
+		}
 		return unlinkChildFromContributions(getFormerContributions().elements, id);
 	}
 
@@ -829,8 +876,9 @@ public class RegistryObjectManager implements IObjectManager {
 				tmp.add(getHandle(ext.getObjectId(), EXTENSION));
 			}
 		}
-		if (tmp.size() == 0)
+		if (tmp.size() == 0) {
 			return EMPTY_EXTENSIONS_ARRAY;
+		}
 		ExtensionHandle[] result = new ExtensionHandle[tmp.size()];
 		return tmp.toArray(result);
 	}

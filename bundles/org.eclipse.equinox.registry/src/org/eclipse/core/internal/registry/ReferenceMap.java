@@ -230,18 +230,22 @@ public class ReferenceMap {
 	 */
 	public ReferenceMap(int referenceType, int capacity, float loadFactor) {
 		super();
-		if (referenceType != HARD && referenceType != SOFT)
+		if (referenceType != HARD && referenceType != SOFT) {
 			throw new IllegalArgumentException(" must be HARD or SOFT."); //$NON-NLS-1$
-		if (capacity <= 0)
+		}
+		if (capacity <= 0) {
 			throw new IllegalArgumentException("capacity must be positive"); //$NON-NLS-1$
-		if ((loadFactor <= 0.0f) || (loadFactor >= 1.0f))
+		}
+		if ((loadFactor <= 0.0f) || (loadFactor >= 1.0f)) {
 			throw new IllegalArgumentException("Load factor must be greater than 0 and less than 1."); //$NON-NLS-1$
+		}
 
 		this.valueType = referenceType;
 
 		int initialSize = 1;
-		while (initialSize < capacity)
+		while (initialSize < capacity) {
 			initialSize *= 2;
+		}
 
 		this.table = new IEntry[initialSize];
 		this.loadFactor = loadFactor;
@@ -264,10 +268,11 @@ public class ReferenceMap {
 				// items with NULL value always removed;
 				// items with non-NULL values are removed only on user request
 				if (!cleanup || (entry.getValue() == null)) {
-					if (previous == null)
+					if (previous == null) {
 						table[index] = entry.getNext();
-					else
+					} else {
 						previous.setNext(entry.getNext());
+					}
 					this.size--;
 					return entry.getValue();
 				}
@@ -285,7 +290,7 @@ public class ReferenceMap {
 	 *         key maps to no value
 	 */
 	public Object get(int key) {
-		for (IEntry entry = table[indexFor(key)]; entry != null; entry = entry.getNext())
+		for (IEntry entry = table[indexFor(key)]; entry != null; entry = entry.getNext()) {
 			if (entry.getKey() == key) {
 				Object value = entry.getValue();
 				if (value == null) {
@@ -293,6 +298,7 @@ public class ReferenceMap {
 				}
 				return value;
 			}
+		}
 		return null;
 	}
 
@@ -361,21 +367,24 @@ public class ReferenceMap {
 	 * @throws NullPointerException if either the key or value is null
 	 */
 	public void put(int key, Object value) {
-		if (value == null)
+		if (value == null) {
 			throw new NullPointerException("null values not allowed"); //$NON-NLS-1$
+		}
 
-		if (size + 1 > threshold)
+		if (size + 1 > threshold) {
 			resize();
+		}
 
 		int index = indexFor(key);
 		IEntry previous = null;
 		IEntry entry = table[index];
 		while (entry != null) {
 			if (key == entry.getKey()) {
-				if (previous == null)
+				if (previous == null) {
 					table[index] = newEntry(key, value, entry.getNext());
-				else
+				} else {
 					previous.setNext(newEntry(key, value, entry.getNext()));
+				}
 				return;
 			}
 			previous = entry;

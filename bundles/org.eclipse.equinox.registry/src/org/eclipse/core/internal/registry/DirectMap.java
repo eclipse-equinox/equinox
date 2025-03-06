@@ -29,10 +29,12 @@ public class DirectMap {
 	private int size;
 
 	public DirectMap(int initialSize, float growthFactor) {
-		if (initialSize < 1)
+		if (initialSize < 1) {
 			throw new IllegalArgumentException();
-		if (growthFactor <= 0)
+		}
+		if (growthFactor <= 0) {
 			throw new IllegalArgumentException();
+		}
 		this.growthFactor = growthFactor;
 		keyArray = new String[initialSize];
 		valueArray = new String[initialSize][];
@@ -40,16 +42,19 @@ public class DirectMap {
 	}
 
 	public synchronized void put(String key, String[] value) {
-		if (key == null)
+		if (key == null) {
 			throw new IllegalArgumentException();
+		}
 		int id = findKey(key);
-		if (id != -1)
+		if (id != -1) {
 			throw new IllegalArgumentException();
+		}
 
 		if (size >= keyArray.length) { // need to resize
 			int newSize = recalcSize(keyArray.length);
-			if (newSize <= size)
+			if (newSize <= size) {
 				newSize = size + 1;
+			}
 
 			String[] newKeyArray = new String[newSize];
 			System.arraycopy(keyArray, 0, newKeyArray, 0, keyArray.length);
@@ -65,17 +70,20 @@ public class DirectMap {
 	}
 
 	public synchronized boolean containsKey(String key) {
-		if (key == null)
+		if (key == null) {
 			throw new IllegalArgumentException();
+		}
 		return (findKey(key) != -1);
 	}
 
 	public synchronized String[] get(String key) {
-		if (key == null)
+		if (key == null) {
 			throw new IllegalArgumentException();
+		}
 		int id = findKey(key);
-		if (id == -1)
+		if (id == -1) {
 			return null;
+		}
 		return valueArray[id];
 	}
 
@@ -97,10 +105,12 @@ public class DirectMap {
 
 	private int findKey(String key) {
 		for (int i = 0; i < keyArray.length; i++) {
-			if (keyArray[i] == null)
+			if (keyArray[i] == null) {
 				continue;
-			if (keyArray[i].equals(key))
+			}
+			if (keyArray[i].equals(key)) {
 				return i;
+			}
 		}
 		return -1;
 	}

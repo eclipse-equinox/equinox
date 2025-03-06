@@ -58,8 +58,9 @@ public class ExtensionPoint extends RegistryObject {
 		// data
 		if (noExtraData()) { // When this is true, the extraInformation is always a String[]. This happens
 								// when the object is created by the parser.
-			if (extraInformation != null)
+			if (extraInformation != null) {
 				return (String[]) extraInformation;
+			}
 			return new String[EXTRA_SIZE];
 		}
 

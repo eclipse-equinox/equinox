@@ -57,11 +57,12 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 	 */
 	public ExtensionTracker(IExtensionRegistry theRegistry) {
 		registry = theRegistry;
-		if (registry != null)
+		if (registry != null) {
 			registry.addRegistryChangeListener(this);
-		else
+		} else {
 			RuntimeLog.log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, 0,
 					RegistryMessages.registry_no_default, null));
+		}
 	}
 
 	/*
@@ -75,8 +76,9 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 	@Override
 	public void registerHandler(IExtensionChangeHandler handler, IFilter filter) {
 		synchronized (lock) {
-			if (closed)
+			if (closed) {
 				return;
+			}
 			// TODO need to store the filter with the handler
 			handlers.add(new HandlerWrapper(handler, filter));
 		}
@@ -90,8 +92,9 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 	@Override
 	public void unregisterHandler(IExtensionChangeHandler handler) {
 		synchronized (lock) {
-			if (closed)
+			if (closed) {
 				return;
+			}
 			handlers.remove(new HandlerWrapper(handler, null));
 		}
 	}
@@ -103,12 +106,14 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 	 */
 	@Override
 	public void registerObject(IExtension element, Object object, int referenceType) {
-		if (element == null || object == null)
+		if (element == null || object == null) {
 			return;
+		}
 
 		synchronized (lock) {
-			if (closed)
+			if (closed) {
 				return;
+			}
 
 			ReferenceHashSet<Object> associatedObjects = extensionToObjects.get(element);
 			if (associatedObjects == null) {
@@ -129,7 +134,7 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 	public void registryChanged(IRegistryChangeEvent event) {
 		IExtensionDelta delta[] = event.getExtensionDeltas();
 		int len = delta.length;
-		for (int i = 0; i < len; i++)
+		for (int i = 0; i < len; i++) {
 			switch (delta[i].getKind()) {
 			case IExtensionDelta.ADDED:
 				doAdd(delta[i]);
@@ -140,6 +145,7 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 			default:
 				break;
 			}
+		}
 	}
 
 	/**
@@ -155,21 +161,24 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 		// Get a copy of the handlers for safe notification
 		Object[] handlersCopy = null;
 		synchronized (lock) {
-			if (closed)
+			if (closed) {
 				return;
+			}
 
-			if (handlers == null || handlers.isEmpty())
+			if (handlers == null || handlers.isEmpty()) {
 				return;
+			}
 			handlersCopy = handlers.getListeners();
 		}
 
 		for (Object w : handlersCopy) {
 			HandlerWrapper wrapper = (HandlerWrapper) w;
 			if (wrapper.filter == null || wrapper.filter.matches(delta.getExtensionPoint())) {
-				if (objects == null)
+				if (objects == null) {
 					applyAdd(wrapper.handler, delta.getExtension());
-				else
+				} else {
 					applyRemove(wrapper.handler, delta.getExtension(), objects);
+				}
 			}
 		}
 	}
@@ -185,15 +194,17 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 	private void doRemove(IExtensionDelta delta) {
 		Object[] removedObjects = null;
 		synchronized (lock) {
-			if (closed)
+			if (closed) {
 				return;
+			}
 
 			ReferenceHashSet<?> associatedObjects = extensionToObjects.remove(delta.getExtension());
-			if (associatedObjects == null)
+			if (associatedObjects == null) {
 				removedObjects = EMPTY_ARRAY;
-			else
+			} else {
 				// Copy the objects early so we don't hold the lock too long
 				removedObjects = associatedObjects.toArray();
+			}
 		}
 		notify(delta, removedObjects);
 	}
@@ -210,11 +221,13 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 	@Override
 	public Object[] getObjects(IExtension element) {
 		synchronized (lock) {
-			if (closed)
+			if (closed) {
 				return EMPTY_ARRAY;
+			}
 			ReferenceHashSet<?> objectSet = extensionToObjects.get(element);
-			if (objectSet == null)
+			if (objectSet == null) {
 				return EMPTY_ARRAY;
+			}
 
 			return objectSet.toArray();
 		}
@@ -228,10 +241,12 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 	@Override
 	public void close() {
 		synchronized (lock) {
-			if (closed)
+			if (closed) {
 				return;
-			if (registry != null)
+			}
+			if (registry != null) {
 				registry.removeRegistryChangeListener(this);
+			}
 			extensionToObjects = null;
 			handlers = null;
 
@@ -247,11 +262,13 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 	@Override
 	public void unregisterObject(IExtension extension, Object object) {
 		synchronized (lock) {
-			if (closed)
+			if (closed) {
 				return;
+			}
 			ReferenceHashSet<Object> associatedObjects = extensionToObjects.get(extension);
-			if (associatedObjects != null)
+			if (associatedObjects != null) {
 				associatedObjects.remove(object);
+			}
 		}
 	}
 
@@ -263,11 +280,13 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 	@Override
 	public Object[] unregisterObject(IExtension extension) {
 		synchronized (lock) {
-			if (closed)
+			if (closed) {
 				return EMPTY_ARRAY;
+			}
 			ReferenceHashSet<?> associatedObjects = extensionToObjects.remove(extension);
-			if (associatedObjects == null)
+			if (associatedObjects == null) {
 				return EMPTY_ARRAY;
+			}
 			return associatedObjects.toArray();
 		}
 	}

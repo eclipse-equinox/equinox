@@ -32,8 +32,9 @@ public class EquinoxUtils {
 	 * Get the command line arguments from the EnvironmentInfo service
 	 */
 	public static String[] getCommandLine(BundleContext context, ServiceReference<?> ref) {
-		if (ref == null)
+		if (ref == null) {
 			return null;
+		}
 		try {
 			EnvironmentInfo environmentInfo = (EnvironmentInfo) context.getService(ref);
 			return environmentInfo == null ? null : environmentInfo.getNonFrameworkArgs();
@@ -46,8 +47,9 @@ public class EquinoxUtils {
 	 * Get the time stamp from the PlatformAdmin service.
 	 */
 	public static long getContainerTimestamp(BundleContext context, ServiceReference<?> ref) {
-		if (ref == null)
+		if (ref == null) {
 			return -1;
+		}
 		try {
 			PlatformAdmin admin = (PlatformAdmin) context.getService(ref);
 			return admin == null ? -1 : admin.getState(false).getTimeStamp();
@@ -77,8 +79,9 @@ public class EquinoxUtils {
 		// the try-catch block should take care
 		try {
 			org.osgi.framework.Bundle bundle = OSGIUtils.getDefault().getBundle(bundleId);
-			if (bundle == null)
+			if (bundle == null) {
 				return false; // should never happen
+			}
 			return (bundle.getState() == Bundle.ACTIVE);
 		} catch (NoClassDefFoundError noClass) {
 			// expected if OSGi is not available; behave as if contributor is active

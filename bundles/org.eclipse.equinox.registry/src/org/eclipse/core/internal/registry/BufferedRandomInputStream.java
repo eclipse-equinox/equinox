@@ -65,8 +65,9 @@ public class BufferedRandomInputStream extends InputStream {
 	@Override
 	public int read() throws IOException {
 		if (buffer_pos >= buffer_size) {
-			if (fillBuffer() <= 0)
+			if (fillBuffer() <= 0) {
 				return -1;
+			}
 		}
 		return buffer[buffer_pos++] & 0xFF;
 	}
@@ -74,8 +75,9 @@ public class BufferedRandomInputStream extends InputStream {
 	@Override
 	public int read(byte b[], int off, int len) throws IOException {
 		int available = buffer_size - buffer_pos;
-		if (available < 0)
+		if (available < 0) {
 			return -1;
+		}
 		// the buffer contains all the bytes we need, so copy over and return
 		if (len <= available) {
 			System.arraycopy(buffer, buffer_pos, b, off, len);
@@ -84,16 +86,18 @@ public class BufferedRandomInputStream extends InputStream {
 		}
 		// Use portion remaining in the buffer
 		System.arraycopy(buffer, buffer_pos, b, off, available);
-		if (fillBuffer() <= 0)
+		if (fillBuffer() <= 0) {
 			return available;
+		}
 		// recursive call to read again until we have the bytes we need
 		return available + read(b, off + available, len - available);
 	}
 
 	@Override
 	public long skip(long n) throws IOException {
-		if (n <= 0)
+		if (n <= 0) {
 			return 0;
+		}
 
 		int available = buffer_size - buffer_pos;
 		if (n <= available) {

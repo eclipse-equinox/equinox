@@ -98,10 +98,11 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 		// (typically,
 		// this implies -dev mode)
 		BundleContext context = Activator.getContext();
-		if (context != null)
+		if (context != null) {
 			trackTimestamp = "true".equalsIgnoreCase(context.getProperty(IRegistryConstants.PROP_CHECK_CONFIG)); //$NON-NLS-1$
-		else
+		} else {
 			trackTimestamp = false;
+		}
 	}
 
 	/*
@@ -159,8 +160,9 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 
 	// String Id to OSGi Bundle conversion
 	private Bundle getBundle(String id) {
-		if (id == null)
+		if (id == null) {
 			return null;
+		}
 		long OSGiId;
 		try {
 			OSGiId = Long.parseLong(id);
@@ -177,8 +179,9 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 		} finally {
 			bundleMapLock.readLock().unlock();
 		}
-		if (bundle != null)
+		if (bundle != null) {
 			return bundle;
+		}
 		// note: we accept that two concurrent threads end up here for the same id,
 		// because they will anyway resolve the same mapping
 		bundle = Activator.getContext().getBundle(OSGiId);
@@ -206,14 +209,16 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	public Object createExecutableExtension(RegistryContributor contributor, String className,
 			String overridenContributorName) throws CoreException {
 		Bundle contributingBundle;
-		if (overridenContributorName != null && !overridenContributorName.equals("")) //$NON-NLS-1$
+		if (overridenContributorName != null && !overridenContributorName.equals("")) { //$NON-NLS-1$
 			contributingBundle = OSGIUtils.getDefault().getBundle(overridenContributorName);
-		else
+		} else { //$NON-NLS-1$
 			contributingBundle = getBundle(contributor.getId());
+		}
 
-		if (contributingBundle == null)
+		if (contributingBundle == null) {
 			throwException(NLS.bind(RegistryMessages.plugin_loadClassError, "UNKNOWN BUNDLE", className), //$NON-NLS-1$
 					new InvalidRegistryObjectException());
+		}
 
 		// load the requested class from this bundle
 		Class<?> classInstance = null;
@@ -262,8 +267,9 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	public void onStart(IExtensionRegistry registry, boolean loadedFromCache) {
 		super.onStart(registry, loadedFromCache);
 
-		if (!(registry instanceof ExtensionRegistry))
+		if (!(registry instanceof ExtensionRegistry)) {
 			return;
+		}
 		// register a listener to catch new bundle installations/resolutions.
 		pluginBundleListener = new EclipseBundleListener((ExtensionRegistry) registry, token, this);
 		Activator.getContext().addBundleListener(pluginBundleListener);
@@ -274,8 +280,9 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 		// to add/remove a bundle from the registry. This is ok since
 		// the registry is a synchronized object and will not add the
 		// same bundle twice.
-		if (!loadedFromCache)
+		if (!loadedFromCache) {
 			pluginBundleListener.processBundles(Activator.getContext().getBundles());
+		}
 	}
 
 	/*
@@ -287,8 +294,9 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	 */
 	@Override
 	public void onStop(IExtensionRegistry registry) {
-		if (pluginBundleListener != null)
+		if (pluginBundleListener != null) {
 			Activator.getContext().removeBundleListener(pluginBundleListener);
+		}
 		if (xmlTracker != null) {
 			xmlTracker.close();
 			xmlTracker = null;
@@ -332,15 +340,17 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	 */
 	@Override
 	public long getContributionsTimestamp() {
-		if (!checkContributionsTimestamp())
+		if (!checkContributionsTimestamp()) {
 			return 0;
+		}
 		RegistryTimestamp expectedTimestamp = new RegistryTimestamp();
 		BundleContext context = Activator.getContext();
 		Bundle[] allBundles = context.getBundles();
 		for (Bundle b : allBundles) {
 			URL pluginManifest = EclipseBundleListener.getExtensionURL(b, false);
-			if (pluginManifest == null)
+			if (pluginManifest == null) {
 				continue;
+			}
 			long timestamp = getExtendedTimestamp(b, pluginManifest);
 			expectedTimestamp.add(timestamp);
 		}
@@ -352,8 +362,9 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	}
 
 	public long getExtendedTimestamp(Bundle bundle, URL pluginManifest) {
-		if (pluginManifest == null)
+		if (pluginManifest == null) {
 			return 0;
+		}
 		try {
 			return pluginManifest.openConnection().getLastModified() + bundle.getBundleId();
 		} catch (IOException e) {
@@ -393,8 +404,9 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 		LocaleProvider localeProvider = (LocaleProvider) localeTracker.getService();
 		if (localeProvider != null) {
 			Locale currentLocale = localeProvider.getLocale();
-			if (currentLocale != null)
+			if (currentLocale != null) {
 				return currentLocale.toString();
+			}
 		}
 		return super.getLocale();
 	}

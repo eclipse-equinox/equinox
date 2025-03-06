@@ -106,22 +106,25 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 		long timestamp = 0;
 		if (strategy.checkContributionsTimestamp()) {
 			URL pluginManifest = getExtensionURL(bundle, false);
-			if (pluginManifest != null)
+			if (pluginManifest != null) {
 				timestamp = strategy.getExtendedTimestamp(bundle, pluginManifest);
+			}
 		}
 		registry.remove(Long.toString(bundle.getBundleId()), timestamp);
 	}
 
 	static public URL getExtensionURL(Bundle bundle, boolean report) {
 		// bail out if the bundle does not have a symbolic name
-		if (bundle.getSymbolicName() == null)
+		if (bundle.getSymbolicName() == null) {
 			return null;
+		}
 
 		boolean isFragment = OSGIUtils.getDefault().isFragment(bundle);
 		String manifestName = isFragment ? FRAGMENT_MANIFEST : PLUGIN_MANIFEST;
 		URL extensionURL = bundle.getEntry(manifestName);
-		if (extensionURL == null)
+		if (extensionURL == null) {
 			return null;
+		}
 
 		// If the bundle is not a singleton, then it is not added
 		if (!isSingleton(bundle)) {
@@ -131,17 +134,20 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 			}
 			return null;
 		}
-		if (!isFragment)
+		if (!isFragment) {
 			return extensionURL;
+		}
 
 		// If the bundle is a fragment being added to a non singleton host, then it is
 		// not added
 		Bundle[] hosts = OSGIUtils.getDefault().getHosts(bundle);
-		if (hosts == null)
+		if (hosts == null) {
 			return null; // should never happen?
+		}
 
-		if (isSingleton(hosts[0]))
+		if (isSingleton(hosts[0])) {
 			return extensionURL;
+		}
 
 		if (report) {
 			// if the host is not a singleton we always report the error; even if the host
@@ -158,24 +164,28 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 	}
 
 	private void addBundle(Bundle bundle, boolean checkNLSFragments) {
-		if (checkNLSFragments)
+		if (checkNLSFragments) {
 			checkForNLSFragment(bundle);
+		}
 		// if the given bundle already exists in the registry then return.
 		// note that this does not work for update cases.
 		IContributor contributor = ContributorFactoryOSGi.createContributor(bundle);
-		if (registry.hasContributor(contributor))
+		if (registry.hasContributor(contributor)) {
 			return;
+		}
 		URL pluginManifest = getExtensionURL(bundle, true);
-		if (pluginManifest == null)
+		if (pluginManifest == null) {
 			return;
+		}
 		InputStream is;
 		try {
 			is = new BufferedInputStream(pluginManifest.openStream());
 		} catch (IOException ex) {
 			is = null;
 		}
-		if (is == null)
+		if (is == null) {
 			return;
+		}
 
 		ResourceBundle translationBundle = null;
 		try {
@@ -184,8 +194,9 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 			// Ignore the exception
 		}
 		long timestamp = 0;
-		if (strategy.checkContributionsTimestamp())
+		if (strategy.checkContributionsTimestamp()) {
 			timestamp = strategy.getExtendedTimestamp(bundle, pluginManifest);
+		}
 		registry.addContribution(is, contributor, true, pluginManifest.getPath(), translationBundle, token, timestamp);
 	}
 
@@ -199,8 +210,9 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 			return;
 		}
 		Bundle[] hosts = OSGIUtils.getDefault().getHosts(bundle);
-		if (hosts == null)
+		if (hosts == null) {
 			return;
+		}
 		// check to see if the hosts should be refreshed because the fragment contains
 		// NLS properties files.
 		for (Bundle host : hosts) {
@@ -213,8 +225,9 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 
 		synchronized (currentStateStamp) {
 			Long hostStateStamp = dynamicAddStateStamps.get(hostID);
-			if (hostStateStamp != null && currentStateStamp[0] == hostStateStamp.longValue())
+			if (hostStateStamp != null && currentStateStamp[0] == hostStateStamp.longValue()) {
 				return; // already processed this host
+			}
 		}
 
 		Bundle[] fragments = OSGIUtils.getDefault().getFragments(host);
@@ -225,8 +238,9 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 		} else {
 			// check the fragment provides NLS for other fragments of this host
 			for (int i = 0; i < fragments.length && !refresh; i++) {
-				if (fragment.equals(fragments[i]))
+				if (fragment.equals(fragments[i])) {
 					continue; // skip fragment that was just resolved; it will be added in by the caller
+				}
 				if (hasNLSFilesFor(fragments[i], fragment)) {
 					refresh = true;
 				}
@@ -251,24 +265,28 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 	}
 
 	private boolean hasNLSFilesFor(Bundle target, Bundle fragment) {
-		if (!registry.hasContributor(Long.toString(target.getBundleId())))
+		if (!registry.hasContributor(Long.toString(target.getBundleId()))) {
 			return false;
+		}
 		// get the base localization path from the target
 		Dictionary<?, ?> targetHeaders = target.getHeaders(""); //$NON-NLS-1$
 		String localization = (String) targetHeaders.get(Constants.BUNDLE_LOCALIZATION);
-		if (localization == null)
+		if (localization == null) {
 			// localization may be empty in which case we should check the default
 			localization = Constants.BUNDLE_LOCALIZATION_DEFAULT_BASENAME;
+		}
 		// we do a simple check to make sure the default nls path exists in the target;
 		// this is for performance reasons, but I'm not sure it is valid because a
 		// target could ship without the default nls properties file but this seems very
 		// unlikely
 		URL baseNLS = target.getEntry(localization + ".properties"); //$NON-NLS-1$
-		if (baseNLS == null)
+		if (baseNLS == null) {
 			return false;
+		}
 		int lastSlash = localization.lastIndexOf('/');
-		if (lastSlash == localization.length() - 1)
+		if (lastSlash == localization.length() - 1) {
 			return false; // just to be safe
+		}
 		String baseDir = lastSlash < 0 ? "" : localization.substring(0, lastSlash); //$NON-NLS-1$
 		String filePattern = (lastSlash < 0 ? localization : localization.substring(lastSlash + 1)) + "_*.properties"; //$NON-NLS-1$
 		Enumeration<?> nlsFiles = fragment.findEntries(baseDir, filePattern, false);
@@ -284,16 +302,18 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 						symbolicNameHeader);
 				if (symbolicNameElements.length > 0) {
 					String singleton = symbolicNameElements[0].getDirective(Constants.SINGLETON_DIRECTIVE);
-					if (singleton == null)
+					if (singleton == null) {
 						singleton = symbolicNameElements[0].getAttribute(Constants.SINGLETON_DIRECTIVE);
+					}
 
 					if (!"true".equalsIgnoreCase(singleton)) { //$NON-NLS-1$
 						String manifestVersion = (String) allHeaders
 								.get(org.osgi.framework.Constants.BUNDLE_MANIFESTVERSION);
 						if (manifestVersion == null) {// the header was not defined for previous versions of the bundle
 							// 3.0 bundles without a singleton attributes are still being accepted
-							if (OSGIUtils.getDefault().getBundle(symbolicNameElements[0].getValue()) == bundle)
+							if (OSGIUtils.getDefault().getBundle(symbolicNameElements[0].getValue()) == bundle) {
 								return true;
+							}
 						}
 						return false;
 					}

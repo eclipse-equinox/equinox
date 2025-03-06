@@ -81,8 +81,9 @@ public class Extension extends RegistryObject {
 	private String[] getExtraData() {
 		// The extension has been created by parsing, or does not have any extra data
 		if (noExtraData()) {
-			if (extraInformation != null)
+			if (extraInformation != null) {
 				return (String[]) extraInformation;
+			}
 			return null;
 		}
 
@@ -99,8 +100,9 @@ public class Extension extends RegistryObject {
 
 	String getLabel() {
 		String s = getExtraData()[LABEL];
-		if (s == null)
+		if (s == null) {
 			return ""; //$NON-NLS-1$
+		}
 		return s;
 	}
 
@@ -111,8 +113,9 @@ public class Extension extends RegistryObject {
 
 	String getContributorId() {
 		String s = getExtraData()[CONTRIBUTOR_ID];
-		if (s == null)
+		if (s == null) {
 			return ""; //$NON-NLS-1$
+		}
 		return s;
 	}
 
@@ -152,8 +155,9 @@ public class Extension extends RegistryObject {
 
 	String getLabelAsIs() {
 		String s = getExtraData()[LABEL];
-		if (s == null)
+		if (s == null) {
 			return ""; //$NON-NLS-1$
+		}
 		return s;
 	}
 

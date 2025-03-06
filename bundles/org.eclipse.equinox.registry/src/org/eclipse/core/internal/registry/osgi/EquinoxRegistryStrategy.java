@@ -76,8 +76,9 @@ public class EquinoxRegistryStrategy extends RegistryStrategyOSGI {
 		}
 		// use a string here instead of the class to prevent class loading.
 		ServiceReference<?> ref = context.getServiceReference("org.eclipse.osgi.service.resolver.PlatformAdmin"); //$NON-NLS-1$
-		if (ref == null)
+		if (ref == null) {
 			return -1;
+		}
 		return EquinoxUtils.getContainerTimestamp(context, ref);
 	}
 

@@ -103,8 +103,9 @@ public class OSGIUtils {
 		DebugOptions options = (DebugOptions) debugTracker.getService();
 		if (options != null) {
 			String value = options.getOption(option);
-			if (value != null)
+			if (value != null) {
 				return value.equalsIgnoreCase("true"); //$NON-NLS-1$
+			}
 		}
 		return defaultValue;
 	}
@@ -120,11 +121,13 @@ public class OSGIUtils {
 
 	public Bundle getBundle(String bundleName) {
 		PackageAdmin packageAdmin = getPackageAdmin();
-		if (packageAdmin == null)
+		if (packageAdmin == null) {
 			return null;
+		}
 		Bundle[] bundles = packageAdmin.getBundles(bundleName, null);
-		if (bundles == null)
+		if (bundles == null) {
 			return null;
+		}
 		// Return the first bundle that is not installed or uninstalled
 		for (Bundle bundle : bundles) {
 			if ((bundle.getState() & (Bundle.INSTALLED | Bundle.UNINSTALLED)) == 0) {
@@ -136,28 +139,32 @@ public class OSGIUtils {
 
 	public Bundle[] getFragments(Bundle bundle) {
 		PackageAdmin packageAdmin = getPackageAdmin();
-		if (packageAdmin == null)
+		if (packageAdmin == null) {
 			return null;
+		}
 		return packageAdmin.getFragments(bundle);
 	}
 
 	public boolean isFragment(Bundle bundle) {
 		PackageAdmin packageAdmin = getPackageAdmin();
-		if (packageAdmin == null)
+		if (packageAdmin == null) {
 			return false;
+		}
 		return (packageAdmin.getBundleType(bundle) & PackageAdmin.BUNDLE_TYPE_FRAGMENT) > 0;
 	}
 
 	public Bundle[] getHosts(Bundle bundle) {
 		PackageAdmin packageAdmin = getPackageAdmin();
-		if (packageAdmin == null)
+		if (packageAdmin == null) {
 			return null;
+		}
 		return packageAdmin.getHosts(bundle);
 	}
 
 	public Location getConfigurationLocation() {
-		if (configurationLocationTracker == null)
+		if (configurationLocationTracker == null) {
 			return null;
+		}
 		return (Location) configurationLocationTracker.getService();
 	}
 }

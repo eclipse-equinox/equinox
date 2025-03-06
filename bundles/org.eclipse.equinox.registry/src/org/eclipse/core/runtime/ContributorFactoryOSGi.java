@@ -71,10 +71,12 @@ public final class ContributorFactoryOSGi {
 	 * @since org.eclipse.equinox.registry 3.3
 	 */
 	public static Bundle resolve(IContributor contributor) {
-		if (contributor == null)
+		if (contributor == null) {
 			return null;
-		if (!(contributor instanceof RegistryContributor))
+		}
+		if (!(contributor instanceof RegistryContributor)) {
 			return null;
+		}
 		String symbolicName = ((RegistryContributor) contributor).getActualName();
 		return OSGIUtils.getDefault().getBundle(symbolicName);
 	}

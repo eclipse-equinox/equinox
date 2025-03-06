@@ -81,10 +81,11 @@ public abstract class RegistryObject implements KeyedElement {
 	}
 
 	private void setPersist(boolean persist) {
-		if (persist)
+		if (persist) {
 			extraDataOffset |= PERSIST_MASK;
-		else
+		} else {
 			extraDataOffset &= ~PERSIST_MASK;
+		}
 	}
 
 	protected boolean noExtraData() {
@@ -93,8 +94,9 @@ public abstract class RegistryObject implements KeyedElement {
 
 	// Convert no extra data to -1 on output
 	protected int getExtraDataOffset() {
-		if (noExtraData())
+		if (noExtraData()) {
 			return -1;
+		}
 		return extraDataOffset & OFFSET_MASK;
 	}
 
@@ -106,8 +108,9 @@ public abstract class RegistryObject implements KeyedElement {
 			return;
 		}
 
-		if ((offset & OFFSET_MASK) != offset)
+		if ((offset & OFFSET_MASK) != offset) {
 			throw new IllegalArgumentException("Registry object: extra data offset is out of range"); //$NON-NLS-1$
+		}
 
 		extraDataOffset &= ~(OFFSET_MASK | EMPTY_MASK); // clear all offset bits; mark as non-empty
 		extraDataOffset |= (offset & OFFSET_MASK); // set all offset bits

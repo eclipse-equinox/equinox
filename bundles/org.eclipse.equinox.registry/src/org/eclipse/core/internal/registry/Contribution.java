@@ -62,8 +62,9 @@ public class Contribution implements KeyedElement {
 		// F T T => needs to be adjusted
 		// T F T
 		// T T T
-		if (shouldPersist() != addContribution.shouldPersist())
+		if (shouldPersist() != addContribution.shouldPersist()) {
 			persist = true;
+		}
 
 		int[] existing = getRawChildren();
 		int[] addition = addContribution.getRawChildren();
@@ -109,8 +110,9 @@ public class Contribution implements KeyedElement {
 	}
 
 	public String getDefaultNamespace() {
-		if (defaultNamespace == null)
+		if (defaultNamespace == null) {
 			defaultNamespace = registry.getObjectManager().getContributor(contributorId).getName();
+		}
 		return defaultNamespace;
 	}
 
@@ -148,8 +150,9 @@ public class Contribution implements KeyedElement {
 				break;
 			}
 		}
-		if (index == -1)
+		if (index == -1) {
 			throw new InvalidRegistryObjectException();
+		}
 
 		// copy all array except one element at index
 		int[] result = new int[children.length - 1];
@@ -157,10 +160,11 @@ public class Contribution implements KeyedElement {
 		System.arraycopy(children, index + 1, result, index, children.length - index - 1);
 
 		// fix sizes
-		if (index < children[EXTENSION_POINT] + 2)
+		if (index < children[EXTENSION_POINT] + 2) {
 			result[EXTENSION_POINT]--;
-		else
+		} else {
 			result[EXTENSION]--;
+		}
 
 		children = result;
 	}
@@ -180,8 +184,9 @@ public class Contribution implements KeyedElement {
 	 */
 	public boolean hasChild(int id) {
 		for (int i = 2; i < children.length; i++) {
-			if (children[i] == id)
+			if (children[i] == id) {
 				return true;
+			}
 		}
 		return false;
 	}

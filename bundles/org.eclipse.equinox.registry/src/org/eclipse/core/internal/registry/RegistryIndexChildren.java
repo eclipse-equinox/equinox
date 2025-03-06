@@ -33,16 +33,18 @@ public class RegistryIndexChildren {
 
 	public int findChild(int id) {
 		for (int i = 0; i < children.length; i++) {
-			if (children[i] == id)
+			if (children[i] == id) {
 				return i;
+			}
 		}
 		return -1;
 	}
 
 	public boolean unlinkChild(int id) {
 		int index = findChild(id);
-		if (index == -1)
+		if (index == -1) {
 			return false; // there is no such element
+		}
 
 		// copy the array except one element at index
 		int[] result = new int[children.length - 1];
@@ -79,8 +81,9 @@ public class RegistryIndexChildren {
 	}
 
 	public boolean unlinkChildren(int[] IDs) {
-		if (children.length == 0)
+		if (children.length == 0) {
 			return (IDs.length == 0);
+		}
 
 		int size = children.length;
 		for (int i = 0; i < IDs.length; i++) {
@@ -97,8 +100,9 @@ public class RegistryIndexChildren {
 		int[] result = new int[size];
 		int pos = 0;
 		for (int child : children) {
-			if (child == -1)
+			if (child == -1) {
 				continue;
+			}
 			result[pos] = child;
 			pos++;
 		}

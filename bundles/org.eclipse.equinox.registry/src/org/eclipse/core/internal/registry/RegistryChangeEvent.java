@@ -42,16 +42,18 @@ public final class RegistryChangeEvent implements IRegistryChangeEvent {
 	}
 
 	private RegistryDelta getHostDelta(String pluginId) {
-		if (filter != null && !pluginId.equals(filter))
+		if (filter != null && !pluginId.equals(filter)) {
 			return null;
+		}
 		return (RegistryDelta) deltas.get(pluginId);
 	}
 
 	@Override
 	public IExtensionDelta[] getExtensionDeltas() {
 		RegistryDelta[] hostDeltas = getHostDeltas();
-		if (hostDeltas.length == 0)
+		if (hostDeltas.length == 0) {
 			return new IExtensionDelta[0];
+		}
 		int extensionDeltasSize = 0;
 		for (RegistryDelta hostDelta : hostDeltas) {
 			extensionDeltasSize += hostDelta.getExtensionDeltasCount();
@@ -68,24 +70,27 @@ public final class RegistryChangeEvent implements IRegistryChangeEvent {
 	@Override
 	public IExtensionDelta[] getExtensionDeltas(String hostName) {
 		RegistryDelta hostDelta = getHostDelta(hostName);
-		if (hostDelta == null)
+		if (hostDelta == null) {
 			return new IExtensionDelta[0];
+		}
 		return hostDelta.getExtensionDeltas();
 	}
 
 	@Override
 	public IExtensionDelta[] getExtensionDeltas(String hostName, String extensionPoint) {
 		RegistryDelta hostDelta = getHostDelta(hostName);
-		if (hostDelta == null)
+		if (hostDelta == null) {
 			return new IExtensionDelta[0];
+		}
 		return hostDelta.getExtensionDeltas(hostName + '.' + extensionPoint);
 	}
 
 	@Override
 	public IExtensionDelta getExtensionDelta(String hostName, String extensionPoint, String extension) {
 		RegistryDelta hostDelta = getHostDelta(hostName);
-		if (hostDelta == null)
+		if (hostDelta == null) {
 			return null;
+		}
 		return hostDelta.getExtensionDelta(hostName + '.' + extensionPoint, extension);
 	}
 
