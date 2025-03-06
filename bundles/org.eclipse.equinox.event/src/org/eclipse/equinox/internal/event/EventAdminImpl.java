@@ -116,8 +116,9 @@ public class EventAdminImpl implements EventAdmin {
 		Permission perm = (sm == null) ? null : new TopicPermission(topic, TopicPermission.SUBSCRIBE);
 
 		Map<EventHandlerWrapper, Permission> listeners = new CopyOnWriteIdentityMap<>();
-		for (EventHandlerWrapper wrapper : eventHandlers)
+		for (EventHandlerWrapper wrapper : eventHandlers) {
 			listeners.put(wrapper, perm);
+		}
 
 		// Create the listener queue for this event delivery
 		ListenerQueue<EventHandlerWrapper, Permission, Event> listenerQueue = new ListenerQueue<>(currentManager);
@@ -140,8 +141,9 @@ public class EventAdminImpl implements EventAdmin {
 	 */
 	private void checkTopicPermissionPublish(String topic) throws SecurityException {
 		SecurityManager sm = System.getSecurityManager();
-		if (sm == null)
+		if (sm == null) {
 			return;
+		}
 		sm.checkPermission(new TopicPermission(topic, TopicPermission.PUBLISH));
 	}
 
