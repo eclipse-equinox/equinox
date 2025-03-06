@@ -64,8 +64,9 @@ public abstract class Component {
 	private URL getResource(String name) {
 		Bundle b = context.getBundleContext().getBundle();
 		URL result = b.getResource(name);
-		if (result == null)
+		if (result == null) {
 			result = b.findEntries("/", name, true).nextElement();
+		}
 		return result;
 	}
 
@@ -91,8 +92,9 @@ public abstract class Component {
 			try {
 				byte[] bytes = new byte[1024];
 				int read;
-				while ((read = fis.read(bytes)) != -1)
+				while ((read = fis.read(bytes)) != -1) {
 					baos.write(bytes, 0, read);
+				}
 				return baos.toByteArray();
 			} finally {
 				closeSilently(baos);

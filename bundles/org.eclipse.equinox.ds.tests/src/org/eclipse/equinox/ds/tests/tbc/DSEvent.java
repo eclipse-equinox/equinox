@@ -32,8 +32,9 @@ public class DSEvent implements Comparable {
 		synchronized (lock) { // to prevent from creating BoundServiceEvents in one and the same millisecond
 			this.action = action;
 			this.object = object;
-			while (lastTime == System.currentTimeMillis())
+			while (lastTime == System.currentTimeMillis()) {
 				;
+			}
 			this.time = lastTime = System.currentTimeMillis();
 		}
 	}
