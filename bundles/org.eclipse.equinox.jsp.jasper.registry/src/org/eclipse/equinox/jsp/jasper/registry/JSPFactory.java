@@ -46,9 +46,9 @@ public class JSPFactory implements IExecutableExtensionFactory, IExecutableExten
 	public void setInitializationData(IConfigurationElement config, String propertyName, Object data) {
 		this.config = config;
 		if (data != null) {
-			if (data instanceof String)
+			if (data instanceof String) {
 				bundleResourcePath = (String) data;
-			else if (data instanceof Hashtable) {
+			} else if (data instanceof Hashtable) {
 				bundleResourcePath = ((Hashtable<String, String>) data).get("path"); //$NON-NLS-1$
 			}
 		}
@@ -60,8 +60,9 @@ public class JSPFactory implements IExecutableExtensionFactory, IExecutableExten
 		String alias = config.getAttribute("alias"); //$NON-NLS-1$
 		if (alias != null && alias.indexOf("/*.") == alias.lastIndexOf('/')) { //$NON-NLS-1$
 			alias = alias.substring(0, alias.lastIndexOf('/'));
-			if (alias.length() == 0)
+			if (alias.length() == 0) {
 				alias = "/"; //$NON-NLS-1$
+			}
 		}
 		return new JspServlet(b, bundleResourcePath, alias);
 	}
