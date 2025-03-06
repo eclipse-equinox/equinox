@@ -27,6 +27,7 @@ import org.osgi.service.http.HttpService;
  * @noimplement This interface is not intended to be implemented by clients.
  * @noextend This interface is not intended to be extended by clients.
  */
+@Deprecated(forRemoval = true)
 public interface HttpContextExtensionService {
 	/**
 	 * returns the HttpContext associated with the HttpService reference and http
