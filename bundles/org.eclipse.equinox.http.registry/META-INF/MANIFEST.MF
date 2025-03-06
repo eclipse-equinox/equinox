@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %bundleName
 Bundle-SymbolicName: org.eclipse.equinox.http.registry;singleton:=true
-Bundle-Version: 1.4.200.qualifier
+Bundle-Version: 1.4.300.qualifier
 Bundle-Activator: org.eclipse.equinox.http.registry.internal.Activator
 Bundle-Localization: plugin
 Require-Bundle: org.eclipse.equinox.common,
