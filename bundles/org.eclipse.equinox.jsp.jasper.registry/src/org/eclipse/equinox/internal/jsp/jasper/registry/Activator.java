@@ -39,12 +39,14 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer<Pack
 	}
 
 	public static synchronized Bundle getBundle(String symbolicName) {
-		if (packageAdmin == null)
+		if (packageAdmin == null) {
 			throw new IllegalStateException("Not started"); //$NON-NLS-1$
+		}
 
 		Bundle[] bundles = packageAdmin.getBundles(symbolicName, null);
-		if (bundles == null)
+		if (bundles == null) {
 			return null;
+		}
 		// Return the first bundle that is not installed or uninstalled
 		for (Bundle bundle : bundles) {
 			if ((bundle.getState() & (Bundle.INSTALLED | Bundle.UNINSTALLED)) == 0) {
