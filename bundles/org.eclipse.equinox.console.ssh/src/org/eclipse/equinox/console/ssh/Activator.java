@@ -39,8 +39,9 @@ public class Activator implements BundleActivator {
 		@Override
 		public SshCommand addingService(ServiceReference<CommandProcessor> reference) {
 			CommandProcessor processor = context.getService(reference);
-			if (processor == null)
+			if (processor == null) {
 				return null;
+			}
 
 			if (isFirstProcessor) {
 				isFirstProcessor = false;
