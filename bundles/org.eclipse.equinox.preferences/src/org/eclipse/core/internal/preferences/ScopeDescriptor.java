@@ -43,19 +43,23 @@ public class ScopeDescriptor {
 		String path = node.absolutePath();
 		int count = EclipsePreferences.getSegmentCount(path);
 		// root or scope root
-		if (count == 1 || count == 0)
+		if (count == 1 || count == 0) {
 			return null;
+		}
 		// the load level we want
-		if (count == 2)
+		if (count == 2) {
 			return node;
-		for (int i = count; i > 2 && node.parent() != null; i--)
+		}
+		for (int i = count; i > 2 && node.parent() != null; i--) {
 			node = (IEclipsePreferences) node.parent();
+		}
 		return node;
 	}
 
 	String[] childrenNames(final String path) throws BackingStoreException {
-		if (storage == null)
+		if (storage == null) {
 			return new String[0];
+		}
 		final String[][] result = new String[1][];
 		final BackingStoreException[] bse = new BackingStoreException[1];
 		ISafeRunnable code = new ISafeRunnable() {
@@ -66,21 +70,24 @@ public class ScopeDescriptor {
 
 			@Override
 			public void handleException(Throwable exception) {
-				if (exception instanceof BackingStoreException)
+				if (exception instanceof BackingStoreException) {
 					bse[0] = (BackingStoreException) exception;
-				else
+				} else {
 					bse[0] = new BackingStoreException(NLS.bind(PrefsMessages.childrenNames2, path), exception);
+				}
 			}
 		};
 		SafeRunner.run(code);
-		if (bse[0] != null)
+		if (bse[0] != null) {
 			throw bse[0];
+		}
 		return result[0] == null ? new String[0] : result[0];
 	}
 
 	Properties load(final String path) throws BackingStoreException {
-		if (storage == null)
+		if (storage == null) {
 			return null;
+		}
 		final Properties[] result = new Properties[1];
 		final BackingStoreException[] bse = new BackingStoreException[1];
 		ISafeRunnable code = new ISafeRunnable() {
@@ -91,22 +98,25 @@ public class ScopeDescriptor {
 
 			@Override
 			public void handleException(Throwable exception) {
-				if (exception instanceof BackingStoreException)
+				if (exception instanceof BackingStoreException) {
 					bse[0] = (BackingStoreException) exception;
-				else
+				} else {
 					bse[0] = new BackingStoreException(NLS.bind(PrefsMessages.preferences_loadException, path),
 							exception);
+				}
 			}
 		};
 		SafeRunner.run(code);
-		if (bse[0] != null)
+		if (bse[0] != null) {
 			throw bse[0];
+		}
 		return result[0] == null ? null : result[0];
 	}
 
 	void save(final String path, final Properties properties) throws BackingStoreException {
-		if (storage == null)
+		if (storage == null) {
 			return;
+		}
 		final BackingStoreException[] bse = new BackingStoreException[1];
 		ISafeRunnable code = new ISafeRunnable() {
 			@Override
@@ -116,16 +126,18 @@ public class ScopeDescriptor {
 
 			@Override
 			public void handleException(Throwable exception) {
-				if (exception instanceof BackingStoreException)
+				if (exception instanceof BackingStoreException) {
 					bse[0] = (BackingStoreException) exception;
-				else
+				} else {
 					bse[0] = new BackingStoreException(NLS.bind(PrefsMessages.preferences_saveException, path),
 							exception);
+				}
 			}
 		};
 		SafeRunner.run(code);
-		if (bse[0] != null)
+		if (bse[0] != null) {
 			throw bse[0];
+		}
 	}
 
 	boolean isAlreadyLoaded(String node) {

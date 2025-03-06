@@ -128,8 +128,9 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 		// Do legacy plugin preference initialization
 		Object plugin = pluginReference.get();
 		ILegacyPreferences initService = PreferencesOSGiUtils.getDefault().getLegacyPreferences();
-		if (initService != null)
+		if (initService != null) {
 			plugin = initService.init(plugin, name);
+		}
 		return new WeakReference<>(plugin);
 	}
 
@@ -206,13 +207,15 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 		// "old"
 		IExtensionPoint pointOld = registry.getExtensionPoint(IPreferencesConstants.RUNTIME_NAME,
 				IPreferencesConstants.PT_PREFERENCES);
-		if (pointOld != null)
+		if (pointOld != null) {
 			extensionsOld = pointOld.getExtensions();
+		}
 		// "new"
 		IExtensionPoint pointNew = registry.getExtensionPoint(IPreferencesConstants.PREFERS_NAME,
 				IPreferencesConstants.PT_PREFERENCES);
-		if (pointNew != null)
+		if (pointNew != null) {
 			extensionsNew = pointNew.getExtensions();
+		}
 		// combine
 		IExtension[] extensions = new IExtension[extensionsOld.length + extensionsNew.length];
 		System.arraycopy(extensionsOld, 0, extensions, 0, extensionsOld.length);
@@ -249,8 +252,9 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 		System.arraycopy(deltasOld, 0, deltas, 0, deltasOld.length);
 		System.arraycopy(deltasNew, 0, deltas, deltasOld.length, deltasNew.length);
 
-		if (deltas.length == 0)
+		if (deltas.length == 0) {
 			return;
+		}
 		// dynamically adjust the registered scopes
 		for (IExtensionDelta delta : deltas) {
 			IConfigurationElement[] elements = delta.getExtension().getConfigurationElements();
@@ -263,8 +267,9 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 					break;
 				case IExtensionDelta.REMOVED:
 					String scope = element.getAttribute(ATTRIBUTE_NAME);
-					if (scope != null)
+					if (scope != null) {
 						scopeRemoved(scope);
+					}
 					break;
 				}
 			}

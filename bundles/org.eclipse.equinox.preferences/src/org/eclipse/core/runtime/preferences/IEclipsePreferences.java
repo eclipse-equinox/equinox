@@ -145,8 +145,9 @@ public interface IEclipsePreferences extends Preferences {
 		 */
 		public PreferenceChangeEvent(Object node, String key, Object oldValue, Object newValue) {
 			super(node);
-			if (key == null || !(node instanceof Preferences))
+			if (key == null || !(node instanceof Preferences)) {
 				throw new IllegalArgumentException();
+			}
 			this.key = key;
 			this.newValue = newValue;
 			this.oldValue = oldValue;
