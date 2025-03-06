@@ -156,8 +156,9 @@ public class Activator implements BundleActivator {
 		public ServiceTracker<ConsoleSession, CommandSession> addingService(
 				ServiceReference<CommandProcessor> reference) {
 			CommandProcessor processor = context.getService(reference);
-			if (processor == null)
+			if (processor == null) {
 				return null;
+			}
 
 			if (isFirstProcessor) {
 				isFirstProcessor = false;
@@ -201,8 +202,9 @@ public class Activator implements BundleActivator {
 		@Override
 		public CommandSession addingService(ServiceReference<ConsoleSession> reference) {
 			final ConsoleSession equinoxSession = context.getService(reference);
-			if (equinoxSession == null)
+			if (equinoxSession == null) {
 				return null;
+			}
 			PrintStream output = new PrintStream(equinoxSession.getOutput());
 			final CommandSession gogoSession = processor.createSession(equinoxSession.getInput(), output, output);
 			new Thread(new Runnable() {
@@ -356,11 +358,13 @@ public class Activator implements BundleActivator {
 	}
 
 	private static <T> T getServiceFromTracker(ServiceTracker<?, T> tracker, Class<T> serviceClass) {
-		if (tracker == null)
+		if (tracker == null) {
 			throw new IllegalStateException("Missing service: " + serviceClass);
+		}
 		T result = tracker.getService();
-		if (result == null)
+		if (result == null) {
 			throw new IllegalStateException("Missing service: " + serviceClass);
+		}
 		return result;
 	}
 
