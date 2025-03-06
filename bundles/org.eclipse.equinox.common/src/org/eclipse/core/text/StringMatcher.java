@@ -605,12 +605,14 @@ public final class StringMatcher {
 				continue;
 			}
 			if (fIgnoreCase) {
-				if (Character.toUpperCase(tchar) == Character.toUpperCase(pchar))
+				if (Character.toUpperCase(tchar) == Character.toUpperCase(pchar)) {
 					continue;
+				}
 				// comparing after converting to upper case doesn't handle all cases;
 				// also compare after converting to lower case
-				if (Character.toLowerCase(tchar) == Character.toLowerCase(pchar))
+				if (Character.toLowerCase(tchar) == Character.toLowerCase(pchar)) {
 					continue;
+				}
 			}
 			return false;
 		}

@@ -93,8 +93,9 @@ public class PlatformLogWriter implements SynchronousLogListener, LogFilter {
 
 	private Bundle getBundle(IStatus status) {
 		String pluginID = status.getPlugin();
-		if (pluginID == null)
+		if (pluginID == null) {
 			return bundle;
+		}
 		Bundle[] bundles = packageAdmin.getBundles(pluginID, null);
 		return bundles == null || bundles.length == 0 ? bundle : bundles[0];
 	}
@@ -111,15 +112,18 @@ public class PlatformLogWriter implements SynchronousLogListener, LogFilter {
 
 	public static IStatus convertToStatus(LogEntry logEntry) {
 		Object context = null;
-		if (logEntry instanceof ExtendedLogEntry)
+		if (logEntry instanceof ExtendedLogEntry) {
 			context = ((ExtendedLogEntry) logEntry).getContext();
-		if (context instanceof IStatus)
+		}
+		if (context instanceof IStatus) {
 			return (IStatus) context;
+		}
 		if (context instanceof FrameworkLogEntry) {
 			FrameworkLogEntry fLogEntry = (FrameworkLogEntry) context;
 			context = fLogEntry.getContext();
-			if (context instanceof IStatus)
+			if (context instanceof IStatus) {
 				return (IStatus) context;
+			}
 			return convertToStatus(fLogEntry);
 		}
 		return convertRawEntryToStatus(logEntry);
@@ -129,8 +133,9 @@ public class PlatformLogWriter implements SynchronousLogListener, LogFilter {
 		FrameworkLogEntry[] children = entry.getChildren();
 		if (children != null) {
 			IStatus[] statusChildren = new Status[children.length];
-			for (int i = 0; i < statusChildren.length; i++)
+			for (int i = 0; i < statusChildren.length; i++) {
 				statusChildren[i] = convertToStatus(children[i]);
+			}
 			return new MultiStatus(entry.getEntry(), entry.getBundleCode(), statusChildren, entry.getMessage(),
 					entry.getThrowable());
 		}

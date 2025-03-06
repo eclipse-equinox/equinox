@@ -103,8 +103,9 @@ public class ListenerList<E> implements Iterable<E> {
 	 *             <a href="ListenerList.html#same">same</a>.
 	 */
 	public ListenerList(int mode) {
-		if (mode != EQUALITY && mode != IDENTITY)
+		if (mode != EQUALITY && mode != IDENTITY) {
 			throw new IllegalArgumentException();
+		}
 		this.identity = mode == IDENTITY;
 	}
 
@@ -117,14 +118,16 @@ public class ListenerList<E> implements Iterable<E> {
 	public synchronized void add(E listener) {
 		// This method is synchronized to protect against multiple threads adding
 		// or removing listeners concurrently. This does not block concurrent readers.
-		if (listener == null)
+		if (listener == null) {
 			throw new IllegalArgumentException();
+		}
 		// check for duplicates
 		final int oldSize = listeners.length;
 		for (int i = 0; i < oldSize; ++i) {
 			Object listener2 = listeners[i];
-			if (identity ? listener == listener2 : listener.equals(listener2))
+			if (identity ? listener == listener2 : listener.equals(listener2)) {
 				return;
+			}
 		}
 		// Thread safety: create new array to avoid affecting concurrent readers
 		Object[] newListeners = new Object[oldSize + 1];
@@ -218,8 +221,9 @@ public class ListenerList<E> implements Iterable<E> {
 	public synchronized void remove(Object listener) {
 		// This method is synchronized to protect against multiple threads adding
 		// or removing listeners concurrently. This does not block concurrent readers.
-		if (listener == null)
+		if (listener == null) {
 			throw new IllegalArgumentException();
+		}
 		int oldSize = listeners.length;
 		for (int i = 0; i < oldSize; ++i) {
 			Object listener2 = listeners[i];

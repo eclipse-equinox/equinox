@@ -40,8 +40,9 @@ public final class RuntimeLog {
 		synchronized (logListeners) {
 			boolean firstListener = isEmpty();
 			RuntimeLog.logWriter = logWriter;
-			if (firstListener && logWriter != null)
+			if (firstListener && logWriter != null) {
 				emptyQueuedMessages();
+			}
 		}
 	}
 
@@ -55,8 +56,9 @@ public final class RuntimeLog {
 			// since we want to retain order)
 			logListeners.remove(listener);
 			logListeners.add(listener);
-			if (firstListener)
+			if (firstListener) {
 				emptyQueuedMessages();
+			}
 		}
 	}
 
@@ -142,8 +144,9 @@ public final class RuntimeLog {
 	private static void emptyQueuedMessages() {
 		IStatus[] queued;
 		synchronized (logListeners) {
-			if (queuedMessages.isEmpty())
+			if (queuedMessages.isEmpty()) {
 				return;
+			}
 			queued = queuedMessages.toArray(new IStatus[queuedMessages.size()]);
 			queuedMessages.clear();
 		}

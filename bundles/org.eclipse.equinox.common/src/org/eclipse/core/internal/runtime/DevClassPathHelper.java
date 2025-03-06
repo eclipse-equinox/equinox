@@ -39,8 +39,9 @@ public class DevClassPathHelper {
 				inDevelopmentMode = true;
 				URL location = new URL(osgiDev);
 				devProperties = load(location);
-				if (devProperties != null)
+				if (devProperties != null) {
 					devDefaultClasspath = getArrayFromList(devProperties.getProperty("*")); //$NON-NLS-1$
+				}
 			} catch (MalformedURLException e) {
 				devDefaultClasspath = getArrayFromList(osgiDev);
 			}
@@ -51,11 +52,13 @@ public class DevClassPathHelper {
 		String[] result = null;
 		if (id != null && devProperties != null) {
 			String entry = devProperties.getProperty(id);
-			if (entry != null)
+			if (entry != null) {
 				result = getArrayFromList(entry);
+			}
 		}
-		if (result == null)
+		if (result == null) {
 			result = devDefaultClasspath;
+		}
 		return result;
 	}
 
@@ -67,14 +70,16 @@ public class DevClassPathHelper {
 	 * @param prop the initial comma-separated string
 	 */
 	public static String[] getArrayFromList(String prop) {
-		if (prop == null || prop.trim().equals("")) //$NON-NLS-1$
+		if (prop == null || prop.trim().equals("")) { //$NON-NLS-1$
 			return new String[0];
+		}
 		Vector<String> list = new Vector<>();
 		StringTokenizer tokens = new StringTokenizer(prop, ","); //$NON-NLS-1$
 		while (tokens.hasMoreTokens()) {
 			String token = tokens.nextToken().trim();
-			if (!token.equals("")) //$NON-NLS-1$
+			if (!token.equals("")) { //$NON-NLS-1$
 				list.addElement(token);
+			}
 		}
 		return list.isEmpty() ? new String[0] : (String[]) list.toArray(new String[list.size()]);
 	}

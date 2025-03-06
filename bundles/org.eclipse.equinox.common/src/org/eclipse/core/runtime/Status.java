@@ -421,10 +421,11 @@ public class Status implements IStatus {
 	 * @param message a human-readable message, localized to the current locale
 	 */
 	protected void setMessage(String message) {
-		if (message == null)
+		if (message == null) {
 			this.message = ""; //$NON-NLS-1$
-		else
+		} else {
 			this.message = message;
+		}
 	}
 
 	/**

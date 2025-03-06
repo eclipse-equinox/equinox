@@ -45,14 +45,17 @@ public class DataArea {
 	private boolean initialized = false;
 
 	protected synchronized void assertLocationInitialized() throws IllegalStateException {
-		if (location != null && initialized)
+		if (location != null && initialized) {
 			return;
+		}
 		Activator activator = Activator.getDefault();
-		if (activator == null)
+		if (activator == null) {
 			throw new IllegalStateException(CommonMessages.activator_not_available);
+		}
 		Location service = activator.getInstanceLocation();
-		if (service == null)
+		if (service == null) {
 			throw new IllegalStateException(CommonMessages.meta_noDataModeSpecified);
+		}
 
 		boolean explicitInitRequired = Boolean.valueOf(Activator.getContext().getProperty(REQUIRES_EXPLICIT_INIT));
 		if (explicitInitRequired && !service.isSet()) {
@@ -65,8 +68,9 @@ public class DataArea {
 			// This will try to init url either from the specified location value or from
 			// service default
 			URL url = service.getURL();
-			if (url == null)
+			if (url == null) {
 				throw new IllegalStateException(CommonMessages.meta_instanceDataUnspecified);
+			}
 			// TODO assume the URL is a file:
 			// Use the new File technique to ensure that the resultant string is
 			// in the right format (e.g., leading / removed from /c:/foo etc)
@@ -93,16 +97,19 @@ public class DataArea {
 	 */
 	public IPath getLogLocation() throws IllegalStateException {
 		// make sure the log location is initialized if the instance location is known
-		if (isInstanceLocationSet())
+		if (isInstanceLocationSet()) {
 			assertLocationInitialized();
+		}
 		FrameworkLog log = Activator.getDefault().getFrameworkLog();
 		if (log != null) {
 			java.io.File file = log.getFile();
-			if (file != null)
+			if (file != null) {
 				return IPath.fromOSString(file.getAbsolutePath());
+			}
 		}
-		if (location == null)
+		if (location == null) {
 			throw new IllegalStateException(CommonMessages.meta_instanceDataUnspecified);
+		}
 		return location.append(F_META_AREA).append(F_LOG);
 	}
 
@@ -125,11 +132,13 @@ public class DataArea {
 	 */
 	private boolean isInstanceLocationSet() {
 		Activator activator = Activator.getDefault();
-		if (activator == null)
+		if (activator == null) {
 			return false;
+		}
 		Location service = activator.getInstanceLocation();
-		if (service == null)
+		if (service == null) {
 			return false;
+		}
 		return service.isSet();
 	}
 
@@ -149,8 +158,9 @@ public class DataArea {
 
 	public IPath getPreferenceLocation(String bundleName, boolean create) throws IllegalStateException {
 		IPath result = getStateLocation(bundleName);
-		if (create)
+		if (create) {
 			result.toFile().mkdirs();
+		}
 		return result.append(PREFERENCES_FILE_NAME);
 	}
 
@@ -164,8 +174,9 @@ public class DataArea {
 			}
 		}
 		// try infer the device if there isn't one (windows)
-		if (location.getDevice() == null)
+		if (location.getDevice() == null) {
 			location = IPath.fromOSString(location.toFile().getAbsolutePath());
+		}
 		createLocation();
 		initialized = true;
 	}
@@ -191,11 +202,12 @@ public class DataArea {
 			Activator activator = Activator.getDefault();
 			if (activator != null) {
 				FrameworkLog log = activator.getFrameworkLog();
-				if (log != null)
+				if (log != null) {
 					log.setFile(logPath.toFile(), true);
-				else if (debug())
+				} else if (debug()) {
 					System.out.println(
 							"ERROR: Unable to acquire log service. Application will proceed, but logging will be disabled."); //$NON-NLS-1$
+				}
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -217,11 +229,13 @@ public class DataArea {
 
 	private boolean debug() {
 		Activator activator = Activator.getDefault();
-		if (activator == null)
+		if (activator == null) {
 			return false;
+		}
 		DebugOptions debugOptions = activator.getDebugOptions();
-		if (debugOptions == null)
+		if (debugOptions == null) {
 			return false;
+		}
 		return debugOptions.getBooleanOption(OPTION_DEBUG, false);
 	}
 }

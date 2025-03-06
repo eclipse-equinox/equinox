@@ -41,13 +41,15 @@ public class ReferenceHashSet<T> {
 
 		@Override
 		public boolean equals(Object obj) {
-			if (!(obj instanceof HashableWeakReference))
+			if (!(obj instanceof HashableWeakReference)) {
 				return false;
+			}
 			U referent = super.get();
 			@SuppressWarnings("unchecked")
 			Object other = ((HashableWeakReference<?>) obj).get();
-			if (referent == null)
+			if (referent == null) {
 				return other == null;
+			}
 			return referent.equals(other);
 		}
 
@@ -59,8 +61,9 @@ public class ReferenceHashSet<T> {
 		@Override
 		public String toString() {
 			Object referent = super.get();
-			if (referent == null)
+			if (referent == null) {
 				return "[hashCode=" + this.hashCode + "] <referent was garbage collected>"; //$NON-NLS-1$ //$NON-NLS-2$
+			}
 			return "[hashCode=" + this.hashCode + "] " + referent; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
@@ -75,13 +78,15 @@ public class ReferenceHashSet<T> {
 
 		@Override
 		public boolean equals(Object obj) {
-			if (!(obj instanceof HashableSoftReference))
+			if (!(obj instanceof HashableSoftReference)) {
 				return false;
+			}
 			Object referent = super.get();
 			@SuppressWarnings("unchecked")
 			Object other = ((HashableSoftReference<?>) obj).get();
-			if (referent == null)
+			if (referent == null) {
 				return other == null;
+			}
 			return referent.equals(other);
 		}
 
@@ -93,8 +98,9 @@ public class ReferenceHashSet<T> {
 		@Override
 		public String toString() {
 			Object referent = super.get();
-			if (referent == null)
+			if (referent == null) {
 				return "[hashCode=" + this.hashCode + "] <referent was garbage collected>"; //$NON-NLS-1$ //$NON-NLS-2$
+			}
 			return "[hashCode=" + this.hashCode + "] " + referent; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
@@ -140,8 +146,9 @@ public class ReferenceHashSet<T> {
 		this.threshold = size; // size represents the expected
 		// number of elements
 		int extraRoom = (int) (size * 1.75f);
-		if (this.threshold == extraRoom)
+		if (this.threshold == extraRoom) {
 			extraRoom++;
+		}
 		this.values = new HashedReference[extraRoom];
 	}
 
@@ -192,16 +199,18 @@ public class ReferenceHashSet<T> {
 		this.values[index] = toReference(referenceType, obj);
 
 		// assumes the threshold is never equal to the size of the table
-		if (++this.elementSize > this.threshold)
+		if (++this.elementSize > this.threshold) {
 			rehash();
+		}
 
 		return obj;
 	}
 
 	private void addValue(HashedReference<T> value) {
 		Object obj = value.get();
-		if (obj == null)
+		if (obj == null) {
 			return;
+		}
 		int valuesLength = this.values.length;
 		int index = (value.hashCode() & 0x7FFFFFFF) % valuesLength;
 		HashedReference<T> currentValue;
@@ -214,8 +223,9 @@ public class ReferenceHashSet<T> {
 		this.values[index] = value;
 
 		// assumes the threshold is never equal to the size of the table
-		if (++this.elementSize > this.threshold)
+		if (++this.elementSize > this.threshold) {
 			rehash();
+		}
 	}
 
 	private void cleanupGarbageCollectedValues() {
@@ -232,8 +242,9 @@ public class ReferenceHashSet<T> {
 					int sameHash = index;
 					int current;
 					while ((currentValue = this.values[current = (sameHash + 1) % valuesLength]) != null
-							&& currentValue.hashCode() == hashCode)
+							&& currentValue.hashCode() == hashCode) {
 						sameHash = current;
+					}
 					this.values[index] = this.values[sameHash];
 					this.values[sameHash] = null;
 					this.elementSize--;
@@ -272,9 +283,11 @@ public class ReferenceHashSet<T> {
 																						// elements
 		newHashSet.referenceQueue = this.referenceQueue;
 		HashedReference<T> currentValue;
-		for (HashedReference<T> value : this.values)
-			if ((currentValue = value) != null)
+		for (HashedReference<T> value : this.values) {
+			if ((currentValue = value) != null) {
 				newHashSet.addValue(currentValue);
+			}
+		}
 
 		this.values = newHashSet.values;
 		this.threshold = newHashSet.threshold;
@@ -332,11 +345,13 @@ public class ReferenceHashSet<T> {
 				continue;
 			}
 			Object tmp = value.get();
-			if (tmp != null)
+			if (tmp != null) {
 				result[resultSize++] = tmp;
+			}
 		}
-		if (result.length == resultSize)
+		if (result.length == resultSize) {
 			return result;
+		}
 		Object[] finalResult = new Object[resultSize];
 		System.arraycopy(result, 0, finalResult, 0, resultSize);
 		return finalResult;

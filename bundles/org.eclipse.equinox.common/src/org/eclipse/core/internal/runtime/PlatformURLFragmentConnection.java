@@ -45,29 +45,35 @@ public class PlatformURLFragmentConnection extends PlatformURLConnection {
 	@Override
 	protected URL resolve() throws IOException {
 		String spec = url.getFile().trim();
-		if (spec.startsWith("/")) //$NON-NLS-1$
+		if (spec.startsWith("/")) { //$NON-NLS-1$
 			spec = spec.substring(1);
-		if (!spec.startsWith(FRAGMENT))
+		}
+		if (!spec.startsWith(FRAGMENT)) {
 			throw new IOException(NLS.bind(CommonMessages.url_badVariant, url));
+		}
 		int ix = spec.indexOf('/', FRAGMENT.length() + 1);
 		String ref = ix == -1 ? spec.substring(FRAGMENT.length() + 1) : spec.substring(FRAGMENT.length() + 1, ix);
 		String id = getId(ref);
 		Activator activator = Activator.getDefault();
-		if (activator == null)
+		if (activator == null) {
 			throw new IOException(CommonMessages.activator_not_available);
+		}
 		target = activator.getBundle(id);
-		if (target == null)
+		if (target == null) {
 			throw new IOException(NLS.bind(CommonMessages.url_resolveFragment, url));
+		}
 		URL result = target.getEntry("/"); //$NON-NLS-1$
-		if (ix == -1 || (ix + 1) >= spec.length())
+		if (ix == -1 || (ix + 1) >= spec.length()) {
 			return result;
+		}
 		return new URL(result, spec.substring(ix + 1));
 	}
 
 	public static void startup() {
 		// register connection type for platform:/fragment handling
-		if (isRegistered)
+		if (isRegistered) {
 			return;
+		}
 		PlatformURLHandler.register(FRAGMENT, PlatformURLFragmentConnection.class);
 		isRegistered = true;
 	}

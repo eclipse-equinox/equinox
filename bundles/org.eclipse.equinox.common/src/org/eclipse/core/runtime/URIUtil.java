@@ -61,8 +61,9 @@ public final class URIUtil {
 	public static URI append(URI base, String extension) {
 		try {
 			String path = base.getPath();
-			if (path == null)
+			if (path == null) {
 				return appendOpaque(base, extension);
+			}
 			// if the base is already a directory then resolve will just do the right thing
 			URI result;
 			if (path.endsWith("/")) {//$NON-NLS-1$
@@ -82,9 +83,10 @@ public final class URIUtil {
 			// 4723726)
 			String resultPath = result.getPath();
 			if (isFileURI(base) && path != null && path.startsWith(UNC_PREFIX)
-					&& (resultPath == null || !resultPath.startsWith(UNC_PREFIX)))
+					&& (resultPath == null || !resultPath.startsWith(UNC_PREFIX))) {
 				result = new URI(result.getScheme(), ensureUNCPath(result.getSchemeSpecificPart()),
 						result.getFragment());
+			}
 			return result;
 		} catch (URISyntaxException e) {
 			// shouldn't happen because we started from a valid URI
@@ -98,10 +100,11 @@ public final class URIUtil {
 	 */
 	private static URI appendOpaque(URI base, String extension) throws URISyntaxException {
 		String ssp = base.getSchemeSpecificPart();
-		if (ssp.endsWith("/")) //$NON-NLS-1$
+		if (ssp.endsWith("/")) { //$NON-NLS-1$
 			ssp += extension;
-		else
+		} else { //$NON-NLS-1$
 			ssp = ssp + "/" + extension; //$NON-NLS-1$
+		}
 		return new URI(base.getScheme(), ssp, base.getFragment());
 	}
 
@@ -113,8 +116,9 @@ public final class URIUtil {
 	 */
 	private static String fixUNCPath(String path) {
 		// URI needs an UNC-Path with four slashes.
-		if (!path.startsWith(UNC_PREFIX) || path.startsWith(UNC_PREFIX, 2))
+		if (!path.startsWith(UNC_PREFIX) || path.startsWith(UNC_PREFIX, 2)) {
 			return path;
+		}
 		return ensureUNCPath(path);
 	}
 
@@ -126,8 +130,9 @@ public final class URIUtil {
 		StringBuilder result = new StringBuilder(len);
 		for (int i = 0; i < 4; i++) {
 			// if we have hit the first non-slash character, add another leading slash
-			if (i >= len || result.length() > 0 || path.charAt(i) != '/')
+			if (i >= len || result.length() > 0 || path.charAt(i) != '/') {
 				result.append('/');
+			}
 		}
 		result.append(path);
 		return result.toString();
@@ -148,8 +153,9 @@ public final class URIUtil {
 		int colon = uriString.indexOf(':');
 		int hash = uriString.lastIndexOf('#');
 		boolean noHash = hash < 0;
-		if (noHash)
+		if (noHash) {
 			hash = uriString.length();
+		}
 		String scheme = colon < 0 ? null : uriString.substring(0, colon);
 		String ssp = uriString.substring(colon + 1, hash);
 		String fragment = noHash ? null : uriString.substring(hash + 1);
@@ -157,13 +163,16 @@ public final class URIUtil {
 		if (scheme != null && scheme.equals(SCHEME_FILE) && !ssp.startsWith(UNC_PREFIX)) {
 			// handle relative URI string with scheme (produced by java.net.URL)
 			File file = new File(ssp);
-			if (file.isAbsolute())
+			if (file.isAbsolute()) {
 				return file.toURI();
-			if (File.separatorChar != '/')
+			}
+			if (File.separatorChar != '/') {
 				ssp = ssp.replace(File.separatorChar, '/');
+			}
 			// relative URIs have a null scheme.
-			if (!ssp.startsWith("/"))//$NON-NLS-1$
+			if (!ssp.startsWith("/")) { //$NON-NLS-1$
 				scheme = null;
+			}
 		}
 		return toURI(scheme, ssp, fragment);
 	}
@@ -209,11 +218,13 @@ public final class URIUtil {
 	 */
 	public static URI removeFileExtension(URI uri) {
 		String lastSegment = lastSegment(uri);
-		if (lastSegment == null)
+		if (lastSegment == null) {
 			return uri;
+		}
 		int lastIndex = lastSegment.lastIndexOf('.');
-		if (lastIndex == -1)
+		if (lastIndex == -1) {
 			return uri;
+		}
 		String uriString = uri.toString();
 		lastIndex = uriString.lastIndexOf('.');
 		uriString = uriString.substring(0, lastIndex);
@@ -231,21 +242,26 @@ public final class URIUtil {
 	 *         otherwise.
 	 */
 	public static boolean sameURI(URI uri1, URI uri2) {
-		if (uri1 == uri2)
+		if (uri1 == uri2) {
 			return true;
-		if (uri1 == null || uri2 == null)
+		}
+		if (uri1 == null || uri2 == null) {
 			return false;
+		}
 
-		if (uri1.equals(uri2))
+		if (uri1.equals(uri2)) {
 			return true;
+		}
 
 		if (sameString(uri1.getScheme(), uri2.getScheme())
 				&& sameString(uri1.getSchemeSpecificPart(), uri2.getSchemeSpecificPart())
-				&& sameString(uri1.getFragment(), uri2.getFragment()))
+				&& sameString(uri1.getFragment(), uri2.getFragment())) {
 			return true;
+		}
 
-		if (uri1.isAbsolute() != uri2.isAbsolute())
+		if (uri1.isAbsolute() != uri2.isAbsolute()) {
 			return false;
+		}
 
 		// check if we have two local file references that are case variants
 		File file1 = toFile(uri1);
@@ -264,8 +280,9 @@ public final class URIUtil {
 	 * @return The local file corresponding to the given URI, or <code>null</code>
 	 */
 	public static File toFile(URI uri) {
-		if (!isFileURI(uri))
+		if (!isFileURI(uri)) {
 			return null;
+		}
 		// assume all illegal characters have been properly encoded, so use URI class to
 		// unencode
 		return new File(uri.getSchemeSpecificPart());
@@ -289,8 +306,9 @@ public final class URIUtil {
 	 */
 	public static URI toJarURI(URI uri, IPath entryPath) {
 		try {
-			if (entryPath == null)
+			if (entryPath == null) {
 				entryPath = IPath.EMPTY;
+			}
 			// must deconstruct the input URI to obtain unencoded strings, and then pass to
 			// URI constructor that will encode the entry path
 			return new URI(SCHEME_JAR,
@@ -315,8 +333,9 @@ public final class URIUtil {
 			String pathString = url.toExternalForm().substring(5);
 			// ensure there is a leading slash to handle common malformed URLs such as
 			// file:c:/tmp
-			if (pathString.indexOf('/') != 0)
+			if (pathString.indexOf('/') != 0) {
 				pathString = '/' + pathString;
+			}
 			return toURI(SCHEME_FILE, null, pathString, null);
 		}
 		try {
@@ -441,13 +460,15 @@ public final class URIUtil {
 	public static String toUnencodedString(URI uri) {
 		StringBuilder result = new StringBuilder();
 		String scheme = uri.getScheme();
-		if (scheme != null)
+		if (scheme != null) {
 			result.append(scheme).append(':');
+		}
 		// there is always a ssp
 		result.append(uri.getSchemeSpecificPart());
 		String fragment = uri.getFragment();
-		if (fragment != null)
+		if (fragment != null) {
 			result.append('#').append(fragment);
+		}
 		return result.toString();
 	}
 
@@ -466,8 +487,9 @@ public final class URIUtil {
 	 * @return an absolute URI
 	 */
 	public static URI makeAbsolute(URI relative, URI baseURI) {
-		if (relative.isAbsolute())
+		if (relative.isAbsolute()) {
 			return relative;
+		}
 		return append(baseURI, toUnencodedString(relative));
 	}
 
@@ -486,19 +508,22 @@ public final class URIUtil {
 	 */
 	public static URI makeRelative(URI original, URI baseURI) {
 		// for non-local URIs just use the built in relativize method
-		if (!SCHEME_FILE.equals(original.getScheme()) || !SCHEME_FILE.equals(baseURI.getScheme()))
+		if (!SCHEME_FILE.equals(original.getScheme()) || !SCHEME_FILE.equals(baseURI.getScheme())) {
 			return baseURI.relativize(original);
+		}
 
 		IPath originalPath = IPath.fromOSString(original.getSchemeSpecificPart());
 		IPath basePath = IPath.fromOSString(baseURI.getSchemeSpecificPart());
 
 		// make sure we have an absolute path to start
-		if (!basePath.isAbsolute())
+		if (!basePath.isAbsolute()) {
 			return original;
+		}
 		IPath relativePath = originalPath.makeRelativeTo(basePath);
 		// if we could not make it relative, just return the original URI
-		if (relativePath == originalPath)
+		if (relativePath == originalPath) {
 			return original;
+		}
 		try {
 			return new URI(null, null, relativePath.toString(), original.getFragment());
 		} catch (URISyntaxException e) {

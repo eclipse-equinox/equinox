@@ -48,19 +48,23 @@ public class PlatformURLPluginConnection extends PlatformURLConnection {
 	 */
 	public static Object[] parse(String spec, URL originalURL) throws IOException {
 		Object[] result = new Object[2];
-		if (spec.startsWith("/")) //$NON-NLS-1$
+		if (spec.startsWith("/")) { //$NON-NLS-1$
 			spec = spec.substring(1);
-		if (!spec.startsWith(PLUGIN))
+		}
+		if (!spec.startsWith(PLUGIN)) {
 			throw new IOException(NLS.bind(CommonMessages.url_badVariant, originalURL));
+		}
 		int ix = spec.indexOf('/', PLUGIN.length() + 1);
 		String ref = ix == -1 ? spec.substring(PLUGIN.length() + 1) : spec.substring(PLUGIN.length() + 1, ix);
 		String id = getId(ref);
 		Activator activator = Activator.getDefault();
-		if (activator == null)
+		if (activator == null) {
 			throw new IOException(CommonMessages.activator_not_available);
+		}
 		Bundle bundle = activator.getBundle(id);
-		if (bundle == null)
+		if (bundle == null) {
 			throw new IOException(NLS.bind(CommonMessages.url_resolvePlugin, id));
+		}
 		result[0] = bundle;
 		result[1] = (ix == -1 || (ix + 1) >= spec.length()) ? "/" : spec.substring(ix + 1); //$NON-NLS-1$
 		return result;
@@ -73,12 +77,14 @@ public class PlatformURLPluginConnection extends PlatformURLConnection {
 		Bundle b = (Bundle) obj[0];
 		String path = (String) obj[1];
 		URL result = b.getEntry(path);
-		if (result != null || "/".equals(path)) //$NON-NLS-1$
+		if (result != null || "/".equals(path)) { //$NON-NLS-1$
 			return result;
+		}
 		// try resolving the path through the classloader
 		result = b.getResource(path);
-		if (result != null)
+		if (result != null) {
 			return result;
+		}
 		// if the result is null then force the creation of a URL that will throw
 		// FileNotFoundExceptions
 		return new URL(b.getEntry("/"), path); //$NON-NLS-1$
@@ -86,8 +92,9 @@ public class PlatformURLPluginConnection extends PlatformURLConnection {
 
 	public static void startup() {
 		// register connection type for platform:/plugin handling
-		if (isRegistered)
+		if (isRegistered) {
 			return;
+		}
 		PlatformURLHandler.register(PLUGIN, PlatformURLPluginConnection.class);
 		isRegistered = true;
 	}

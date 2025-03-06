@@ -148,8 +148,9 @@ public class MultiStatus extends Status {
 		for (IStatus child : newChildren) {
 			Assert.isLegal(child != null);
 			int severity = child.getSeverity();
-			if (severity > maxSeverity)
+			if (severity > maxSeverity) {
 				maxSeverity = severity;
+			}
 		}
 		this.children.addAll(Arrays.asList(newChildren));
 		setSeverity(maxSeverity);

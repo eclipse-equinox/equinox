@@ -38,26 +38,31 @@ public class PlatformURLConfigConnection extends PlatformURLConnection {
 	@Override
 	protected URL resolve() throws IOException {
 		String spec = url.getFile().trim();
-		if (spec.startsWith("/")) //$NON-NLS-1$
+		if (spec.startsWith("/")) { //$NON-NLS-1$
 			spec = spec.substring(1);
-		if (!spec.startsWith(CONFIG))
+		}
+		if (!spec.startsWith(CONFIG)) {
 			throw new IOException(NLS.bind(CommonMessages.url_badVariant, url.toString()));
+		}
 		String path = spec.substring(CONFIG.length() + 1);
 		// resolution takes parent configuration into account (if it exists)
 		Activator activator = Activator.getDefault();
-		if (activator == null)
+		if (activator == null) {
 			throw new IOException(CommonMessages.activator_not_available);
+		}
 		Location localConfig = activator.getConfigurationLocation();
 		Location parentConfig = localConfig.getParentLocation();
 		// assume we will find the file locally
 		URL localURL = new URL(localConfig.getURL(), path);
-		if (!FILE_PROTOCOL.equals(localURL.getProtocol()) || parentConfig == null)
+		if (!FILE_PROTOCOL.equals(localURL.getProtocol()) || parentConfig == null) {
 			// we only support cascaded file: URLs
 			return localURL;
+		}
 		File localFile = new File(localURL.getPath());
-		if (localFile.exists())
+		if (localFile.exists()) {
 			// file exists in local configuration
 			return localURL;
+		}
 		// try to find in the parent configuration
 		URL parentURL = new URL(parentConfig.getURL(), path);
 		if (FILE_PROTOCOL.equals(parentURL.getProtocol())) {
@@ -74,8 +79,9 @@ public class PlatformURLConfigConnection extends PlatformURLConnection {
 
 	public static void startup() {
 		// register connection type for platform:/config handling
-		if (isRegistered)
+		if (isRegistered) {
 			return;
+		}
 		PlatformURLHandler.register(CONFIG, PlatformURLConfigConnection.class);
 		isRegistered = true;
 	}
@@ -83,8 +89,9 @@ public class PlatformURLConfigConnection extends PlatformURLConnection {
 	@Override
 	public OutputStream getOutputStream() throws IOException {
 		if (parentConfiguration || Activator.getDefault() == null
-				|| Activator.getDefault().getConfigurationLocation().isReadOnly())
+				|| Activator.getDefault().getConfigurationLocation().isReadOnly()) {
 			throw new UnknownServiceException(NLS.bind(CommonMessages.url_noOutput, url));
+		}
 		// This is not optimal but connection is a private instance variable in the
 		// super-class.
 		URL resolved = getResolvedURL();
@@ -93,8 +100,9 @@ public class PlatformURLConfigConnection extends PlatformURLConnection {
 			if (fileString != null) {
 				File file = new File(fileString);
 				String parent = file.getParent();
-				if (parent != null)
+				if (parent != null) {
 					new File(parent).mkdirs();
+				}
 				return new FileOutputStream(file);
 			}
 		}

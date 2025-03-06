@@ -36,29 +36,35 @@ public class PlatformURLMetaConnection extends PlatformURLConnection {
 	@Override
 	protected URL resolve() throws IOException {
 		String spec = url.getFile().trim();
-		if (spec.startsWith("/")) //$NON-NLS-1$
+		if (spec.startsWith("/")) { //$NON-NLS-1$
 			spec = spec.substring(1);
-		if (!spec.startsWith(META))
+		}
+		if (!spec.startsWith(META)) {
 			throw new IOException(NLS.bind(CommonMessages.url_badVariant, url.toString()));
+		}
 		int ix = spec.indexOf('/', META.length() + 1);
 		String ref = ix == -1 ? spec.substring(META.length() + 1) : spec.substring(META.length() + 1, ix);
 		String id = getId(ref);
 		Activator activator = Activator.getDefault();
-		if (activator == null)
+		if (activator == null) {
 			throw new IOException(CommonMessages.activator_not_available);
+		}
 		target = activator.getBundle(id);
-		if (target == null)
+		if (target == null) {
 			throw new IOException(NLS.bind(CommonMessages.url_resolvePlugin, url.toString()));
+		}
 		IPath path = MetaDataKeeper.getMetaArea().getStateLocation(target);
-		if (ix != -1 || (ix + 1) <= spec.length())
+		if (ix != -1 || (ix + 1) <= spec.length()) {
 			path = path.append(spec.substring(ix + 1));
+		}
 		return path.toFile().toURL();
 	}
 
 	public static void startup() {
 		// register connection type for platform:/meta handling
-		if (isRegistered)
+		if (isRegistered) {
 			return;
+		}
 		PlatformURLHandler.register(META, PlatformURLMetaConnection.class);
 		isRegistered = true;
 	}
@@ -72,8 +78,9 @@ public class PlatformURLMetaConnection extends PlatformURLConnection {
 			if (fileString != null) {
 				File file = new File(fileString);
 				String parent = file.getParent();
-				if (parent != null)
+				if (parent != null) {
 					new File(parent).mkdirs();
+				}
 				return new FileOutputStream(file);
 			}
 		}
