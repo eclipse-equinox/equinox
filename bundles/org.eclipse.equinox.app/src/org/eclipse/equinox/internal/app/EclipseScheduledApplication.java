@@ -64,36 +64,41 @@ public class EclipseScheduledApplication implements ScheduledApplication, EventH
 
 	@Override
 	public synchronized String getTopic() {
-		if (removed)
+		if (removed) {
 			throw new IllegalStateException(Messages.scheduled_app_removed);
+		}
 		return topic;
 	}
 
 	@Override
 	public synchronized String getEventFilter() {
-		if (removed)
+		if (removed) {
 			throw new IllegalStateException(Messages.scheduled_app_removed);
+		}
 		return eventFilter;
 	}
 
 	@Override
 	public synchronized boolean isRecurring() {
-		if (removed)
+		if (removed) {
 			throw new IllegalStateException(Messages.scheduled_app_removed);
+		}
 		return recurring;
 	}
 
 	@Override
 	public synchronized ApplicationDescriptor getApplicationDescriptor() {
-		if (removed)
+		if (removed) {
 			throw new IllegalStateException(Messages.scheduled_app_removed);
+		}
 		return (ApplicationDescriptor) Activator.getService(appTracker);
 	}
 
 	@Override
 	public synchronized Map<String, Object> getArguments() {
-		if (removed)
+		if (removed) {
 			throw new IllegalStateException(Messages.scheduled_app_removed);
+		}
 		return args == null ? null : new HashMap<>(args);
 	}
 
@@ -105,12 +110,14 @@ public class EclipseScheduledApplication implements ScheduledApplication, EventH
 
 	@Override
 	public synchronized void remove() {
-		if (removed)
+		if (removed) {
 			return;
+		}
 		removed = true;
 		AppPersistence.removeScheduledApp(this);
-		if (sr != null)
+		if (sr != null) {
 			sr.unregister();
+		}
 		sr = null;
 		appTracker.close();
 	}
@@ -118,27 +125,31 @@ public class EclipseScheduledApplication implements ScheduledApplication, EventH
 	@Override
 	public synchronized void handleEvent(Event event) {
 		try {
-			if (removed)
+			if (removed) {
 				return;
+			}
 			ApplicationDescriptor desc = getApplicationDescriptor();
-			if (desc == null)
+			if (desc == null) {
 				// in this case the application descriptor was removed;
 				// we must return and keep the scheduled app incase the application comes back
 				return;
+			}
 			desc.launch(getArguments(event));
 		} catch (Exception e) {
 			String message = NLS.bind(Messages.scheduled_app_launch_error, sr);
 			Activator.log(new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.WARNING, 0, message, 0, e, null));
 			return; // return here to avoid removing non-recurring apps when an error occurs
 		}
-		if (!isRecurring())
+		if (!isRecurring()) {
 			remove();
+		}
 	}
 
 	synchronized void setServiceRegistration(ServiceRegistration sr) {
 		this.sr = sr;
-		if (removed) // just incase we were removed before the sr was set
+		if (removed) { // just incase we were removed before the sr was set
 			sr.unregister();
+		}
 	}
 
 	/*
@@ -158,8 +169,9 @@ public class EclipseScheduledApplication implements ScheduledApplication, EventH
 		@Override
 		public void checkGuard(Object object) throws SecurityException {
 			SecurityManager sm = System.getSecurityManager();
-			if (sm != null)
+			if (sm != null) {
 				sm.checkPermission(new TopicPermission(eventTopic, TopicPermission.SUBSCRIBE));
+			}
 		}
 
 	}

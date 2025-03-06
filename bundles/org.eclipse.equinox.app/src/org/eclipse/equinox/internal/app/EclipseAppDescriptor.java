@@ -65,8 +65,9 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 		// that can only be done by using the Bundle.findEntries method which
 		// requires the path to be split up between the base and the file name!!
 		if (iconPath != null && iconPath.length() > 0) {
-			if (iconPath.charAt(0) == '/')
+			if (iconPath.charAt(0) == '/') {
 				iconPath = iconPath.substring(1);
+			}
 			String baseIconDir = "/"; //$NON-NLS-1$
 			String iconFile = iconPath;
 			int lastSlash = iconPath.lastIndexOf('/');
@@ -75,8 +76,9 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 				iconFile = iconPath.substring(lastSlash + 1);
 			}
 			Enumeration<URL> urls = contributor.findEntries(baseIconDir, iconFile, false);
-			if (urls != null && urls.hasMoreElements())
+			if (urls != null && urls.hasMoreElements()) {
 				iconResult = urls.nextElement();
+			}
 		}
 		this.iconURL = iconResult;
 	}
@@ -90,8 +92,9 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 	@Override
 	protected ApplicationHandle launchSpecific(Map arguments) throws Exception {
 		// if this application is locked throw an exception.
-		if (getLocked().booleanValue())
+		if (getLocked().booleanValue()) {
 			throw new IllegalStateException("Cannot launch a locked application."); //$NON-NLS-1$
+		}
 		// initialize the appHandle
 		EclipseAppHandle appHandle = createAppHandle(arguments);
 		try {
@@ -104,8 +107,9 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 			} catch (Throwable destroyError) {
 				// ignore and clean up
 			}
-			if (t instanceof Exception)
+			if (t instanceof Exception) {
 				throw (Exception) t;
+			}
 			throw (Error) t;
 		}
 		return appHandle;
@@ -127,13 +131,14 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 
 	void refreshProperties() {
 		ServiceRegistration reg = getServiceRegistration();
-		if (reg != null)
+		if (reg != null) {
 			try {
 				reg.setProperties(getServiceProperties());
 			} catch (IllegalStateException e) {
 				// this must mean the service was unregistered
 				// just ignore
 			}
+		}
 	}
 
 	void setServiceRegistration(ServiceRegistration sr) {
@@ -147,12 +152,13 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 
 	private ServiceRegistration getServiceRegistration() {
 		synchronized (registrationLock) {
-			if (sr == null && registrationLock[0])
+			if (sr == null && registrationLock[0]) {
 				try {
 					registrationLock.wait(1000); // timeout after 1 second
 				} catch (InterruptedException e) {
 					// nothing
 				}
+			}
 			return sr;
 		}
 	}
@@ -167,8 +173,9 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 	Hashtable<String, Object> getServiceProperties() {
 		Hashtable<String, Object> props = new Hashtable<>(10);
 		props.put(ApplicationDescriptor.APPLICATION_PID, getApplicationId());
-		if (name != null)
+		if (name != null) {
 			props.put(ApplicationDescriptor.APPLICATION_NAME, name);
+		}
 		props.put(ApplicationDescriptor.APPLICATION_CONTAINER, Activator.PI_APP);
 		props.put(ApplicationDescriptor.APPLICATION_LOCATION, getLocation());
 		Boolean launchable = appContainer.isLocked(this) == 0 ? Boolean.TRUE : Boolean.FALSE;
@@ -177,16 +184,19 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 		Boolean visible = (flags & FLAG_VISIBLE) != 0 ? Boolean.TRUE : Boolean.FALSE;
 		props.put(ApplicationDescriptor.APPLICATION_VISIBLE, visible);
 		props.put(APP_TYPE, getThreadTypeString());
-		if ((flags & FLAG_DEFAULT_APP) != 0)
+		if ((flags & FLAG_DEFAULT_APP) != 0) {
 			props.put(APP_DEFAULT, Boolean.TRUE);
-		if (iconURL != null)
+		}
+		if (iconURL != null) {
 			props.put(ApplicationDescriptor.APPLICATION_ICON, iconURL);
+		}
 		return props;
 	}
 
 	private String getLocation() {
-		if (contributor == null)
+		if (contributor == null) {
 			return ""; //$NON-NLS-1$
+		}
 		return Activator.getLocation(contributor);
 	}
 
@@ -210,8 +220,9 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 
 	@Override
 	public boolean matchDNChain(String pattern) {
-		if (contributor == null)
+		if (contributor == null) {
 			return false;
+		}
 		return BundleSignerCondition
 				.getCondition(contributor,
 						new ConditionInfo(BundleSignerCondition.class.getName(), new String[] { pattern }))
@@ -232,8 +243,9 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 	}
 
 	String getThreadTypeString() {
-		if ((flags & FLAG_TYPE_ANY_THREAD) != 0)
+		if ((flags & FLAG_TYPE_ANY_THREAD) != 0) {
 			return APP_TYPE_ANY_THREAD;
+		}
 		return APP_TYPE_MAIN_THREAD;
 	}
 
@@ -252,8 +264,9 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 
 	private synchronized String getInstanceID() {
 		// make sure the instanceID has not reached the max
-		if (instanceID == Long.MAX_VALUE)
+		if (instanceID == Long.MAX_VALUE) {
 			instanceID = 0;
+		}
 		// create a unique instance id
 		return getApplicationId() + "." + instanceID++; //$NON-NLS-1$
 	}

@@ -48,8 +48,9 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		// doing simple get service here because we expect the PackageAdmin service to
 		// always be available
 		ServiceReference ref = bc.getServiceReference(PackageAdmin.class.getName());
-		if (ref != null)
+		if (ref != null) {
 			_packageAdmin = (PackageAdmin) bc.getService(ref);
+		}
 		_frameworkLogTracker = new ServiceTracker(bc, FrameworkLog.class.getName(), null);
 		_frameworkLogTracker.open();
 		getDebugOptions(bc);
@@ -90,8 +91,9 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 
 	private void getDebugOptions(BundleContext context) {
 		ServiceReference debugRef = context.getServiceReference(DebugOptions.class.getName());
-		if (debugRef == null)
+		if (debugRef == null) {
 			return;
+		}
 		DebugOptions debugOptions = (DebugOptions) context.getService(debugRef);
 		DEBUG = debugOptions.getBooleanOption(PI_APP + "/debug", false); //$NON-NLS-1$
 		context.ungetService(debugRef);
@@ -99,35 +101,41 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 
 	private static EnvironmentInfo getEnvironmentInfo() {
 		BundleContext bc = Activator.getContext();
-		if (bc == null)
+		if (bc == null) {
 			return null;
+		}
 		ServiceReference infoRef = bc.getServiceReference(EnvironmentInfo.class.getName());
-		if (infoRef == null)
+		if (infoRef == null) {
 			return null;
+		}
 		EnvironmentInfo envInfo = (EnvironmentInfo) bc.getService(infoRef);
-		if (envInfo == null)
+		if (envInfo == null) {
 			return null;
+		}
 		bc.ungetService(infoRef);
 		return envInfo;
 	}
 
 	private void processCommandLineArgs(BundleContext bc) {
 		EnvironmentInfo envInfo = Activator.getEnvironmentInfo();
-		if (envInfo != null)
+		if (envInfo != null) {
 			CommandLineArgs.processCommandLine(envInfo);
+		}
 	}
 
 	@Override
 	public Object addingService(ServiceReference reference) {
 		BundleContext context = _context;
-		if (context == null)
+		if (context == null) {
 			return null; // really should never happen since we close the tracker before nulling out
+		}
 							// context
 		Object service = null;
 		EclipseAppContainer startContainer = null;
 		synchronized (this) {
-			if (container != null)
+			if (container != null) {
 				return null; // container is already started; do nothing
+			}
 
 			service = context.getService(reference);
 			if (registry == null && service instanceof IExtensionRegistry) {
@@ -144,8 +152,9 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 			return service;
 		}
 		// this means there is more than one registry; we don't need a second one
-		if (service != null)
+		if (service != null) {
 			context.ungetService(reference);
+		}
 		return null;
 	}
 
@@ -159,24 +168,27 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		EclipseAppContainer currentContainer = null;
 		synchronized (this) {
 			// either the registry or launcher is going away
-			if (service == registry)
+			if (service == registry) {
 				registry = null;
-			if (container == null)
+			}
+			if (container == null) {
 				return; // do nothing; we have not started the container yet
+			}
 			currentContainer = container;
 			container = null;
 		}
 		// stop the app container outside the sync block
-		if (currentContainer != null)
+		if (currentContainer != null) {
 			currentContainer.stop();
+		}
 	}
 
 	// helper used to protect callers from permission checks when opening service
 	// trackers
 	static void openTracker(final ServiceTracker tracker, final boolean allServices) {
-		if (System.getSecurityManager() == null)
+		if (System.getSecurityManager() == null) {
 			tracker.open(allServices);
-		else
+		} else {
 			AccessController.doPrivileged(new PrivilegedAction() {
 				@Override
 				public Object run() {
@@ -184,12 +196,14 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 					return null;
 				}
 			});
+		}
 	}
 
 	// helper used to protect callers from permission checks when get services
 	static Object getService(final ServiceTracker tracker) {
-		if (System.getSecurityManager() == null)
+		if (System.getSecurityManager() == null) {
 			return tracker.getService();
+		}
 		return AccessController.doPrivileged(new PrivilegedAction() {
 			@Override
 			public Object run() {
@@ -200,8 +214,9 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 
 	// helper used to protect callers from permission checks when getting locations
 	static String getLocation(final Bundle bundle) {
-		if (System.getSecurityManager() == null)
+		if (System.getSecurityManager() == null) {
 			return bundle.getLocation();
+		}
 		return (String) AccessController.doPrivileged(new PrivilegedAction() {
 			@Override
 			public Object run() {
@@ -216,18 +231,21 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 			try {
 				long id = Long.parseLong(((RegistryContributor) contributor).getActualId());
 				BundleContext context = _context;
-				if (context != null)
+				if (context != null) {
 					return context.getBundle(id);
+				}
 			} catch (NumberFormatException e) {
 				// try using the name of the contributor below
 			}
 		}
 		PackageAdmin packageAdmin = _packageAdmin;
-		if (packageAdmin == null)
+		if (packageAdmin == null) {
 			return null;
+		}
 		Bundle[] bundles = packageAdmin.getBundles(contributor.getName(), null);
-		if (bundles == null)
+		if (bundles == null) {
 			return null;
+		}
 		// Return the first bundle that is not installed or uninstalled
 		for (Bundle bundle : bundles) {
 			if ((bundle.getState() & (Bundle.INSTALLED | Bundle.UNINSTALLED)) == 0) {
@@ -248,15 +266,17 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	static void log(FrameworkLogEntry entry) {
 		ServiceTracker frameworkLogTracker = _frameworkLogTracker;
 		FrameworkLog log = frameworkLogTracker == null ? null : (FrameworkLog) frameworkLogTracker.getService();
-		if (log != null)
+		if (log != null) {
 			log.log(entry);
+		}
 	}
 
 	static void setProperty(String key, String value) {
 		EnvironmentInfo envInfo = getEnvironmentInfo();
-		if (envInfo != null)
+		if (envInfo != null) {
 			envInfo.setProperty(key, value);
-		else
+		} else {
 			System.getProperties().setProperty(key, value);
+		}
 	}
 }

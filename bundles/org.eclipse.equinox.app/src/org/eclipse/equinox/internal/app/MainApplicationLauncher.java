@@ -33,8 +33,9 @@ public class MainApplicationLauncher implements ApplicationRunnable {
 	public Object run(Object context) throws Exception {
 		appContainer.startDefaultApp(false);
 		ApplicationRunnable mainHandle = getMainHandle();
-		if (mainHandle != null)
+		if (mainHandle != null) {
 			return mainHandle.run(context);
+		}
 		throw new ApplicationException(ApplicationException.APPLICATION_INTERNAL_ERROR, Messages.application_noIdFound);
 	}
 
@@ -46,8 +47,9 @@ public class MainApplicationLauncher implements ApplicationRunnable {
 	public void stop() {
 		// force the application to quit
 		ApplicationRunnable handle = getMainHandle();
-		if (handle != null)
+		if (handle != null) {
 			handle.stop();
+		}
 	}
 
 	synchronized void launch(ApplicationRunnable app) {

@@ -85,8 +85,9 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 	}
 
 	private static void closeConfiguration() {
-		if (configTracker != null)
+		if (configTracker != null) {
 			configTracker.close();
+		}
 		configTracker = null;
 	}
 
@@ -131,10 +132,11 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 				saveData(FILE_APPSCHEDULED);
 			}
 		}
-		if (removed)
+		if (removed) {
 			synchronized (timerApps) {
 				timerApps.remove(scheduledApp);
 			}
+		}
 	}
 
 	/**
@@ -146,9 +148,10 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 	public static ScheduledApplication addScheduledApp(ApplicationDescriptor descriptor, String scheduleId,
 			Map<String, Object> arguments, String topic, String eventFilter, boolean recurring)
 			throws InvalidSyntaxException, ApplicationException {
-		if (!scheduling && !checkSchedulingSupport())
+		if (!scheduling && !checkSchedulingSupport()) {
 			throw new ApplicationException(ApplicationException.APPLICATION_SCHEDULING_FAILED,
 					"Cannot support scheduling without org.osgi.service.event package"); //$NON-NLS-1$
+		}
 		// check the event filter for correct syntax
 		context.createFilter(eventFilter);
 		EclipseScheduledApplication result;
@@ -166,16 +169,19 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 		if (ScheduledApplication.TIMER_TOPIC.equals(scheduledApp.getTopic())) {
 			synchronized (timerApps) {
 				timerApps.add(scheduledApp);
-				if (timerThread == null)
+				if (timerThread == null) {
 					startTimer();
+				}
 			}
 		}
 		scheduledApps.put(scheduledApp.getScheduleId(), scheduledApp);
 		Hashtable<String, Object> serviceProps = new Hashtable<>();
-		if (scheduledApp.getTopic() != null)
+		if (scheduledApp.getTopic() != null) {
 			serviceProps.put(EventConstants.EVENT_TOPIC, new String[] { scheduledApp.getTopic() });
-		if (scheduledApp.getEventFilter() != null)
+		}
+		if (scheduledApp.getEventFilter() != null) {
 			serviceProps.put(EventConstants.EVENT_FILTER, scheduledApp.getEventFilter());
+		}
 		serviceProps.put(ScheduledApplication.SCHEDULE_ID, scheduledApp.getScheduleId());
 		serviceProps.put(ScheduledApplication.APPLICATION_PID, scheduledApp.getAppPid());
 		ServiceRegistration sr = context.registerService(
@@ -185,19 +191,23 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 
 	private static String getNextScheduledID(String scheduledId) throws ApplicationException {
 		if (scheduledId != null) {
-			if (scheduledApps.get(scheduledId) != null)
+			if (scheduledApps.get(scheduledId) != null) {
 				throw new ApplicationException(ApplicationException.APPLICATION_DUPLICATE_SCHEDULE_ID,
 						"Duplicate scheduled ID: " + scheduledId); //$NON-NLS-1$
+			}
 			return scheduledId;
 		}
-		if (nextScheduledID == Integer.MAX_VALUE)
+		if (nextScheduledID == Integer.MAX_VALUE) {
 			nextScheduledID = 0;
+		}
 		String result = Integer.toString(nextScheduledID++);
-		while (scheduledApps.get(result) != null && nextScheduledID < Integer.MAX_VALUE)
+		while (scheduledApps.get(result) != null && nextScheduledID < Integer.MAX_VALUE) {
 			result = Integer.toString(nextScheduledID++);
-		if (nextScheduledID == Integer.MAX_VALUE)
+		}
+		if (nextScheduledID == Integer.MAX_VALUE) {
 			throw new ApplicationException(ApplicationException.APPLICATION_DUPLICATE_SCHEDULE_ID,
 					"Maximum number of scheduled applications reached"); //$NON-NLS-1$
+		}
 		return result;
 	}
 
@@ -216,8 +226,9 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 	private synchronized static boolean loadData(String fileName) {
 		try {
 			Location location = configLocation;
-			if (location == null)
+			if (location == null) {
 				return false;
+			}
 			File theStorageDir = new File(location.getURL().getPath() + '/' + Activator.PI_APP);
 			if (storageManager == null) {
 				boolean readOnly = location.isReadOnly();
@@ -235,12 +246,14 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 					tmp.close();
 				}
 			}
-			if (dataFile == null || !dataFile.isFile())
+			if (dataFile == null || !dataFile.isFile()) {
 				return true;
-			if (FILE_APPLOCKS.equals(fileName))
+			}
+			if (FILE_APPLOCKS.equals(fileName)) {
 				loadLocks(dataFile);
-			else if (FILE_APPSCHEDULED.equals(fileName))
+			} else if (FILE_APPSCHEDULED.equals(fileName)) {
 				loadSchedules(dataFile);
+			}
 		} catch (IOException e) {
 			return false;
 		}
@@ -251,12 +264,14 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 		try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(locksData));) {
 
 			int dataVersion = in.readInt();
-			if (dataVersion != DATA_VERSION)
+			if (dataVersion != DATA_VERSION) {
 				return;
+			}
 			int numLocks = in.readInt();
 			synchronized (locks) {
-				for (int i = 0; i < numLocks; i++)
+				for (int i = 0; i < numLocks; i++) {
 					locks.add(in.readUTF());
+				}
 			}
 		}
 	}
@@ -264,8 +279,9 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 	private static void loadSchedules(File schedulesData) throws IOException {
 		try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(schedulesData))) {
 			int dataVersion = in.readInt();
-			if (dataVersion != DATA_VERSION)
+			if (dataVersion != DATA_VERSION) {
 				return;
+			}
 			int numScheds = in.readInt();
 			for (int i = 0; i < numScheds; i++) {
 				String id = readString(in, false);
@@ -285,14 +301,16 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 	}
 
 	private synchronized static void saveData(String fileName) {
-		if (storageManager == null || storageManager.isReadOnly())
+		if (storageManager == null || storageManager.isReadOnly()) {
 			return;
+		}
 		try {
 			File data = storageManager.createTempFile(fileName);
-			if (FILE_APPLOCKS.equals(fileName))
+			if (FILE_APPLOCKS.equals(fileName)) {
 				saveLocks(data);
-			else if (FILE_APPSCHEDULED.equals(fileName))
+			} else if (FILE_APPSCHEDULED.equals(fileName)) {
 				saveSchedules(data);
+			}
 			storageManager.lookup(fileName, true);
 			storageManager.update(new String[] { fileName }, new String[] { data.getName() });
 		} catch (IOException e) {
@@ -306,8 +324,9 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 		try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(locksData))) {
 			out.writeInt(DATA_VERSION);
 			out.writeInt(locks.size());
-			for (String lock : locks)
+			for (String lock : locks) {
 				out.writeUTF(lock);
+			}
 		}
 	}
 
@@ -333,8 +352,9 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 	}
 
 	private static void stopTimer() {
-		if (timerThread != null)
+		if (timerThread != null) {
 			timerThread.interrupt();
+		}
 		timerThread = null;
 	}
 
@@ -347,8 +367,9 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 					Thread.sleep(30000); // sleeping 30 secs instead of 60 to try to avoid skipping minutes
 					Calendar cal = Calendar.getInstance();
 					int minute = cal.get(Calendar.MINUTE);
-					if (minute == lastMin)
+					if (minute == lastMin) {
 						continue;
+					}
 					lastMin = minute;
 					Hashtable<String, Object> props = new Hashtable<>();
 					props.put(ScheduledApplication.YEAR, Integer.valueOf(cal.get(Calendar.YEAR)));
@@ -362,8 +383,9 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 					// poor mans implementation of dispatching events; the spec will not allow us to
 					// use event admin to dispatch the virtual timer events; boo!!
 					synchronized (timerApps) {
-						if (timerApps.size() == 0)
+						if (timerApps.size() == 0) {
 							continue;
+						}
 						apps = timerApps.toArray(new EclipseScheduledApplication[timerApps.size()]);
 					}
 					for (EclipseScheduledApplication app : apps) {
@@ -388,15 +410,16 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 
 	private static String readString(ObjectInputStream in, boolean intern) throws IOException {
 		byte type = in.readByte();
-		if (type == NULL)
+		if (type == NULL) {
 			return null;
+		}
 		return intern ? in.readUTF().intern() : in.readUTF();
 	}
 
 	private static void writeStringOrNull(ObjectOutputStream out, String string) throws IOException {
-		if (string == null)
+		if (string == null) {
 			out.writeByte(NULL);
-		else {
+		} else {
 			out.writeByte(OBJECT);
 			out.writeUTF(string);
 		}
@@ -404,8 +427,9 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 
 	@Override
 	public Object addingService(ServiceReference reference) {
-		if (configLocation != null)
+		if (configLocation != null) {
 			return null; // only care about one configuration
+		}
 		configLocation = (Location) context.getService(reference);
 		loadData(FILE_APPLOCKS);
 		loadData(FILE_APPSCHEDULED);
@@ -419,7 +443,8 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 
 	@Override
 	public void removedService(ServiceReference reference, Object service) {
-		if (service == configLocation)
+		if (service == configLocation) {
 			configLocation = null;
+		}
 	}
 }

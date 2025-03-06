@@ -207,11 +207,13 @@ public abstract class ApplicationHandle {
 	 *             if the application handle is unregistered
 	 */
 	public final void destroy() {
-		if (STOPPING.equals(getState()))
+		if (STOPPING.equals(getState())) {
 			return;
+		}
 		SecurityManager sm = System.getSecurityManager();
-		if (sm != null)
+		if (sm != null) {
 			sm.checkPermission(new ApplicationAdminPermission(getApplicationDescriptor(), ApplicationAdminPermission.LIFECYCLE_ACTION));
+		}
 		destroySpecific();
 	}
 

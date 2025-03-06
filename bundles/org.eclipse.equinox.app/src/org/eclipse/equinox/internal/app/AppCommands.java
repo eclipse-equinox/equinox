@@ -45,15 +45,17 @@ public class AppCommands implements CommandProvider {
 	private ServiceRegistration providerRegistration;
 
 	static synchronized void create(BundleContext context) {
-		if (instance != null)
+		if (instance != null) {
 			return;
+		}
 		instance = new AppCommands();
 		instance.start(context);
 	}
 
 	static synchronized void destroy(BundleContext context) {
-		if (instance == null)
+		if (instance == null) {
 			return;
+		}
 		instance.stop(context);
 		instance = null;
 	}
@@ -82,12 +84,15 @@ public class AppCommands implements CommandProvider {
 
 	public void stop(BundleContext ctx) {
 		providerRegistration.unregister();
-		if (applicationDescriptors != null)
+		if (applicationDescriptors != null) {
 			applicationDescriptors.close();
-		if (applicationHandles != null)
+		}
+		if (applicationHandles != null) {
 			applicationHandles.close();
-		if (scheduledApplications != null)
+		}
+		if (scheduledApplications != null) {
 			scheduledApplications.close();
+		}
 	}
 
 	@Override
@@ -204,12 +209,14 @@ public class AppCommands implements CommandProvider {
 			intp.print(application);
 
 			if (getApplication(applicationHandles.getServiceReferences(), application,
-					ApplicationHandle.APPLICATION_DESCRIPTOR, true) != null)
+					ApplicationHandle.APPLICATION_DESCRIPTOR, true) != null) {
 				intp.print(" [running]"); //$NON-NLS-1$
+			}
 
 			if (getApplication(scheduledApplications.getServiceReferences(), application,
-					ScheduledApplication.APPLICATION_PID, true) != null)
+					ScheduledApplication.APPLICATION_PID, true) != null) {
 				intp.print(" [scheduled]"); //$NON-NLS-1$
+			}
 			if (!launchableApp.match(getServiceProps(app))) {
 				intp.print(" [not launchable]"); //$NON-NLS-1$
 			} else {
@@ -238,8 +245,9 @@ public class AppCommands implements CommandProvider {
 
 	private ServiceReference getApplication(ServiceReference[] apps, String targetId, String idKey,
 			boolean perfectMatch) {
-		if (apps == null || targetId == null)
+		if (apps == null || targetId == null) {
 			return null;
+		}
 
 		ServiceReference result = null;
 		boolean ambigous = false;
@@ -248,11 +256,13 @@ public class AppCommands implements CommandProvider {
 			if (targetId.equals(id)) {
 				return app; // always return a perfect match
 			}
-			if (perfectMatch)
+			if (perfectMatch) {
 				continue;
+			}
 			if (id.contains(targetId)) {
-				if (result != null)
+				if (result != null) {
 					ambigous = true;
+				}
 				result = app;
 			}
 		}
@@ -263,18 +273,20 @@ public class AppCommands implements CommandProvider {
 		String appId = intp.nextArgument();
 		ServiceReference application = getApplication(applicationDescriptors.getServiceReferences(), appId,
 				ApplicationDescriptor.APPLICATION_PID, false);
-		if (application == null)
+		if (application == null) {
 			intp.println("\"" + appId + "\" does not exist or is ambigous."); //$NON-NLS-1$ //$NON-NLS-2$
-		else {
+		} else {
 			ArrayList<String> argList = new ArrayList<>();
 			String arg = null;
-			while ((arg = intp.nextArgument()) != null)
+			while ((arg = intp.nextArgument()) != null) {
 				argList.add(arg);
+			}
 			String[] args = argList.size() == 0 ? null : (String[]) argList.toArray(new String[argList.size()]);
 			try {
 				HashMap<String, Object> launchArgs = new HashMap<>(1);
-				if (args != null)
+				if (args != null) {
 					launchArgs.put(IApplicationContext.APPLICATION_ARGS, args);
+				}
 				ApplicationDescriptor appDesc = (context.<ApplicationDescriptor>getService(application));
 				ApplicationHandle handle = appDesc.launch(launchArgs);
 				intp.println("Launched application instance: " + handle.getInstanceId()); //$NON-NLS-1$
@@ -290,12 +302,13 @@ public class AppCommands implements CommandProvider {
 		// first search for the application instance id
 		ServiceReference application = getApplication(applicationHandles.getServiceReferences(), appId,
 				ApplicationHandle.APPLICATION_PID, false);
-		if (application == null)
+		if (application == null) {
 			application = getApplication(applicationHandles.getServiceReferences(), appId,
 					ApplicationHandle.APPLICATION_DESCRIPTOR, false);
-		if (application == null)
+		}
+		if (application == null) {
 			intp.println("\"" + appId + "\" does not exist, is not running or is ambigous."); //$NON-NLS-1$ //$NON-NLS-2$
-		else {
+		} else {
 			if (activeApp.match(getServiceProps(application))) {
 				try {
 					ApplicationHandle appHandle = (ApplicationHandle) context.getService(application);
@@ -316,9 +329,9 @@ public class AppCommands implements CommandProvider {
 		String appId = intp.nextArgument();
 		ServiceReference application = getApplication(applicationDescriptors.getServiceReferences(), appId,
 				ApplicationDescriptor.APPLICATION_PID, false);
-		if (application == null)
+		if (application == null) {
 			intp.println("\"" + appId + "\" does not exist or is ambigous."); //$NON-NLS-1$ //$NON-NLS-2$
-		else {
+		} else {
 			try {
 				ApplicationDescriptor appDesc = (ApplicationDescriptor) context.getService(application);
 				appDesc.lock();
@@ -334,9 +347,9 @@ public class AppCommands implements CommandProvider {
 		String appId = intp.nextArgument();
 		ServiceReference application = getApplication(applicationDescriptors.getServiceReferences(), appId,
 				ApplicationDescriptor.APPLICATION_PID, false);
-		if (application == null)
+		if (application == null) {
 			intp.println("\"" + appId + "\" does not exist or is ambigous."); //$NON-NLS-1$ //$NON-NLS-2$
-		else {
+		} else {
 			try {
 				ApplicationDescriptor appDesc = (ApplicationDescriptor) context.getService(application);
 				appDesc.unlock();
@@ -352,9 +365,9 @@ public class AppCommands implements CommandProvider {
 		String appId = intp.nextArgument();
 		ServiceReference application = getApplication(applicationDescriptors.getServiceReferences(), appId,
 				ApplicationDescriptor.APPLICATION_PID, false);
-		if (application == null)
+		if (application == null) {
 			intp.println("\"" + appId + "\" does not exist or is ambigous."); //$NON-NLS-1$ //$NON-NLS-2$
-		else {
+		} else {
 			try {
 				ApplicationDescriptor appDesc = (ApplicationDescriptor) context.getService(application);
 				String filter = intp.nextArgument();
@@ -372,9 +385,9 @@ public class AppCommands implements CommandProvider {
 		String appId = intp.nextArgument();
 		ServiceReference application = getApplication(scheduledApplications.getServiceReferences(), appId,
 				ScheduledApplication.APPLICATION_PID, false);
-		if (application == null)
+		if (application == null) {
 			intp.println("\"" + appId + "\" does not exist or is ambigous."); //$NON-NLS-1$ //$NON-NLS-2$
-		else {
+		} else {
 			try {
 				ScheduledApplication schedApp = (ScheduledApplication) context.getService(application);
 				schedApp.remove();

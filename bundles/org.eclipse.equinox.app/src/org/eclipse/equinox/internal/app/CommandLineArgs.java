@@ -43,10 +43,12 @@ public class CommandLineArgs {
 
 	static String[] processCommandLine(EnvironmentInfo envInfo) {
 		String[] args = envInfo.getNonFrameworkArgs();
-		if (args == null)
+		if (args == null) {
 			return args;
-		if (args.length == 0)
+		}
+		if (args.length == 0) {
 			return args;
+		}
 		allArgs = args;
 		int[] configArgs = new int[args.length];
 		// need to initialize the first element to something that could not be an index.
@@ -57,41 +59,54 @@ public class CommandLineArgs {
 			// check for args without parameters (i.e., a flag arg)
 
 			// consume obsolete args for compatibility
-			if (args[i].equalsIgnoreCase(CLASSLOADER_PROPERTIES))
+			if (args[i].equalsIgnoreCase(CLASSLOADER_PROPERTIES)) {
 				found = true; // ignored
-			if (args[i].equalsIgnoreCase(NO_PACKAGE_PREFIXES))
+			}
+			if (args[i].equalsIgnoreCase(NO_PACKAGE_PREFIXES)) {
 				found = true; // ignored
-			if (args[i].equalsIgnoreCase(PLUGINS))
+			}
+			if (args[i].equalsIgnoreCase(PLUGINS)) {
 				found = true; // ignored
-			if (args[i].equalsIgnoreCase(FIRST_USE))
+			}
+			if (args[i].equalsIgnoreCase(FIRST_USE)) {
 				found = true; // ignored
-			if (args[i].equalsIgnoreCase(NO_UPDATE))
+			}
+			if (args[i].equalsIgnoreCase(NO_UPDATE)) {
 				found = true; // ignored
-			if (args[i].equalsIgnoreCase(NEW_UPDATES))
+			}
+			if (args[i].equalsIgnoreCase(NEW_UPDATES)) {
 				found = true; // ignored
-			if (args[i].equalsIgnoreCase(UPDATE))
+			}
+			if (args[i].equalsIgnoreCase(UPDATE)) {
 				found = true; // ignored
-			if (args[i].equalsIgnoreCase(BOOT))
+			}
+			if (args[i].equalsIgnoreCase(BOOT)) {
 				found = true; // ignored
-			if (args[i].equalsIgnoreCase(KEYRING))
+			}
+			if (args[i].equalsIgnoreCase(KEYRING)) {
 				found = true; // ignored
-			if (args[i].equalsIgnoreCase(PASSWORD))
+			}
+			if (args[i].equalsIgnoreCase(PASSWORD)) {
 				found = true; // ignored
-			if (args[i].equalsIgnoreCase(PLUGIN_CUSTOMIZATION))
+			}
+			if (args[i].equalsIgnoreCase(PLUGIN_CUSTOMIZATION)) {
 				found = true; // ignored
+			}
 
 			// done checking obsolete for args. Remember where an arg was found
 			if (found) {
 				configArgs[configArgIndex++] = i;
 				// check if the obsolete arg had a second param
-				if (i < (args.length - 1) && !args[i + 1].startsWith("-")) //$NON-NLS-1$
+				if (i < (args.length - 1) && !args[i + 1].startsWith("-")) { //$NON-NLS-1$
 					configArgs[configArgIndex++] = ++i;
+				}
 				continue;
 			}
 
 			// check for args with parameters
-			if (i == args.length - 1 || args[i + 1].startsWith("-")) //$NON-NLS-1$
+			if (i == args.length - 1 || args[i + 1].startsWith("-")) { //$NON-NLS-1$
 				continue;
+			}
 			String arg = args[++i];
 
 			// look for the product to run
@@ -125,10 +140,11 @@ public class CommandLineArgs {
 		configArgIndex = 0;
 		int j = 0;
 		for (int i = 0; i < args.length; i++) {
-			if (i == configArgs[configArgIndex])
+			if (i == configArgs[configArgIndex]) {
 				configArgIndex++;
-			else
+			} else {
 				appArgs[j++] = args[i];
+			}
 		}
 		return appArgs;
 	}

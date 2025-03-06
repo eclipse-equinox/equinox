@@ -62,13 +62,15 @@ public class DefaultApplicationListener implements ApplicationRunnable, ServiceT
 
 	@Override
 	public Object run(Object context) {
-		if (handleTracker == null)
+		if (handleTracker == null) {
 			return getResult(); // app has ended, return the result
+		}
 		EclipseAppHandle anyThreadedDefaultApp = (EclipseAppHandle) handleTracker.getService();
-		if (anyThreadedDefaultApp != null)
+		if (anyThreadedDefaultApp != null) {
 			// We now need to actual launch the application; this will run the application
 			// on another thread.
 			AnyThreadAppLauncher.launchEclipseApplication(anyThreadedDefaultApp);
+		}
 		try {
 			while (waitOnRunning()) {
 				EclipseAppHandle mainHandle = getMainHandle();
@@ -98,13 +100,15 @@ public class DefaultApplicationListener implements ApplicationRunnable, ServiceT
 	}
 
 	private synchronized void unsetMainHandle(EclipseAppHandle mainHandle) {
-		if (launchMainApp == mainHandle)
+		if (launchMainApp == mainHandle) {
 			launchMainApp = null;
+		}
 	}
 
 	private synchronized boolean waitOnRunning() {
-		if (!running)
+		if (!running) {
 			return false;
+		}
 		try {
 			wait(100);
 		} catch (InterruptedException e) {
@@ -115,8 +119,9 @@ public class DefaultApplicationListener implements ApplicationRunnable, ServiceT
 
 	@Override
 	public void stop() {
-		if (handleTracker == null)
+		if (handleTracker == null) {
 			return;
+		}
 		// force the default application to quit
 		ApplicationHandle handle = (ApplicationHandle) handleTracker.getService();
 		if (handle != null) {
@@ -148,7 +153,7 @@ public class DefaultApplicationListener implements ApplicationRunnable, ServiceT
 		// this should never timeout if the application exited normally.
 		result = ((EclipseAppHandle) service).waitForResult(5000);
 		EclipseAppHandle mainHandle = getMainHandle();
-		if (mainHandle != null)
+		if (mainHandle != null) {
 			// default application has quit; now force the main threaded application to quit
 			try {
 				mainHandle.destroy();
@@ -157,6 +162,7 @@ public class DefaultApplicationListener implements ApplicationRunnable, ServiceT
 				Activator.log(
 						new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.WARNING, 0, message, 0, t, null));
 			}
+		}
 		this.notify();
 	}
 
