@@ -83,8 +83,9 @@ public class BundleFileWrapperFactoryHookTests extends AbstractFrameworkHookTest
 			for (String line = reader.readLine(); line != null;) {
 				sb.append(line);
 				line = reader.readLine();
-				if (line != null)
+				if (line != null) {
 					sb.append('\n');
+				}
 			}
 		}
 		return sb.toString();

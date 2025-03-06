@@ -32,11 +32,13 @@ public class ExceptionHandlerTests {
 
 		@Override
 		public synchronized void frameworkEvent(FrameworkEvent newEvent) {
-			if (newEvent.getType() != FrameworkEvent.ERROR)
+			if (newEvent.getType() != FrameworkEvent.ERROR) {
 				return;
+			}
 
-			if (this.event != null)
+			if (this.event != null) {
 				return;
+			}
 			event = newEvent;
 			notify();
 		}

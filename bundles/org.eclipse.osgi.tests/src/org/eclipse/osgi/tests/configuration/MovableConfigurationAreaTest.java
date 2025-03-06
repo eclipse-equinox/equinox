@@ -114,9 +114,10 @@ public class MovableConfigurationAreaTest extends TestCase {
 		} catch (BundleException be) {
 			// success
 		} finally {
-			if (installed != null)
+			if (installed != null) {
 				// clean-up - only runs if we end-up accepting an invalid manifest
 				installed.uninstall();
+			}
 		}
 	}
 

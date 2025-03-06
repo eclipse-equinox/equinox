@@ -125,8 +125,10 @@ public abstract class AbstractTest {
 	}
 
 	protected void unregisterService(Object service) {
-		for (ServiceRegistration<?> serviceRegistration : serviceRegistrations)
-			if (getSystemBundleContext().getService(serviceRegistration.getReference()).equals(service))
+		for (ServiceRegistration<?> serviceRegistration : serviceRegistrations) {
+			if (getSystemBundleContext().getService(serviceRegistration.getReference()).equals(service)) {
 				serviceRegistration.unregister();
+			}
+		}
 	}
 }

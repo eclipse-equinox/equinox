@@ -230,8 +230,9 @@ public class KeyStoreTrustEngineTest extends TestCase {
 	 */
 	protected static void safeClose(OutputStream out) {
 		try {
-			if (out != null)
+			if (out != null) {
 				out.close();
+			}
 		} catch (IOException e) {
 			// ignore
 		}

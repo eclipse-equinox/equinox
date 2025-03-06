@@ -136,8 +136,9 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 			clearResults(results);
 		} finally {
 			OSGiTestsActivator.getContext().removeServiceListener(testListener);
-			if (reg != null)
+			if (reg != null) {
 				reg.unregister();
+			}
 		}
 	}
 
@@ -226,8 +227,9 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 			clearResults(results);
 		} finally {
 			OSGiTestsActivator.getContext().removeServiceListener(testListener);
-			if (reg != null)
+			if (reg != null) {
 				reg.unregister();
+			}
 		}
 	}
 
@@ -348,10 +350,12 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 			clearResults(results);
 		} finally {
 			OSGiTestsActivator.getContext().removeServiceListener(testListener);
-			if (reg1 != null)
+			if (reg1 != null) {
 				reg1.unregister();
-			if (reg2 != null)
+			}
+			if (reg2 != null) {
 				reg2.unregister();
+			}
 		}
 	}
 
@@ -385,12 +389,15 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 			assertNotNull("service ref is null", ref); //$NON-NLS-1$
 			assertEquals("Wrong references", reg2.getReference(), ref); //$NON-NLS-1$
 		} finally {
-			if (reg1 != null)
+			if (reg1 != null) {
 				reg1.unregister();
-			if (reg2 != null)
+			}
+			if (reg2 != null) {
 				reg2.unregister();
-			if (reg3 != null)
+			}
+			if (reg3 != null) {
 				reg3.unregister();
+			}
 		}
 	}
 
@@ -404,8 +411,9 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 						// nothing
 					}, null);
 		} finally {
-			if (reg != null)
+			if (reg != null) {
 				reg.unregister();
+			}
 		}
 	}
 
@@ -457,12 +465,15 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 			assertTrue("Wrong compareTo value: " + ref3.compareTo(ref2), ref3.compareTo(ref2) < 0); //$NON-NLS-1$
 			assertTrue("Wrong compareTo value: " + ref3.compareTo(ref3), ref3.compareTo(ref3) == 0); //$NON-NLS-1$
 		} finally {
-			if (reg1 != null)
+			if (reg1 != null) {
 				reg1.unregister();
-			if (reg2 != null)
+			}
+			if (reg2 != null) {
 				reg2.unregister();
-			if (reg3 != null)
+			}
+			if (reg3 != null) {
 				reg3.unregister();
+			}
 		}
 	}
 
@@ -486,10 +497,12 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 			assertEquals("wrong service reference", reg2.getReference(), //$NON-NLS-1$
 					getContext().getServiceReference("java.lang.Runnable")); //$NON-NLS-1$
 		} finally {
-			if (reg1 != null)
+			if (reg1 != null) {
 				reg1.unregister();
-			if (reg2 != null)
+			}
+			if (reg2 != null) {
 				reg2.unregister();
+			}
 		}
 	}
 
@@ -536,8 +549,9 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 			assertTrue(OSGiTestsActivator.getContext().createFilter("(&(!(test.null=*))(test.non.null=v1))")
 					.match(reg.getReference().getProperties()));
 		} finally {
-			if (reg != null)
+			if (reg != null) {
 				reg.unregister();
+			}
 		}
 	}
 
@@ -553,8 +567,9 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 			assertTrue(OSGiTestsActivator.getContext().createFilter("(test.non.null=v1)")
 					.match(reg.getReference().getProperties()));
 		} finally {
-			if (reg != null)
+			if (reg != null) {
 				reg.unregister();
+			}
 		}
 	}
 
@@ -702,12 +717,14 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 	}
 
 	private void clearResults(boolean[] results) {
-		for (int i = 0; i < results.length; i++)
+		for (int i = 0; i < results.length; i++) {
 			results[i] = false;
+		}
 	}
 
 	private void clearResults(int[] results) {
-		for (int i = 0; i < results.length; i++)
+		for (int i = 0; i < results.length; i++) {
 			results[i] = 0;
+		}
 	}
 }

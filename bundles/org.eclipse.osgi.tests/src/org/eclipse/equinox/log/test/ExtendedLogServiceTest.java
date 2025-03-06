@@ -99,22 +99,25 @@ public class ExtendedLogServiceTest {
 
 	@Test
 	public void testIsLoggableTrue() throws Exception {
-		if (!log.isLoggable(LogService.LOG_INFO))
+		if (!log.isLoggable(LogService.LOG_INFO)) {
 			fail();
+		}
 	}
 
 	@Test
 	public void testNotIsLoggableWithNoListener() throws Exception {
 		reader.removeLogListener(listener);
-		if (log.isLoggable(LogService.LOG_INFO))
+		if (log.isLoggable(LogService.LOG_INFO)) {
 			fail();
+		}
 	}
 
 	@Test
 	public void testNotIsLoggableWithListener() throws Exception {
 		reader.addLogListener(listener, (b, loggerName, logLevel) -> false);
-		if (log.isLoggable(LogService.LOG_INFO))
+		if (log.isLoggable(LogService.LOG_INFO)) {
 			fail();
+		}
 	}
 
 	@Test
@@ -184,22 +187,26 @@ public class ExtendedLogServiceTest {
 	@Test
 	public void testLoggerIsLoggableTrue() throws Exception {
 		reader.addLogListener(listener, (b, loggerName, logLevel) -> {
-			if (loggerName.equals("test"))
+			if (loggerName.equals("test")) {
 				return true;
+			}
 			return false;
 		});
-		if (!log.getLogger("test").isLoggable(LogService.LOG_INFO))
+		if (!log.getLogger("test").isLoggable(LogService.LOG_INFO)) {
 			fail();
+		}
 	}
 
 	@Test
 	public void testLoggerNotIsLoggableWithListener() throws Exception {
 		reader.addLogListener(listener, (b, loggerName, logLevel) -> {
-			if (loggerName.equals("test"))
+			if (loggerName.equals("test")) {
 				return false;
+			}
 			return true;
 		});
-		if (log.getLogger("test").isLoggable(LogService.LOG_INFO))
+		if (log.getLogger("test").isLoggable(LogService.LOG_INFO)) {
 			fail();
+		}
 	}
 }

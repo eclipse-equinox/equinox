@@ -74,10 +74,12 @@ public class OSGiAPICertificateTest extends BaseSecurityTest {
 	private final Collection<Bundle> installedBundles = new ArrayList<>();
 
 	private static String escapeStar(String dnChain) {
-		if (dnChain == null || dnChain.length() == 0)
+		if (dnChain == null || dnChain.length() == 0) {
 			return dnChain;
-		for (int star = dnChain.indexOf('*'); star >= 0; star = dnChain.indexOf('*', star + 2))
+		}
+		for (int star = dnChain.indexOf('*'); star >= 0; star = dnChain.indexOf('*', star + 2)) {
 			dnChain = dnChain.substring(0, star) + '\\' + dnChain.substring(star);
+		}
 		return dnChain;
 	}
 

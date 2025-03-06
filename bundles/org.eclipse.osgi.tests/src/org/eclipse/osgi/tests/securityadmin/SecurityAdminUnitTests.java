@@ -184,8 +184,9 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 	@Override
 	public void tearDown() throws Exception {
 		equinox.stop();
-		if (System.getSecurityManager() != null)
+		if (System.getSecurityManager() != null) {
 			System.setSecurityManager(null);
+		}
 		Policy.setPolicy(previousPolicy);
 		super.tearDown();
 	}
@@ -963,8 +964,9 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 		String info3 = "deny { [Test3] (Type3 \"name3\" \"action3\") } \"name3\""; //$NON-NLS-1$
 
 		ArrayList infos = new ArrayList();
-		for (Enumeration eInfos = cpa.getConditionalPermissionInfos(); eInfos.hasMoreElements();)
+		for (Enumeration eInfos = cpa.getConditionalPermissionInfos(); eInfos.hasMoreElements();) {
 			infos.add(eInfos.nextElement());
+		}
 		assertEquals("Wrong number of infos", 2, infos.size()); //$NON-NLS-1$
 		assertTrue("Missing info1", infos.contains(cpa.newConditionalPermissionInfo(info1))); //$NON-NLS-1$
 		assertTrue("Missing info2", infos.contains(cpa.newConditionalPermissionInfo(info2))); //$NON-NLS-1$
@@ -978,8 +980,9 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 		assertTrue("Failed commit", update.commit()); //$NON-NLS-1$
 
 		infos = new ArrayList();
-		for (Enumeration eInfos = cpa.getConditionalPermissionInfos(); eInfos.hasMoreElements();)
+		for (Enumeration eInfos = cpa.getConditionalPermissionInfos(); eInfos.hasMoreElements();) {
 			infos.add(eInfos.nextElement());
+		}
 		assertTrue("Info lists are not equal", updateInfos.equals(infos)); //$NON-NLS-1$
 	}
 

@@ -22,10 +22,11 @@ public class Activator implements BundleActivator {
 	public void start(BundleContext context) throws Exception {
 		ServiceReference[] refs = context.getServiceReferences(Runnable.class.getName(), "(test=bug306181)");
 		String error = null;
-		if (refs == null)
+		if (refs == null) {
 			error = "Did not find expected service";
-		else if (refs.length != 1)
+		} else if (refs.length != 1) {
 			error = "Found wrong number of services: " + refs.length;
+		}
 		if (error != null) {
 			Hashtable props = new Hashtable();
 			props.put("test", "bug306181");

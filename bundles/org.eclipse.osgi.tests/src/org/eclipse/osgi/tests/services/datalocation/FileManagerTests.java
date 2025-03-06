@@ -55,10 +55,12 @@ public class FileManagerTests {
 
 	@After
 	public void tearDown() throws Exception {
-		if (manager1 != null)
+		if (manager1 != null) {
 			manager1.close();
-		if (manager2 != null)
+		}
+		if (manager2 != null) {
 			manager2.close();
+		}
 		rm(base);
 	}
 
@@ -313,8 +315,9 @@ public class FileManagerTests {
 		manager1.close(); // force a cleanup
 		manager1 = null;
 		// sanity check
-		if (file1.exists() || !file2.exists() || file3.exists())
+		if (file1.exists() || !file2.exists() || file3.exists()) {
 			fail("Failed creating a file revision");
+		}
 
 		manager2 = new StorageManager(base, null);
 		manager2.open(true);
@@ -360,9 +363,10 @@ public class FileManagerTests {
 		// So run this test for windows only.
 		@SuppressWarnings("deprecation")
 		String ee = System.getProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT);
-		if (!"win32".equalsIgnoreCase(System.getProperty("osgi.os")) && ee.indexOf("JavaSE-1.6") == -1)
+		if (!"win32".equalsIgnoreCase(System.getProperty("osgi.os")) && ee.indexOf("JavaSE-1.6") == -1) {
 			// this is a Windows-only test or JavaSE-1.6 or higher test
 			return;
+		}
 		String fileName = "testMultipleFileManagers.txt";
 		File file1 = new File(base, fileName + ".1");
 		File file2 = new File(base, fileName + ".2");
@@ -430,9 +434,10 @@ public class FileManagerTests {
 	@Test
 	public void testJavaIOLocking() throws FileNotFoundException, IOException {
 		// This type of locking is only sure to work on Win32.
-		if (!"win32".equalsIgnoreCase(System.getProperty("osgi.os")))
+		if (!"win32".equalsIgnoreCase(System.getProperty("osgi.os"))) {
 			// this is a Windows-only test
 			return;
+		}
 		String fileName = "testJavaIOLocking";
 		File lockFile = new File(new File(base, ".manager"), ".fileTableLock");
 		lockFile.getParentFile().mkdirs();

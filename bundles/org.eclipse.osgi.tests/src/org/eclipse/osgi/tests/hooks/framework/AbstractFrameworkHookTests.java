@@ -54,8 +54,9 @@ public abstract class AbstractFrameworkHookTests {
 
 		@Override
 		public URL getResource(String name) {
-			if (isLocalResource(name))
+			if (isLocalResource(name)) {
 				return findResource(name);
+			}
 			return super.getResource(name);
 		}
 
@@ -66,8 +67,9 @@ public abstract class AbstractFrameworkHookTests {
 
 		@Override
 		public Enumeration<URL> getResources(String name) throws IOException {
-			if (isLocalResource(name))
+			if (isLocalResource(name)) {
 				return findResources(name);
+			}
 			return super.getResources(name);
 		}
 
@@ -86,8 +88,9 @@ public abstract class AbstractFrameworkHookTests {
 			if (name.startsWith("org.eclipse") || name.startsWith("org.osgi.framework.FrameworkUtil")
 					|| name.equals(FrameworkUtilHelper.class.getName())) {
 				Class<?> result = findLoadedClass(name);
-				if (result == null)
+				if (result == null) {
 					result = findClass(name);
+				}
 				return result;
 			}
 			return super.loadClass(name, resolve);
@@ -154,10 +157,11 @@ public abstract class AbstractFrameworkHookTests {
 		BundleContext context = getContext();
 		String osgiFramework = context.getProperty(EclipseStarter.PROP_FRAMEWORK);
 		URL[] urls;
-		if ("folder".equals(context.getProperty(EclipseStarter.PROP_FRAMEWORK_SHAPE)))
+		if ("folder".equals(context.getProperty(EclipseStarter.PROP_FRAMEWORK_SHAPE))) {
 			urls = new URL[] { new URL(osgiFramework), new URL(osgiFramework + "bin/") };
-		else
+		} else {
 			urls = new URL[] { new URL(osgiFramework) };
+		}
 		classLoader = new BasicURLClassLoader(urls, getClass().getClassLoader(), testURL);
 	}
 }

@@ -85,12 +85,14 @@ public class BundleInstaller {
 	}
 
 	private Bundle install(String location, InputStream input, String name, boolean track) throws BundleException {
-		if (bundles == null && track)
+		if (bundles == null && track) {
 			return null;
+		}
 		try (InputStream in = input) {
 			Bundle bundle = context.installBundle(location, input);
-			if (track)
+			if (track) {
 				bundles.put(name, bundle);
+			}
 			return bundle;
 		} catch (IOException e) { // ignore
 			throw new BundleException("Failed to close bundle's input stream", e);
@@ -98,8 +100,9 @@ public class BundleInstaller {
 	}
 
 	public String getBundleLocation(final String name) throws BundleException {
-		if (System.getSecurityManager() == null)
+		if (System.getSecurityManager() == null) {
 			return getBundleLocation0(name);
+		}
 		try {
 			return (String) AccessController.doPrivileged((PrivilegedExceptionAction) () -> getBundleLocation0(name));
 		} catch (PrivilegedActionException e) {
@@ -110,39 +113,46 @@ public class BundleInstaller {
 	String getBundleLocation0(String name) throws BundleException {
 		String bundleFileName = rootLocation + "/" + name;
 		URL bundleURL = context.getBundle().getEntry(bundleFileName + ".jar");
-		if (bundleURL == null)
+		if (bundleURL == null) {
 			bundleURL = context.getBundle().getEntry(bundleFileName);
-		if (bundleURL == null)
+		}
+		if (bundleURL == null) {
 			throw new BundleException("Could not find bundle to install at: " + name);
+		}
 		try {
 			bundleURL = converter.getService().resolve(bundleURL);
 		} catch (IOException e) {
 			throw new BundleException("Converter error", e);
 		}
 		String location = bundleURL.toExternalForm();
-		if ("file".equals(bundleURL.getProtocol()))
+		if ("file".equals(bundleURL.getProtocol())) {
 			location = "reference:" + location;
+		}
 		return location;
 	}
 
 	synchronized public Bundle updateBundle(String fromName, String toName) throws BundleException {
-		if (bundles == null)
+		if (bundles == null) {
 			return null;
+		}
 		Bundle fromBundle = bundles.get(fromName);
-		if (fromBundle == null)
+		if (fromBundle == null) {
 			throw new BundleException("The bundle to update does not exist!! " + fromName);
+		}
 		String bundleFileName = rootLocation + "/" + toName;
 		URL bundleURL = context.getBundle().getEntry(bundleFileName + ".jar");
-		if (bundleURL == null)
+		if (bundleURL == null) {
 			bundleURL = context.getBundle().getEntry(bundleFileName);
+		}
 		try {
 			bundleURL = converter.getService().resolve(bundleURL);
 		} catch (IOException e) {
 			throw new BundleException("Converter error", e);
 		}
 		String location = bundleURL.toExternalForm();
-		if ("file".equals(bundleURL.getProtocol()))
+		if ("file".equals(bundleURL.getProtocol())) {
 			location = "reference:" + location;
+		}
 		try {
 			fromBundle.update(new URL(location).openStream());
 		} catch (Exception e) {
@@ -154,18 +164,21 @@ public class BundleInstaller {
 	}
 
 	synchronized public Bundle uninstallBundle(String name) throws BundleException {
-		if (bundles == null)
+		if (bundles == null) {
 			return null;
+		}
 		Bundle bundle = bundles.remove(name);
-		if (bundle == null)
+		if (bundle == null) {
 			return null;
+		}
 		bundle.uninstall();
 		return bundle;
 	}
 
 	synchronized public Bundle[] uninstallAllBundles() {
-		if (bundles == null)
+		if (bundles == null) {
 			return new Bundle[0];
+		}
 		List<Bundle> result = new ArrayList<>(bundles.size());
 		for (Bundle bundle : bundles.values()) {
 			try {
@@ -183,8 +196,9 @@ public class BundleInstaller {
 	}
 
 	synchronized public void shutdown() {
-		if (bundles == null)
+		if (bundles == null) {
 			return;
+		}
 		Bundle[] result = uninstallAllBundles();
 		refreshPackages(result);
 		packageAdmin.close();
@@ -195,8 +209,9 @@ public class BundleInstaller {
 	}
 
 	synchronized public Bundle[] refreshPackages(Bundle[] refresh) {
-		if (bundles == null)
+		if (bundles == null) {
 			return null;
+		}
 		PackageAdmin pa = packageAdmin.getService();
 		CountDownLatch flag = new CountDownLatch(1);
 		FrameworkListener listener = event -> {
@@ -220,15 +235,17 @@ public class BundleInstaller {
 	}
 
 	synchronized public boolean resolveBundles(Bundle[] resolve) {
-		if (bundles == null)
+		if (bundles == null) {
 			return false;
+		}
 		PackageAdmin pa = packageAdmin.getService();
 		return pa.resolveBundles(resolve);
 	}
 
 	synchronized public Bundle getBundle(String name) {
-		if (bundles == null)
+		if (bundles == null) {
 			return null;
+		}
 		return bundles.get(name);
 	}
 

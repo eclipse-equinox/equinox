@@ -52,8 +52,9 @@ public class BasePerformanceTest extends AbstractStateTest {
 			ImportPackageSpecification[] importPackages = new ImportPackageSpecification[importPackageCount];
 			for (int j = 0; j < importPackages.length; j++) {
 				int index = importedPackageIndex++;
-				if (importedPackageIndex > exportPackageCount)
+				if (importedPackageIndex > exportPackageCount) {
 					importedPackageIndex = 1;
+				}
 				String packageName = "package." + index;
 				importPackages[j] = stateFactory.createImportPackageSpecification(packageName,
 						new VersionRange("1.0.0"), null, null, null, null, null);

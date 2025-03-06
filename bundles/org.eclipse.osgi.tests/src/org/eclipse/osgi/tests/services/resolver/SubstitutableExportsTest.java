@@ -1714,15 +1714,17 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		System.arraycopy(aExported, 0, expected, 0, aExported.length);
 		System.arraycopy(gExported, 0, expected, aExported.length, gExported.length);
 		for (int i = 0; i < expected.length; i++) {
-			if (i == 2)
+			if (i == 2) {
 				assertContains("aVisible not correct", aVisible, expected[i]); //$NON-NLS-1$
+			}
 			assertContains("bVisible not correct", bVisible, expected[i]); //$NON-NLS-1$
 			assertContains("cVisible not correct", cVisible, expected[i]); //$NON-NLS-1$
 			assertContains("dVisible not correct", dVisible, expected[i]); //$NON-NLS-1$
 			assertContains("eVisible not correct", eVisible, expected[i]); //$NON-NLS-1$
 			assertContains("fVisible not correct", fVisible, expected[i]); //$NON-NLS-1$
-			if (i == 0 || i == 1)
+			if (i == 0 || i == 1) {
 				assertContains("gVisible not correct", gVisible, expected[i]); //$NON-NLS-1$
+			}
 			assertContains("hVisible not correct", hVisible, expected[i]); //$NON-NLS-1$
 		}
 	}

@@ -99,19 +99,21 @@ public class LoggingTests extends AbstractBundleTests {
 		}
 
 		synchronized boolean waitforContext() {
-			if (context.size() > 0)
+			if (context.size() > 0) {
 				try {
 					wait(5000);
 				} catch (InterruptedException e) {
 					Thread.currentThread().interrupt();
 				}
+			}
 			return context.size() == 0;
 
 		}
 
 		synchronized void checkContext(IStatus check) {
-			if (check == null)
+			if (check == null) {
 				return;
+			}
 			if (context.size() > 0) {
 				IStatus expected = (IStatus) context.get(0);
 				try {
@@ -123,8 +125,9 @@ public class LoggingTests extends AbstractBundleTests {
 					return;
 				}
 				context.remove(0);
-				if (context.size() == 0)
+				if (context.size() == 0) {
 					notifyAll();
+				}
 			}
 		}
 
@@ -156,10 +159,12 @@ public class LoggingTests extends AbstractBundleTests {
 		public void logged(LogEntry entry) {
 			entries.add(entry);
 			Object check = ((ExtendedLogEntry) entry).getContext();
-			if (check instanceof FrameworkLogEntry)
+			if (check instanceof FrameworkLogEntry) {
 				check = ((FrameworkLogEntry) check).getContext();
-			if (check instanceof IStatus)
+			}
+			if (check instanceof IStatus) {
 				checkContext((IStatus) check);
+			}
 		}
 
 		List getEntries() {
@@ -402,14 +407,16 @@ public class LoggingTests extends AbstractBundleTests {
 			logRef.logService.log(LogService.LOG_ERROR, getName());
 			Event testEvent = null;
 			synchronized (events) {
-				if (events.size() == 0)
+				if (events.size() == 0) {
 					try {
 						events.wait(5000);
 					} catch (InterruptedException e) {
 						Thread.currentThread().interrupt();
 					}
-				if (events.size() > 0)
+				}
+				if (events.size() > 0) {
 					testEvent = (Event) events.get(0);
+				}
 			}
 			assertNotNull("No event fired", testEvent);
 			assertEquals("Wrong message", getName(), testEvent.getProperty("message"));
@@ -441,12 +448,13 @@ public class LoggingTests extends AbstractBundleTests {
 			logRef.logService.log(LogService.LOG_ERROR, getName());
 			int size = 0;
 			synchronized (events) {
-				for (int i = 0; i < 3 && events.size() < 3; i++)
+				for (int i = 0; i < 3 && events.size() < 3; i++) {
 					try {
 						events.wait(5000);
 					} catch (InterruptedException e) {
 						Thread.currentThread().interrupt();
 					}
+				}
 				size = events.size();
 			}
 			assertEquals("Should only get one event from bad handler", 2, size);

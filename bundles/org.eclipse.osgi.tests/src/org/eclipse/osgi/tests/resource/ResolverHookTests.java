@@ -40,8 +40,9 @@ public class ResolverHookTests extends AbstractResourceTest {
 
 			@Override
 			public void filterSingletonCollisions(BundleCapability singleton, Collection collisionCandidates) {
-				if (error[0] != null)
+				if (error[0] != null) {
 					return;
+				}
 				called[0] = true;
 				try {
 					assertEquals("Wrong namespace", IdentityNamespace.IDENTITY_NAMESPACE, singleton.getNamespace());
@@ -86,8 +87,9 @@ public class ResolverHookTests extends AbstractResourceTest {
 			assertFalse(getContext().getBundle(0).adapt(FrameworkWiring.class)
 					.resolveBundles(Arrays.asList(new Bundle[] { tb1v1, tb1v2 })));
 			assertTrue("ResolverHook was not called", called[0]);
-			if (error[0] != null)
+			if (error[0] != null) {
 				throw error[0];
+			}
 		} finally {
 			hookReg.unregister();
 		}
