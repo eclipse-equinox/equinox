@@ -329,17 +329,20 @@ public class Main {
 			StringTokenizer tokenizer = new StringTokenizer(versionString, DELIM);
 
 			// major
-			if (tokenizer.hasMoreTokens())
+			if (tokenizer.hasMoreTokens()) {
 				major = Integer.parseInt(tokenizer.nextToken());
+			}
 
 			try {
 				// minor
-				if (tokenizer.hasMoreTokens())
+				if (tokenizer.hasMoreTokens()) {
 					minor = Integer.parseInt(tokenizer.nextToken());
+				}
 
 				// service
-				if (tokenizer.hasMoreTokens())
+				if (tokenizer.hasMoreTokens()) {
 					service = Integer.parseInt(tokenizer.nextToken());
+				}
 			} catch (NumberFormatException nfe) {
 				// ignore the minor and service qualifiers in that case and default to 0
 				// this will allow us to tolerate other non-conventional version numbers
@@ -356,23 +359,28 @@ public class Main {
 		 * 2.0.0 >= 1.3.1 -> true
 		 */
 		boolean isGreaterEqualTo(Identifier minimum) {
-			if (major < minimum.major)
+			if (major < minimum.major) {
 				return false;
-			if (major > minimum.major)
+			}
+			if (major > minimum.major) {
 				return true;
+			}
 			// major numbers are equivalent so check minor
-			if (minor < minimum.minor)
+			if (minor < minimum.minor) {
 				return false;
-			if (minor > minimum.minor)
+			}
+			if (minor > minimum.minor) {
 				return true;
+			}
 			// minor numbers are equivalent so check service
 			return service >= minimum.service;
 		}
 	}
 
 	private String getWS() {
-		if (ws != null)
+		if (ws != null) {
 			return ws;
+		}
 
 		String osgiWs = System.getProperty(PROP_WS);
 		if (osgiWs != null) {
@@ -381,60 +389,79 @@ public class Main {
 		}
 
 		String osName = getOS();
-		if (osName.equals(Constants.OS_WIN32))
+		if (osName.equals(Constants.OS_WIN32)) {
 			return Constants.WS_WIN32;
-		if (osName.equals(Constants.OS_LINUX))
+		}
+		if (osName.equals(Constants.OS_LINUX)) {
 			return Constants.WS_GTK;
-		if (osName.equals(Constants.OS_MACOSX))
+		}
+		if (osName.equals(Constants.OS_MACOSX)) {
 			return Constants.WS_COCOA;
-		if (osName.equals(Constants.OS_HPUX))
+		}
+		if (osName.equals(Constants.OS_HPUX)) {
 			return Constants.WS_GTK;
-		if (osName.equals(Constants.OS_AIX))
+		}
+		if (osName.equals(Constants.OS_AIX)) {
 			return Constants.WS_GTK;
-		if (osName.equals(Constants.OS_SOLARIS))
+		}
+		if (osName.equals(Constants.OS_SOLARIS)) {
 			return Constants.WS_GTK;
-		if (osName.equals(Constants.OS_QNX))
+		}
+		if (osName.equals(Constants.OS_QNX)) {
 			return Constants.WS_PHOTON;
+		}
 		return Constants.WS_UNKNOWN;
 	}
 
 	private String getOS() {
-		if (os != null)
+		if (os != null) {
 			return os;
+		}
 		String osgiOs = System.getProperty(PROP_OS);
 		if (osgiOs != null) {
 			os = osgiOs;
 			return os;
 		}
 		String osName = System.getProperty("os.name"); //$NON-NLS-1$
-		if (osName.regionMatches(true, 0, Constants.OS_WIN32, 0, 3))
+		if (osName.regionMatches(true, 0, Constants.OS_WIN32, 0, 3)) {
 			return Constants.OS_WIN32;
+		}
 		// EXCEPTION: All mappings of SunOS convert to Solaris
-		if (osName.equalsIgnoreCase(Constants.INTERNAL_OS_SUNOS))
+		if (osName.equalsIgnoreCase(Constants.INTERNAL_OS_SUNOS)) {
 			return Constants.OS_SOLARIS;
-		if (osName.equalsIgnoreCase(Constants.INTERNAL_OS_LINUX))
+		}
+		if (osName.equalsIgnoreCase(Constants.INTERNAL_OS_LINUX)) {
 			return Constants.OS_LINUX;
-		if (osName.equalsIgnoreCase(Constants.INTERNAL_OS_QNX))
+		}
+		if (osName.equalsIgnoreCase(Constants.INTERNAL_OS_QNX)) {
 			return Constants.OS_QNX;
-		if (osName.equalsIgnoreCase(Constants.INTERNAL_OS_AIX))
+		}
+		if (osName.equalsIgnoreCase(Constants.INTERNAL_OS_AIX)) {
 			return Constants.OS_AIX;
-		if (osName.equalsIgnoreCase(Constants.INTERNAL_OS_HPUX))
+		}
+		if (osName.equalsIgnoreCase(Constants.INTERNAL_OS_HPUX)) {
 			return Constants.OS_HPUX;
-		if (osName.equalsIgnoreCase(Constants.INTERNAL_OS_OS400))
+		}
+		if (osName.equalsIgnoreCase(Constants.INTERNAL_OS_OS400)) {
 			return Constants.OS_OS400;
-		if (osName.equalsIgnoreCase(Constants.INTERNAL_OS_OS390))
+		}
+		if (osName.equalsIgnoreCase(Constants.INTERNAL_OS_OS390)) {
 			return Constants.OS_OS390;
-		if (osName.equalsIgnoreCase(Constants.INTERNAL_OS_ZOS))
+		}
+		if (osName.equalsIgnoreCase(Constants.INTERNAL_OS_ZOS)) {
 			return Constants.OS_ZOS;
+		}
 		// os.name on Mac OS can be either Mac OS or Mac OS X
-		if (osName.regionMatches(true, 0, Constants.INTERNAL_OS_MACOSX, 0, Constants.INTERNAL_OS_MACOSX.length()))
+		if (osName.regionMatches(true, 0, Constants.INTERNAL_OS_MACOSX, 0, Constants.INTERNAL_OS_MACOSX.length())) {
 			return Constants.OS_MACOSX;
+		}
 		return Constants.OS_UNKNOWN;
 	}
 
 	private String getArch() {
-		if (arch != null)
+		if (arch != null) {
 			return arch;
+		}
 		String osgiArch = System.getProperty(PROP_ARCH);
 		if (osgiArch != null) {
 			arch = osgiArch;
@@ -442,8 +469,9 @@ public class Main {
 		}
 		String name = System.getProperty("os.arch");//$NON-NLS-1$
 		// Map amd64 architecture to x86_64
-		if (name.equalsIgnoreCase(Constants.INTERNAL_AMD64))
+		if (name.equalsIgnoreCase(Constants.INTERNAL_AMD64)) {
 			return Constants.ARCH_X86_64;
+		}
 
 		return name;
 	}
@@ -452,8 +480,9 @@ public class Main {
 	 *  Sets up the JNI bridge to native calls
 	 */
 	private void setupJNI(URL[] defaultPath) {
-		if (bridge != null)
+		if (bridge != null) {
 			return;
+		}
 
 		String libPath = null;
 
@@ -471,8 +500,9 @@ public class Main {
 			libPath = getLibraryPath(fragmentName, defaultPath);
 		}
 		library = libPath;
-		if (library != null)
+		if (library != null) {
 			bridge = new JNIBridge(library);
+		}
 	}
 
 	private String getLibraryPath(String fragmentName, URL[] defaultPath) {
@@ -486,8 +516,9 @@ public class Main {
 				if (location.isAbsolute()) {
 					String dir = location.getParent();
 					fragment = searchFor(fragmentName, dir);
-					if (fragment != null)
+					if (fragment != null) {
 						libPath = getLibraryFromFragment(fragment);
+					}
 				}
 			}
 		}
@@ -498,10 +529,12 @@ public class Main {
 				for (int i = urls.length - 1; i >= 0 && libPath == null; i--) {
 					File entryFile = new File(urls[i].getFile());
 					String dir = entryFile.getParent();
-					if (fragment == null)
+					if (fragment == null) {
 						fragment = searchFor(fragmentName, dir);
-					if (fragment != null)
+					}
+					if (fragment != null) {
 						libPath = getLibraryFromFragment(fragment);
+					}
 				}
 			}
 		}
@@ -510,22 +543,26 @@ public class Main {
 			String location = install.getFile();
 			location += "/plugins/"; //$NON-NLS-1$
 			fragment = searchFor(fragmentName, location);
-			if (fragment != null)
+			if (fragment != null) {
 				libPath = getLibraryFromFragment(fragment);
+			}
 		}
 		return libPath;
 	}
 
 	private String getLibraryFromFragment(String fragment) {
-		if (fragment.startsWith(FILE_SCHEME))
+		if (fragment.startsWith(FILE_SCHEME)) {
 			fragment = fragment.substring(5);
+		}
 
 		File frag = new File(fragment);
-		if (!frag.exists())
+		if (!frag.exists()) {
 			return null;
+		}
 
-		if (frag.isDirectory())
+		if (frag.isDirectory()) {
 			return searchFor("eclipse", fragment); //$NON-NLS-1$;
+		}
 
 		try (ZipFile fragmentJar = new ZipFile(frag)) {
 			Enumeration<? extends ZipEntry> entries = fragmentJar.entries();
@@ -567,9 +604,10 @@ public class Main {
 		commands = args;
 		String[] passThruArgs = processCommandLine(args);
 
-		if (!debug)
+		if (!debug) {
 			// debug can be specified as system property as well
 			debug = System.getProperty(PROP_DEBUG) != null;
+		}
 		setupVMProperties();
 		processConfiguration();
 
@@ -591,12 +629,14 @@ public class Main {
 
 		//ensure minimum Java version, do this after JNI is set up so that we can write an error message
 		//with exitdata if we fail.
-		if (!checkVersion(System.getProperty("java.version"), System.getProperty(PROP_REQUIRED_JAVA_VERSION))) //$NON-NLS-1$
+		if (!checkVersion(System.getProperty("java.version"), System.getProperty(PROP_REQUIRED_JAVA_VERSION))) { //$NON-NLS-1$
 			return;
+		}
 
 		// verify configuration location is writable
-		if (!checkConfigurationLocation(configurationLocation))
+		if (!checkConfigurationLocation(configurationLocation)) {
 			return;
+		}
 
 		setSecurityPolicy(bootPath);
 		// splash handling is done here, because the default case needs to know
@@ -618,8 +658,9 @@ public class Main {
 			// Do not set the security manager, this will be done by the framework itself.
 			ProtectionDomain domain = Main.class.getProtectionDomain();
 			CodeSource source = null;
-			if (domain != null)
+			if (domain != null) {
 				source = Main.class.getProtectionDomain().getCodeSource();
+			}
 			if (domain == null || source == null) {
 				log("Can not automatically set the security manager. Please use a policy file."); //$NON-NLS-1$
 				return;
@@ -654,14 +695,16 @@ public class Main {
 		type = System.getProperty(PROP_PARENT_CLASSLOADER, type);
 		type = System.getProperty(PROP_FRAMEWORK_PARENT_CLASSLOADER, type);
 		ClassLoader parent = null;
-		if (PARENT_CLASSLOADER_APP.equalsIgnoreCase(type))
+		if (PARENT_CLASSLOADER_APP.equalsIgnoreCase(type)) {
 			parent = ClassLoader.getSystemClassLoader();
-		else if (PARENT_CLASSLOADER_EXT.equalsIgnoreCase(type)) {
+		} else if (PARENT_CLASSLOADER_EXT.equalsIgnoreCase(type)) {
 			ClassLoader appCL = ClassLoader.getSystemClassLoader();
-			if (appCL != null)
+			if (appCL != null) {
 				parent = appCL.getParent();
-		} else if (PARENT_CLASSLOADER_CURRENT.equalsIgnoreCase(type))
+			}
+		} else if (PARENT_CLASSLOADER_CURRENT.equalsIgnoreCase(type)) {
 			parent = this.getClass().getClassLoader();
+		}
 		@SuppressWarnings("resource")
 		URLClassLoader loader = new StartupClassLoader(bootPath, parent);
 		Class<?> clazz = loader.loadClass(STARTER);
@@ -669,13 +712,14 @@ public class Main {
 		try {
 			method.invoke(clazz, passThruArgs, splashHandler);
 		} catch (InvocationTargetException e) {
-			if (e.getTargetException() instanceof Error)
+			if (e.getTargetException() instanceof Error) {
 				throw (Error) e.getTargetException();
-			else if (e.getTargetException() instanceof Exception)
+			} else if (e.getTargetException() instanceof Exception) {
 				throw (Exception) e.getTargetException();
-			else
+			} else {
 				//could be a subclass of Throwable!
 				throw e;
+			}
 		}
 	}
 
@@ -687,8 +731,9 @@ public class Main {
 	 * @return a boolean indicating whether the checking passed
 	 */
 	private boolean checkVersion(String availableVersion, String requiredVersion) {
-		if (requiredVersion == null || availableVersion == null)
+		if (requiredVersion == null || availableVersion == null) {
 			return true;
+		}
 		try {
 			Identifier required = new Identifier(requiredVersion);
 			Identifier available = new Identifier(availableVersion);
@@ -718,8 +763,9 @@ public class Main {
 	 * @return a boolean indicating whether the checking passed
 	 */
 	private boolean checkConfigurationLocation(URL locationUrl) {
-		if (locationUrl == null || !"file".equals(locationUrl.getProtocol())) //$NON-NLS-1$
+		if (locationUrl == null || !"file".equals(locationUrl.getProtocol())) { //$NON-NLS-1$
 			return true;
+		}
 		if (Boolean.parseBoolean(System.getProperty(PROP_CONFIG_AREA + READ_ONLY_AREA_SUFFIX))) {
 			// user wants readonly config area
 			return true;
@@ -758,10 +804,11 @@ public class Main {
 				StringBuilder buf = new StringBuilder(len);
 				for (int i = 0; i < len; i++) {
 					char c = urlString.charAt(i);
-					if (c == '+')
+					if (c == '+') {
 						buf.append("%2B"); //$NON-NLS-1$
-					else
+					} else {
 						buf.append(c);
+					}
 				}
 				urlString = buf.toString();
 			}
@@ -778,8 +825,9 @@ public class Main {
 	 * @param prop the initial comma-separated string
 	 */
 	protected String[] getArrayFromList(String prop) {
-		if (prop == null || prop.trim().equals("")) //$NON-NLS-1$
+		if (prop == null || prop.trim().equals("")) { //$NON-NLS-1$
 			return new String[0];
+		}
 		ArrayList<String> list = new ArrayList<>();
 		StringTokenizer tokens = new StringTokenizer(prop, ","); //$NON-NLS-1$
 		while (tokens.hasMoreTokens()) {
@@ -801,8 +849,9 @@ public class Main {
 	 */
 	private URL[] getDevPath(URL base) throws IOException {
 		ArrayList<URL> result = new ArrayList<>(5);
-		if (inDevelopmentMode)
+		if (inDevelopmentMode) {
 			addDevEntries(base, result, OSGI);
+		}
 		//The jars from the base always need to be added, even when running in dev mode (bug 46772)
 		addBaseJars(base, result);
 		return result.toArray(new URL[result.size()]);
@@ -848,28 +897,32 @@ public class Main {
 			if (installLocation.getProtocol().equals("file")) { //$NON-NLS-1$
 				extensionResults.add(path);
 				extensionURL = new File(path).toURL();
-			} else
+			} else { //$NON-NLS-1$
 				extensionURL = new URL(installLocation.getProtocol(), installLocation.getHost(), installLocation.getPort(), path);
+			}
 			//Load a property file of the extension, merge its content, and in case of dev mode add the bin entries
 			Properties extensionProperties = null;
 			try {
 				extensionProperties = loadProperties(constructURL(extensionURL, ECLIPSE_PROPERTIES));
 			} catch (IOException e) {
-				if (debug)
+				if (debug) {
 					System.out.println("\t" + ECLIPSE_PROPERTIES + " not found"); //$NON-NLS-1$ //$NON-NLS-2$
+				}
 			}
 			String extensionClassPath = null;
-			if (extensionProperties != null)
+			if (extensionProperties != null) {
 				extensionClassPath = extensionProperties.getProperty(PROP_CLASSPATH);
-			else
+			} else {
 				// this is a "normal" RFC 101 framework extension bundle just put the base path on the classpath
 				extensionProperties = new Properties();
+			}
 			String[] entries = extensionClassPath == null || extensionClassPath.length() == 0 ? new String[] {""} : getArrayFromList(extensionClassPath); //$NON-NLS-1$
 			String qualifiedPath;
-			if (System.getProperty(PROP_CLASSPATH) == null)
+			if (System.getProperty(PROP_CLASSPATH) == null) {
 				qualifiedPath = "."; //$NON-NLS-1$
-			else
+			} else {
 				qualifiedPath = ""; //$NON-NLS-1$
+			}
 			for (String entry : entries) {
 				qualifiedPath += ", " + FILE_SCHEME + path + entry; //$NON-NLS-1$
 			}
@@ -917,8 +970,9 @@ public class Main {
 
 		String[] baseJars = getArrayFromList(baseJarList);
 		if (baseJars.length == 0) {
-			if (!inDevelopmentMode && new File(base.getFile()).isDirectory())
+			if (!inDevelopmentMode && new File(base.getFile()).isDirectory()) {
 				throw new IOException("Unable to initialize " + PROP_CLASSPATH); //$NON-NLS-1$
+			}
 			addEntry(base, result);
 			return;
 		}
@@ -932,10 +986,11 @@ public class Main {
 					addEntry(base, result);
 				}
 				URL url = null;
-				if (string.startsWith(FILE_SCHEME))
+				if (string.startsWith(FILE_SCHEME)) {
 					url = new File(string.substring(5)).toURL();
-				else
+				} else {
 					url = new URL(string);
+				}
 				addEntry(url, result);
 			} catch (MalformedURLException e) {
 				addEntry(new URL(base, string), result);
@@ -944,29 +999,33 @@ public class Main {
 	}
 
 	protected void addEntry(URL url, List<URL> result) {
-		if (new File(url.getFile()).exists())
+		if (new File(url.getFile()).exists()) {
 			result.add(url);
+		}
 	}
 
 	private void addDevEntries(URL base, List<URL> result, String symbolicName) throws MalformedURLException {
-		if (devClassPathProps == null)
+		if (devClassPathProps == null) {
 			return; // do nothing
+		}
 		String devPathList = devClassPathProps.getProperty(symbolicName);
-		if (devPathList == null)
+		if (devPathList == null) {
 			devPathList = devClassPathProps.getProperty("*"); //$NON-NLS-1$
+		}
 		String[] locations = getArrayFromList(devPathList);
 		for (String location : locations) {
 			File path = new File(location);
 			URL url;
-			if (path.isAbsolute())
+			if (path.isAbsolute()) {
 				url = path.toURL();
-			else {
+			} else {
 				// dev path is relative, combine with base location
 				char lastChar = location.charAt(location.length() - 1);
-				if ((location.endsWith(".jar") || (lastChar == '/' || lastChar == '\\'))) //$NON-NLS-1$
+				if ((location.endsWith(".jar") || (lastChar == '/' || lastChar == '\\'))) { //$NON-NLS-1$
 					url = new URL(base, location);
-				else
+				} else { //$NON-NLS-1$
 					url = new URL(base, location + "/"); //$NON-NLS-1$
+				}
 			}
 			addEntry(url, result);
 		}
@@ -988,17 +1047,21 @@ public class Main {
 			url = getInstallLocation();
 			String pluginsLocation = new File(url.getFile(), "plugins").toString(); //$NON-NLS-1$
 			String path = searchFor(framework, pluginsLocation);
-			if (path == null)
+			if (path == null) {
 				throw new FileNotFoundException(String.format("Could not find framework under %s", pluginsLocation)); //$NON-NLS-1$
-			if (url.getProtocol().equals("file")) //$NON-NLS-1$
+			}
+			if (url.getProtocol().equals("file")) { //$NON-NLS-1$
 				url = new File(path).toURL();
-			else
+			} else { //$NON-NLS-1$
 				url = new URL(url.getProtocol(), url.getHost(), url.getPort(), path);
+			}
 		}
-		if (System.getProperty(PROP_FRAMEWORK) == null)
+		if (System.getProperty(PROP_FRAMEWORK) == null) {
 			System.setProperty(PROP_FRAMEWORK, url.toExternalForm());
-		if (debug)
+		}
+		if (debug) {
 			System.out.println("Framework located:\n    " + url.toExternalForm()); //$NON-NLS-1$
+		}
 		// add on any dev path elements
 		URL[] result = getDevPath(url);
 		if (debug) {
@@ -1022,8 +1085,9 @@ public class Main {
 
 		// Note that File.list only gives you file names not the complete path from start
 		String[] candidates = root.list();
-		if (candidates == null)
+		if (candidates == null) {
 			return null;
+		}
 
 		ArrayList<String> matches = new ArrayList<>(2);
 		for (String candidate : candidates) {
@@ -1033,17 +1097,20 @@ public class Main {
 		}
 		String[] names = matches.toArray(new String[matches.size()]);
 		int result = findMax(target, names);
-		if (result == -1)
+		if (result == -1) {
 			return null;
+		}
 		File candidate = new File(start, names[result]);
 		return candidate.getAbsolutePath().replace(File.separatorChar, '/') + (candidate.isDirectory() ? "/" : ""); //$NON-NLS-1$//$NON-NLS-2$
 	}
 
 	private boolean isMatchingCandidate(String target, String candidate, File root) {
-		if (candidate.equals(target))
+		if (candidate.equals(target)) {
 			return true;
-		if (!candidate.startsWith(target + "_")) //$NON-NLS-1$
+		}
+		if (!candidate.startsWith(target + "_")) { //$NON-NLS-1$
 			return false;
+		}
 		int targetLength = target.length();
 		int lastUnderscore = candidate.lastIndexOf('_');
 
@@ -1064,11 +1131,13 @@ public class Main {
 		}
 
 		//get past all '_' that are part of the qualifier
-		while (lastUnderscore > lastDot)
+		while (lastUnderscore > lastDot) {
 			lastUnderscore = candidate.lastIndexOf('_', lastUnderscore - 1);
+		}
 
-		if (lastUnderscore == targetLength)
+		if (lastUnderscore == targetLength) {
 			return true; //underscore at the end of target (foo_1.0.0.v1_123 case)
+		}
 		return false; //another underscore between target and version (foo_64_1.0.0.v1_123 case)
 	}
 
@@ -1076,8 +1145,9 @@ public class Main {
 		//Only handle "reference:file:" urls, and not simple "file:" because we will be using the jar wherever it is.
 		if (target.startsWith(REFERENCE_SCHEME)) {
 			target = target.substring(REFERENCE_SCHEME.length());
-			if (!target.startsWith(FILE_SCHEME))
+			if (!target.startsWith(FILE_SCHEME)) {
 				throw new IllegalArgumentException("Bundle URL is invalid: " + target); //$NON-NLS-1$
+			}
 			target = target.substring(FILE_SCHEME.length());
 			File child = new File(target);
 			File fileLocation = child;
@@ -1096,10 +1166,11 @@ public class Main {
 		for (int i = 0; i < candidates.length; i++) {
 			String name = (candidates[i] != null) ? candidates[i] : ""; //$NON-NLS-1$
 			String version = ""; //$NON-NLS-1$ // Note: directory with version suffix is always > than directory without version suffix
-			if (prefix == null)
+			if (prefix == null) {
 				version = name; //webstart just passes in versions
-			else if (name.startsWith(prefix + "_")) //$NON-NLS-1$
+			} else if (name.startsWith(prefix + "_")) { //$NON-NLS-1$
 				version = name.substring(prefix.length() + 1); //prefix_version
+			}
 			Object currentVersion = getVersionElements(version);
 			if (maxVersion == null) {
 				result = i;
@@ -1124,16 +1195,19 @@ public class Main {
 	private int compareVersion(Object[] left, Object[] right) {
 
 		int result = ((Integer) left[0]).compareTo((Integer) right[0]); // compare major
-		if (result != 0)
+		if (result != 0) {
 			return result;
+		}
 
 		result = ((Integer) left[1]).compareTo((Integer) right[1]); // compare minor
-		if (result != 0)
+		if (result != 0) {
 			return result;
+		}
 
 		result = ((Integer) left[2]).compareTo((Integer) right[2]); // compare service
-		if (result != 0)
+		if (result != 0) {
 			return result;
+		}
 
 		return ((String) left[3]).compareTo((String) right[3]); // compare qualifier
 	}
@@ -1147,8 +1221,9 @@ public class Main {
 	 * qualifier). Note, that returning anything else will cause exceptions in the caller.
 	 */
 	private Object[] getVersionElements(String version) {
-		if (version.endsWith(".jar")) //$NON-NLS-1$
+		if (version.endsWith(".jar")) { //$NON-NLS-1$
 			version = version.substring(0, version.length() - 4);
+		}
 		Object[] result = {Integer.valueOf(0), Integer.valueOf(0), Integer.valueOf(0), ""}; //$NON-NLS-1$
 		StringTokenizer t = new StringTokenizer(version, "."); //$NON-NLS-1$
 		String token;
@@ -1172,29 +1247,34 @@ public class Main {
 	}
 
 	private static URL buildURL(String spec, boolean trailingSlash) {
-		if (spec == null)
+		if (spec == null) {
 			return null;
-		if (File.separatorChar == '\\')
+		}
+		if (File.separatorChar == '\\') {
 			spec = spec.trim();
+		}
 		boolean isFile = spec.startsWith(FILE_SCHEME);
 		try {
 			if (isFile) {
 				File toAdjust = toFileURL(spec);
 				toAdjust = resolveFile(toAdjust);
-				if (toAdjust.isDirectory())
+				if (toAdjust.isDirectory()) {
 					return adjustTrailingSlash(toAdjust.toURL(), trailingSlash);
+				}
 				return toAdjust.toURL();
 			}
 			return new URL(spec);
 		} catch (MalformedURLException e) {
 			// if we failed and it is a file spec, there is nothing more we can do
 			// otherwise, try to make the spec into a file URL.
-			if (isFile)
+			if (isFile) {
 				return null;
+			}
 			try {
 				File toAdjust = new File(spec);
-				if (toAdjust.isDirectory())
+				if (toAdjust.isDirectory()) {
 					return adjustTrailingSlash(toAdjust.toURL(), trailingSlash);
+				}
 				return toAdjust.toURL();
 			} catch (MalformedURLException e1) {
 				return null;
@@ -1220,10 +1300,11 @@ public class Main {
 		if (!toAdjust.isAbsolute()) {
 			String installArea = System.getProperty(PROP_INSTALL_AREA);
 			if (installArea != null) {
-				if (installArea.startsWith(FILE_SCHEME))
+				if (installArea.startsWith(FILE_SCHEME)) {
 					toAdjust = new File(installArea.substring(5), toAdjust.getPath());
-				else if (new File(installArea).exists())
+				} else if (new File(installArea).exists()) {
 					toAdjust = new File(installArea, toAdjust.getPath());
+				}
 			}
 		}
 		return toAdjust;
@@ -1231,8 +1312,9 @@ public class Main {
 
 	private static URL adjustTrailingSlash(URL url, boolean trailingSlash) throws MalformedURLException {
 		String file = url.getFile();
-		if (trailingSlash == (file.endsWith("/"))) //$NON-NLS-1$
+		if (trailingSlash == (file.endsWith("/"))) { //$NON-NLS-1$
 			return url;
+		}
 		file = trailingSlash ? file + "/" : file.substring(0, file.length() - 1); //$NON-NLS-1$
 		return new URL(url.getProtocol(), url.getHost(), file);
 	}
@@ -1244,13 +1326,13 @@ public class Main {
 		// if the instance location is not set, predict where the workspace will be and
 		// put the instance area inside the workspace meta area.
 		try {
-			if (location == null)
+			if (location == null) {
 				result = defaultLocation;
-			else if (location.equalsIgnoreCase(NONE))
+			} else if (location.equalsIgnoreCase(NONE)) {
 				return null;
-			else if (location.equalsIgnoreCase(NO_DEFAULT))
+			} else if (location.equalsIgnoreCase(NO_DEFAULT)) {
 				result = buildURL(location, true);
-			else {
+			} else {
 				if (location.startsWith(USER_HOME)) {
 					String base = substituteVar(location, USER_HOME, PROP_USER_HOME);
 					location = new File(base, userDefaultAppendage).getAbsolutePath();
@@ -1267,8 +1349,9 @@ public class Main {
 				result = buildURL(location, true);
 			}
 		} finally {
-			if (result != null)
+			if (result != null) {
 				System.setProperty(property, result.toExternalForm());
+			}
 		}
 		return result;
 	}
@@ -1301,16 +1384,18 @@ public class Main {
 		// TODO a little dangerous here.  Basically we have to assume that it is a file URL.
 		if (install.getProtocol().equals("file")) { //$NON-NLS-1$
 			File installDir = new File(install.getFile());
-			if (canWrite(installDir, getOS()))
+			if (canWrite(installDir, getOS())) {
 				return installDir.getAbsolutePath() + File.separator + CONFIG_DIR;
+			}
 		}
 		// We can't write in the eclipse install dir so try for some place in the user's home dir
 		return computeDefaultUserAreaLocation(CONFIG_DIR);
 	}
 
 	private static boolean canWrite(File installDir, String os) {
-		if (!installDir.isDirectory())
+		if (!installDir.isDirectory()) {
 			return false;
+		}
 
 		if (Files.isWritable(installDir.toPath())) {
 			return true;
@@ -1329,8 +1414,9 @@ public class Main {
 			//If an exception occured while trying to create the file, it means that it is not writtable
 			return false;
 		} finally {
-			if (fileTest != null)
+			if (fileTest != null) {
 				fileTest.delete();
+			}
 		}
 		return true;
 	}
@@ -1348,8 +1434,9 @@ public class Main {
 		//    defined in .eclipseproduct marker file. If .eclipseproduct does not
 		//    exist, use "eclipse" as the application-id.
 		URL installURL = getInstallLocation();
-		if (installURL == null)
+		if (installURL == null) {
 			return null;
+		}
 		File installDir = new File(installURL.getFile());
 		String installDirHash = getInstallDirHash();
 
@@ -1359,8 +1446,9 @@ public class Main {
 			if (macConfiguration != null) {
 				return macConfiguration;
 			}
-			if (debug)
+			if (debug) {
 				System.out.println("Computation of Mac specific configuration folder failed."); //$NON-NLS-1$
+			}
 		}
 
 		String appName = "." + ECLIPSE; //$NON-NLS-1$
@@ -1370,11 +1458,13 @@ public class Main {
 			try (FileInputStream inStream = new FileInputStream(eclipseProduct)) {
 				props.load(inStream);
 				String appId = props.getProperty(PRODUCT_SITE_ID);
-				if (appId == null || appId.trim().length() == 0)
+				if (appId == null || appId.trim().length() == 0) {
 					appId = ECLIPSE;
+				}
 				String appVersion = props.getProperty(PRODUCT_SITE_VERSION);
-				if (appVersion == null || appVersion.trim().length() == 0)
+				if (appVersion == null || appVersion.trim().length() == 0) {
 					appVersion = ""; //$NON-NLS-1$
+				}
 				appName += File.separator + appId + "_" + appVersion + "_" + installDirHash; //$NON-NLS-1$ //$NON-NLS-2$
 			} catch (IOException e) {
 				// Do nothing if we get an exception.  We will default to a standard location
@@ -1394,10 +1484,12 @@ public class Main {
 	private String computeConfigurationLocationForMacOS() {
 		if (bridge != null) {
 			String folder = bridge.getOSRecommendedFolder();
-			if (debug)
+			if (debug) {
 				System.out.println("App folder provided by MacOS is: " + folder); //$NON-NLS-1$
-			if (folder != null)
+			}
+			if (folder != null) {
 				return folder + '/' + CONFIG_DIR;
+			}
 		}
 		return null;
 	}
@@ -1417,8 +1509,9 @@ public class Main {
 	private String getInstallDirHash() {
 		// compute an install dir hash to prevent configuration area collisions with other eclipse installs
 		URL installURL = getInstallLocation();
-		if (installURL == null)
+		if (installURL == null) {
 			return ""; //$NON-NLS-1$
+		}
 		File installDir = new File(installURL.getFile());
 		int hashCode;
 		try {
@@ -1427,8 +1520,9 @@ public class Main {
 			// fall back to absolute path
 			hashCode = installDir.getAbsolutePath().hashCode();
 		}
-		if (hashCode < 0)
+		if (hashCode < 0) {
 			hashCode = -(hashCode);
+		}
 		return String.valueOf(hashCode);
 	}
 
@@ -1439,8 +1533,9 @@ public class Main {
 	 */
 	public static void main(String argString) {
 		ArrayList<String> list = new ArrayList<>(5);
-		for (StringTokenizer tokens = new StringTokenizer(argString, " "); tokens.hasMoreElements();) //$NON-NLS-1$
+		for (StringTokenizer tokens = new StringTokenizer(argString, " "); tokens.hasMoreElements();) { //$NON-NLS-1$
 			list.add(tokens.nextToken());
+		}
 		main(list.toArray(new String[list.size()]));
 	}
 
@@ -1471,9 +1566,10 @@ public class Main {
 			// If the return code is 23, that means that Equinox requested a restart.
 			// In order to distinguish the request for a restart, do a System.exit(23)
 			// no matter of 'osgi.noShutdown' runtime property value.
-			if (!Boolean.getBoolean(PROP_NOSHUTDOWN) || result == 23)
+			if (!Boolean.getBoolean(PROP_NOSHUTDOWN) || result == 23) {
 				// make sure we always terminate the VM
 				System.exit(result);
+			}
 		}
 	}
 
@@ -1503,10 +1599,11 @@ public class Main {
 				log("Exception launching the Eclipse Platform:"); //$NON-NLS-1$
 				log(e);
 				String message = "An error has occurred"; //$NON-NLS-1$
-				if (logFile == null)
+				if (logFile == null) {
 					message += " and could not be logged: \n" + e.getMessage(); //$NON-NLS-1$
-				else
+				} else {
 					message += ".  See the log file\n" + logFile.getAbsolutePath(); //$NON-NLS-1$
+				}
 				System.setProperty(PROP_EXITDATA, message);
 			} else {
 				// we have an exit code of 13, in most cases the user tries to start a 32/64 bit Eclipse
@@ -1529,15 +1626,17 @@ public class Main {
 
 	private void setExitData() {
 		String data = System.getProperty(PROP_EXITDATA);
-		if (data == null)
+		if (data == null) {
 			return;
+		}
 		//if the bridge is null then we have nothing to send the data to;
 		//exitData is a shared memory id, if we loaded the library from java, we need a non-null exitData
 		//if the executable loaded the library, then we don't need the exitData id
-		if (bridge == null || (bridge.isLibraryLoadedByJava() && exitData == null))
+		if (bridge == null || (bridge.isLibraryLoadedByJava() && exitData == null)) {
 			System.out.println(data);
-		else
+		} else {
 			bridge.setExitData(exitData, data);
+		}
 	}
 
 	/**
@@ -1550,8 +1649,9 @@ public class Main {
 	 * @param args the command line arguments
 	 */
 	protected String[] processCommandLine(String[] args) {
-		if (args.length == 0)
+		if (args.length == 0) {
 			return args;
+		}
 		int[] configArgs = new int[args.length];
 		configArgs[0] = -1; // need to initialize the first element to something that could not be an index.
 		int configArgIndex = 0;
@@ -1643,8 +1743,9 @@ public class Main {
 
 			// check for args with parameters. If we are at the last argument or if the next one
 			// has a '-' as the first character, then we can't have an arg with a parm so continue.
-			if (i == args.length - 1 || args[i + 1].startsWith("-")) //$NON-NLS-1$
+			if (i == args.length - 1 || args[i + 1].startsWith("-")) { //$NON-NLS-1$
 				continue;
+			}
 			String arg = args[++i];
 
 			// look for the development mode and class path entries.
@@ -1653,8 +1754,9 @@ public class Main {
 				devClassPathProps = processDevArg(arg);
 				if (devClassPathProps != null) {
 					devClassPath = devClassPathProps.getProperty(OSGI);
-					if (devClassPath == null)
+					if (devClassPath == null) {
 						devClassPath = devClassPathProps.getProperty("*"); //$NON-NLS-1$
+					}
 				}
 				continue;
 			}
@@ -1757,17 +1859,19 @@ public class Main {
 		configArgIndex = 0;
 		int j = 0;
 		for (int i = 0; i < args.length; i++) {
-			if (i == configArgs[configArgIndex])
+			if (i == configArgs[configArgIndex]) {
 				configArgIndex++;
-			else if (args[i] != null)
+			} else if (args[i] != null) {
 				passThruArgs[j++] = args[i];
+			}
 		}
 		return passThruArgs;
 	}
 
 	private Properties processDevArg(String arg) {
-		if (arg == null)
+		if (arg == null) {
 			return null;
+		}
 		try {
 			URL location = new URL(arg);
 			return load(location, null);
@@ -1783,18 +1887,22 @@ public class Main {
 	}
 
 	private URL getConfigurationLocation() {
-		if (configurationLocation != null)
+		if (configurationLocation != null) {
 			return configurationLocation;
+		}
 		configurationLocation = buildLocation(PROP_CONFIG_AREA, null, ""); //$NON-NLS-1$
 		if (configurationLocation == null) {
 			configurationLocation = buildLocation(PROP_CONFIG_AREA_DEFAULT, null, ""); //$NON-NLS-1$
-			if (configurationLocation == null)
+			if (configurationLocation == null) {
 				configurationLocation = buildURL(computeDefaultConfigurationLocation(), true);
+			}
 		}
-		if (configurationLocation != null)
+		if (configurationLocation != null) {
 			System.setProperty(PROP_CONFIG_AREA, configurationLocation.toExternalForm());
-		if (debug)
+		}
+		if (debug) {
 			System.out.println("Configuration location:\n    " + configurationLocation); //$NON-NLS-1$
+		}
 		return configurationLocation;
 	}
 
@@ -1809,11 +1917,12 @@ public class Main {
 		if (System.getProperty(PROP_CONFIG_AREA) == null) {
 			ensureAbsolute(PROP_BASE_CONFIG_AREA);
 			String baseLocation = System.getProperty(PROP_BASE_CONFIG_AREA);
-			if (baseLocation != null)
+			if (baseLocation != null) {
 				// here the base config cannot have any symbolic (e..g, @xxx) entries.  It must just
 				// point to the config file.
 				baseConfigurationLocation = buildURL(baseLocation, true);
-			if (baseConfigurationLocation == null)
+			}
+			if (baseConfigurationLocation == null) {
 				try {
 					// here we access the install location but this is very early.  This case will only happen if
 					// the config area is not set and the base config area is not set (or is bogus).
@@ -1822,19 +1931,22 @@ public class Main {
 				} catch (MalformedURLException e) {
 					// leave baseConfigurationLocation null
 				}
+			}
 			baseConfiguration = loadConfiguration(baseConfigurationLocation);
 			if (baseConfiguration != null) {
 				// if the base sets the install area then use that value if the property.  We know the
 				// property is not already set.
 				String location = baseConfiguration.getProperty(PROP_CONFIG_AREA);
-				if (location != null)
+				if (location != null) {
 					System.setProperty(PROP_CONFIG_AREA, location);
+				}
 				// if the base sets the install area then use that value if the property is not already set.
 				// This helps in selfhosting cases where you cannot easily compute the install location
 				// from the code base.
 				location = baseConfiguration.getProperty(PROP_INSTALL_AREA);
-				if (location != null && System.getProperty(PROP_INSTALL_AREA) == null)
+				if (location != null && System.getProperty(PROP_INSTALL_AREA) == null) {
 					System.setProperty(PROP_INSTALL_AREA, location);
+				}
 			}
 		}
 
@@ -1848,8 +1960,9 @@ public class Main {
 		// if the config or parent we are about to read is the same as the base config we read above,
 		// just reuse the base
 		Properties configuration = baseConfiguration;
-		if (configuration == null || !getConfigurationLocation().equals(baseConfigurationLocation))
+		if (configuration == null || !getConfigurationLocation().equals(baseConfigurationLocation)) {
 			configuration = loadConfiguration(getConfigurationLocation());
+		}
 
 		if (configuration != null && "false".equalsIgnoreCase(configuration.getProperty(PROP_CONFIG_CASCADED))) { //$NON-NLS-1$
 			System.clearProperty(PROP_SHARED_CONFIG_AREA);
@@ -1858,13 +1971,14 @@ public class Main {
 		} else {
 			ensureAbsolute(PROP_SHARED_CONFIG_AREA);
 			URL sharedConfigURL = buildLocation(PROP_SHARED_CONFIG_AREA, null, ""); //$NON-NLS-1$
-			if (sharedConfigURL == null)
+			if (sharedConfigURL == null) {
 				try {
 					// there is no shared config value so compute one
 					sharedConfigURL = new URL(getInstallLocation(), CONFIG_DIR);
 				} catch (MalformedURLException e) {
 					// leave sharedConfigurationLocation null
 				}
+			}
 			// if the parent location is different from the config location, read it too.
 			if (sharedConfigURL != null) {
 				if (sharedConfigURL.equals(getConfigurationLocation())) {
@@ -1882,8 +1996,9 @@ public class Main {
 					}
 					long sharedConfigTimestamp = getCurrentConfigIniBaseTimestamp(sharedConfigURL);
 					long lastKnownBaseTimestamp = getLastKnownConfigIniBaseTimestamp();
-					if (debug)
+					if (debug) {
 						System.out.println("Timestamps found: \n\t config.ini in the base: " + sharedConfigTimestamp + "\n\t remembered " + lastKnownBaseTimestamp); //$NON-NLS-1$ //$NON-NLS-2$
+					}
 
 					//merge user configuration since the base has not changed.
 					if (lastKnownBaseTimestamp == sharedConfigTimestamp || lastKnownBaseTimestamp == NO_TIMESTAMP) {
@@ -1896,8 +2011,9 @@ public class Main {
 					//now merge the base configuration
 					mergeWithSystemProperties(sharedConfiguration, configuration);
 					System.setProperty(PROP_SHARED_CONFIG_AREA, sharedConfigURL.toExternalForm());
-					if (debug)
+					if (debug) {
 						System.out.println("Shared configuration location:\n    " + sharedConfigURL.toExternalForm()); //$NON-NLS-1$
+					}
 				}
 			}
 		}
@@ -1931,14 +2047,16 @@ public class Main {
 
 	//Get the timestamp that has been remembered. The BASE_TIMESTAMP_FILE_CONFIGINI is written at provisioning time by fwkAdmin.
 	private long getLastKnownConfigIniBaseTimestamp() {
-		if (debug)
+		if (debug) {
 			System.out.println("Loading timestamp file from:\n\t " + getConfigurationLocation() + "   " + BASE_TIMESTAMP_FILE_CONFIGINI); //$NON-NLS-1$ //$NON-NLS-2$
+		}
 		Properties result;
 		try {
 			result = load(getConfigurationLocation(), BASE_TIMESTAMP_FILE_CONFIGINI);
 		} catch (IOException e) {
-			if (debug)
+			if (debug) {
 				System.out.println("\tNo timestamp file found"); //$NON-NLS-1$
+			}
 			return NO_TIMESTAMP;
 		}
 		String timestamp = result.getProperty(KEY_CONFIGINI_TIMESTAMP);
@@ -1953,9 +2071,10 @@ public class Main {
 	 */
 	private void ensureAbsolute(String locationProperty) {
 		String propertyValue = System.getProperty(locationProperty);
-		if (propertyValue == null)
+		if (propertyValue == null) {
 			// property not defined
 			return;
+		}
 		URL locationURL = null;
 		try {
 			locationURL = new URL(propertyValue);
@@ -1964,13 +2083,15 @@ public class Main {
 			return;
 		}
 		String locationPath = locationURL.getPath();
-		if (locationPath.startsWith("/")) //$NON-NLS-1$
+		if (locationPath.startsWith("/")) { //$NON-NLS-1$
 			// property value is absolute
 			return;
+		}
 		URL installURL = getInstallLocation();
-		if (!locationURL.getProtocol().equals(installURL.getProtocol()))
+		if (!locationURL.getProtocol().equals(installURL.getProtocol())) {
 			// not same protocol
 			return;
+		}
 		try {
 			URL absoluteURL = new URL(installURL, locationPath);
 			System.setProperty(locationProperty, absoluteURL.toExternalForm());
@@ -1983,43 +2104,50 @@ public class Main {
 	 * Returns url of the location this class was loaded from
 	 */
 	private URL getInstallLocation() {
-		if (installLocation != null)
+		if (installLocation != null) {
 			return installLocation;
+		}
 
 		// value is not set so compute the default and set the value
 		String installArea = System.getProperty(PROP_INSTALL_AREA);
 		if (installArea != null) {
 			if (installArea.startsWith(LAUNCHER_DIR)) {
 				String launcher = System.getProperty(PROP_LAUNCHER);
-				if (launcher == null)
+				if (launcher == null) {
 					throw new IllegalStateException("Install location depends on launcher, but launcher is not defined"); //$NON-NLS-1$
+				}
 				installArea = installArea.replace(LAUNCHER_DIR, new File(launcher).getParent());
 			}
 			installLocation = buildURL(installArea, true);
-			if (installLocation == null)
+			if (installLocation == null) {
 				throw new IllegalStateException("Install location is invalid: " + installArea); //$NON-NLS-1$
+			}
 			System.setProperty(PROP_INSTALL_AREA, installLocation.toExternalForm());
-			if (debug)
+			if (debug) {
 				System.out.println("Install location:\n    " + installLocation); //$NON-NLS-1$
+			}
 			return installLocation;
 		}
 
 		ProtectionDomain domain = Main.class.getProtectionDomain();
 		CodeSource source = null;
 		URL result = null;
-		if (domain != null)
+		if (domain != null) {
 			source = domain.getCodeSource();
+		}
 		if (source == null || domain == null) {
-			if (debug)
+			if (debug) {
 				System.out.println("CodeSource location is null. Defaulting the install location to file:startup.jar"); //$NON-NLS-1$
+			}
 			try {
 				result = new URL("file:startup.jar"); //$NON-NLS-1$
 			} catch (MalformedURLException e2) {
 				//Ignore
 			}
 		}
-		if (source != null)
+		if (source != null) {
 			result = source.getLocation();
+		}
 
 		String path = decode(result.getFile());
 		// normalize to not have leading / so we can check the form
@@ -2028,16 +2156,19 @@ public class Main {
 		// TODO need a better test for windows
 		// If on Windows then canonicalize the drive letter to be lowercase.
 		// remember that there may be UNC paths
-		if (File.separatorChar == '\\')
+		if (File.separatorChar == '\\') {
 			if (Character.isUpperCase(path.charAt(0))) {
 				char[] chars = path.toCharArray();
 				chars[0] = Character.toLowerCase(chars[0]);
 				path = new String(chars);
 			}
-		if (path.toLowerCase().endsWith(".jar")) //$NON-NLS-1$
+		}
+		if (path.toLowerCase().endsWith(".jar")) { //$NON-NLS-1$
 			path = path.substring(0, path.lastIndexOf('/') + 1);
-		if (path.toLowerCase().endsWith("/plugins/")) //$NON-NLS-1$
+		}
+		if (path.toLowerCase().endsWith("/plugins/")) { //$NON-NLS-1$
 			path = path.substring(0, path.length() - "/plugins/".length()); //$NON-NLS-1$
+		}
 		try {
 			try {
 				// create a file URL (via File) to normalize the form (e.g., put
@@ -2051,8 +2182,9 @@ public class Main {
 		} catch (MalformedURLException e) {
 			// TODO Very unlikely case.  log here.
 		}
-		if (debug)
+		if (debug) {
 			System.out.println("Install location:\n    " + installLocation); //$NON-NLS-1$
+		}
 		return installLocation;
 	}
 
@@ -2067,22 +2199,26 @@ public class Main {
 			return null;
 		}
 		try {
-			if (debug)
+			if (debug) {
 				System.out.print("Configuration file:\n    " + url); //$NON-NLS-1$
+			}
 			result = loadProperties(url);
-			if (debug)
+			if (debug) {
 				System.out.println(" loaded"); //$NON-NLS-1$
+			}
 		} catch (IOException e) {
-			if (debug)
+			if (debug) {
 				System.out.println(" not found or not read"); //$NON-NLS-1$
+			}
 		}
 		return substituteVars(result);
 	}
 
 	private Properties loadProperties(URL url) throws IOException {
 		// try to load saved configuration file (watch for failed prior save())
-		if (url == null)
+		if (url == null) {
 			return null;
+		}
 		Properties result = null;
 		IOException originalException = null;
 		try {
@@ -2107,8 +2243,9 @@ public class Main {
 	 */
 	private Properties load(URL url, String suffix) throws IOException {
 		// figure out what we will be loading
-		if (suffix != null && !suffix.equals("")) //$NON-NLS-1$
+		if (suffix != null && !suffix.equals("")) { //$NON-NLS-1$
 			url = new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getFile() + suffix);
+		}
 
 		// try to load saved configuration file
 		Properties props = new Properties();
@@ -2172,15 +2309,18 @@ public class Main {
 		}
 
 		// check if we are running without a splash screen
-		if (!showSplash)
+		if (!showSplash) {
 			return;
+		}
 
 		// determine the splash location
 		splashLocation = getSplashLocation(defaultPath);
-		if (debug)
+		if (debug) {
 			System.out.println("Splash location:\n    " + splashLocation); //$NON-NLS-1$
-		if (splashLocation == null)
+		}
+		if (splashLocation == null) {
 			return;
+		}
 
 		bridge.setLauncherInfo(System.getProperty(PROP_LAUNCHER), System.getProperty(PROP_LAUNCHER_NAME));
 		bridge.showSplash(splashLocation);
@@ -2199,8 +2339,9 @@ public class Main {
 	 * Take down the splash screen.
 	 */
 	protected void takeDownSplash() {
-		if (splashDown || bridge == null) // splash is already down
+		if (splashDown || bridge == null) { // splash is already down
 			return;
+		}
 
 		splashDown = bridge.takeDownSplash();
 		System.clearProperty(SPLASH_HANDLE);
@@ -2225,8 +2366,9 @@ public class Main {
 			return splashLocation;
 		}
 		String result = System.getProperty(PROP_SPLASHLOCATION);
-		if (result != null)
+		if (result != null) {
 			return result;
+		}
 		String splashPath = System.getProperty(PROP_SPLASHPATH);
 		if (splashPath != null) {
 			String[] entries = getArrayFromList(splashPath);
@@ -2236,8 +2378,9 @@ public class Main {
 				if (entry != null && entry.startsWith(FILE_SCHEME)) {
 					File entryFile = new File(entry.substring(5).replace('/', File.separatorChar));
 					entry = searchFor(entryFile.getName(), entryFile.getParent());
-					if (entry != null)
+					if (entry != null) {
 						path.add(entry);
+					}
 				} else {
 					log("Invalid splash path entry: " + e); //$NON-NLS-1$
 				}
@@ -2256,32 +2399,38 @@ public class Main {
 	 * Do a locale-sensitive lookup of splash image
 	 */
 	private String searchForSplash(String[] searchPath) {
-		if (searchPath == null)
+		if (searchPath == null) {
 			return null;
+		}
 
 		// Get the splash screen for the specified locale
 		String locale = System.getProperty(PROP_NL);
-		if (locale == null)
+		if (locale == null) {
 			locale = Locale.getDefault().toString();
+		}
 		String[] nlVariants = buildNLVariants(locale);
 
 		for (String nlVariant : nlVariants) {
 			for (String path : searchPath) {
-				if (path.startsWith(FILE_SCHEME))
+				if (path.startsWith(FILE_SCHEME)) {
 					path = path.substring(5);
+				}
 				// do we have a JAR?
 				if (isJAR(path)) {
 					String result = extractFromJAR(path, nlVariant);
-					if (result != null)
+					if (result != null) {
 						return result;
+					}
 				} else {
 					// we have a file or a directory
-					if (!path.endsWith(File.separator))
+					if (!path.endsWith(File.separator)) {
 						path += File.separator;
+					}
 					path += nlVariant;
 					File result = new File(path);
-					if (result.exists())
+					if (result.exists()) {
 						return result.getAbsolutePath(); // return the first match found [20063]
+					}
 				}
 			}
 		}
@@ -2301,15 +2450,17 @@ public class Main {
 			return null;
 		}
 		URL configURL = buildURL(configLocation, false);
-		if (configURL == null)
+		if (configURL == null) {
 			return null;
+		}
 		// cache the splash in the equinox launcher sub-dir in the config area
 		File splash = new File(configURL.getPath(), PLUGIN_ID);
 		//include the name of the jar in the cache location
 		File jarFile = new File(jarPath);
 		String cache = jarFile.getName();
-		if (cache.endsWith(".jar")) //$NON-NLS-1$
+		if (cache.endsWith(".jar")) { //$NON-NLS-1$
 			cache = cache.substring(0, cache.length() - 4);
+		}
 		splash = new File(splash, cache);
 		splash = new File(splash, jarEntry);
 		// if we have already extracted this file before, then return
@@ -2323,14 +2474,16 @@ public class Main {
 					break;
 				}
 			}
-			if (!clean)
+			if (!clean) {
 				return splash.getAbsolutePath();
+			}
 		}
 
 		try (ZipFile file = new ZipFile(jarPath)) {
 			ZipEntry entry = file.getEntry(jarEntry.replace(File.separatorChar, '/'));
-			if (entry == null)
+			if (entry == null) {
 				return null;
+			}
 
 			Path outputFile = splash.toPath();
 			Files.createDirectories(outputFile.getParent());
@@ -2376,8 +2529,9 @@ public class Main {
 				result.add("nl" + File.separatorChar + nl.replace('_', File.separatorChar) + File.separatorChar + name); //$NON-NLS-1$
 			}
 			lastSeparator = nl.lastIndexOf('_');
-			if (lastSeparator == -1)
+			if (lastSeparator == -1) {
 				break;
+			}
 			nl = nl.substring(0, lastSeparator);
 		}
 		//add the empty suffix last (most general)
@@ -2392,8 +2546,9 @@ public class Main {
 	 */
 	private String resolve(String urlString) {
 		// handle the case where people mistakenly spec a refererence: url.
-		if (urlString.startsWith(REFERENCE_SCHEME))
+		if (urlString.startsWith(REFERENCE_SCHEME)) {
 			urlString = urlString.substring(10);
+		}
 		if (urlString.startsWith(PLATFORM_URL)) {
 			String path = urlString.substring(PLATFORM_URL.length());
 			return getInstallLocation() + path;
@@ -2405,8 +2560,9 @@ public class Main {
 	 * Entry point for logging.
 	 */
 	protected synchronized void log(Object obj) {
-		if (obj == null)
+		if (obj == null) {
 			return;
+		}
 		try {
 			openLogFile();
 			try {
@@ -2416,18 +2572,21 @@ public class Main {
 					String timestamp = new Date().toString();
 					log.write(timestamp);
 					log.write(' ');
-					for (int i = SESSION.length() + timestamp.length(); i < 78; i++)
+					for (int i = SESSION.length() + timestamp.length(); i < 78; i++) {
 						log.write('-');
+					}
 					log.newLine();
 					newSession = false;
 				}
 				write(obj);
 			} finally {
 				if (logFile == null) {
-					if (log != null)
+					if (log != null) {
 						log.flush();
-				} else
+					}
+				} else {
 					closeLogFile();
+				}
 			}
 		} catch (Exception e) {
 			System.err.println("An exception occurred while writing to the platform log:"); //$NON-NLS-1$
@@ -2451,8 +2610,9 @@ public class Main {
 	 * This should only be called from #log()
 	 */
 	private void write(Object obj) throws IOException {
-		if (obj == null)
+		if (obj == null) {
 			return;
+		}
 		if (obj instanceof Throwable) {
 			log.write(STACK);
 			log.newLine();
@@ -2491,11 +2651,13 @@ public class Main {
 
 	private StringBuilder appendPaddedInt(int value, int pad, StringBuilder buffer) {
 		pad = pad - 1;
-		if (pad == 0)
+		if (pad == 0) {
 			return buffer.append(value);
+		}
 		int padding = (int) Math.pow(10, pad);
-		if (value >= padding)
+		if (value >= padding) {
 			return buffer.append(value);
+		}
 		while (padding > value && padding > 1) {
 			buffer.append('0');
 			padding = padding / 10;
@@ -2516,8 +2678,9 @@ public class Main {
 
 		// compute the base location and then append the name of the log file
 		URL base = buildURL(System.getProperty(PROP_CONFIG_AREA), false);
-		if (base == null)
+		if (base == null) {
 			return;
+		}
 		logFile = new File(base.getPath(), System.currentTimeMillis() + ".log"); //$NON-NLS-1$
 		new File(logFile.getParent()).mkdirs();
 		System.setProperty(PROP_LOGFILE, logFile.getAbsolutePath());
@@ -2550,17 +2713,19 @@ public class Main {
 
 	private void mergeWithSystemProperties(Properties source, Properties userConfiguration) {
 		final String EXT_OVERRIDE_USER = ".override.user"; //$NON-NLS-1$
-		if (source == null)
+		if (source == null) {
 			return;
+		}
 		for (Enumeration<?> e = source.keys(); e.hasMoreElements();) {
 			String key = (String) e.nextElement();
 			if (key.equals(PROP_CLASSPATH)) {
 				String destinationClasspath = System.getProperty(PROP_CLASSPATH);
 				String sourceClasspath = source.getProperty(PROP_CLASSPATH);
-				if (destinationClasspath == null)
+				if (destinationClasspath == null) {
 					destinationClasspath = sourceClasspath;
-				else
+				} else {
 					destinationClasspath = destinationClasspath + sourceClasspath;
+				}
 				System.setProperty(PROP_CLASSPATH, destinationClasspath);
 				continue;
 			}
@@ -2582,14 +2747,16 @@ public class Main {
 			}
 
 			// only set the value if it doesn't already exist to preserve ordering (command-line, user config, shared config)
-			if (System.getProperty(key) == null)
+			if (System.getProperty(key) == null) {
 				System.setProperty(key, value);
+			}
 		}
 	}
 
 	private void setupVMProperties() {
-		if (vm != null)
+		if (vm != null) {
 			System.setProperty(PROP_VM, vm);
+		}
 		setMultiValueProperty(PROP_VMARGS, vmargs);
 		setMultiValueProperty(PROP_COMMANDS, commands);
 	}
@@ -2659,37 +2826,43 @@ public class Main {
 
 		@Override
 		public PermissionCollection getPermissions(CodeSource codesource) {
-			if (contains(codesource))
+			if (contains(codesource)) {
 				return allPermissions;
+			}
 			return policy == null ? allPermissions : policy.getPermissions(codesource);
 		}
 
 		@Override
 		public PermissionCollection getPermissions(ProtectionDomain domain) {
-			if (contains(domain.getCodeSource()))
+			if (contains(domain.getCodeSource())) {
 				return allPermissions;
+			}
 			return policy == null ? allPermissions : policy.getPermissions(domain);
 		}
 
 		@Override
 		public boolean implies(ProtectionDomain domain, Permission permission) {
-			if (contains(domain.getCodeSource()))
+			if (contains(domain.getCodeSource())) {
 				return true;
+			}
 			return policy == null ? true : policy.implies(domain, permission);
 		}
 
 		@Override
 		public void refresh() {
-			if (policy != null)
+			if (policy != null) {
 				policy.refresh();
+			}
 		}
 
 		private boolean contains(CodeSource codeSource) {
-			if (codeSource == null)
+			if (codeSource == null) {
 				return false;
+			}
 			URL location = codeSource.getLocation();
-			if (location == null)
+			if (location == null) {
 				return false;
+			}
 			// Check to see if this URL is in our set of URLs to give AllPermissions to.
 			for (URL url : urls) {
 				// We do simple equals test here because we assume the URLs will be the same objects.
@@ -2717,13 +2890,15 @@ public class Main {
 
 		@Override
 		protected String findLibrary(String name) {
-			if (extensionPaths == null)
+			if (extensionPaths == null) {
 				return super.findLibrary(name);
+			}
 			String libName = System.mapLibraryName(name);
 			for (String extensionPath : extensionPaths) {
 				File libFile = new File(extensionPath, libName);
-				if (libFile.isFile())
+				if (libFile.isFile()) {
 					return libFile.getAbsolutePath();
+				}
 			}
 			return super.findLibrary(name);
 		}
@@ -2761,8 +2936,9 @@ public class Main {
 			Object key = eKeys.nextElement();
 			if (key instanceof String) {
 				String value = result.getProperty((String) key);
-				if (value != null)
+				if (value != null) {
 					result.put(key, substituteVars(value));
+				}
 			}
 		}
 		return result;
@@ -2783,8 +2959,9 @@ public class Main {
 					// we have found the end of a var
 					String prop = null;
 					// get the value of the var from system properties
-					if (var != null && var.length() > 0)
+					if (var != null && var.length() > 0) {
 						prop = System.getProperty(var);
+					}
 					if (prop == null) {
 						prop = System.getenv(var);
 					}
@@ -2801,15 +2978,17 @@ public class Main {
 					var = null;
 				}
 			} else {
-				if (!varStarted)
+				if (!varStarted) {
 					buf.append(tok); // the token is not part of a var
-				else
+				} else {
 					var = tok; // the token is the var key; save the key to process when we find the end token
+				}
 			}
 		}
-		if (var != null)
+		if (var != null) {
 			// found a case of $var at the end of the path with no trailing $; just append it as is.
 			buf.append(VARIABLE_DELIM_CHAR).append(var);
+		}
 		return buf.toString();
 	}
 }
