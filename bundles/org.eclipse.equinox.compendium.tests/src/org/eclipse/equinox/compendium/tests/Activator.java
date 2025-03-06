@@ -69,12 +69,14 @@ public class Activator implements BundleActivator {
 
 	public static synchronized Bundle getBundle(String symbolicName) {
 		PackageAdmin packageAdmin = Activator.getDefault().getPackageAdmin();
-		if (packageAdmin == null)
+		if (packageAdmin == null) {
 			return null;
+		}
 
 		Bundle[] bundles = packageAdmin.getBundles(symbolicName, null);
-		if (bundles == null)
+		if (bundles == null) {
 			return null;
+		}
 		for (Bundle bundle : bundles) {
 			if ((bundle.getState() & (Bundle.INSTALLED | Bundle.UNINSTALLED)) == 0) {
 				return bundle;
