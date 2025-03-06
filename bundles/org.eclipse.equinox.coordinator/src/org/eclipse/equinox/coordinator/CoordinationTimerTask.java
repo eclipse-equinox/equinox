@@ -22,8 +22,9 @@ public class CoordinationTimerTask extends TimerTask {
 	private final CoordinationImpl coordination;
 
 	public CoordinationTimerTask(CoordinationImpl coordination) {
-		if (coordination == null)
+		if (coordination == null) {
 			throw new NullPointerException(NLS.bind(Messages.NullParameter, "coordination")); //$NON-NLS-1$
+		}
 		this.coordination = coordination;
 	}
 

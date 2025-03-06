@@ -69,8 +69,9 @@ public class CoordinationImpl {
 	public void addParticipant(Participant participant) throws CoordinationException {
 		// This method requires the PARTICIPATE permission.
 		coordinator.checkPermission(CoordinationPermission.PARTICIPATE, name);
-		if (participant == null)
+		if (participant == null) {
 			throw new NullPointerException(NLS.bind(Messages.NullParameter, "participant")); //$NON-NLS-1$
+		}
 		/*
 		 * The caller has permission. Check to see if the participant is already
 		 * participating in another coordination. Do this in a loop in case the
@@ -165,8 +166,9 @@ public class CoordinationImpl {
 						peeked.end();
 					} catch (CoordinationException e) {
 						peeked = coordinator.peek();
-						if (peeked != null)
+						if (peeked != null) {
 							peeked.fail(e);
+						}
 					}
 				}
 				// A coordination is removed from the thread local stack only when being ended.
@@ -219,30 +221,31 @@ public class CoordinationImpl {
 			checkTerminated();
 			// If there was no previous timeout set, return 0 indicating that no
 			// extension has taken place.
-			if (timerTask == null)
+			if (timerTask == null) {
 				return 0;
+			}
 			// Passing anything less than zero as well as zero itself will return the
 			// existing deadline. The deadline will not be null if timerTask is not null.
-			if (timeInMillis == 0)
+			if (timeInMillis == 0) {
 				return deadline.getTime();
+			}
 			long maxTimeout = coordinator.getMaxTimeout();
 			long newTotalTimeout = totalTimeout + timeInMillis;
 			// If there is no maximum timeout, there's no need to track the total timeout.
 			if (maxTimeout != 0) {
 				// If the max timeout has already been reached, return 0 indicating that no
 				// extension has taken place.
-				if (totalTimeout == maxTimeout)
+				if (totalTimeout == maxTimeout) {
 					return 0;
-				// If the extension would exceed the maximum timeout, add as much time
-				// as possible.
-				else if (newTotalTimeout > maxTimeout) {
+				} else if (newTotalTimeout > maxTimeout) {
 					totalTimeout = maxTimeout;
 					// Adjust the requested extension amount with the allowable amount.
 					timeInMillis = newTotalTimeout - maxTimeout;
 				}
 				// Otherwise, accept the full extension.
-				else
+ else {
 					totalTimeout = newTotalTimeout;
+				}
 			}
 			// Cancel the current timeout.
 			boolean cancelled = timerTask.cancel();
@@ -279,14 +282,16 @@ public class CoordinationImpl {
 	public boolean fail(Throwable reason) {
 		coordinator.checkPermission(CoordinationPermission.PARTICIPATE, name);
 		// The reason must not be null.
-		if (reason == null)
+		if (reason == null) {
 			throw new NullPointerException(NLS.bind(Messages.MissingFailureCause, getName(), getId()));
+		}
 		// Terminating the coordination must be atomic.
 		synchronized (this) {
 			// If this coordination is terminated, return false. Do not throw a
 			// CoordinationException as in other methods.
-			if (terminated)
+			if (terminated) {
 				return false;
+			}
 			// This coordination has not already terminated, so terminate now.
 			terminate();
 			// Store the reason for the failure.
@@ -319,8 +324,9 @@ public class CoordinationImpl {
 
 	public synchronized Coordination getEnclosingCoordination() {
 		coordinator.checkPermission(CoordinationPermission.ADMIN, name);
-		if (enclosingCoordination == null)
+		if (enclosingCoordination == null) {
 			return null;
+		}
 		return enclosingCoordination.getReferent();
 	}
 
@@ -382,8 +388,9 @@ public class CoordinationImpl {
 					// Update the elapsed time.
 					elapsed = System.currentTimeMillis() - start;
 					// If the allotted wait time has fully expired, we're done.
-					if (elapsed >= timeInMillis) // Don't allow a wait of zero here!
+					if (elapsed >= timeInMillis) { // Don't allow a wait of zero here!
 						break;
+					}
 				}
 			}
 		}
@@ -420,8 +427,9 @@ public class CoordinationImpl {
 
 	private void checkTerminated() throws CoordinationException {
 		// If this coordination is not terminated, simply return.
-		if (!terminated)
+		if (!terminated) {
 			return;
+		}
 		// The coordination has terminated. Figure out which type of exception
 		// must be thrown.
 		if (failure != null) {
@@ -447,9 +455,9 @@ public class CoordinationImpl {
 
 	private static void validateName(String name) {
 		boolean valid = true;
-		if (name == null || name.length() == 0)
+		if (name == null || name.length() == 0) {
 			valid = false;
-		else {
+		} else {
 			boolean period = false;
 			for (char c : name.toCharArray()) {
 				if (Character.isLetterOrDigit(c) || c == '_' || c == '-') {
@@ -462,12 +470,14 @@ public class CoordinationImpl {
 				}
 			}
 		}
-		if (!valid)
+		if (!valid) {
 			throw new IllegalArgumentException(NLS.bind(Messages.InvalidCoordinationName, name));
+		}
 	}
 
 	private static void validateTimeout(long timeout) {
-		if (timeout < 0)
+		if (timeout < 0) {
 			throw new IllegalArgumentException(NLS.bind(Messages.InvalidTimeInterval, timeout));
+		}
 	}
 }

@@ -37,9 +37,10 @@ public class CoordinationWeakReference extends WeakReference<CoordinationReferen
 						c.end();
 					} catch (CoordinationException e) {
 						// This is expected since we already failed the coordination...
-						if (!Coordination.ORPHANED.equals(e.getCause()))
+						if (!Coordination.ORPHANED.equals(e.getCause())) {
 							// ...but only if the cause is ORPHANED.
 							c.getLogService().debug(NLS.bind(Messages.OrphanedCoordinationError, c.getName(), c.getId()), e);
+						}
 					} catch (Exception e) {
 						c.getLogService().warn(NLS.bind(Messages.OrphanedCoordinationError, c.getName(), c.getId()), e);
 					}
@@ -52,8 +53,9 @@ public class CoordinationWeakReference extends WeakReference<CoordinationReferen
 
 	public CoordinationWeakReference(CoordinationReferent referent, CoordinationImpl coordination) {
 		super(referent, referenceQueue);
-		if (coordination == null)
+		if (coordination == null) {
 			throw new NullPointerException();
+		}
 		this.coordination = coordination;
 	}
 

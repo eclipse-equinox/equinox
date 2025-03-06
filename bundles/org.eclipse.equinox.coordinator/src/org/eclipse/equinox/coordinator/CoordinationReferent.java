@@ -24,8 +24,9 @@ public class CoordinationReferent implements Coordination {
 	private final CoordinationImpl coordination;
 
 	public CoordinationReferent(CoordinationImpl coordination) {
-		if (coordination == null)
+		if (coordination == null) {
 			throw new NullPointerException();
+		}
 		this.coordination = coordination;
 	}
 
@@ -106,10 +107,12 @@ public class CoordinationReferent implements Coordination {
 
 	@Override
 	public boolean equals(Object object) {
-		if (object == this)
+		if (object == this) {
 			return true;
-		if (!(object instanceof CoordinationReferent))
+		}
+		if (!(object instanceof CoordinationReferent)) {
 			return false;
+		}
 		return coordination.equals(((CoordinationReferent) object).coordination);
 	}
 
