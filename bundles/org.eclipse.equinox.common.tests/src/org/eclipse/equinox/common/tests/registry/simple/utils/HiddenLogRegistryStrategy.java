@@ -60,18 +60,20 @@ public class HiddenLogRegistryStrategy extends RegistryStrategy {
 		}
 		statusMsg += message;
 
-		if (prefix != null)
+		if (prefix != null) {
 			statusMsg = prefix + statusMsg;
+		}
 		output += statusMsg;
 
 		// print out children as well
 		IStatus[] children = status.getChildren();
 		if (children.length != 0) {
 			String newPrefix;
-			if (prefix == null)
+			if (prefix == null) {
 				newPrefix = "\t"; //$NON-NLS-1$
-			else
+			} else {
 				newPrefix = prefix + "\t"; //$NON-NLS-1$
+			}
 			for (IStatus child : children) {
 				log(child, newPrefix);
 			}
