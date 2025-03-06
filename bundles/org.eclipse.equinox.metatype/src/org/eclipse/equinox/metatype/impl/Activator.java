@@ -120,8 +120,9 @@ public class Activator implements BundleActivator {
 		@Override
 		public SAXParserFactory addingService(ServiceReference<SAXParserFactory> ref) {
 			SAXParserFactory parserFactory = bundleCtx.getService(ref);
-			if (parserFactory == null)
+			if (parserFactory == null) {
 				return null;
+			}
 			ServiceRegistration<?> registration = null;
 			MetaTypeServiceImpl service = null;
 			SAXParserFactory oldFactory = null;
@@ -209,12 +210,14 @@ public class Activator implements BundleActivator {
 		private SAXParserFactory findBestPossibleFactory() {
 			ServiceTracker<SAXParserFactory, SAXParserFactory> tracker = getSAXParserFactoryTracker();
 			// The tracker will be null if the bundle is stopping.
-			if (tracker == null)
+			if (tracker == null) {
 				return null;
+			}
 			SAXParserFactory[] factories = (SAXParserFactory[]) tracker.getServices();
 			// The factories will be null if there are no services being tracked.
-			if (factories == null)
+			if (factories == null) {
 				return null;
+			}
 			SAXParserFactory result = null;
 			for (SAXParserFactory factory : factories) {
 				if (factory.isNamespaceAware()) {
@@ -229,8 +232,9 @@ public class Activator implements BundleActivator {
 			}
 			// If no factories capable of providing namespace aware parsers have been found,
 			// just grab the first available one, if any.
-			if (result == null)
+			if (result == null) {
 				result = tracker.getService();
+			}
 			return result;
 		}
 
@@ -259,8 +263,9 @@ public class Activator implements BundleActivator {
 		}
 
 		private boolean supportsNamespaceAwareness(SAXParserFactory factory) {
-			if (factory.isNamespaceAware())
+			if (factory.isNamespaceAware()) {
 				return true;
+			}
 			factory.setNamespaceAware(true);
 			try {
 				factory.newSAXParser();

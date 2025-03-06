@@ -175,11 +175,13 @@ public class LogTracker extends ServiceTracker<LogService, LogService> {
 
 	private StringBuffer appendPaddedInt(int value, int pad, StringBuffer buffer) {
 		pad = pad - 1;
-		if (pad == 0)
+		if (pad == 0) {
 			return buffer.append(Integer.toString(value));
+		}
 		int padding = (int) Math.pow(10, pad);
-		if (value >= padding)
+		if (value >= padding) {
 			return buffer.append(Integer.toString(value));
+		}
 		while (padding > value && padding > 1) {
 			buffer.append('0');
 			padding = padding / 10;

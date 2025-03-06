@@ -103,12 +103,14 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 	 */
 	private boolean readMetaFiles(Bundle bundle, SAXParser saxParser) {
 		Enumeration<URL> entries = bundle.findEntries(MetaTypeService.METATYPE_DOCUMENTS_LOCATION, "*", false); //$NON-NLS-1$
-		if (entries == null)
+		if (entries == null) {
 			return false;
+		}
 		boolean result = false;
 		for (URL entry : Collections.list(entries)) {
-			if (entry.getPath().endsWith("/")) //$NON-NLS-1$
+			if (entry.getPath().endsWith("/")) { //$NON-NLS-1$
 				continue;
+			}
 			DataParser parser = new DataParser(bundle, entry, saxParser, logger);
 			try {
 				Collection<Designate> designates = parser.doParse();
@@ -164,17 +166,20 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 	public boolean isInvalidLocale(String locale) {
 
 		// Just a simple and quick check here.
-		if (locale == null || locale.length() == 0)
+		if (locale == null || locale.length() == 0) {
 			return false;
+		}
 
 		int idx_first = locale.indexOf(LocalizationElement.LOCALE_SEP);
 		int idx_second = locale.lastIndexOf(LocalizationElement.LOCALE_SEP);
-		if (idx_first == -1 && locale.length() == 2)
+		if (idx_first == -1 && locale.length() == 2) {
 			// It is format of only language.
 			return false;
-		if ((idx_first == 2) && (idx_second == 5 || idx_second == 2))
+		}
+		if ((idx_first == 2) && (idx_second == 5 || idx_second == 2)) {
 			// It is format of language + "_" + country [ + "_" + variation ].
 			return false;
+		}
 		return true;
 	}
 
@@ -185,23 +190,27 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 	 */
 	@Override
 	public synchronized String[] getLocales() {
-		if (_locales != null)
+		if (_locales != null) {
 			return checkForDefault(_locales);
+		}
 		List<String> localizationFiles = new ArrayList<>(7);
 		// get all the localization resources for PIDS
 		for (ObjectClassDefinitionImpl ocd : _allPidOCDs.values()) {
 			String localization = ocd.getLocalization();
-			if (localization != null && !localizationFiles.contains(localization))
+			if (localization != null && !localizationFiles.contains(localization)) {
 				localizationFiles.add(localization);
+			}
 		}
 		// get all the localization resources for FPIDS
 		for (ObjectClassDefinitionImpl ocd : _allFPidOCDs.values()) {
 			String localization = ocd.getLocalization();
-			if (localization != null && !localizationFiles.contains(localization))
+			if (localization != null && !localizationFiles.contains(localization)) {
 				localizationFiles.add(localization);
+			}
 		}
-		if (localizationFiles.size() == 0)
+		if (localizationFiles.size() == 0) {
 			localizationFiles.add(getBundleLocalization(_bundle));
+		}
 		Vector<String> locales = new Vector<>(7);
 		for (String localizationFile : localizationFiles) {
 			int iSlash = localizationFile.lastIndexOf(DIRECTORY_SEP);
@@ -214,13 +223,15 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 			}
 			baseFileName = '/' + localizationFile + RESOURCE_FILE_CONN;
 			Enumeration<URL> entries = _bundle.findEntries(baseDir, "*.properties", false); //$NON-NLS-1$
-			if (entries == null)
+			if (entries == null) {
 				continue;
+			}
 			while (entries.hasMoreElements()) {
 				String resource = entries.nextElement().getPath();
-				if (resource.startsWith(baseFileName) && resource.toLowerCase().endsWith(RESOURCE_FILE_EXT))
+				if (resource.startsWith(baseFileName) && resource.toLowerCase().endsWith(RESOURCE_FILE_EXT)) {
 					locales.add(
 							resource.substring(baseFileName.length(), resource.length() - RESOURCE_FILE_EXT.length()));
+				}
 			}
 		}
 		_locales = locales.toArray(new String[locales.size()]);
@@ -230,9 +241,10 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 	static String getBundleLocalization(Bundle bundle) {
 		// Use the Bundle-Localization manifest header value if it exists.
 		String baseName = bundle.getHeaders("").get(Constants.BUNDLE_LOCALIZATION); //$NON-NLS-1$
-		if (baseName == null)
+		if (baseName == null) {
 			// If the manifest header does not exist, use the default.
 			baseName = Constants.BUNDLE_LOCALIZATION_DEFAULT_BASENAME;
+		}
 		return baseName;
 	}
 
@@ -242,8 +254,9 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 	private String[] checkForDefault(String[] locales) {
 
 		if (locales == null || locales.length == 0
-				|| (locales.length == 1 && Locale.getDefault().toString().equals(locales[0])))
+				|| (locales.length == 1 && Locale.getDefault().toString().equals(locales[0]))) {
 			return null;
+		}
 		return locales;
 	}
 

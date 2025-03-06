@@ -41,16 +41,18 @@ public class FragmentUtils {
 			file = path;
 			break;
 		case 0:
-			if (path.length() > 1)
+			if (path.length() > 1) {
 				file = path.substring(1);
+			}
 			break;
 		default:
 			directory = path.substring(0, index);
 			file = path.substring(index + 1);
 		}
 		Enumeration<URL> entries = bundle.findEntries(directory, file, false);
-		if (entries == null)
+		if (entries == null) {
 			return null;
+		}
 		List<URL> list = Collections.list(entries);
 		return list.toArray(new URL[list.size()]);
 	}
