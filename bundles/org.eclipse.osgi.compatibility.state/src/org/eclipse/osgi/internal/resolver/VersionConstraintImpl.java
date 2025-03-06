@@ -52,8 +52,9 @@ abstract class VersionConstraintImpl implements VersionConstraint {
 	@Override
 	public VersionRange getVersionRange() {
 		synchronized (this.monitor) {
-			if (versionRange == null)
+			if (versionRange == null) {
 				return VersionRange.emptyRange;
+			}
 			return versionRange;
 		}
 	}
@@ -121,8 +122,9 @@ abstract class VersionConstraintImpl implements VersionConstraint {
 	@Override
 	public BundleRequirement getRequirement() {
 		String namespace = getInternalNameSpace();
-		if (namespace == null)
+		if (namespace == null) {
 			return null;
+		}
 		return new BundleRequirementImpl(namespace);
 	}
 
@@ -179,10 +181,12 @@ abstract class VersionConstraintImpl implements VersionConstraint {
 
 		@Override
 		public boolean equals(Object obj) {
-			if (this == obj)
+			if (this == obj) {
 				return true;
-			if (!(obj instanceof BundleRequirementImpl))
+			}
+			if (!(obj instanceof BundleRequirementImpl)) {
 				return false;
+			}
 			return ((BundleRequirementImpl) obj).getVersionConstraint() == VersionConstraintImpl.this;
 		}
 
@@ -192,15 +196,18 @@ abstract class VersionConstraintImpl implements VersionConstraint {
 		}
 
 		public boolean matches(Capability capability) {
-			if (capability instanceof BundleCapability)
+			if (capability instanceof BundleCapability) {
 				return matches((BundleCapability) capability);
+			}
 			// now we must do the generic thing
-			if (!namespace.equals(capability.getNamespace()))
+			if (!namespace.equals(capability.getNamespace())) {
 				return false;
+			}
 			String filterSpec = getDirectives().get(Namespace.REQUIREMENT_FILTER_DIRECTIVE);
 			try {
-				if (filterSpec != null && !FrameworkUtil.createFilter(filterSpec).matches(capability.getAttributes()))
+				if (filterSpec != null && !FrameworkUtil.createFilter(filterSpec).matches(capability.getAttributes())) {
 					return false;
+				}
 			} catch (InvalidSyntaxException e) {
 				return false;
 			}
@@ -248,8 +255,9 @@ abstract class VersionConstraintImpl implements VersionConstraint {
 			char c = output[i];
 			switch (c) {
 				case '*' :
-					if (!escapeWildCard)
+					if (!escapeWildCard) {
 						break;
+					}
 				case '\\' :
 				case '(' :
 				case ')' :

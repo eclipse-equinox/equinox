@@ -49,8 +49,9 @@ public abstract class ResolverConstraint {
 
 	// Same as VersionConstraint but does additinal permission checks
 	boolean isSatisfiedBy(VersionSupplier vs) {
-		if (vs.getResolverBundle().isUninstalled() || !bundle.getResolver().getPermissionChecker().checkPermission(constraint, vs.getBaseDescription()))
+		if (vs.getResolverBundle().isUninstalled() || !bundle.getResolver().getPermissionChecker().checkPermission(constraint, vs.getBaseDescription())) {
 			return false;
+		}
 		return vs.getSubstitute() == null && constraint.isSatisfiedBy(vs.getBaseDescription());
 	}
 
@@ -73,8 +74,9 @@ public abstract class ResolverConstraint {
 	abstract boolean isOptional();
 
 	void addPossibleSupplier(VersionSupplier supplier) {
-		if (supplier == null)
+		if (supplier == null) {
 			return;
+		}
 		// we hope multiple suppliers are rare so do simple array expansion here.
 		if (possibleSuppliers == null) {
 			possibleSuppliers = new VersionSupplier[] {supplier};
@@ -87,8 +89,9 @@ public abstract class ResolverConstraint {
 	}
 
 	public void removePossibleSupplier(VersionSupplier supplier) {
-		if (possibleSuppliers == null || supplier == null)
+		if (possibleSuppliers == null || supplier == null) {
 			return;
+		}
 		int index = -1;
 		for (int i = 0; i < possibleSuppliers.length; i++) {
 			if (possibleSuppliers[i] == supplier) {
@@ -103,28 +106,32 @@ public abstract class ResolverConstraint {
 			}
 			VersionSupplier[] newSuppliers = new VersionSupplier[possibleSuppliers.length - 1];
 			System.arraycopy(possibleSuppliers, 0, newSuppliers, 0, index);
-			if (index < possibleSuppliers.length - 1)
+			if (index < possibleSuppliers.length - 1) {
 				System.arraycopy(possibleSuppliers, index + 1, newSuppliers, index, possibleSuppliers.length - index - 1);
+			}
 			possibleSuppliers = newSuppliers;
 		}
 	}
 
 	int getNumPossibleSuppliers() {
-		if (possibleSuppliers == null)
+		if (possibleSuppliers == null) {
 			return 0;
+		}
 		return possibleSuppliers.length;
 	}
 
 	boolean selectNextSupplier() {
-		if (possibleSuppliers == null || selectedSupplierIndex >= possibleSuppliers.length)
+		if (possibleSuppliers == null || selectedSupplierIndex >= possibleSuppliers.length) {
 			return false;
+		}
 		selectedSupplierIndex += 1;
 		return selectedSupplierIndex < possibleSuppliers.length;
 	}
 
 	VersionSupplier getSelectedSupplier() {
-		if (possibleSuppliers == null || selectedSupplierIndex >= possibleSuppliers.length)
+		if (possibleSuppliers == null || selectedSupplierIndex >= possibleSuppliers.length) {
 			return null;
+		}
 		return possibleSuppliers[selectedSupplierIndex];
 	}
 

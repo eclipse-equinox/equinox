@@ -70,11 +70,13 @@ public class MappedList<K, V> {
 
 	// returns all values of all keys
 	public List<V> getAllValues() {
-		if (getSize() == 0)
+		if (getSize() == 0) {
 			return empty;
+		}
 		ArrayList<V> results = new ArrayList<>(getSize());
-		for (List<V> element : internal.values())
+		for (List<V> element : internal.values()) {
 			results.addAll(element);
+		}
 		return results;
 	}
 

@@ -38,8 +38,9 @@ public class ResolverImport extends ResolverConstraint {
 
 	@Override
 	public String getName() {
-		if (name != null)
+		if (name != null) {
 			return name; // return the required package set for a dynamic import
+		}
 		return super.getName();
 	}
 

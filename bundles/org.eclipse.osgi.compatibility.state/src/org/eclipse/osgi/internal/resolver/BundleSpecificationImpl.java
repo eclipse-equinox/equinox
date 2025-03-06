@@ -83,28 +83,34 @@ public class BundleSpecificationImpl extends VersionConstraintImpl implements Bu
 
 	@Override
 	public boolean isSatisfiedBy(BaseDescription supplier) {
-		if (!(supplier instanceof BundleDescriptionImpl))
+		if (!(supplier instanceof BundleDescriptionImpl)) {
 			return false;
+		}
 		BundleDescriptionImpl candidate = (BundleDescriptionImpl) supplier;
-		if (candidate.getHost() != null)
+		if (candidate.getHost() != null) {
 			return false;
+		}
 		Map<String, ?> requiredAttrs = getAttributes();
 		if (requiredAttrs != null) {
 			Map<String, ?> prividerAttrs = candidate.getAttributes();
-			if (prividerAttrs == null)
+			if (prividerAttrs == null) {
 				return false;
+			}
 			for (String key : requiredAttrs.keySet()) {
 				Object requiredValue = requiredAttrs.get(key);
 				Object prividedValue = prividerAttrs.get(key);
-				if (prividedValue == null || !requiredValue.equals(prividedValue))
+				if (prividedValue == null || !requiredValue.equals(prividedValue)) {
 					return false;
+				}
 			}
 		}
 		String[] mandatory = (String[]) candidate.getDirective(Constants.MANDATORY_DIRECTIVE);
-		if (!hasMandatoryAttributes(mandatory))
+		if (!hasMandatoryAttributes(mandatory)) {
 			return false;
-		if (getName() != null && getName().equals(candidate.getSymbolicName()) && (getVersionRange() == null || getVersionRange().isIncluded(candidate.getVersion())))
+		}
+		if (getName() != null && getName().equals(candidate.getSymbolicName()) && (getVersionRange() == null || getVersionRange().isIncluded(candidate.getVersion()))) {
 			return true;
+		}
 		return false;
 	}
 
@@ -113,10 +119,12 @@ public class BundleSpecificationImpl extends VersionConstraintImpl implements Bu
 		if (mandatory != null) {
 			Map<String, ?> requiredAttrs = getAttributes();
 			for (String key : mandatory) {
-				if (Constants.BUNDLE_VERSION_ATTRIBUTE.equals(key))
+				if (Constants.BUNDLE_VERSION_ATTRIBUTE.equals(key)) {
 					continue; // has a default value of 0.0.0
-				if (requiredAttrs == null || requiredAttrs.get(key) == null)
+				}
+				if (requiredAttrs == null || requiredAttrs.get(key) == null) {
 					return false;
+				}
 			}
 		}
 		return true;
@@ -131,12 +139,15 @@ public class BundleSpecificationImpl extends VersionConstraintImpl implements Bu
 	protected Map<String, String> getInternalDirectives() {
 		Map<String, String> result = new HashMap<>(2);
 		synchronized (this.monitor) {
-			if (arbitraryDirectives != null)
+			if (arbitraryDirectives != null) {
 				result.putAll(arbitraryDirectives);
-			if (exported)
+			}
+			if (exported) {
 				result.put(Constants.VISIBILITY_DIRECTIVE, Constants.VISIBILITY_REEXPORT);
-			if (optional)
+			}
+			if (optional) {
 				result.put(Constants.RESOLUTION_DIRECTIVE, Constants.RESOLUTION_OPTIONAL);
+			}
 			result.put(Constants.FILTER_DIRECTIVE, createFilterDirective());
 			return result;
 		}
@@ -148,10 +159,12 @@ public class BundleSpecificationImpl extends VersionConstraintImpl implements Bu
 		synchronized (this.monitor) {
 			addFilterAttribute(filter, BundleRevision.BUNDLE_NAMESPACE, getName());
 			VersionRange range = getVersionRange();
-			if (range != null && range != VersionRange.emptyRange)
+			if (range != null && range != VersionRange.emptyRange) {
 				addFilterAttribute(filter, Constants.BUNDLE_VERSION_ATTRIBUTE, range);
-			if (attributes != null)
+			}
+			if (attributes != null) {
 				addFilterAttributes(filter, attributes);
+			}
 		}
 		filter.append(')');
 		return filter.toString();

@@ -47,8 +47,9 @@ public class NativeCodeDescriptionImpl extends BaseDescriptionImpl implements Na
 	@Override
 	public String[] getLanguages() {
 		synchronized (this.monitor) {
-			if (languages == null)
+			if (languages == null) {
 				return BundleDescriptionImpl.EMPTY_STRING;
+			}
 			return languages;
 		}
 	}
@@ -56,8 +57,9 @@ public class NativeCodeDescriptionImpl extends BaseDescriptionImpl implements Na
 	@Override
 	public String[] getNativePaths() {
 		synchronized (this.monitor) {
-			if (nativePaths == null)
+			if (nativePaths == null) {
 				return BundleDescriptionImpl.EMPTY_STRING;
+			}
 			return nativePaths;
 		}
 	}
@@ -65,8 +67,9 @@ public class NativeCodeDescriptionImpl extends BaseDescriptionImpl implements Na
 	@Override
 	public String[] getOSNames() {
 		synchronized (this.monitor) {
-			if (osNames == null)
+			if (osNames == null) {
 				return BundleDescriptionImpl.EMPTY_STRING;
+			}
 			return osNames;
 		}
 	}
@@ -74,8 +77,9 @@ public class NativeCodeDescriptionImpl extends BaseDescriptionImpl implements Na
 	@Override
 	public VersionRange[] getOSVersions() {
 		synchronized (this.monitor) {
-			if (osVersions == null)
+			if (osVersions == null) {
 				return EMPTY_VERSIONRANGES;
+			}
 			return osVersions;
 		}
 	}
@@ -83,8 +87,9 @@ public class NativeCodeDescriptionImpl extends BaseDescriptionImpl implements Na
 	@Override
 	public String[] getProcessors() {
 		synchronized (this.monitor) {
-			if (processors == null)
+			if (processors == null) {
 				return BundleDescriptionImpl.EMPTY_STRING;
+			}
 			return processors;
 		}
 	}
@@ -97,8 +102,9 @@ public class NativeCodeDescriptionImpl extends BaseDescriptionImpl implements Na
 	@Override
 	public int compareTo(NativeCodeDescription otherDesc) {
 		State containingState = getSupplier().getContainingState();
-		if (containingState == null)
+		if (containingState == null) {
 			return 0;
+		}
 		Dictionary<Object, Object>[] platformProps = containingState.getPlatformProperties();
 		Version osversion;
 		try {
@@ -110,8 +116,9 @@ public class NativeCodeDescriptionImpl extends BaseDescriptionImpl implements Na
 		VersionRange[] otherRanges = otherDesc.getOSVersions();
 		Version thisHighest = getHighestVersionMatch(osversion, thisRanges);
 		Version otherHighest = getHighestVersionMatch(osversion, otherRanges);
-		if (thisHighest.compareTo(otherHighest) < 0)
+		if (thisHighest.compareTo(otherHighest) < 0) {
 			return -1;
+		}
 		return (getLanguages().length == 0 ? 0 : 1) - (otherDesc.getLanguages().length == 0 ? 0 : 1);
 	}
 
