@@ -56,14 +56,16 @@ public class ResourceServlet extends HttpServlet {
 		String method = req.getMethod();
 		if (method.equals("GET") || method.equals("POST") || method.equals("HEAD")) { //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 			String pathInfo = HttpServletRequestWrapperImpl.getDispatchPathInfo(req);
-			if (pathInfo == null)
+			if (pathInfo == null) {
 				pathInfo = Const.BLANK;
+			}
 			String resourcePath = internalName + pathInfo;
 			URL resourceURL = servletContextHelper.getResource(resourcePath);
-			if (resourceURL != null)
+			if (resourceURL != null) {
 				writeResource(req, resp, resourcePath, resourceURL);
-			else
+			} else {
 				resp.sendError(HttpServletResponse.SC_NOT_FOUND, "ProxyServlet: " + req.getRequestURI()); //$NON-NLS-1$
+			}
 		} else {
 			resp.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		}
@@ -78,8 +80,9 @@ public class ResourceServlet extends HttpServlet {
 				int contentLength = connection.getContentLength();
 
 				String etag = null;
-				if (lastModified != -1 && contentLength != -1)
+				if (lastModified != -1 && contentLength != -1) {
 					etag = "W/\"" + contentLength + "-" + lastModified + "\""; //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+				}
 
 				// Check for cache revalidation.
 				// We should prefer ETag validation as the guarantees are stronger and all HTTP
@@ -113,22 +116,27 @@ public class ResourceServlet extends HttpServlet {
 				}
 
 				// return the full contents regularly
-				if (contentLength != -1)
+				if (contentLength != -1) {
 					resp.setContentLength(contentLength);
+				}
 
 				String filename = new File(resourcePath).getName();
 				String contentType = servletContextHelper.getMimeType(filename);
-				if (contentType == null)
+				if (contentType == null) {
 					contentType = getServletConfig().getServletContext().getMimeType(filename);
+				}
 
-				if (contentType != null)
+				if (contentType != null) {
 					resp.setContentType(contentType);
+				}
 
-				if (lastModified > 0)
+				if (lastModified > 0) {
 					resp.setDateHeader(LAST_MODIFIED, lastModified);
+				}
 
-				if (etag != null)
+				if (etag != null) {
 					resp.setHeader(ETAG, etag);
+				}
 
 				if (range == null && (servletContextHelper instanceof RangeAwareServletContextHelper)
 						&& ((RangeAwareServletContextHelper) servletContextHelper).rangeableContentType(contentType,
@@ -155,8 +163,9 @@ public class ResourceServlet extends HttpServlet {
 						try {
 							OutputStream os = resp.getOutputStream();
 							int writtenContentLength = writeResourceToOutputStream(is, os, range);
-							if (contentLength == -1 || contentLength != writtenContentLength)
+							if (contentLength == -1 || contentLength != writtenContentLength) {
 								resp.setContentLength(writtenContentLength);
+							}
 						} catch (IllegalStateException e) { // can occur if the response output is already open as a
 															// Writer
 							Writer writer = resp.getWriter();

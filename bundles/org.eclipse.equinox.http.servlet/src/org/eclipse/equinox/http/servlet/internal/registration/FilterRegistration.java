@@ -76,8 +76,9 @@ public class FilterRegistration extends MatchableRegistration<Filter, FilterDTO>
 	@Override
 	public int compareTo(FilterRegistration otherFilterRegistration) {
 		int priorityDifference = priority - otherFilterRegistration.priority;
-		if (priorityDifference != 0)
+		if (priorityDifference != 0) {
 			return -priorityDifference;
+		}
 
 		// Note that we use abs here because the DTO service ID may have been negated
 		// for legacy filters.

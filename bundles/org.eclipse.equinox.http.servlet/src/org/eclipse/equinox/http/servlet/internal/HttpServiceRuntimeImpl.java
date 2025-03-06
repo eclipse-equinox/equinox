@@ -186,10 +186,12 @@ public class HttpServiceRuntimeImpl implements HttpServiceRuntime,
 	public boolean isDefaultContext(ContextController contextController) {
 		ServiceReference<?> thisReference = defaultContextReg.getReference();
 		ServiceReference<ServletContextHelper> contextReference = contextController.getServiceReference();
-		if (thisReference == null)
+		if (thisReference == null) {
 			throw new NullPointerException("Default Context Service reference is null. " + this); //$NON-NLS-1$
-		if (contextReference == null)
+		}
+		if (contextReference == null) {
 			throw new NullPointerException("Context Service reference is null. " + contextController); //$NON-NLS-1$
+		}
 		return thisReference.equals(contextReference);
 	}
 

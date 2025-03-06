@@ -228,8 +228,9 @@ public class ServletContextAdaptor {
 	 * @see javax.servlet.ServletContext#getResourcePaths(java.lang.String)
 	 */
 	public Set<String> getResourcePaths(final String name) {
-		if (name == null || !name.startsWith(Const.SLASH))
+		if (name == null || !name.startsWith(Const.SLASH)) {
 			return null;
+		}
 
 		try {
 			return AccessController.doPrivileged(

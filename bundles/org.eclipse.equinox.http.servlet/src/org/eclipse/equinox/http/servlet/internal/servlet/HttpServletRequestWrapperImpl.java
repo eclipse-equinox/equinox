@@ -101,8 +101,9 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 	@Override
 	public String getAuthType() {
 		String authType = (String) this.getAttribute(HttpContext.AUTHENTICATION_TYPE);
-		if (authType != null)
+		if (authType != null) {
 			return authType;
+		}
 
 		return request.getAuthType();
 	}
@@ -110,8 +111,9 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 	@Override
 	public String getRemoteUser() {
 		String remoteUser = (String) this.getAttribute(HttpContext.REMOTE_USER);
-		if (remoteUser != null)
+		if (remoteUser != null) {
 			return remoteUser;
+		}
 
 		return request.getRemoteUser();
 	}
@@ -319,15 +321,17 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 	}
 
 	public static String getDispatchPathInfo(HttpServletRequest req) {
-		if (req.getDispatcherType() == DispatcherType.INCLUDE)
+		if (req.getDispatcherType() == DispatcherType.INCLUDE) {
 			return (String) req.getAttribute(RequestDispatcher.INCLUDE_PATH_INFO);
+		}
 
 		return req.getPathInfo();
 	}
 
 	public static String getDispatchRequestURI(HttpServletRequest req) {
-		if (req.getDispatcherType() == DispatcherType.INCLUDE)
+		if (req.getDispatcherType() == DispatcherType.INCLUDE) {
 			return (String) req.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI);
+		}
 
 		return req.getRequestURI();
 	}
