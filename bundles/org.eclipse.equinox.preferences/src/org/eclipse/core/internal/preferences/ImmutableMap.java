@@ -44,8 +44,9 @@ public abstract class ImmutableMap implements Cloneable {
 			this.elementSize = 0;
 			// table size must always be a power of two
 			int tableLen = 1;
-			while (tableLen < size)
+			while (tableLen < size) {
 				tableLen *= 2;
+			}
 			this.keyTable = new String[tableLen];
 			this.valueTable = new String[tableLen];
 			this.threshold = (int) (tableLen * LOAD_FACTOR);
@@ -57,8 +58,9 @@ public abstract class ImmutableMap implements Cloneable {
 			int index = key.hashCode() & lengthMask;
 			String currentKey;
 			while ((currentKey = keyTable[index]) != null) {
-				if (currentKey.equals(key))
+				if (currentKey.equals(key)) {
 					return valueTable[index];
+				}
 				index = (index + 1) & lengthMask;
 			}
 			return null;
@@ -90,8 +92,9 @@ public abstract class ImmutableMap implements Cloneable {
 		 */
 		@Override
 		public String[] keys() {
-			if (elementSize == 0)
+			if (elementSize == 0) {
 				return EMPTY_STRING_ARRAY;
+			}
 			String[] result = new String[elementSize];
 			int next = 0;
 			for (String key : keyTable) {
@@ -110,9 +113,11 @@ public abstract class ImmutableMap implements Cloneable {
 				// rehash case
 				String currentKey;
 				result = new ArrayMap(oldLen * 2);
-				for (int i = oldLen; --i >= 0;)
-					if ((currentKey = keyTable[i]) != null)
+				for (int i = oldLen; --i >= 0;) {
+					if ((currentKey = keyTable[i]) != null) {
 						result.internalPut(currentKey, valueTable[i]);
+					}
+				}
 			} else {
 				result = new ArrayMap(oldLen);
 				System.arraycopy(this.keyTable, 0, result.keyTable, 0, this.keyTable.length);
@@ -130,16 +135,21 @@ public abstract class ImmutableMap implements Cloneable {
 			String currentKey;
 			while ((currentKey = keyTable[index]) != null) {
 				if (currentKey.equals(key)) {
-					if (elementSize <= 1)
+					if (elementSize <= 1) {
 						return EMPTY;
+					}
 					// return a new map that includes all keys except the current one
 					ImmutableMap result = createMap((int) (elementSize / LOAD_FACTOR));
-					for (int i = 0; i < index; i++)
-						if ((currentKey = keyTable[i]) != null)
+					for (int i = 0; i < index; i++) {
+						if ((currentKey = keyTable[i]) != null) {
 							result.internalPut(currentKey, valueTable[i]);
-					for (int i = index + 1; i <= lengthMask; i++)
-						if ((currentKey = keyTable[i]) != null)
+						}
+					}
+					for (int i = index + 1; i <= lengthMask; i++) {
+						if ((currentKey = keyTable[i]) != null) {
 							result.internalPut(currentKey, valueTable[i]);
+						}
+					}
 					return result;
 				}
 				index = (index + 1) & lengthMask;
@@ -205,8 +215,9 @@ public abstract class ImmutableMap implements Cloneable {
 	public abstract String get(String key);
 
 	protected static ImmutableMap createMap(int i) {
-		if (i <= 0)
+		if (i <= 0) {
 			return EMPTY;
+		}
 		return new ArrayMap(i);
 	}
 
@@ -246,8 +257,9 @@ public abstract class ImmutableMap implements Cloneable {
 	@Override
 	public String toString() {
 		StringBuilder s = new StringBuilder();
-		for (String key : keys())
+		for (String key : keys()) {
 			s.append(key).append(" -> ").append(get(key)).append("\n"); //$NON-NLS-2$ //$NON-NLS-1$
+		}
 		return s.toString();
 	}
 }

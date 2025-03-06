@@ -83,12 +83,13 @@ public abstract class AbstractPreferenceStorage {
 		} catch (IOException | IllegalArgumentException e) {
 			throw new BackingStoreException(PrefsMessages.preferences_loadProblems, e);
 		} finally {
-			if (input != null)
+			if (input != null) {
 				try {
 					input.close();
 				} catch (IOException e) {
 					// ignore
 				}
+			}
 		}
 		return result;
 	}
@@ -110,12 +111,13 @@ public abstract class AbstractPreferenceStorage {
 		} catch (IOException e) {
 			throw new BackingStoreException(PrefsMessages.preferences_saveProblems, e);
 		} finally {
-			if (output != null)
+			if (output != null) {
 				try {
 					output.close();
 				} catch (IOException e) {
 					// ignore
 				}
+			}
 		}
 	}
 

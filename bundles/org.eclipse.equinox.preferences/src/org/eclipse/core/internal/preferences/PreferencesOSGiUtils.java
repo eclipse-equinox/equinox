@@ -49,8 +49,9 @@ public class PreferencesOSGiUtils {
 	void openServices() {
 		BundleContext context = Activator.getContext();
 		if (context == null) {
-			if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
+			if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL) {
 				PrefsMessages.message("PreferencesOSGiUtils called before plugin started"); //$NON-NLS-1$
+			}
 			return;
 		}
 
@@ -107,40 +108,47 @@ public class PreferencesOSGiUtils {
 	}
 
 	public ILegacyPreferences getLegacyPreferences() {
-		if (initTracker != null)
+		if (initTracker != null) {
 			return initTracker.getService();
-		if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
+		}
+		if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL) {
 			PrefsMessages.message("Legacy preference tracker is not set"); //$NON-NLS-1$
+		}
 		return null;
 	}
 
 	public boolean getBooleanDebugOption(String option, boolean defaultValue) {
 		if (debugTracker == null) {
-			if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
+			if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL) {
 				PrefsMessages.message("Debug tracker is not set"); //$NON-NLS-1$
+			}
 			return defaultValue;
 		}
 		DebugOptions options = debugTracker.getService();
 		if (options != null) {
 			String value = options.getOption(option);
-			if (value != null)
+			if (value != null) {
 				return value.equalsIgnoreCase("true"); //$NON-NLS-1$
+			}
 		}
 		return defaultValue;
 	}
 
 	public Bundle getBundle(String bundleName) {
 		if (bundleTracker == null) {
-			if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
+			if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL) {
 				PrefsMessages.message("Bundle tracker is not set"); //$NON-NLS-1$
+			}
 			return null;
 		}
 		PackageAdmin packageAdmin = bundleTracker.getService();
-		if (packageAdmin == null)
+		if (packageAdmin == null) {
 			return null;
+		}
 		Bundle[] bundles = packageAdmin.getBundles(bundleName, null);
-		if (bundles == null)
+		if (bundles == null) {
 			return null;
+		}
 		// Return the first bundle that is not installed or uninstalled
 		for (Bundle bundle : bundles) {
 			if ((bundle.getState() & (Bundle.INSTALLED | Bundle.UNINSTALLED)) == 0) {
@@ -151,14 +159,16 @@ public class PreferencesOSGiUtils {
 	}
 
 	public Location getConfigurationLocation() {
-		if (configurationLocationTracker != null)
+		if (configurationLocationTracker != null) {
 			return (Location) configurationLocationTracker.getService();
+		}
 		return null;
 	}
 
 	public Location getInstanceLocation() {
-		if (instanceLocationTracker != null)
+		if (instanceLocationTracker != null) {
 			return (Location) instanceLocationTracker.getService();
+		}
 		return null;
 	}
 }

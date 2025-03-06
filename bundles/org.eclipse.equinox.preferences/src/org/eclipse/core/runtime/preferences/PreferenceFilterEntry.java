@@ -34,8 +34,9 @@ public final class PreferenceFilterEntry {
 	 */
 	public PreferenceFilterEntry(String key) {
 		super();
-		if (key == null || key.length() == 0)
+		if (key == null || key.length() == 0) {
 			throw new IllegalArgumentException();
+		}
 		this.key = key;
 	}
 

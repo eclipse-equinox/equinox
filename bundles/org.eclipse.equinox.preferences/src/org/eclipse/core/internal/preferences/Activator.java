@@ -197,16 +197,19 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer<Obje
 		environmentTracker.open();
 		EnvironmentInfo environmentInfo = environmentTracker.getService();
 		environmentTracker.close();
-		if (environmentInfo == null)
+		if (environmentInfo == null) {
 			return;
+		}
 		String[] args = environmentInfo.getNonFrameworkArgs();
-		if (args == null || args.length == 0)
+		if (args == null || args.length == 0) {
 			return;
+		}
 
 		for (int i = 0; i < args.length; i++) {
 			if (args[i].equalsIgnoreCase(IPreferencesConstants.PLUGIN_CUSTOMIZATION)) {
-				if (args.length > i + 1) // make sure the file name is actually there
+				if (args.length > i + 1) { // make sure the file name is actually there
 					DefaultPreferences.pluginCustomizationFile = args[i + 1];
+				}
 				break; // only interested in this one
 			}
 		}
