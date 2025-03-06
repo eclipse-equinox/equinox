@@ -56,15 +56,17 @@ public abstract class StructuredTextDelimsEsc extends StructuredTextDelims {
 		char delim = getDelimiters().charAt((caseNumber * 2) - 1);
 		while (true) {
 			location = text.indexOf(delim, location);
-			if (location < 0)
+			if (location < 0) {
 				return text.length();
+			}
 			int cnt = 0;
 			for (int i = location - 1; text.charAt(i) == '\\'; i--) {
 				cnt++;
 			}
 			location++;
-			if ((cnt & 1) == 0)
+			if ((cnt & 1) == 0) {
 				return location;
+			}
 		}
 	}
 

@@ -114,10 +114,11 @@ public class StructuredTextEnvironment {
 	 */
 	public StructuredTextEnvironment(String lang, boolean mirrored, int orientation) {
 		if (lang != null) {
-			if (lang.length() > 2)
+			if (lang.length() > 2) {
 				language = lang.substring(0, 2);
-			else
+			} else {
 				language = lang;
+			}
 		} else {
 			Locale defaultLocale = StructuredTextActivator.getInstance() != null
 					? StructuredTextActivator.getInstance().getDefaultLocale()
@@ -186,8 +187,9 @@ public class StructuredTextEnvironment {
 	public boolean isProcessingNeeded() {
 		if (processingNeeded == null) {
 			String osName = StructuredTextActivator.getProperty("os.name"); //$NON-NLS-1$ /
-			if (osName != null)
+			if (osName != null) {
 				osName = osName.toLowerCase();
+			}
 			boolean supportedOS = osName.startsWith("windows") || osName.startsWith("linux") //$NON-NLS-1$ //$NON-NLS-2$
 					|| osName.startsWith("mac"); //$NON-NLS-1$
 			if (supportedOS) {
@@ -235,27 +237,36 @@ public class StructuredTextEnvironment {
 	 */
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (getClass() != obj.getClass()) {
 			return false;
+		}
 		StructuredTextEnvironment other = (StructuredTextEnvironment) obj;
 		if (language == null) {
-			if (other.language != null)
+			if (other.language != null) {
 				return false;
-		} else if (!language.equals(other.language))
+			}
+		} else if (!language.equals(other.language)) {
 			return false;
-		if (mirrored != other.mirrored)
+		}
+		if (mirrored != other.mirrored) {
 			return false;
-		if (orientation != other.orientation)
+		}
+		if (orientation != other.orientation) {
 			return false;
+		}
 		if (processingNeeded == null) {
-			if (other.processingNeeded != null)
+			if (other.processingNeeded != null) {
 				return false;
-		} else if (!processingNeeded.equals(other.processingNeeded))
+			}
+		} else if (!processingNeeded.equals(other.processingNeeded)) {
 			return false;
+		}
 		return true;
 	}
 

@@ -117,28 +117,32 @@ public class StructuredTextStringRecord {
 	 */
 	public static StructuredTextStringRecord addRecord(String string, int segmentCount, String handlerID, int start,
 			int limit) {
-		if (string == null)
+		if (string == null) {
 			throw new IllegalArgumentException("The string argument must not be null!"); //$NON-NLS-1$
-		if (segmentCount < 1)
+		}
+		if (segmentCount < 1) {
 			throw new IllegalArgumentException("The segment count must be at least 1!"); //$NON-NLS-1$
+		}
 		synchronized (recordRefs) {
-			if (last < MAXINDEX)
+			if (last < MAXINDEX) {
 				last++;
-			else {
+			} else {
 				wrapAround = true;
 				last = 0;
 			}
 		}
 		StructuredTextStringRecord record = null;
-		if (recordRefs[last] != null)
+		if (recordRefs[last] != null) {
 			record = recordRefs[last].get();
+		}
 		if (record == null) {
 			record = new StructuredTextStringRecord();
 			recordRefs[last] = new SoftReference<>(record);
 		}
 		hashArray[last] = string.hashCode();
-		for (int i = 0; i < record.usedSegmentCount; i++)
+		for (int i = 0; i < record.usedSegmentCount; i++) {
 			record.handlers[i] = null;
+		}
 		if (segmentCount > record.totalSegmentCount) {
 			record.handlers = new String[segmentCount];
 			record.boundaries = new short[segmentCount * 2];
@@ -176,16 +180,20 @@ public class StructuredTextStringRecord {
 	 *                                  the StructuredTextStringRecord instance.
 	 */
 	public void addSegment(String handlerID, int start, int limit) {
-		if (handlerID == null)
+		if (handlerID == null) {
 			throw new IllegalArgumentException("The handlerID argument must not be null!"); //$NON-NLS-1$
-		if (start < 0 || start >= string.length())
+		}
+		if (start < 0 || start >= string.length()) {
 			throw new IllegalArgumentException(
 					"The start position must be at least 0 and less than the length of the string!"); //$NON-NLS-1$
-		if (limit <= start || limit > string.length())
+		}
+		if (limit <= start || limit > string.length()) {
 			throw new IllegalArgumentException(
 					"The limit position must be greater than the start position but no greater than the length of the string!"); //$NON-NLS-1$
-		if (usedSegmentCount >= totalSegmentCount)
+		}
+		if (usedSegmentCount >= totalSegmentCount) {
 			throw new IllegalStateException("All segments of the record are already used!"); //$NON-NLS-1$
+		}
 		handlers[usedSegmentCount] = handlerID;
 		boundaries[usedSegmentCount * 2] = (short) start;
 		boundaries[usedSegmentCount * 2 + 1] = (short) limit;
@@ -207,32 +215,41 @@ public class StructuredTextStringRecord {
 	 *         its ending offset can be retrieved using {@link #getLimit getLimit},
 	 */
 	public static StructuredTextStringRecord getRecord(String string) {
-		if (last < 0) // no records at all
+		if (last < 0) { // no records at all
 			return null;
-		if (string == null || string.length() < 1)
+		}
+		if (string == null || string.length() < 1) {
 			return null;
+		}
 		StructuredTextStringRecord record;
 		int myLast = last;
 		int hash = string.hashCode();
 		for (int i = myLast; i >= 0; i--) {
-			if (hash != hashArray[i])
+			if (hash != hashArray[i]) {
 				continue;
+			}
 			record = recordRefs[i].get();
-			if (record == null)
+			if (record == null) {
 				continue;
-			if (string.equals(record.string))
+			}
+			if (string.equals(record.string)) {
 				return record;
+			}
 		}
-		if (!wrapAround) // never recorded past myLast
+		if (!wrapAround) { // never recorded past myLast
 			return null;
+		}
 		for (int i = MAXINDEX; i > myLast; i--) {
-			if (hash != hashArray[i])
+			if (hash != hashArray[i]) {
 				continue;
+			}
 			record = recordRefs[i].get();
-			if (record == null)
+			if (record == null) {
 				continue;
-			if (string.equals(record.string))
+			}
+			if (string.equals(record.string)) {
 				return record;
+			}
 		}
 		return null;
 	}
@@ -247,9 +264,10 @@ public class StructuredTextStringRecord {
 	}
 
 	private void checkSegmentNumber(int segmentNumber) {
-		if (segmentNumber >= usedSegmentCount)
+		if (segmentNumber >= usedSegmentCount) {
 			throw new IllegalArgumentException("The segment number " + segmentNumber //$NON-NLS-1$
 					+ " is greater than the total number of segments = " + usedSegmentCount + "!"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
 	}
 
 	/**
@@ -314,11 +332,13 @@ public class StructuredTextStringRecord {
 		for (int i = 0; i <= MAXINDEX; i++) {
 			hashArray[i] = 0;
 			SoftReference<StructuredTextStringRecord> softRef = recordRefs[i];
-			if (softRef == null)
+			if (softRef == null) {
 				continue;
+			}
 			StructuredTextStringRecord record = softRef.get();
-			if (record == null)
+			if (record == null) {
 				continue;
+			}
 			record.boundaries = null;
 			record.handlers = null;
 			record.totalSegmentCount = 0;

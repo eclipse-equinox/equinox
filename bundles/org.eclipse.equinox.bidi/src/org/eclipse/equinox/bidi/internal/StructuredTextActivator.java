@@ -68,8 +68,9 @@ public class StructuredTextActivator implements BundleActivator {
 	 *         is undefined
 	 */
 	public static String getProperty(String key) {
-		if (instance != null)
+		if (instance != null) {
 			return instance.bundleContext.getProperty(key);
+		}
 		return System.getProperty(key);
 	}
 
@@ -81,15 +82,17 @@ public class StructuredTextActivator implements BundleActivator {
 		} catch (InvalidSyntaxException e) {
 			// do nothing
 		}
-		if (references == null || references.length < 1)
+		if (references == null || references.length < 1) {
 			return Locale.getDefault();
+		}
 		Object service = bundleContext.getService(references[0]);
 		LocaleProvider localeProvider = (LocaleProvider) service;
 		if (localeProvider != null) {
 			Locale currentLocale = localeProvider.getLocale();
 			bundleContext.ungetService(references[0]);
-			if (currentLocale != null)
+			if (currentLocale != null) {
 				return currentLocale;
+			}
 		}
 		return Locale.getDefault();
 	}
@@ -112,8 +115,9 @@ public class StructuredTextActivator implements BundleActivator {
 			}
 		}
 		System.err.println(message);
-		if (e != null)
+		if (e != null) {
 			e.printStackTrace();
+		}
 	}
 
 }

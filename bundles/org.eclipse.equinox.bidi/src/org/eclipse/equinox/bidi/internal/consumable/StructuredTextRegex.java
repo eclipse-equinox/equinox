@@ -111,32 +111,37 @@ public class StructuredTextRegex extends StructuredTextTypeHandler {
 			return text.indexOf(startStrings[caseNumber], fromIndex);
 		}
 		// there never is a need for a mark before the first char
-		if (fromIndex <= 0)
+		if (fromIndex <= 0) {
 			fromIndex = 1;
+		}
 		// look for R, AL, AN, EN which are potentially needing a mark
 		for (; fromIndex < text.length(); fromIndex++) {
 			charType = charTypes.getBidiTypeAt(fromIndex);
 			// R and AL will always be examined using processSeparator()
-			if (charType == R || charType == AL)
+			if (charType == R || charType == AL) {
 				return fromIndex;
+			}
 
 			if (charType == EN || charType == AN) {
 				// no need for a mark after the first digit in a number
-				if (charTypes.getBidiTypeAt(fromIndex - 1) == charType)
+				if (charTypes.getBidiTypeAt(fromIndex - 1) == charType) {
 					continue;
+				}
 
 				for (int i = fromIndex - 1; i >= 0; i--) {
 					charType = charTypes.getBidiTypeAt(i);
 					// after a L char, no need for a mark
-					if (charType == L)
+					if (charType == L) {
 						continue;
+					}
 
 					// digit after R or AL or AN need a mark, except for EN
 					// following AN, but this is a contrived case, so we
 					// don't check for it (and calling processSeparator()
 					// for it will do no harm)
-					if (charType == R || charType == AL || charType == AN)
+					if (charType == R || charType == AL || charType == AN) {
 						return fromIndex;
+					}
 				}
 				continue;
 			}
@@ -194,8 +199,9 @@ public class StructuredTextRegex extends StructuredTextTypeHandler {
 			location = separLocation + startStrings[caseNumber].length();
 			// look for ending character
 			location = text.indexOf(endChars[caseNumber], location);
-			if (location < 0)
+			if (location < 0) {
 				return text.length();
+			}
 			return location + 1;
 		case 17: /* quoted sequence \Q...\E */
 			if (separLocation < 0) {
@@ -243,17 +249,21 @@ public class StructuredTextRegex extends StructuredTextTypeHandler {
 	public int getDirection(IStructuredTextExpert expert, String text, StructuredTextCharTypes charTypes) {
 		StructuredTextEnvironment environment = expert.getEnvironment();
 		String language = environment.getLanguage();
-		if (!language.equals("ar")) //$NON-NLS-1$
+		if (!language.equals("ar")) { //$NON-NLS-1$
 			return IStructuredTextExpert.DIR_LTR;
+		}
 		for (int i = 0; i < text.length(); i++) {
 			byte charType = charTypes.getBidiTypeAt(i);
-			if (charType == AL || charType == R)
+			if (charType == AL || charType == R) {
 				return IStructuredTextExpert.DIR_RTL;
-			if (charType == L)
+			}
+			if (charType == L) {
 				return IStructuredTextExpert.DIR_LTR;
+			}
 		}
-		if (environment.getMirrored())
+		if (environment.getMirrored()) {
 			return IStructuredTextExpert.DIR_RTL;
+		}
 		return IStructuredTextExpert.DIR_LTR;
 	}
 

@@ -95,8 +95,9 @@ final public class StructuredTextExpertFactory {
 			expert = sharedDefaultExperts.get(type);
 			if (expert == null) {
 				StructuredTextTypeHandler handler = StructuredTextTypeHandlerFactory.getHandler(type);
-				if (handler == null)
+				if (handler == null) {
 					throw new IllegalArgumentException("Invalid type argument"); //$NON-NLS-1$
+				}
 				expert = new StructuredTextImpl(handler, StructuredTextEnvironment.DEFAULT, false);
 				sharedDefaultExperts.put(type, expert);
 			}
@@ -124,8 +125,9 @@ final public class StructuredTextExpertFactory {
 	 */
 	static public IStructuredTextExpert getExpert(String type, StructuredTextEnvironment environment) {
 		IStructuredTextExpert expert;
-		if (environment == null)
+		if (environment == null) {
 			environment = StructuredTextEnvironment.DEFAULT;
+		}
 		synchronized (sharedExperts) {
 			Map<StructuredTextEnvironment, IStructuredTextExpert> experts = sharedExperts.get(type);
 			if (experts == null) {
@@ -135,8 +137,9 @@ final public class StructuredTextExpertFactory {
 			expert = experts.get(environment);
 			if (expert == null) {
 				StructuredTextTypeHandler handler = StructuredTextTypeHandlerFactory.getHandler(type);
-				if (handler == null)
+				if (handler == null) {
 					throw new IllegalArgumentException("Invalid type argument"); //$NON-NLS-1$
+				}
 				expert = new StructuredTextImpl(handler, environment, false);
 				experts.put(environment, expert);
 			}
@@ -180,8 +183,9 @@ final public class StructuredTextExpertFactory {
 	 */
 	static public IStructuredTextExpert getStatefulExpert(String type, StructuredTextEnvironment environment) {
 		StructuredTextTypeHandler handler = StructuredTextTypeHandlerFactory.getHandler(type);
-		if (handler == null)
+		if (handler == null) {
 			throw new IllegalArgumentException("Invalid type argument"); //$NON-NLS-1$
+		}
 		return getStatefulExpert(handler, environment);
 	}
 
@@ -204,10 +208,12 @@ final public class StructuredTextExpertFactory {
 	 */
 	static public IStructuredTextExpert getStatefulExpert(StructuredTextTypeHandler handler,
 			StructuredTextEnvironment environment) {
-		if (handler == null)
+		if (handler == null) {
 			throw new IllegalArgumentException("handler must not be null"); //$NON-NLS-1$
-		if (environment == null)
+		}
+		if (environment == null) {
 			environment = StructuredTextEnvironment.DEFAULT;
+		}
 		return new StructuredTextImpl(handler, environment, true);
 	}
 

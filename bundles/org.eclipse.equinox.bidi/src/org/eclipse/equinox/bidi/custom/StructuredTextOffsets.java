@@ -101,35 +101,42 @@ public class StructuredTextOffsets {
 		// look up after which member the new offset should be inserted
 		while (index >= 0) {
 			int wrkOffset = offsets[index];
-			if (offset > wrkOffset)
+			if (offset > wrkOffset) {
 				break;
-			if (offset == wrkOffset)
+			}
+			if (offset == wrkOffset) {
 				return; // avoid duplicates
+			}
 			index--;
 		}
 		index++; // index now points at where to insert
 		int length = count - index; // number of members to move up
-		if (length > 0) // shift right all members greater than offset
+		if (length > 0) { // shift right all members greater than offset
 			System.arraycopy(offsets, index, offsets, index + 1, length);
+		}
 		offsets[index] = offset;
 		count++; // number of used entries
 		// if the offset is 0, adding a mark does not change anything
-		if (offset < 1)
+		if (offset < 1) {
 			return;
-		if (charTypes == null)
+		}
+		if (charTypes == null) {
 			return;
+		}
 
 		byte charType = charTypes.getBidiTypeAt(offset);
 		// if the current char is a strong one or a digit, we change the
 		// charType of the previous char to account for the inserted mark.
-		if (charType == L || charType == R || charType == AL || charType == EN || charType == AN)
+		if (charType == L || charType == R || charType == AL || charType == EN || charType == AN) {
 			index = offset - 1;
-		else
+		} else {
 			// if the current char is a neutral, we change its own charType
 			index = offset;
+		}
 
-		if (direction < 0)
+		if (direction < 0) {
 			direction = charTypes.getDirection();
+		}
 		charTypes.setBidiTypeAt(index, STRONGS[direction]);
 		return;
 	}
@@ -140,8 +147,9 @@ public class StructuredTextOffsets {
 	 * @return the current used entries of the offsets array.
 	 */
 	public int[] getOffsets() {
-		if (count == offsets.length)
+		if (count == offsets.length) {
 			return offsets;
+		}
 		int[] array = new int[count];
 		System.arraycopy(offsets, 0, array, 0, count);
 		return array;

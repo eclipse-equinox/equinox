@@ -106,20 +106,23 @@ public class StructuredTextJava extends StructuredTextTypeHandler {
 			location = separLocation + 1;
 			while (true) {
 				location = text.indexOf('"', location);
-				if (location < 0)
+				if (location < 0) {
 					return text.length();
+				}
 				for (counter = 0, i = location - 1; text.charAt(i) == '\\'; i--) {
 					counter++;
 				}
 				location++;
-				if ((counter & 1) == 0)
+				if ((counter & 1) == 0) {
 					return location;
+				}
 			}
 		case 3: /* slash-aster comment */
 			if (separLocation < 0) { // continuation line
 				location = 0;
-			} else
+			} else { // continuation line
 				location = separLocation + 2; // skip the opening slash-aster
+			}
 			location = text.indexOf("*/", location); //$NON-NLS-1$
 			if (location < 0) {
 				expert.setState(STATE_SLASH_ASTER_COMMENT);
@@ -131,8 +134,9 @@ public class StructuredTextJava extends StructuredTextTypeHandler {
 			return location + 2;
 		case 4: /* slash-slash comment */
 			location = text.indexOf(lineSep, separLocation + 2);
-			if (location < 0)
+			if (location < 0) {
 				return text.length();
+			}
 			return location + lineSep.length();
 		}
 		// we should never get here
