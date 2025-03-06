@@ -58,18 +58,21 @@ public class HttpContextManager implements Listener {
 	public void added(IExtension extension) {
 		IConfigurationElement[] elements = extension.getConfigurationElements();
 		for (IConfigurationElement httpContextElement : elements) {
-			if (!HTTPCONTEXT.equals(httpContextElement.getName()))
+			if (!HTTPCONTEXT.equals(httpContextElement.getName())) {
 				continue;
+			}
 
 			String httpContextId = httpContextElement.getAttribute(ID);
 			if (httpContextId == null) {
 				httpContextId = httpContextElement.getAttribute(NAME);
-				if (httpContextId == null)
+				if (httpContextId == null) {
 					continue;
+				}
 			}
 
-			if (httpContextId.indexOf('.') == -1)
+			if (httpContextId.indexOf('.') == -1) {
 				httpContextId = httpContextElement.getNamespaceIdentifier() + "." + httpContextId; //$NON-NLS-1$
+			}
 
 			HttpContext context = null;
 			String clazz = httpContextElement.getAttribute(CLASS);
@@ -86,8 +89,9 @@ public class HttpContextManager implements Listener {
 				DefaultRegistryHttpContext defaultContext = httpRegistryManager.createDefaultRegistryHttpContext();
 
 				String oldPath = httpContextElement.getAttribute(PATH);
-				if (oldPath != null)
+				if (oldPath != null) {
 					defaultContext.addResourceMapping(contributingBundle, oldPath);
+				}
 
 				IConfigurationElement[] resourceMappingElements = httpContextElement.getChildren(RESOURCEMAPPING);
 				for (IConfigurationElement resourceMappingElement : resourceMappingElements) {
@@ -96,12 +100,14 @@ public class HttpContextManager implements Listener {
 					String bundleName = resourceMappingElement.getAttribute(BUNDLE);
 					if (bundleName != null) {
 						resourceBundle = httpRegistryManager.getBundle(bundleName);
-						if (resourceBundle == null)
+						if (resourceBundle == null) {
 							continue;
+						}
 						if (System.getSecurityManager() != null) {
 							AdminPermission resourcePermission = new AdminPermission(resourceBundle, "resource"); //$NON-NLS-1$
-							if (!contributingBundle.hasPermission(resourcePermission))
+							if (!contributingBundle.hasPermission(resourcePermission)) {
 								continue;
+							}
 						}
 					}
 					defaultContext.addResourceMapping(resourceBundle, path);
@@ -116,8 +122,9 @@ public class HttpContextManager implements Listener {
 				context = defaultContext;
 			}
 
-			if (httpRegistryManager.addHttpContextContribution(httpContextId, context, extension.getContributor()))
+			if (httpRegistryManager.addHttpContextContribution(httpContextId, context, extension.getContributor())) {
 				registered.add(httpContextElement);
+			}
 		}
 	}
 
@@ -125,20 +132,24 @@ public class HttpContextManager implements Listener {
 	public void removed(IExtension extension) {
 		IConfigurationElement[] elements = extension.getConfigurationElements();
 		for (IConfigurationElement httpContextElement : elements) {
-			if (!HTTPCONTEXT.equals(httpContextElement.getName()))
+			if (!HTTPCONTEXT.equals(httpContextElement.getName())) {
 				continue;
+			}
 
 			String httpContextId = httpContextElement.getAttribute(ID);
 			if (httpContextId == null) {
 				httpContextId = httpContextElement.getAttribute(NAME);
-				if (httpContextId == null)
+				if (httpContextId == null) {
 					continue;
+				}
 			}
-			if (httpContextId.indexOf('.') == -1)
+			if (httpContextId.indexOf('.') == -1) {
 				httpContextId = httpContextElement.getNamespaceIdentifier() + "." + httpContextId; //$NON-NLS-1$
+			}
 
-			if (registered.remove(httpContextElement))
+			if (registered.remove(httpContextElement)) {
 				httpRegistryManager.removeHttpContextContribution(httpContextId);
+			}
 		}
 	}
 }

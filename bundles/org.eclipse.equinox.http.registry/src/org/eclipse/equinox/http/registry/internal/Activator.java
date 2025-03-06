@@ -55,11 +55,13 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	public Object addingService(ServiceReference reference) {
 		Object service = context.getService(reference);
 
-		if (service instanceof PackageAdmin && packageAdmin == null)
+		if (service instanceof PackageAdmin && packageAdmin == null) {
 			packageAdmin = (PackageAdmin) service;
+		}
 
-		if (service instanceof IExtensionRegistry && registry == null)
+		if (service instanceof IExtensionRegistry && registry == null) {
 			registry = (IExtensionRegistry) service;
+		}
 
 		if (packageAdmin != null && registry != null) {
 			httpServiceTracker = new HttpServiceTracker(context, packageAdmin, registry);
@@ -76,11 +78,13 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 
 	@Override
 	public void removedService(ServiceReference reference, Object service) {
-		if (service == packageAdmin)
+		if (service == packageAdmin) {
 			packageAdmin = null;
+		}
 
-		if (service == registry)
+		if (service == registry) {
 			registry = null;
+		}
 
 		if (packageAdmin == null || registry == null) {
 			if (httpServiceTracker != null) {

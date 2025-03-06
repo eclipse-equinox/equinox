@@ -74,8 +74,9 @@ public class ServletManager implements ExtensionPointTracker.Listener {
 	public void added(IExtension extension) {
 		IConfigurationElement[] elements = extension.getConfigurationElements();
 		for (IConfigurationElement serviceSelectorElement : elements) {
-			if (!SERVICESELECTOR.equals(serviceSelectorElement.getName()))
+			if (!SERVICESELECTOR.equals(serviceSelectorElement.getName())) {
 				continue;
+			}
 
 			org.osgi.framework.Filter serviceSelector = null;
 			String clazz = serviceSelectorElement.getAttribute(CLASS);
@@ -90,8 +91,9 @@ public class ServletManager implements ExtensionPointTracker.Listener {
 				}
 			} else {
 				String filter = serviceSelectorElement.getAttribute(FILTER);
-				if (filter == null)
+				if (filter == null) {
 					return;
+				}
 
 				try {
 					serviceSelector = FrameworkUtil.createFilter(filter);
@@ -102,20 +104,23 @@ public class ServletManager implements ExtensionPointTracker.Listener {
 				}
 			}
 
-			if (!serviceSelector.match(reference))
+			if (!serviceSelector.match(reference)) {
 				return;
+			}
 
 			break;
 		}
 
 		for (IConfigurationElement servletElement : elements) {
-			if (!SERVLET.equals(servletElement.getName()))
+			if (!SERVLET.equals(servletElement.getName())) {
 				continue;
+			}
 
 			ServletWrapper wrapper = new ServletWrapper(servletElement);
 			String alias = servletElement.getAttribute(ALIAS);
-			if (alias == null)
+			if (alias == null) {
 				continue; // alias is mandatory - ignore this.
+			}
 
 			Dictionary<String, String> initparams = new Hashtable<>();
 			IConfigurationElement[] initParams = servletElement.getChildren(INIT_PARAM);
@@ -126,20 +131,23 @@ public class ServletManager implements ExtensionPointTracker.Listener {
 			}
 
 			boolean loadOnStartup = Boolean.valueOf(servletElement.getAttribute(LOAD_ON_STARTUP)).booleanValue();
-			if (loadOnStartup)
+			if (loadOnStartup) {
 				wrapper.setLoadOnStartup();
+			}
 
 			String httpContextId = servletElement.getAttribute(HTTPCONTEXT_ID);
 			if (httpContextId == null) {
 				httpContextId = servletElement.getAttribute(HTTPCONTEXT_NAME);
 			}
 
-			if (httpContextId != null && httpContextId.indexOf('.') == -1)
+			if (httpContextId != null && httpContextId.indexOf('.') == -1) {
 				httpContextId = servletElement.getNamespaceIdentifier() + "." + httpContextId; //$NON-NLS-1$
+			}
 
 			if (httpRegistryManager.addServletContribution(alias, wrapper, initparams, httpContextId,
-					extension.getContributor()))
+					extension.getContributor())) {
 				registered.add(servletElement);
+			}
 		}
 	}
 
@@ -171,8 +179,9 @@ public class ServletManager implements ExtensionPointTracker.Listener {
 		@Override
 		public void init(ServletConfig servletConfig) throws ServletException {
 			this.config = servletConfig;
-			if (loadOnStartup)
+			if (loadOnStartup) {
 				initializeDelegate();
+			}
 		}
 
 		@Override

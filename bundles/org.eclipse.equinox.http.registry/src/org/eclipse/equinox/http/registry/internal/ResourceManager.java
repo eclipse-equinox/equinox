@@ -67,8 +67,9 @@ public class ResourceManager implements ExtensionPointTracker.Listener {
 	public void added(IExtension extension) {
 		IConfigurationElement[] elements = extension.getConfigurationElements();
 		for (IConfigurationElement serviceSelectorElement : elements) {
-			if (!SERVICESELECTOR.equals(serviceSelectorElement.getName()))
+			if (!SERVICESELECTOR.equals(serviceSelectorElement.getName())) {
 				continue;
+			}
 
 			org.osgi.framework.Filter serviceSelector = null;
 			String clazz = serviceSelectorElement.getAttribute(CLASS);
@@ -83,8 +84,9 @@ public class ResourceManager implements ExtensionPointTracker.Listener {
 				}
 			} else {
 				String filter = serviceSelectorElement.getAttribute(FILTER);
-				if (filter == null)
+				if (filter == null) {
 					return;
+				}
 
 				try {
 					serviceSelector = FrameworkUtil.createFilter(filter);
@@ -95,35 +97,41 @@ public class ResourceManager implements ExtensionPointTracker.Listener {
 				}
 			}
 
-			if (!serviceSelector.match(reference))
+			if (!serviceSelector.match(reference)) {
 				return;
+			}
 
 			break;
 		}
 
 		for (IConfigurationElement resourceElement : elements) {
-			if (!RESOURCE.equals(resourceElement.getName()))
+			if (!RESOURCE.equals(resourceElement.getName())) {
 				continue;
+			}
 
 			String alias = resourceElement.getAttribute(ALIAS);
-			if (alias == null)
+			if (alias == null) {
 				continue; // alias is mandatory - ignore this.
+			}
 
 			String baseName = resourceElement.getAttribute(BASE_NAME);
-			if (baseName == null)
+			if (baseName == null) {
 				baseName = ""; //$NON-NLS-1$
+			}
 
 			String httpContextId = resourceElement.getAttribute(HTTPCONTEXT_ID);
 			if (httpContextId == null) {
 				httpContextId = resourceElement.getAttribute(HTTPCONTEXT_NAME);
 			}
 
-			if (httpContextId != null && httpContextId.indexOf('.') == -1)
+			if (httpContextId != null && httpContextId.indexOf('.') == -1) {
 				httpContextId = resourceElement.getNamespaceIdentifier() + "." + httpContextId; //$NON-NLS-1$
+			}
 
 			if (httpRegistryManager.addResourcesContribution(alias, baseName, httpContextId,
-					extension.getContributor()))
+					extension.getContributor())) {
 				registered.add(resourceElement);
+			}
 		}
 	}
 

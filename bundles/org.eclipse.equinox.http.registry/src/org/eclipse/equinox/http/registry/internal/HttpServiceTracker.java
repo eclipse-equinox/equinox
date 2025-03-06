@@ -56,8 +56,9 @@ public class HttpServiceTracker extends ServiceTracker<HttpService, HttpService>
 	@Override
 	public synchronized HttpService addingService(ServiceReference<HttpService> reference) {
 		HttpService httpService = super.addingService(reference);
-		if (httpService == null)
+		if (httpService == null) {
 			return null;
+		}
 
 		HttpRegistryManager httpRegistryManager = new HttpRegistryManager(reference, httpService, packageAdmin,
 				registry);
@@ -108,8 +109,9 @@ public class HttpServiceTracker extends ServiceTracker<HttpService, HttpService>
 		public HttpContext getHttpContext(ServiceReference<HttpService> httpServiceReference, String httpContextId) {
 			synchronized (HttpServiceTracker.this) {
 				HttpRegistryManager httpRegistryManager = httpRegistryManagers.get(httpServiceReference);
-				if (httpRegistryManager == null)
+				if (httpRegistryManager == null) {
 					return null;
+				}
 
 				return httpRegistryManager.getHttpContext(httpContextId, bundle);
 			}

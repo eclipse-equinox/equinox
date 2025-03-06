@@ -51,8 +51,9 @@ public class ExtensionPointTracker {
 		this.extensionPointId = extensionPointId;
 		this.listener = (listener != null) ? listener : NULL_LISTENER;
 
-		if (extensionPointId == null || -1 == extensionPointId.indexOf('.'))
+		if (extensionPointId == null || -1 == extensionPointId.indexOf('.')) {
 			throw new IllegalArgumentException("Unexpected Extension Point Identifier: " + extensionPointId); //$NON-NLS-1$
+		}
 		int lastDotIndex = extensionPointId.lastIndexOf('.');
 		namespace = extensionPointId.substring(0, lastDotIndex);
 		simpleIdentifier = extensionPointId.substring(lastDotIndex + 1);

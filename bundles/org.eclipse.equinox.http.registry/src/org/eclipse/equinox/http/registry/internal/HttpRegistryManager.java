@@ -130,8 +130,9 @@ public class HttpRegistryManager {
 
 		ResourcesContribution contribution = new ResourcesContribution(alias, baseName, httpContextId, contributor);
 		resources.put(alias, contribution);
-		if (httpContextId == null || contexts.containsKey(httpContextId))
+		if (httpContextId == null || contexts.containsKey(httpContextId)) {
 			registerResources(contribution);
+		}
 
 		return true;
 	}
@@ -147,8 +148,9 @@ public class HttpRegistryManager {
 		ServletContribution contribution = new ServletContribution(alias, servlet, initparams, httpContextId,
 				contributor);
 		servlets.put(alias, contribution);
-		if (httpContextId == null || contexts.containsKey(httpContextId))
+		if (httpContextId == null || contexts.containsKey(httpContextId)) {
 			registerServlet(contribution);
+		}
 
 		return true;
 	}
@@ -171,14 +173,16 @@ public class HttpRegistryManager {
 
 	public synchronized HttpContext getHttpContext(String httpContextId, Bundle bundle) {
 		HttpContextContribution contribution = contexts.get(httpContextId);
-		if (contribution == null)
+		if (contribution == null) {
 			return null;
+		}
 
 		if (System.getSecurityManager() != null) {
 			Bundle httpContextBundle = getBundle(contribution.contributor);
 			AdminPermission resourcePermission = new AdminPermission(httpContextBundle, "resource"); //$NON-NLS-1$
-			if (!bundle.hasPermission(resourcePermission))
+			if (!bundle.hasPermission(resourcePermission)) {
 				return null;
+			}
 		}
 		return contribution.context;
 	}
@@ -193,18 +197,21 @@ public class HttpRegistryManager {
 
 		contexts.put(httpContextId, new HttpContextContribution(context, contributor));
 		for (FilterContribution contribution : filters.values()) {
-			if (httpContextId.equals(contribution.httpContextId))
+			if (httpContextId.equals(contribution.httpContextId)) {
 				registerFilter(contribution);
+			}
 		}
 
 		for (ResourcesContribution contribution : resources.values()) {
-			if (httpContextId.equals(contribution.httpContextId))
+			if (httpContextId.equals(contribution.httpContextId)) {
 				registerResources(contribution);
+			}
 		}
 
 		for (ServletContribution contribution : servlets.values()) {
-			if (httpContextId.equals(contribution.httpContextId))
+			if (httpContextId.equals(contribution.httpContextId)) {
 				registerServlet(contribution);
+			}
 		}
 		return true;
 	}
@@ -212,13 +219,15 @@ public class HttpRegistryManager {
 	public synchronized void removeHttpContextContribution(String httpContextId) {
 		if (contexts.remove(httpContextId) != null) {
 			for (ResourcesContribution contribution : resources.values()) {
-				if (httpContextId.equals(contribution.httpContextId))
+				if (httpContextId.equals(contribution.httpContextId)) {
 					unregister(contribution.alias);
+				}
 			}
 
 			for (ServletContribution contribution : servlets.values()) {
-				if (httpContextId.equals(contribution.httpContextId))
+				if (httpContextId.equals(contribution.httpContextId)) {
 					unregister(contribution.alias);
+				}
 			}
 		}
 	}
@@ -240,8 +249,9 @@ public class HttpRegistryManager {
 
 	public Bundle getBundle(String symbolicName) {
 		Bundle[] bundles = packageAdmin.getBundles(symbolicName, null);
-		if (bundles == null)
+		if (bundles == null) {
 			return null;
+		}
 		// Return the first bundle that is not installed or uninstalled
 		for (Bundle bundle : bundles) {
 			if ((bundle.getState() & (Bundle.INSTALLED | Bundle.UNINSTALLED)) == 0) {
@@ -253,8 +263,9 @@ public class HttpRegistryManager {
 
 	private void registerResources(ResourcesContribution contribution) {
 		HttpContext context = getHttpContext(contribution.httpContextId, contribution.contributor);
-		if (context == null)
+		if (context == null) {
 			return;
+		}
 		try {
 			httpService.registerResources(contribution.alias, contribution.baseName, context);
 			registered.add(contribution.alias);
@@ -266,8 +277,9 @@ public class HttpRegistryManager {
 
 	private void registerServlet(ServletContribution contribution) {
 		HttpContext context = getHttpContext(contribution.httpContextId, contribution.contributor);
-		if (context == null)
+		if (context == null) {
 			return;
+		}
 		try {
 			httpService.registerServlet(contribution.alias, contribution.servlet, contribution.initparams, context);
 			registered.add(contribution.alias);
@@ -290,8 +302,9 @@ public class HttpRegistryManager {
 
 	private boolean registerFilter(FilterContribution contribution) {
 		HttpContext context = getHttpContext(contribution.httpContextId, contribution.contributor);
-		if (context == null)
+		if (context == null) {
 			return false;
+		}
 
 		Method registerFilterMethod = null;
 		try {
@@ -339,8 +352,9 @@ public class HttpRegistryManager {
 	private HttpContext getHttpContext(String httpContextId, IContributor contributor) {
 		if (httpContextId == null) {
 			DefaultRegistryHttpContext defaultContext = createDefaultRegistryHttpContext();
-			if (defaultContext == null)
+			if (defaultContext == null) {
 				return null;
+			}
 
 			defaultContext.addResourceMapping(getBundle(contributor), null);
 			return defaultContext;
@@ -351,8 +365,9 @@ public class HttpRegistryManager {
 			Bundle contributorBundle = getBundle(contributor);
 			Bundle httpContextBundle = getBundle(contribution.contributor);
 			AdminPermission resourcePermission = new AdminPermission(httpContextBundle, "resource"); //$NON-NLS-1$
-			if (!contributorBundle.hasPermission(resourcePermission))
+			if (!contributorBundle.hasPermission(resourcePermission)) {
 				return null;
+			}
 		}
 		return contribution.context;
 	}

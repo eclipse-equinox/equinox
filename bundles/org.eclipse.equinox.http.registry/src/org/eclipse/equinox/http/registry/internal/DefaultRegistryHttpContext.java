@@ -31,15 +31,17 @@ public class DefaultRegistryHttpContext implements HttpContext {
 	}
 
 	public void addResourceMapping(Bundle contributingBundle, String path) {
-		if (resourceMappings == null)
+		if (resourceMappings == null) {
 			resourceMappings = new ArrayList<>();
+		}
 
 		resourceMappings.add(new ResourceMapping(contributingBundle, path));
 	}
 
 	public void addMimeMapping(String mimeExtension, String mimeType) {
-		if (mimeMappings == null)
+		if (mimeMappings == null) {
 			mimeMappings = new Properties();
+		}
 
 		mimeMappings.put(mimeExtension, mimeType);
 	}
@@ -51,8 +53,9 @@ public class DefaultRegistryHttpContext implements HttpContext {
 			if (dotIndex != -1) {
 				String mimeExtension = name.substring(dotIndex + 1);
 				String mimeType = mimeMappings.getProperty(mimeExtension);
-				if (mimeType != null)
+				if (mimeType != null) {
 					return mimeType;
+				}
 			}
 		}
 		return delegate.getMimeType(name);
@@ -65,27 +68,31 @@ public class DefaultRegistryHttpContext implements HttpContext {
 
 	@Override
 	public URL getResource(String name) {
-		if (resourceMappings == null)
+		if (resourceMappings == null) {
 			return null;
+		}
 
 		for (ResourceMapping mapping : resourceMappings) {
 			URL resourceURL = mapping.getResource(name);
-			if (resourceURL != null)
+			if (resourceURL != null) {
 				return resourceURL;
+			}
 		}
 		return null;
 	}
 
 	public Set<String> getResourcePaths(String path) {
-		if (resourceMappings == null || path == null || !path.startsWith("/")) //$NON-NLS-1$
+		if (resourceMappings == null || path == null || !path.startsWith("/")) { //$NON-NLS-1$
 			return null;
+		}
 
 		Set<String> result = null;
 		for (ResourceMapping mapping : resourceMappings) {
 			Set<String> resourcePaths = mapping.getResourcePaths(path);
 			if (resourcePaths != null) {
-				if (result == null)
+				if (result == null) {
 					result = new HashSet<>();
+				}
 				result.addAll(resourcePaths);
 			}
 		}
@@ -99,31 +106,37 @@ public class DefaultRegistryHttpContext implements HttpContext {
 		public ResourceMapping(Bundle bundle, String path) {
 			this.bundle = bundle;
 			if (path != null) {
-				if (path.endsWith("/")) //$NON-NLS-1$
+				if (path.endsWith("/")) { //$NON-NLS-1$
 					path = path.substring(0, path.length() - 1);
+				}
 
-				if (path.length() == 0)
+				if (path.length() == 0) {
 					path = null;
+				}
 			}
 			this.bundlePath = path;
 		}
 
 		public URL getResource(String resourceName) {
-			if (bundlePath != null)
+			if (bundlePath != null) {
 				resourceName = bundlePath + resourceName;
+			}
 
 			int lastSlash = resourceName.lastIndexOf('/');
-			if (lastSlash == -1)
+			if (lastSlash == -1) {
 				return null;
+			}
 
 			String path = resourceName.substring(0, lastSlash);
-			if (path.length() == 0)
+			if (path.length() == 0) {
 				path = "/"; //$NON-NLS-1$
+			}
 			String file = sanitizeEntryName(resourceName.substring(lastSlash + 1));
 			Enumeration<URL> entryPaths = bundle.findEntries(path, file, false);
 
-			if (entryPaths != null && entryPaths.hasMoreElements())
+			if (entryPaths != null && entryPaths.hasMoreElements()) {
 				return entryPaths.nextElement();
+			}
 
 			return null;
 		}
@@ -143,8 +156,9 @@ public class DefaultRegistryHttpContext implements HttpContext {
 					buffer.append('\\').append(c);
 					break;
 				default:
-					if (buffer != null)
+					if (buffer != null) {
 						buffer.append(c);
+					}
 					break;
 				}
 			}
@@ -152,22 +166,25 @@ public class DefaultRegistryHttpContext implements HttpContext {
 		}
 
 		public Set<String> getResourcePaths(String path) {
-			if (bundlePath != null)
+			if (bundlePath != null) {
 				path = bundlePath + path;
+			}
 
 			Enumeration<URL> entryPaths = bundle.findEntries(path, null, false);
-			if (entryPaths == null)
+			if (entryPaths == null) {
 				return null;
+			}
 
 			Set<String> result = new HashSet<>();
 			while (entryPaths.hasMoreElements()) {
 				URL entryURL = entryPaths.nextElement();
 				String entryPath = entryURL.getFile();
 
-				if (bundlePath == null)
+				if (bundlePath == null) {
 					result.add(entryPath);
-				else
+				} else {
 					result.add(entryPath.substring(bundlePath.length()));
+				}
 			}
 			return result;
 		}
