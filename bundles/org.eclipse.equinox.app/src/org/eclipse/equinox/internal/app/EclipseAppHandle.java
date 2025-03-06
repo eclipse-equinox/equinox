@@ -61,10 +61,11 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 		defaultAppInstance = arguments == null || arguments.get(EclipseAppDescriptor.APP_DEFAULT) == null
 				? Boolean.FALSE
 				: (Boolean) arguments.remove(EclipseAppDescriptor.APP_DEFAULT);
-		if (arguments == null)
+		if (arguments == null) {
 			this.arguments = new HashMap<>(2);
-		else
+		} else {
 			this.arguments = new HashMap<>(arguments);
+		}
 	}
 
 	@Override
@@ -80,8 +81,9 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 		default:
 			// must only check this if the status is STOPPED; otherwise we throw exceptions
 			// before we have set the registration.
-			if (getServiceRegistration() == null)
+			if (getServiceRegistration() == null) {
 				throw new IllegalStateException(NLS.bind(Messages.application_error_state_stopped, getInstanceId()));
+			}
 			return STOPPED;
 		}
 	}
@@ -93,8 +95,9 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 		setAppStatus(EclipseAppHandle.FLAG_STOPPING);
 		// now force the application to stop
 		IApplication app = getApplication();
-		if (app != null)
+		if (app != null) {
 			app.stop();
+		}
 		// make sure the app status is stopped
 		setAppStatus(EclipseAppHandle.FLAG_STOPPED);
 	}
@@ -122,8 +125,9 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 
 	ServiceReference getServiceReference() {
 		ServiceRegistration reg = getServiceRegistration();
-		if (reg == null)
+		if (reg == null) {
 			return null;
+		}
 		try {
 			return reg.getReference();
 		} catch (IllegalStateException e) {
@@ -142,8 +146,9 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 		props.put(EclipseAppDescriptor.APP_TYPE,
 				((EclipseAppDescriptor) getApplicationDescriptor()).getThreadTypeString());
 		props.put(ApplicationHandle.APPLICATION_SUPPORTS_EXITVALUE, Boolean.TRUE);
-		if (defaultAppInstance.booleanValue())
+		if (defaultAppInstance.booleanValue()) {
 			props.put(EclipseAppDescriptor.APP_DEFAULT, defaultAppInstance);
+		}
 		return props;
 	}
 
@@ -152,19 +157,24 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 	 * state of this handle and will update the service registration accordingly.
 	 */
 	private synchronized void setAppStatus(int status) {
-		if (this.status == status)
+		if (this.status == status) {
 			return;
-		if ((status & EclipseAppHandle.FLAG_STARTING) != 0)
+		}
+		if ((status & EclipseAppHandle.FLAG_STARTING) != 0) {
 			throw new IllegalArgumentException("Cannot set app status to starting"); //$NON-NLS-1$
+		}
 		// if status is stopping and the context is already stopping then return
-		if ((status & EclipseAppHandle.FLAG_STOPPING) != 0)
-			if ((this.status & (EclipseAppHandle.FLAG_STOPPING | EclipseAppHandle.FLAG_STOPPED)) != 0)
+		if ((status & EclipseAppHandle.FLAG_STOPPING) != 0) {
+			if ((this.status & (EclipseAppHandle.FLAG_STOPPING | EclipseAppHandle.FLAG_STOPPED)) != 0) {
 				return;
+			}
+		}
 		// change the service properties to reflect the state change.
 		this.status = status;
 		ServiceRegistration handleReg = getServiceRegistration();
-		if (handleReg == null)
+		if (handleReg == null) {
 			return;
+		}
 		handleReg.setProperties(getServiceProperties());
 		// if the status is stopped then unregister the service
 		if ((this.status & EclipseAppHandle.FLAG_STOPPED) != 0) {
@@ -197,41 +207,48 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 		try {
 			Object app;
 			synchronized (this) {
-				if ((status & (EclipseAppHandle.FLAG_STARTING | EclipseAppHandle.FLAG_STOPPING)) == 0)
+				if ((status & (EclipseAppHandle.FLAG_STARTING | EclipseAppHandle.FLAG_STOPPING)) == 0) {
 					throw new ApplicationException(ApplicationException.APPLICATION_INTERNAL_ERROR,
 							NLS.bind(Messages.application_instance_stopped, getInstanceId()));
+				}
 				application = getConfiguration().createExecutableExtension("run"); //$NON-NLS-1$
 				app = application;
 				notifyAll();
 			}
-			if (app instanceof IApplication)
+			if (app instanceof IApplication) {
 				tempResult = ((IApplication) app).start(this);
-			else
+			} else {
 				tempResult = EclipseAppContainer.callMethodWithException(app, "run", new Class[] { Object.class }, //$NON-NLS-1$
 						new Object[] { context });
-			if (tempResult == null)
+			}
+			if (tempResult == null) {
 				tempResult = NULL_RESULT;
+			}
 		} finally {
 			tempResult = setInternalResult(tempResult, false, null);
 		}
 
-		if (Activator.DEBUG)
+		if (Activator.DEBUG) {
 			System.out.println(NLS.bind(Messages.application_returned,
 					(new String[] { getApplicationDescriptor().getApplicationId(),
 							tempResult == null ? "null" : tempResult.toString() }))); //$NON-NLS-1$
+		}
 		return tempResult;
 	}
 
 	private synchronized Object setInternalResult(Object result, boolean isAsync, IApplication tokenApp) {
-		if (setResult)
+		if (setResult) {
 			throw new IllegalStateException("The result of the application is already set."); //$NON-NLS-1$
+		}
 		if (isAsync) {
-			if (!setAsyncResult)
+			if (!setAsyncResult) {
 				throw new IllegalStateException(
 						"The application must return IApplicationContext.EXIT_ASYNC_RESULT to set asynchronous results."); //$NON-NLS-1$
-			if (application != tokenApp)
+			}
+			if (application != tokenApp) {
 				throw new IllegalArgumentException(
 						"The application is not the correct instance for this application context."); //$NON-NLS-1$
+			}
 		} else {
 			if (result == IApplicationContext.EXIT_ASYNC_RESULT) {
 				setAsyncResult = true;
@@ -273,8 +290,9 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 		setAppStatus(EclipseAppHandle.FLAG_ACTIVE);
 		// now run the splash handler
 		final ServiceReference[] monitors = getStartupMonitors();
-		if (monitors == null)
+		if (monitors == null) {
 			return;
+		}
 		SafeRunner.run(new ISafeRunnable() {
 			@Override
 			public void handleException(Throwable e) {
@@ -304,8 +322,9 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 		} catch (InvalidSyntaxException e) {
 			// ignore; this cannot happen
 		}
-		if (refs == null || refs.length == 0)
+		if (refs == null || refs.length == 0) {
 			return null;
+		}
 		// Implement our own Comparator to sort services
 		Arrays.sort(refs, new Comparator<ServiceReference>() {
 			@Override
@@ -316,8 +335,9 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 				int rank1 = (property instanceof Integer) ? ((Integer) property).intValue() : 0;
 				property = ref2.getProperty(Constants.SERVICE_RANKING);
 				int rank2 = (property instanceof Integer) ? ((Integer) property).intValue() : 0;
-				if (rank1 != rank2)
+				if (rank1 != rank2) {
 					return rank1 > rank2 ? -1 : 1;
+				}
 				// rankings are equal; sort by id, lowest id wins
 				long id1 = ((Long) (ref1.getProperty(Constants.SERVICE_ID))).longValue();
 				long id2 = ((Long) (ref2.getProperty(Constants.SERVICE_ID))).longValue();
@@ -328,7 +348,7 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 	}
 
 	private synchronized IApplication getApplication() {
-		if (handleRegistration != null && application == null)
+		if (handleRegistration != null && application == null) {
 			// the handle has been initialized by the container but the launcher has not
 			// gotten around to creating the application object and starting it yet.
 			try {
@@ -337,20 +357,23 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 			} catch (InterruptedException e) {
 				// do nothing
 			}
+		}
 		return (IApplication) ((application instanceof IApplication) ? application : null);
 	}
 
 	private IConfigurationElement getConfiguration() {
 		IExtension applicationExtension = ((EclipseAppDescriptor) getApplicationDescriptor()).getContainerManager()
 				.getAppExtension(getApplicationDescriptor().getApplicationId());
-		if (applicationExtension == null)
+		if (applicationExtension == null) {
 			throw new RuntimeException(NLS.bind(Messages.application_notFound,
 					getApplicationDescriptor().getApplicationId(),
 					((EclipseAppDescriptor) getApplicationDescriptor()).getContainerManager().getAvailableAppsMsg()));
+		}
 		IConfigurationElement[] configs = applicationExtension.getConfigurationElements();
-		if (configs.length == 0)
+		if (configs.length == 0) {
 			throw new RuntimeException(
 					NLS.bind(Messages.application_invalidExtension, getApplicationDescriptor().getApplicationId()));
+		}
 		return configs[0];
 	}
 
@@ -408,19 +431,23 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 
 	@Override
 	public synchronized Object getExitValue(long timeout) throws ApplicationException, InterruptedException {
-		if (handleRegistration == null && application == null)
+		if (handleRegistration == null && application == null) {
 			return result;
+		}
 		long startTime = System.currentTimeMillis();
 		long delay = timeout;
 		while (!setResult && (delay > 0 || timeout == 0)) {
 			wait(delay); // only wait for the specified amount of time
-			if (timeout > 0)
+			if (timeout > 0) {
 				delay -= (System.currentTimeMillis() - startTime);
+			}
 		}
-		if (result == null)
+		if (result == null) {
 			throw new ApplicationException(ApplicationException.APPLICATION_EXITVALUE_NOT_AVAILABLE);
-		if (result == NULL_RESULT)
+		}
+		if (result == NULL_RESULT) {
 			return null;
+		}
 		return result;
 	}
 

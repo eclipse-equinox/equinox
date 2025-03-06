@@ -27,8 +27,9 @@ public class ErrorApplication implements IApplication {
 	@Override
 	public Object start(IApplicationContext context) throws Exception {
 		Exception error = (Exception) context.getArguments().get(ERROR_EXCEPTION);
-		if (error != null)
+		if (error != null) {
 			throw error;
+		}
 		throw new IllegalStateException();
 	}
 

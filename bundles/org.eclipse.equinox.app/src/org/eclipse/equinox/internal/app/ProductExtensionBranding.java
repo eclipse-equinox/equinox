@@ -32,8 +32,9 @@ public class ProductExtensionBranding implements IBranding {
 
 	public ProductExtensionBranding(String id, IConfigurationElement element) {
 		this.id = id;
-		if (element == null)
+		if (element == null) {
 			return;
+		}
 		application = element.getAttribute(ATTR_APPLICATION);
 		name = element.getAttribute(ATTR_NAME);
 		description = element.getAttribute(ATTR_DESCRIPTION);
@@ -46,8 +47,9 @@ public class ProductExtensionBranding implements IBranding {
 		for (IConfigurationElement child : children) {
 			String key = child.getAttribute(ATTR_NAME);
 			String value = child.getAttribute(ATTR_VALUE);
-			if (key != null && value != null)
+			if (key != null && value != null) {
 				properties.put(key, value);
+			}
 		}
 		definingBundle = Activator.getBundle(element.getContributor());
 	}

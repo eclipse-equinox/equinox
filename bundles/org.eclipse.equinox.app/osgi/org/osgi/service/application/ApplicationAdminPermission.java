@@ -99,18 +99,21 @@ public class ApplicationAdminPermission extends Permission {
 	public ApplicationAdminPermission(String filter, String actions) throws InvalidSyntaxException {
 		super(filter == null ? "*" : filter);
 		
-		if( filter == null )
+		if( filter == null ) {
 			filter = "*";
+		}
 		
-		if( actions == null )
+		if( actions == null ) {
 			throw new NullPointerException( "Action string cannot be null!" );
+		}
 		
 		this.applicationDescriptor = null;
 		this.filter = (filter == null ? "*" : filter);
 		this.actions = actions;
 
-		if( !filter.equals( "*" ) && !filter.equals( "<<SELF>>" ) )
+		if( !filter.equals( "*" ) && !filter.equals( "<<SELF>>" ) ) {
 			FrameworkUtil.createFilter( this.filter ); // check if the filter is valid
+		}
 		init();
 	}
 	
@@ -124,8 +127,9 @@ public class ApplicationAdminPermission extends Permission {
 	public ApplicationAdminPermission(ApplicationDescriptor application, String actions) {
 		super(application.getApplicationId());
 				
-		if( application == null || actions == null )
+		if( application == null || actions == null ) {
 			throw new NullPointerException( "ApplicationDescriptor and action string cannot be null!" );
+		}
 		
 		this.filter = application.getApplicationId();
 		this.applicationDescriptor = application;
@@ -152,9 +156,9 @@ public class ApplicationAdminPermission extends Permission {
 			}catch( InvalidSyntaxException e ) {
 				throw new RuntimeException(e); /* this can never happen */
 			}
-		}
-		else	
+		} else {
 			newPerm = new ApplicationAdminPermission( this.applicationDescriptor, this.actions );
+		}
 		
 		newPerm.applicationID = applicationId;
 		
@@ -182,24 +186,29 @@ public class ApplicationAdminPermission extends Permission {
 	 */
 	@Override
 	public boolean implies(Permission otherPermission) {
-		if( otherPermission == null )
+		if( otherPermission == null ) {
 			return false;
+		}
 				
-		if(!(otherPermission instanceof ApplicationAdminPermission))
+		if(!(otherPermission instanceof ApplicationAdminPermission)) {
 			return false;
+		}
 
 		ApplicationAdminPermission other = (ApplicationAdminPermission) otherPermission;
 
 		if( !filter.equals("*") ) {
-			if( other.applicationDescriptor == null )
+			if( other.applicationDescriptor == null ) {
 				return false;
+			}
 			
 			if( filter.equals( "<<SELF>>") ) {
-				if( other.applicationID == null )
+				if( other.applicationID == null ) {
 					return false; /* it cannot be, this might be a bug */
+				}
 			
-				if( !other.applicationID.equals( other.applicationDescriptor.getApplicationId() ) )
+				if( !other.applicationID.equals( other.applicationDescriptor.getApplicationId() ) ) {
 					return false;
+				}
 			}
 			else {
 				Hashtable props = new Hashtable();
@@ -207,34 +216,41 @@ public class ApplicationAdminPermission extends Permission {
 				props.put( "signer", new SignerWrapper( other.applicationDescriptor ) );
 								
 				Filter flt = getFilter();
-				if( flt == null )
+				if( flt == null ) {
 					return false;
+				}
 			
-				if( !flt.match( props ) )
+				if( !flt.match( props ) ) {
 					return false;
+				}
 			}
 		}
 		
-		if( !actionsVector.containsAll( other.actionsVector ) )
+		if( !actionsVector.containsAll( other.actionsVector ) ) {
 			return false;
+		}
 		
 		return true;
 	}
 
 	@Override
 	public boolean equals(Object with) {
-		if( with == null || !(with instanceof ApplicationAdminPermission) )
+		if( with == null || !(with instanceof ApplicationAdminPermission) ) {
 			return false;
+		}
 		
 		ApplicationAdminPermission other = (ApplicationAdminPermission)with;  	
 		
 		// Compare actions:
-		if( other.actionsVector.size() != actionsVector.size() )
+		if( other.actionsVector.size() != actionsVector.size() ) {
 			return false;
+		}
 		
-		for( int i=0; i != actionsVector.size(); i++ )
-			if( !other.actionsVector.contains( actionsVector.get( i ) ) )
+		for( int i=0; i != actionsVector.size(); i++ ) {
+			if( !other.actionsVector.contains( actionsVector.get( i ) ) ) {
 				return false;
+			}
+		}
 		
 		
 		return equal(this.filter, other.filter ) && equal(this.applicationDescriptor, other.applicationDescriptor)
@@ -261,8 +277,9 @@ public class ApplicationAdminPermission extends Permission {
 	@Override
 	public int hashCode() {
 		int hc = 0;
-		for( int i=0; i != actionsVector.size(); i++ )
+		for( int i=0; i != actionsVector.size(); i++ ) {
 			hc ^= ((String)actionsVector.get( i )).hashCode();
+		}
 		hc ^= (null == this.filter )? 0 : this.filter.hashCode();
 		hc ^= (null == this.applicationDescriptor) ? 0 : this.applicationDescriptor.hashCode();
 		hc ^= (null == this.applicationID) ? 0 : this.applicationID.hashCode();
@@ -300,8 +317,9 @@ public class ApplicationAdminPermission extends Permission {
 			v.add(action.toLowerCase());
 		}
 		
-		if( v.contains( SCHEDULE_ACTION ) && !v.contains( LIFECYCLE_ACTION ) )
+		if( v.contains( SCHEDULE_ACTION ) && !v.contains( LIFECYCLE_ACTION ) ) {
 			v.add( LIFECYCLE_ACTION );
+		}
 		
 		return v;
 	}
@@ -324,8 +342,9 @@ public class ApplicationAdminPermission extends Permission {
 		
 		@Override
 		public boolean equals(Object o) {
-			if (!(o instanceof SignerWrapper))
+			if (!(o instanceof SignerWrapper)) {
 				return false;
+			}
 			SignerWrapper other = (SignerWrapper) o;
 			ApplicationDescriptor matchAppDesc = (ApplicationDescriptor) (appDesc != null ? appDesc : other.appDesc);
 			String matchPattern = appDesc != null ? other.pattern : pattern;
@@ -336,10 +355,11 @@ public class ApplicationAdminPermission extends Permission {
 	private void init() {
 		actionsVector = actionsVector( actions );
 
-		if ( actions.equals("*") )
+		if ( actions.equals("*") ) {
 			actionsVector = actionsVector( LIFECYCLE_ACTION + "," + SCHEDULE_ACTION + "," + LOCK_ACTION );
-		else if (!ACTIONS.containsAll(actionsVector))
+		} else if (!ACTIONS.containsAll(actionsVector)) {
 			throw new IllegalArgumentException("Illegal action!");
+		}
 		
 		applicationID = null;
 	}

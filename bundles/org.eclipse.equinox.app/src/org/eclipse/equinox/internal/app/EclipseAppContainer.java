@@ -145,13 +145,15 @@ public class EclipseAppContainer
 	}
 
 	private EclipseAppDescriptor createAppDescriptor(IExtension appExtension) {
-		if (Activator.DEBUG)
+		if (Activator.DEBUG) {
 			System.out.println("Creating application descriptor: " + appExtension.getUniqueIdentifier()); //$NON-NLS-1$
+		}
 		String iconPath = null;
 		synchronized (lock) {
 			EclipseAppDescriptor appDescriptor = apps.get(appExtension.getUniqueIdentifier());
-			if (appDescriptor != null)
+			if (appDescriptor != null) {
 				return appDescriptor;
+			}
 			// the appDescriptor does not exist for the app ID; create it
 			IConfigurationElement[] configs = appExtension.getConfigurationElements();
 			int flags = EclipseAppDescriptor.FLAG_CARD_SINGLETON_GLOGAL | EclipseAppDescriptor.FLAG_VISIBLE
@@ -159,8 +161,9 @@ public class EclipseAppContainer
 			int cardinality = 0;
 			if (configs.length > 0) {
 				String sVisible = configs[0].getAttribute(PT_APP_VISIBLE);
-				if (sVisible != null && !Boolean.valueOf(sVisible).booleanValue())
+				if (sVisible != null && !Boolean.valueOf(sVisible).booleanValue()) {
 					flags &= ~(EclipseAppDescriptor.FLAG_VISIBLE);
+				}
 				String sThread = configs[0].getAttribute(PT_APP_THREAD);
 				if (PT_APP_THREAD_ANY.equals(sThread)) {
 					flags |= EclipseAppDescriptor.FLAG_TYPE_ANY_THREAD;
@@ -169,13 +172,13 @@ public class EclipseAppContainer
 				String sCardinality = configs[0].getAttribute(PT_APP_CARDINALITY);
 				if (sCardinality != null) {
 					flags &= ~(EclipseAppDescriptor.FLAG_CARD_SINGLETON_GLOGAL); // clear the global bit
-					if (PT_APP_CARDINALITY_SINGLETON_SCOPED.equals(sCardinality))
+					if (PT_APP_CARDINALITY_SINGLETON_SCOPED.equals(sCardinality)) {
 						flags |= EclipseAppDescriptor.FLAG_CARD_SINGLETON_SCOPED;
-					else if (PT_APP_CARDINALITY_UNLIMITED.equals(sCardinality))
+					} else if (PT_APP_CARDINALITY_UNLIMITED.equals(sCardinality)) {
 						flags |= EclipseAppDescriptor.FLAG_CARD_UNLIMITED;
-					else if (PT_APP_CARDINALITY_SINGLETON_GLOBAL.equals(sCardinality))
+					} else if (PT_APP_CARDINALITY_SINGLETON_GLOBAL.equals(sCardinality)) {
 						flags |= EclipseAppDescriptor.FLAG_CARD_SINGLETON_GLOGAL;
-					else {
+					} else {
 						try {
 							cardinality = Integer.parseInt(sCardinality);
 							flags |= EclipseAppDescriptor.FLAG_CARD_LIMITED;
@@ -187,8 +190,9 @@ public class EclipseAppContainer
 					}
 				}
 				String defaultApp = getDefaultAppId();
-				if (defaultApp != null && defaultApp.equals(appExtension.getUniqueIdentifier()))
+				if (defaultApp != null && defaultApp.equals(appExtension.getUniqueIdentifier())) {
 					flags |= EclipseAppDescriptor.FLAG_DEFAULT_APP;
+				}
 				iconPath = configs[0].getAttribute(PT_APP_ICON);
 			}
 			appDescriptor = new EclipseAppDescriptor(Activator.getBundle(appExtension.getContributor()),
@@ -205,12 +209,14 @@ public class EclipseAppContainer
 	}
 
 	private EclipseAppDescriptor removeAppDescriptor(String applicationId) {
-		if (Activator.DEBUG)
+		if (Activator.DEBUG) {
 			System.out.println("Removing application descriptor: " + applicationId); //$NON-NLS-1$
+		}
 		synchronized (lock) {
 			EclipseAppDescriptor appDescriptor = apps.remove(applicationId);
-			if (appDescriptor == null)
+			if (appDescriptor == null) {
 				return null;
+			}
 			appDescriptor.unregister();
 			return appDescriptor;
 		}
@@ -272,11 +278,12 @@ public class EclipseAppContainer
 			missingApp = true;
 			return;
 		}
-		if (defaultDesc != null)
+		if (defaultDesc != null) {
 			defaultDesc.launch(args);
-		else
+		} else {
 			throw new ApplicationException(ApplicationException.APPLICATION_INTERNAL_ERROR,
 					Messages.application_noIdFound);
+		}
 	}
 
 	/*
@@ -292,8 +299,9 @@ public class EclipseAppContainer
 
 	private void registerAppDescriptor(String applicationId) {
 		IExtension appExtension = getAppExtension(applicationId);
-		if (appExtension != null)
+		if (appExtension != null) {
 			createAppDescriptor(appExtension);
+		}
 	}
 
 	/*
@@ -302,8 +310,9 @@ public class EclipseAppContainer
 	 */
 	private IExtension[] getAvailableAppExtensions() {
 		IExtensionPoint point = extensionRegistry.getExtensionPoint(PI_RUNTIME + '.' + PT_APPLICATIONS);
-		if (point == null)
+		if (point == null) {
 			return new IExtension[0];
+		}
 		return point.getExtensions();
 	}
 
@@ -312,8 +321,9 @@ public class EclipseAppContainer
 		String availableAppsMsg = "<NONE>"; //$NON-NLS-1$
 		if (availableApps.length != 0) {
 			availableAppsMsg = availableApps[0].getUniqueIdentifier();
-			for (int i = 1; i < availableApps.length; i++)
+			for (int i = 1; i < availableApps.length; i++) {
 				availableAppsMsg = availableAppsMsg + ", " + availableApps[i].getUniqueIdentifier(); //$NON-NLS-1$
+			}
 		}
 		return availableAppsMsg;
 	}
@@ -352,12 +362,13 @@ public class EclipseAppContainer
 				curDefaultApplicationListener = defaultAppListener;
 				curMissingAppLauncher = missingAppLauncher;
 			}
-			if (curDefaultApplicationListener != null)
+			if (curDefaultApplicationListener != null) {
 				curDefaultApplicationListener.launch(appHandle);
-			else if (curMissingAppLauncher != null)
+			} else if (curMissingAppLauncher != null) {
 				curMissingAppLauncher.launch(appHandle);
-			else
+			} else {
 				appLauncher.launch(appHandle, appHandle.getArguments().get(IApplicationContext.APPLICATION_ARGS));
+			}
 		} else {
 			if (isDefault) {
 				DefaultApplicationListener curDefaultApplicationListener = null;
@@ -365,8 +376,9 @@ public class EclipseAppContainer
 				ApplicationLauncher appLauncher = null;
 				synchronized (this) {
 					appLauncher = (ApplicationLauncher) launcherTracker.getService();
-					if (defaultAppListener == null)
+					if (defaultAppListener == null) {
 						defaultAppListener = new DefaultApplicationListener(appHandle);
+					}
 					curDefaultApplicationListener = defaultAppListener;
 					if (appLauncher == null) {
 						// we need to wait to allow the ApplicationLauncher to get registered;
@@ -377,10 +389,11 @@ public class EclipseAppContainer
 					}
 					curMissingAppLauncher = missingAppLauncher;
 				}
-				if (curMissingAppLauncher != null)
+				if (curMissingAppLauncher != null) {
 					curMissingAppLauncher.launch(curDefaultApplicationListener);
-				else
+				} else {
 					appLauncher.launch(curDefaultApplicationListener, null);
+				}
 			} else {
 				AnyThreadAppLauncher.launchEclipseApplication(appHandle);
 			}
@@ -390,8 +403,9 @@ public class EclipseAppContainer
 	@Override
 	public void bundleChanged(BundleEvent event) {
 		// if this is not the system bundle stopping then ignore the event
-		if ((BundleEvent.STOPPING & event.getType()) == 0 || event.getBundle().getBundleId() != 0)
+		if ((BundleEvent.STOPPING & event.getType()) == 0 || event.getBundle().getBundleId() != 0) {
 			return;
+		}
 		// The system bundle is stopping; better stop all applications and containers
 		// now
 		stopAllApps();
@@ -402,12 +416,13 @@ public class EclipseAppContainer
 		try {
 			ServiceReference[] runningRefs = context.getServiceReferences(ApplicationHandle.class.getName(),
 					"(!(application.state=STOPPING))"); //$NON-NLS-1$
-			if (runningRefs != null)
+			if (runningRefs != null) {
 				for (ServiceReference runningRef : runningRefs) {
 					ApplicationHandle handle = (ApplicationHandle) context.getService(runningRef);
 					try {
-						if (handle != null)
+						if (handle != null) {
 							handle.destroy();
+						}
 					} catch (Throwable t) {
 						String message = NLS.bind(Messages.application_error_stopping, handle.getInstanceId());
 						Activator.log(new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.WARNING, 0, message, 0,
@@ -418,23 +433,27 @@ public class EclipseAppContainer
 						}
 					}
 				}
+			}
 		} catch (InvalidSyntaxException e) {
 			// do nothing; we already tested the filter string above
 		}
 	}
 
 	private String getDefaultAppId() {
-		if (defaultAppId != null)
+		if (defaultAppId != null) {
 			return defaultAppId;
+		}
 		// try commandLineProperties
 		defaultAppId = CommandLineArgs.getApplication();
-		if (defaultAppId != null)
+		if (defaultAppId != null) {
 			return defaultAppId;
+		}
 
 		// try bundleContext properties
 		defaultAppId = context.getProperty(EclipseAppContainer.PROP_ECLIPSE_APPLICATION);
-		if (defaultAppId != null)
+		if (defaultAppId != null) {
 			return defaultAppId;
+		}
 
 		// Derive the application from the product information
 		defaultAppId = getBranding() == null ? null : getBranding().getApplication();
@@ -442,17 +461,20 @@ public class EclipseAppContainer
 	}
 
 	public IBranding getBranding() {
-		if (branding != null)
+		if (branding != null) {
 			return branding;
+		}
 		// try commandLineProperties
 		String productId = CommandLineArgs.getProduct();
 		if (productId == null) {
 			// try bundleContext properties
-			if (context == null)
+			if (context == null) {
 				return null;
+			}
 			productId = context.getProperty(PROP_PRODUCT);
-			if (productId == null)
+			if (productId == null) {
 				return null;
+			}
 		}
 		IConfigurationElement[] entries = extensionRegistry.getConfigurationElementsFor(PI_RUNTIME, PT_PRODUCTS,
 				productId);
@@ -469,7 +491,7 @@ public class EclipseAppContainer
 				try {
 					Object provider = element.createExecutableExtension("run"); //$NON-NLS-1$
 					Object[] products = (Object[]) EclipseAppContainer.callMethod(provider, "getProducts", null, null); //$NON-NLS-1$
-					if (products != null)
+					if (products != null) {
 						for (Object product : products) {
 							if (productId.equalsIgnoreCase(
 									(String) EclipseAppContainer.callMethod(product, "getId", null, null))) { //$NON-NLS-1$
@@ -477,17 +499,20 @@ public class EclipseAppContainer
 								return branding;
 							}
 						}
+					}
 				} catch (CoreException e) {
-					if (logEntries == null)
+					if (logEntries == null) {
 						logEntries = new ArrayList<>(3);
+					}
 					logEntries.add(new FrameworkLogEntry(Activator.PI_APP,
 							NLS.bind(Messages.provider_invalid, element.getParent().toString()), 0, e, null));
 				}
 			}
 		}
-		if (logEntries != null)
+		if (logEntries != null) {
 			Activator.log(new FrameworkLogEntry(Activator.PI_APP, Messages.provider_invalid_general, 0, null,
 					logEntries.toArray(new FrameworkLogEntry[logEntries.size()])));
+		}
 
 		if (!missingProductReported) {
 			Activator.log(new FrameworkLogEntry(Activator.PI_APP, NLS.bind(Messages.product_notFound, productId), 0,
@@ -499,8 +524,9 @@ public class EclipseAppContainer
 
 	private void refreshAppDescriptors() {
 		synchronized (lock) {
-			for (EclipseAppDescriptor eclipseAppDescriptor : apps.values())
+			for (EclipseAppDescriptor eclipseAppDescriptor : apps.values()) {
 				eclipseAppDescriptor.refreshProperties();
+			}
 		}
 	}
 
@@ -537,8 +563,9 @@ public class EclipseAppContainer
 				activeScopedSingleton = appHandle;
 				break;
 			case EclipseAppDescriptor.FLAG_CARD_LIMITED:
-				if (activeLimited == null)
+				if (activeLimited == null) {
 					activeLimited = new HashMap<>(3);
+				}
 				ArrayList<EclipseAppHandle> limited = activeLimited.get(eclipseApp.getApplicationId());
 				if (limited == null) {
 					limited = new ArrayList<>(eclipseApp.getCardinality());
@@ -551,8 +578,9 @@ public class EclipseAppContainer
 			default:
 				break;
 			}
-			if (eclipseApp.getThreadType() == EclipseAppDescriptor.FLAG_TYPE_MAIN_THREAD)
+			if (eclipseApp.getThreadType() == EclipseAppDescriptor.FLAG_TYPE_MAIN_THREAD) {
 				activeMain = appHandle;
+			}
 			activeHandles.add(appHandle);
 			refreshAppDescriptors();
 		}
@@ -560,44 +588,51 @@ public class EclipseAppContainer
 
 	void unlock(EclipseAppHandle appHandle) {
 		synchronized (lock) {
-			if (activeGlobalSingleton == appHandle)
+			if (activeGlobalSingleton == appHandle) {
 				activeGlobalSingleton = null;
-			else if (activeScopedSingleton == appHandle)
+			} else if (activeScopedSingleton == appHandle) {
 				activeScopedSingleton = null;
-			else if (((EclipseAppDescriptor) appHandle.getApplicationDescriptor())
+			} else if (((EclipseAppDescriptor) appHandle.getApplicationDescriptor())
 					.getCardinalityType() == EclipseAppDescriptor.FLAG_CARD_LIMITED) {
 				if (activeLimited != null) {
 					ArrayList<EclipseAppHandle> limited = activeLimited
 							.get(appHandle.getApplicationDescriptor().getApplicationId());
-					if (limited != null)
+					if (limited != null) {
 						limited.remove(appHandle);
+					}
 				}
 			}
-			if (activeMain == appHandle)
+			if (activeMain == appHandle) {
 				activeMain = null;
-			if (activeHandles.remove(appHandle))
+			}
+			if (activeHandles.remove(appHandle)) {
 				refreshAppDescriptors(); // only refresh descriptors if we really unlocked something
+			}
 		}
 	}
 
 	int isLocked(EclipseAppDescriptor eclipseApp) {
 		synchronized (lock) {
-			if (activeGlobalSingleton != null)
+			if (activeGlobalSingleton != null) {
 				return LOCKED_SINGLETON_GLOBAL_RUNNING;
+			}
 			switch (eclipseApp.getCardinalityType()) {
 			case EclipseAppDescriptor.FLAG_CARD_SINGLETON_GLOGAL:
-				if (activeHandles.size() > 0)
+				if (activeHandles.size() > 0) {
 					return LOCKED_SINGLETON_GLOBAL_APPS_RUNNING;
+				}
 				break;
 			case EclipseAppDescriptor.FLAG_CARD_SINGLETON_SCOPED:
-				if (activeScopedSingleton != null)
+				if (activeScopedSingleton != null) {
 					return LOCKED_SINGLETON_SCOPED_RUNNING;
+				}
 				break;
 			case EclipseAppDescriptor.FLAG_CARD_LIMITED:
 				if (activeLimited != null) {
 					ArrayList<EclipseAppHandle> limited = activeLimited.get(eclipseApp.getApplicationId());
-					if (limited != null && limited.size() >= eclipseApp.getCardinality())
+					if (limited != null && limited.size() >= eclipseApp.getCardinality()) {
 						return LOCKED_SINGLETON_LIMITED_RUNNING;
+					}
 				}
 				break;
 			case EclipseAppDescriptor.FLAG_CARD_UNLIMITED:
@@ -605,8 +640,9 @@ public class EclipseAppContainer
 			default:
 				break;
 			}
-			if (eclipseApp.getThreadType() == EclipseAppDescriptor.FLAG_TYPE_MAIN_THREAD && activeMain != null)
+			if (eclipseApp.getThreadType() == EclipseAppDescriptor.FLAG_TYPE_MAIN_THREAD && activeMain != null) {
 				return LOCKED_MAIN_THREAD_RUNNING;
+			}
 			return NOT_LOCKED;
 		}
 	}
@@ -627,10 +663,12 @@ public class EclipseAppContainer
 			Method method = obj.getClass().getMethod(methodName, argTypes);
 			return method.invoke(obj, args);
 		} catch (InvocationTargetException e) {
-			if (e.getTargetException() instanceof Error)
+			if (e.getTargetException() instanceof Error) {
 				throw (Error) e.getTargetException();
-			if (e.getTargetException() instanceof Exception)
+			}
+			if (e.getTargetException() instanceof Exception) {
 				throw (Exception) e.getTargetException();
+			}
 			throw e;
 		}
 	}
@@ -651,12 +689,13 @@ public class EclipseAppContainer
 				missingApp = false;
 			}
 		}
-		if (appRunnable != null)
+		if (appRunnable != null) {
 			// found a main threaded app; start it now that the app launcher is available
 			appLauncher.launch(appRunnable,
 					appRunnable instanceof EclipseAppHandle
 							? ((EclipseAppHandle) appRunnable).getArguments().get(IApplicationContext.APPLICATION_ARGS)
 							: null);
+		}
 		return appLauncher;
 	}
 

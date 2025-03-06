@@ -198,10 +198,11 @@ public abstract class ApplicationDescriptor {
 		Boolean containerLocked = (Boolean) props.remove(APPLICATION_LOCKED);
 		synchronized (locked) {
 			if (containerLocked != null && containerLocked.booleanValue() != locked[0]) {
-				if (locked[0])
+				if (locked[0]) {
 					lockSpecific();
-				else
+				} else {
 					unlockSpecific();
+				}
 			}
 		}
 		/* replace the container's lock with the application model's lock, that's the correct */
@@ -298,14 +299,17 @@ public abstract class ApplicationDescriptor {
 	 */
 	public final ApplicationHandle launch(Map arguments) throws ApplicationException {
 		SecurityManager sm = System.getSecurityManager();
-		if (sm != null)
+		if (sm != null) {
 			sm.checkPermission(new ApplicationAdminPermission(this, ApplicationAdminPermission.LIFECYCLE_ACTION));
-		synchronized (locked) {
-			if (locked[0])
-				throw new ApplicationException(ApplicationException.APPLICATION_LOCKED, "Application is locked, can't launch!");
 		}
-		if (!isLaunchableSpecific())
+		synchronized (locked) {
+			if (locked[0]) {
+				throw new ApplicationException(ApplicationException.APPLICATION_LOCKED, "Application is locked, can't launch!");
+			}
+		}
+		if (!isLaunchableSpecific()) {
 			throw new ApplicationException(ApplicationException.APPLICATION_NOT_LAUNCHABLE, "Cannot launch the application!");
+		}
 		checkArgs(arguments, false);
 		try {
 			return launchSpecific(arguments);
@@ -415,8 +419,9 @@ public abstract class ApplicationDescriptor {
 	 */
 	public final ScheduledApplication schedule(String scheduleId, Map arguments, String topic, String eventFilter, boolean recurring) throws InvalidSyntaxException, ApplicationException {
 		SecurityManager sm = System.getSecurityManager();
-		if (sm != null)
+		if (sm != null) {
 			sm.checkPermission(new ApplicationAdminPermission(this, ApplicationAdminPermission.SCHEDULE_ACTION));
+		}
 		arguments = checkArgs(arguments, true);
 		isLaunchableSpecific(); // checks if the ApplicationDescriptor was already unregistered
 		return AppPersistence.addScheduledApp(this, scheduleId, arguments, topic, eventFilter, recurring);
@@ -435,11 +440,13 @@ public abstract class ApplicationDescriptor {
 	 */
 	public final void lock() {
 		SecurityManager sm = System.getSecurityManager();
-		if (sm != null)
+		if (sm != null) {
 			sm.checkPermission(new ApplicationAdminPermission(this, ApplicationAdminPermission.LOCK_ACTION));
+		}
 		synchronized (locked) {
-			if (locked[0])
+			if (locked[0]) {
 				return;
+			}
 			locked[0] = true;
 			lockSpecific();
 			saveLock(true);
@@ -466,11 +473,13 @@ public abstract class ApplicationDescriptor {
 	 */
 	public final void unlock() {
 		SecurityManager sm = System.getSecurityManager();
-		if (sm != null)
+		if (sm != null) {
 			sm.checkPermission(new ApplicationAdminPermission(this, ApplicationAdminPermission.LOCK_ACTION));
+		}
 		synchronized (locked) {
-			if (!locked[0])
+			if (!locked[0]) {
 				return;
+			}
 			locked[0] = false;
 			unlockSpecific();
 			saveLock(false);
@@ -500,17 +509,21 @@ public abstract class ApplicationDescriptor {
 	private static final Collection primitiveArrays = Arrays.asList(new Class[] {long[].class, int[].class, short[].class, char[].class, byte[].class, double[].class, float[].class, boolean[].class});
 
 	private static Map checkArgs(Map arguments, boolean validateValues) throws ApplicationException {
-		if (arguments == null)
+		if (arguments == null) {
 			return arguments;
+		}
 		Map copy = validateValues ? new HashMap() : null;
 		for (Iterator entries = arguments.entrySet().iterator(); entries.hasNext();) {
 			Map.Entry entry = (Entry) entries.next();
-			if (!(entry.getKey() instanceof String))
+			if (!(entry.getKey() instanceof String)) {
 				throw new IllegalArgumentException("Invalid key type: " + entry.getKey() == null ? "<null>" : entry.getKey().getClass().getName());
-			if ("".equals(entry.getKey())) //$NON-NLS-1$
+			}
+			if ("".equals(entry.getKey())) { //$NON-NLS-1$
 				throw new IllegalArgumentException("Empty string is an invalid key");
-			if (validateValues)
+			}
+			if (validateValues) {
 				validateValue(entry, copy);
+			}
 		}
 		return validateValues ? copy : arguments;
 	}
