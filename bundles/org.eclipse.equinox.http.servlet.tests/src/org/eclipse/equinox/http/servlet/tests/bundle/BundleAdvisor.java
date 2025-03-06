@@ -26,14 +26,16 @@ public class BundleAdvisor extends Object {
 
 	public BundleAdvisor(BundleContext bundleContext) {
 		super();
-		if (bundleContext == null)
+		if (bundleContext == null) {
 			throw new IllegalArgumentException("bundleContext must not be null"); //$NON-NLS-1$
+		}
 		this.bundleContext = bundleContext;
 	}
 
 	private Bundle getBundle(String symbolicName) {
-		if (symbolicName == null)
+		if (symbolicName == null) {
 			throw new IllegalArgumentException("symbolicName must not be null"); //$NON-NLS-1$
+		}
 		BundleContext context = getBundleContext();
 		Bundle[] bundles = context.getBundles();
 		for (Bundle bundle : bundles) {
