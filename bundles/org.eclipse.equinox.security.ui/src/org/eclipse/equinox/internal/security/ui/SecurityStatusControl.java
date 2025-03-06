@@ -90,7 +90,7 @@ public class SecurityStatusControl extends ControlContribution {
 					IconState newState = getCurrentState();
 					if (!currentState.equals(newState)) {
 						final Display display = getDisplay(window);
-						if (null != display)
+						if (null != display) {
 							display.asyncExec(() -> {
 								if (!label.isDisposed()) {
 									Image oldIcon = label.getImage();
@@ -98,6 +98,7 @@ public class SecurityStatusControl extends ControlContribution {
 									oldIcon.dispose();
 								}
 							});
+						}
 						currentState = newState;
 					}
 					try {
@@ -156,8 +157,9 @@ public class SecurityStatusControl extends ControlContribution {
 	private static Display getDisplay(IWorkbenchWindow window) {
 		if (null != window) {
 			Shell shell = window.getShell();
-			if (null != shell)
+			if (null != shell) {
 				return shell.getDisplay();
+			}
 		}
 		return null;
 	}
@@ -168,8 +170,9 @@ public class SecurityStatusControl extends ControlContribution {
 		IStatus status;
 
 		IconState(boolean enabled, IStatus status, boolean needsAttention) {
-			if (null == status)
+			if (null == status) {
 				throw new IllegalArgumentException();
+			}
 
 			this.enabled = enabled;
 			this.status = status;

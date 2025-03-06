@@ -79,14 +79,16 @@ public class X509CertificateAttributeContentProvider implements IStructuredConte
 
 		inputChanged(viewer, null, curCert);
 
-		if (viewer != null)
+		if (viewer != null) {
 			viewer.refresh();
+		}
 	}
 
 	public void clear(boolean refresh) {
 		elements.clear();
-		if (refresh && viewer != null)
+		if (refresh && viewer != null) {
 			viewer.refresh();
+		}
 	}
 
 	public void clear() {
@@ -137,8 +139,9 @@ public class X509CertificateAttributeContentProvider implements IStructuredConte
 			// Only set the string field, If we got some data
 			if (keyUsagesArray != null && keyUsagesArray.length > 0) {
 				for (int i = 0; i < keyUsagesArray.length; i++) {
-					if (keyUsagesArray[i])
+					if (keyUsagesArray[i]) {
 						keyUsages.append(keyUsageStrings[i] + listDelim);
+					}
 				}
 
 				X509CertificateAttribute keyUsage = new X509CertificateAttribute(SecurityUIMsg.CERTPROP_X509_KEY_USAGE,
@@ -229,16 +232,18 @@ public class X509CertificateAttributeContentProvider implements IStructuredConte
 		String result = ""; //$NON-NLS-1$
 		if (buf != null) {
 			for (int i = 0; i < buf.length; i++) {
-				if (i > 0)
+				if (i > 0) {
 					result += " "; //$NON-NLS-1$
+				}
 
 				short sValue = buf[i];
 				int curInt = 0;
 				curInt += sValue;
 				String converted = Integer.toHexString(curInt);
 
-				if (converted.length() > 2)
+				if (converted.length() > 2) {
 					converted = converted.substring(converted.length() - 2);
+				}
 
 				result += converted.toUpperCase();
 			}

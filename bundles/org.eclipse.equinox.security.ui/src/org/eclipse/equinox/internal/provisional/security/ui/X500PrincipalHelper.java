@@ -178,8 +178,9 @@ public class X500PrincipalHelper {
 			StringBuilder value = new StringBuilder();
 			for (endIndex = startIndex; endIndex < dn.length(); endIndex++) {
 				c = dn.charAt(endIndex);
-				if (c == ',' || c == '+')
+				if (c == ',' || c == '+') {
 					break;
+				}
 				if (c == '\\') {
 					endIndex++; // skip the escaped char
 				} else {
@@ -187,17 +188,19 @@ public class X500PrincipalHelper {
 				}
 			}
 
-			if (endIndex > dn.length())
+			if (endIndex > dn.length()) {
 				throw new IllegalArgumentException("unterminated escape " + dn); //$NON-NLS-1$
+			}
 
 			nameValues.add(value.toString());
 
 			if (c != '+') {
 				rdnNameArray.add(nameValues);
-				if (endIndex != dn.length())
+				if (endIndex != dn.length()) {
 					nameValues = new ArrayList<>();
-				else
+				} else {
 					nameValues = null;
+				}
 			}
 			startIndex = endIndex + 1;
 		}
@@ -249,8 +252,9 @@ public class X500PrincipalHelper {
 				// it.
 				retNamePart = namePart.toString().substring(searchPart.length());
 				// By definition the first one is most significant
-				if (significance == MOSTSIGNIFICANT)
+				if (significance == MOSTSIGNIFICANT) {
 					break;
+				}
 			}
 		}
 

@@ -91,11 +91,13 @@ public class CertificateImportFileSelectPage extends WizardPage implements Liste
 
 	@Override
 	public void handleEvent(Event e) {
-		if (e.widget == browseDirectoriesButton || e.widget == filePathField)
-			if (filePathField.getText().length() < 1)
+		if (e.widget == browseDirectoriesButton || e.widget == filePathField) {
+			if (filePathField.getText().length() < 1) {
 				setErrorMessage(SecurityUIMsg.WIZARD_ERROR_CERT_REQUIRED);
-			else
+			} else {
 				setErrorMessage(null);
+			}
+		}
 		getWizard().getContainer().updateButtons();
 	}
 

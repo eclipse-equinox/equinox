@@ -64,38 +64,44 @@ public class NodesView {
 
 		@Override
 		public Object[] getElements(Object parent) {
-			if (defaultPrefs.equals(parent))
+			if (defaultPrefs.equals(parent)) {
 				return new Object[] { SecurePreferencesFactory.getDefault() };
+			}
 			return new Object[0];
 		}
 
 		@Override
 		public Object getParent(Object child) {
-			if (!(child instanceof ISecurePreferences))
+			if (!(child instanceof ISecurePreferences)) {
 				return null;
+			}
 			ISecurePreferences node = (ISecurePreferences) child;
 			ISecurePreferences parentNode = node.parent();
-			if (parentNode == null)
+			if (parentNode == null) {
 				return null;
+			}
 			return node.parent();
 		}
 
 		@Override
 		public Object[] getChildren(Object parent) {
-			if (!(parent instanceof ISecurePreferences))
+			if (!(parent instanceof ISecurePreferences)) {
 				return new Object[0];
+			}
 			ISecurePreferences node = (ISecurePreferences) parent;
 			String[] childrenNames = node.childrenNames();
 			ISecurePreferences[] result = new ISecurePreferences[childrenNames.length];
-			for (int i = 0; i < childrenNames.length; i++)
+			for (int i = 0; i < childrenNames.length; i++) {
 				result[i] = node.node(childrenNames[i]);
+			}
 			return result;
 		}
 
 		@Override
 		public boolean hasChildren(Object parent) {
-			if (!(parent instanceof ISecurePreferences))
+			if (!(parent instanceof ISecurePreferences)) {
 				return false;
+			}
 			ISecurePreferences node = (ISecurePreferences) parent;
 			String[] childrenNames = node.childrenNames();
 			return (childrenNames.length > 0);
@@ -106,11 +112,13 @@ public class NodesView {
 
 		@Override
 		public String getText(Object obj) {
-			if (!(obj instanceof ISecurePreferences))
+			if (!(obj instanceof ISecurePreferences)) {
 				return obj.toString();
+			}
 			ISecurePreferences node = (ISecurePreferences) obj;
-			if (node.parent() == null)
+			if (node.parent() == null) {
 				return '[' + SecUIMessages.rootNodeName + ']';
+			}
 			return node.name();
 		}
 
@@ -132,10 +140,11 @@ public class NodesView {
 		nodeTreeViewer.addSelectionChangedListener(event -> {
 			TreeSelection selection = (TreeSelection) event.getSelection();
 			Object selected = selection.getFirstElement();
-			if (selected instanceof ISecurePreferences)
+			if (selected instanceof ISecurePreferences) {
 				parentView.setSelection((ISecurePreferences) selected);
-			else
+			} else {
 				parentView.setSelection(null);
+			}
 		});
 
 		if (Activator.getDefault().debugStorageContents()) {
@@ -193,18 +202,20 @@ public class NodesView {
 					ISecurePreferences node = (ISecurePreferences) selected;
 
 					NewNodeDialog nodeDialog = new NewNodeDialog(nodeTreeViewer.getControl().getShell());
-					if (nodeDialog.open() != Window.OK)
+					if (nodeDialog.open() != Window.OK) {
 						return;
+					}
 					String name = nodeDialog.getNodeName();
 					ISecurePreferences child = node.node(name);
 					parentView.modified();
 
 					// expand and select new node
 					ISecurePreferences parentNode = child.parent();
-					if (parentNode != null)
+					if (parentNode != null) {
 						nodeTreeViewer.refresh(parentNode, false);
-					else
+					} else {
 						nodeTreeViewer.refresh(false);
+					}
 					nodeTreeViewer.expandToLevel(child, 0);
 					nodeTreeViewer.setSelection(new StructuredSelection(child), true);
 				}
@@ -225,8 +236,9 @@ public class NodesView {
 				if (selected instanceof ISecurePreferences) {
 					ISecurePreferences node = (ISecurePreferences) selected;
 					ISecurePreferences parentNode = node.parent();
-					if (parentNode == null)
+					if (parentNode == null) {
 						return; // can't remove root node
+					}
 					node.removeNode();
 					parentView.modified();
 
@@ -247,8 +259,9 @@ public class NodesView {
 	}
 
 	public void postDeleted() {
-		if (contentProvider == null)
+		if (contentProvider == null) {
 			return;
+		}
 		nodeTreeViewer.setSelection(StructuredSelection.EMPTY);
 		nodeTreeViewer.refresh();
 	}

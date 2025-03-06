@@ -83,8 +83,9 @@ public class ValuesView {
 		}
 
 		public String getValue() {
-			if (value == null)
+			if (value == null) {
 				return ENCRYPTED_SUBSTITUTE;
+			}
 			return value;
 		}
 
@@ -107,16 +108,18 @@ public class ValuesView {
 
 		@Override
 		public Object[] getElements(Object parent) {
-			if (selectedNode == null)
+			if (selectedNode == null) {
 				return new Object[0];
+			}
 			String[] keys = selectedNode.keys();
 			TableValuesElement[] result = new TableValuesElement[keys.length];
 			for (int i = 0; i < keys.length; i++) {
 				try {
-					if (selectedNode.isEncrypted(keys[i]))
+					if (selectedNode.isEncrypted(keys[i])) {
 						result[i] = new TableValuesElement(keys[i]);
-					else
+					} else {
 						result[i] = new TableValuesElement(keys[i], selectedNode.get(keys[i], null));
+					}
 				} catch (StorageException e) {
 					Activator.log(IStatus.ERROR, SecUIMessages.failedDecrypt, null, e);
 				}
@@ -128,10 +131,12 @@ public class ValuesView {
 	class TableLabelProvider extends LabelProvider implements ITableLabelProvider {
 		@Override
 		public String getColumnText(Object obj, int index) {
-			if (obj == null)
+			if (obj == null) {
 				return null;
-			if (!(obj instanceof TableValuesElement))
+			}
+			if (!(obj instanceof TableValuesElement)) {
 				return obj.toString();
+			}
 			switch (index) {
 			case 0:
 				return ((TableValuesElement) obj).getKey();
@@ -196,12 +201,15 @@ public class ValuesView {
 			boolean isInternal = selectedNode.absolutePath().startsWith(IStorageConst.PROVIDER_NODE);
 			addValueAction.setEnabled(!isInternal);
 			removeValueAction.setEnabled(!isInternal);
-			if (encryptValueAction != null)
+			if (encryptValueAction != null) {
 				encryptValueAction.setEnabled(!isInternal);
-			if (decryptValueAction != null)
+			}
+			if (decryptValueAction != null) {
 				decryptValueAction.setEnabled(!isInternal);
-			if (showValueAction != null)
+			}
+			if (showValueAction != null) {
 				showValueAction.setEnabled(false);
+			}
 
 			// enablement of encrypted/decrypted
 			StructuredSelection selection = (StructuredSelection) tableViewer.getSelection();
@@ -210,12 +218,15 @@ public class ValuesView {
 				String key = ((TableValuesElement) selected).getKey();
 				try {
 					boolean encrypted = selectedNode.isEncrypted(key);
-					if (encryptValueAction != null)
+					if (encryptValueAction != null) {
 						encryptValueAction.setEnabled(!isInternal && !encrypted);
-					if (decryptValueAction != null)
+					}
+					if (decryptValueAction != null) {
 						decryptValueAction.setEnabled(!isInternal && encrypted);
-					if (showValueAction != null)
+					}
+					if (showValueAction != null) {
 						showValueAction.setEnabled(encrypted);
+					}
 				} catch (StorageException e) {
 					Activator.log(IStatus.ERROR, SecUIMessages.failedDecrypt, null, e);
 				}
@@ -235,21 +246,24 @@ public class ValuesView {
 			menuMgr.add(new Separator());
 			menuMgr.add(encryptValueAction);
 		}
-		if (decryptValueAction != null)
+		if (decryptValueAction != null) {
 			menuMgr.add(decryptValueAction);
+		}
 	}
 
 	private void makeActions() {
 		addValueAction = new Action() {
 			@Override
 			public void run() {
-				if (selectedNode == null)
+				if (selectedNode == null) {
 					return;
+				}
 
 				NewValueDialog newValueDialog = new NewValueDialog(selectedNode.keys(),
 						tableViewer.getControl().getShell());
-				if (newValueDialog.open() != Window.OK)
+				if (newValueDialog.open() != Window.OK) {
 					return;
+				}
 				String key = newValueDialog.getKey();
 				String value = newValueDialog.getValue();
 				boolean encrypt = newValueDialog.encrypt();
@@ -270,12 +284,14 @@ public class ValuesView {
 		removeValueAction = new Action() {
 			@Override
 			public void run() {
-				if (selectedNode == null)
+				if (selectedNode == null) {
 					return;
+				}
 				StructuredSelection selection = (StructuredSelection) tableViewer.getSelection();
 				Object selected = selection.getFirstElement();
-				if (!(selected instanceof TableValuesElement))
+				if (!(selected instanceof TableValuesElement)) {
 					return;
+				}
 
 				TableValuesElement node = (TableValuesElement) selected;
 				String key = node.getKey();
@@ -285,8 +301,9 @@ public class ValuesView {
 				dialog.setText(SecUIMessages.removeValueTitle);
 				String msg = NLS.bind(SecUIMessages.removeValueMsg, key);
 				dialog.setMessage(msg);
-				if (dialog.open() != SWT.YES)
+				if (dialog.open() != SWT.YES) {
 					return;
+				}
 				selectedNode.remove(key);
 				parentView.modified();
 				tableViewer.refresh();
@@ -297,20 +314,23 @@ public class ValuesView {
 		removeValueAction
 				.setImageDescriptor(ImageDescriptor.createFromFile(NodesView.class, "/icons/storage/value_delete.gif")); //$NON-NLS-1$
 
-		if (inDevelopmentMode)
+		if (inDevelopmentMode) {
 			addDevelopmentMenuOptions();
+		}
 	}
 
 	private void addDevelopmentMenuOptions() {
 		showValueAction = new Action() {
 			@Override
 			public void run() {
-				if (selectedNode == null)
+				if (selectedNode == null) {
 					return;
+				}
 				StructuredSelection selection = (StructuredSelection) tableViewer.getSelection();
 				Object selected = selection.getFirstElement();
-				if (!(selected instanceof TableValuesElement))
+				if (!(selected instanceof TableValuesElement)) {
 					return;
+				}
 
 				TableValuesElement node = (TableValuesElement) selected;
 				String key = node.getKey();
@@ -359,12 +379,14 @@ public class ValuesView {
 	}
 
 	protected void reCodeValue(boolean encrypted) {
-		if (selectedNode == null)
+		if (selectedNode == null) {
 			return;
+		}
 		StructuredSelection selection = (StructuredSelection) tableViewer.getSelection();
 		Object selected = selection.getFirstElement();
-		if (!(selected instanceof TableValuesElement))
+		if (!(selected instanceof TableValuesElement)) {
 			return;
+		}
 
 		TableValuesElement node = (TableValuesElement) selected;
 		String key = node.getKey();

@@ -72,11 +72,13 @@ public class CertificateImportCertSelectPage extends WizardPage implements Liste
 
 	private void populateDropDown() {
 		CertificateImportWizard certImportWizard = (CertificateImportWizard) getWizard();
-		if (certImportWizard.selectedImportFile == null)
+		if (certImportWizard.selectedImportFile == null) {
 			return;
+		}
 
-		if (certDropDown.getItemCount() > 0)
+		if (certDropDown.getItemCount() > 0) {
 			certDropDown.removeAll();
+		}
 
 		try {
 			certList = new ArrayList<>();
@@ -125,8 +127,9 @@ public class CertificateImportCertSelectPage extends WizardPage implements Liste
 	 */
 	@Override
 	public void setVisible(boolean visible) {
-		if (visible)
+		if (visible) {
 			populateDropDown();
+		}
 		super.setVisible(visible);
 
 	}

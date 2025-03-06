@@ -31,8 +31,9 @@ public class DefaultPasswordProvider extends PasswordProvider {
 
 	@Override
 	public PBEKeySpec getPassword(IPreferencesContainer container, int passwordType) {
-		if (!StorageUtils.showUI(container))
+		if (!StorageUtils.showUI(container)) {
 			return null;
+		}
 
 		boolean newPassword = ((passwordType & CREATE_NEW_PASSWORD) != 0);
 		boolean passwordChange = ((passwordType & PASSWORD_CHANGE) != 0);
@@ -41,26 +42,29 @@ public class DefaultPasswordProvider extends PasswordProvider {
 		URL defaultURL = InternalExchangeUtils.defaultStorageLocation();
 		if (defaultURL != null) { // remove default location from the dialog
 			String defaultFile = defaultURL.getFile();
-			if (defaultFile != null && defaultFile.equals(location))
+			if (defaultFile != null && defaultFile.equals(location)) {
 				location = null;
+			}
 		}
 
 		final StorageLoginDialog loginDialog = new StorageLoginDialog(newPassword, passwordChange, location);
 
 		final PBEKeySpec[] result = new PBEKeySpec[1];
 		PlatformUI.getWorkbench().getDisplay().syncExec(() -> {
-			if (loginDialog.open() == Window.OK)
+			if (loginDialog.open() == Window.OK) {
 				result[0] = loginDialog.getGeneratedPassword();
-			else
+			} else {
 				result[0] = null;
+			}
 		});
 		return result[0];
 	}
 
 	@Override
 	public boolean retryOnError(Exception e, IPreferencesContainer container) {
-		if (!StorageUtils.showUI(container))
+		if (!StorageUtils.showUI(container)) {
 			return false;
+		}
 
 		final Boolean[] result = new Boolean[1];
 		PlatformUI.getWorkbench().getDisplay().syncExec(() -> {

@@ -54,8 +54,9 @@ public class StoragePreferencePage extends PreferencePage implements IWorkbenchP
 
 		folder.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> {
 			int i = folder.getSelectionIndex();
-			if (i == 0 && passwordTab != null) // password page
+			if (i == 0 && passwordTab != null) { // password page
 				passwordTab.onActivated();
+			}
 		}));
 		Dialog.applyDialogFont(folder);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), HELP_ID);
@@ -64,19 +65,23 @@ public class StoragePreferencePage extends PreferencePage implements IWorkbenchP
 
 	@Override
 	protected void performDefaults() {
-		if (passwordTab != null)
+		if (passwordTab != null) {
 			passwordTab.performDefaults();
-		if (advancedTab != null)
+		}
+		if (advancedTab != null) {
 			advancedTab.performDefaults();
+		}
 		super.performDefaults();
 	}
 
 	@Override
 	public boolean performOk() {
-		if (passwordTab != null)
+		if (passwordTab != null) {
 			passwordTab.performOk();
-		if (advancedTab != null)
+		}
+		if (advancedTab != null) {
 			advancedTab.performOk();
+		}
 		return super.performOk();
 	}
 }

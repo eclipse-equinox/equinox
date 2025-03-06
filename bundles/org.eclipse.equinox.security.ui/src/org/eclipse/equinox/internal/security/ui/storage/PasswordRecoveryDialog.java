@@ -91,18 +91,20 @@ public class PasswordRecoveryDialog extends TitleAreaDialog {
 	protected void validateOK() {
 		boolean valid = true;
 		for (int i = 0; i < questionsText.length; i++) {
-			if (answers[i] == null)
+			if (answers[i] == null) {
 				continue;
+			}
 			String question = answers[i].getText();
 			if (question == null || question.length() == 0) {
 				valid = false;
 				break;
 			}
 		}
-		if (valid)
+		if (valid) {
 			setMessage(SecUIMessages.pswRecoveryMsg, IMessageProvider.INFORMATION);
-		else
+		} else {
 			setMessage(SecUIMessages.pswRecoveryWarning, IMessageProvider.WARNING);
+		}
 		okButton.setEnabled(valid);
 	}
 
@@ -119,8 +121,9 @@ public class PasswordRecoveryDialog extends TitleAreaDialog {
 			MessageBox prompt = new MessageBox(getShell(), SWT.ICON_ERROR | SWT.YES | SWT.NO);
 			prompt.setText(SecUIMessages.pswdRecoveryTitle);
 			prompt.setMessage(SecUIMessages.pswNotRecoveredMsg);
-			if (prompt.open() == SWT.YES)
+			if (prompt.open() == SWT.YES) {
 				return;
+			}
 		} else { // even in UI case we use digested and encoded password - makes no sense to show
 					// it
 			MessageBox prompt = new MessageBox(getShell(), SWT.ICON_INFORMATION | SWT.OK);

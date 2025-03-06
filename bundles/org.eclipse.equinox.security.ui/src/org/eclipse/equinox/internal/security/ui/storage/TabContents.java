@@ -85,8 +85,9 @@ public class TabContents implements ISecurePreferencesSelection, IDeleteListener
 		setButtonSize(buttonSave);
 		buttonSave.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> {
 			ISecurePreferences root = SecurePreferencesFactory.getDefault();
-			if (root == null)
+			if (root == null) {
 				return;
+			}
 			try {
 				root.flush();
 			} catch (IOException exception) {
@@ -136,27 +137,31 @@ public class TabContents implements ISecurePreferencesSelection, IDeleteListener
 
 	public void validateSave() {
 		ISecurePreferences root = SecurePreferencesFactory.getDefault();
-		if (root == null)
+		if (root == null) {
 			return;
+		}
 		boolean modified = (root == null) ? false : InternalExchangeUtils.isModified(root);
 		buttonSave.setEnabled(modified);
 	}
 
 	@Override
 	public void onDeleted() {
-		if (nodesView != null)
+		if (nodesView != null) {
 			nodesView.postDeleted();
+		}
 	}
 
 	protected void export() {
 		ISecurePreferences root = SecurePreferencesFactory.getDefault();
-		if (root == null)
+		if (root == null) {
 			return;
+		}
 		ExportDialog dialog = new ExportDialog(shell);
 		dialog.open();
 		String fileName = dialog.getFileName();
-		if (fileName == null)
+		if (fileName == null) {
 			return;
+		}
 		File outputFile = new File(fileName);
 
 		try (PrintStream output = new PrintStream(new FileOutputStream(outputFile))) {
@@ -169,8 +174,9 @@ public class TabContents implements ISecurePreferencesSelection, IDeleteListener
 	}
 
 	protected void export(ISecurePreferences node, PrintStream stream) {
-		if (IStorageConst.PROVIDER_NODE.equals(node.absolutePath()))
+		if (IStorageConst.PROVIDER_NODE.equals(node.absolutePath())) {
 			return; // skip internal node
+		}
 		String[] keys = node.keys();
 		if (keys.length > 0) {
 			String header = '[' + node.absolutePath() + ']';
@@ -196,13 +202,15 @@ public class TabContents implements ISecurePreferencesSelection, IDeleteListener
 
 	protected void deteleDefaultStorage() {
 		URL location = InternalExchangeUtils.defaultStorageLocation();
-		if (location == null)
+		if (location == null) {
 			return;
+		}
 		MessageBox messageBox = new MessageBox(shell, SWT.YES | SWT.NO);
 		messageBox.setText(SecUIMessages.generalDialogTitle);
 		messageBox.setMessage(SecUIMessages.confirmDeleteMsg);
-		if (messageBox.open() != SWT.YES)
+		if (messageBox.open() != SWT.YES) {
 			return;
+		}
 
 		// clear the data structure itself in case somebody holds on to it
 		ISecurePreferences defaultStorage = SecurePreferencesFactory.getDefault();
@@ -212,16 +220,18 @@ public class TabContents implements ISecurePreferencesSelection, IDeleteListener
 		// clear it from the list of open storages, delete the file
 		InternalExchangeUtils.defaultStorageDelete();
 
-		if (nodesView != null)
+		if (nodesView != null) {
 			nodesView.postDeleted();
+		}
 
 		// suggest restart in case somebody holds on to the deleted storage
 		MessageBox postDeletionBox = new MessageBox(shell, SWT.YES | SWT.NO);
 		postDeletionBox.setText(SecUIMessages.generalDialogTitle);
 		postDeletionBox.setMessage(SecUIMessages.postDeleteMsg);
 		int result = postDeletionBox.open();
-		if (result == SWT.YES)
+		if (result == SWT.YES) {
 			PlatformUI.getWorkbench().restart();
+		}
 	}
 
 }

@@ -92,8 +92,9 @@ public class ExportDialog extends TitleAreaDialog {
 
 		// pick up last used file name
 		String lastFileName = eclipseNode.get(EXPORT_FILE, null);
-		if (lastFileName != null)
+		if (lastFileName != null) {
 			fileText.setText(lastFileName);
+		}
 
 		// add listener after the setText() above
 		fileText.addModifyListener(event -> okButton.setEnabled(validFile()));
@@ -114,11 +115,13 @@ public class ExportDialog extends TitleAreaDialog {
 				dialog.setText(SecUIMessages.fileSelectTitle);
 				dialog.setFilterExtensions(exportExtensions);
 				String tmp = fileText.getText();
-				if (tmp != null)
+				if (tmp != null) {
 					dialog.setFileName(tmp);
+				}
 				String result = dialog.open();
-				if (result != null)
+				if (result != null) {
 					fileText.setText(result);
+				}
 			}
 		});
 
@@ -129,24 +132,28 @@ public class ExportDialog extends TitleAreaDialog {
 	}
 
 	protected boolean validFile() {
-		if (fileText == null)
+		if (fileText == null) {
 			return true;
+		}
 
 		boolean valid;
 		String tmp = fileText.getText();
 		if ((tmp != null) && (tmp.length() != 0)) {
 			File check = new File(tmp);
-			if (check.exists())
+			if (check.exists()) {
 				valid = check.canWrite();
-			else
+			} else {
 				valid = true;
-		} else
+			}
+		} else {
 			valid = false;
+		}
 
-		if (valid)
+		if (valid) {
 			setMessage(SecUIMessages.exportDialogMsg, IMessageProvider.WARNING);
-		else
+		} else {
 			setMessage(SecUIMessages.exportDialogInvalidMsg, IMessageProvider.ERROR);
+		}
 		return valid;
 	}
 
