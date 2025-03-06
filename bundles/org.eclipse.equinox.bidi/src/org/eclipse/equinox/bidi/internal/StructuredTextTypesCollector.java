@@ -37,8 +37,9 @@ public class StructuredTextTypesCollector implements IRegistryEventListener {
 
 	private StructuredTextTypesCollector() {
 		IExtensionRegistry registry = RegistryFactory.getRegistry();
-		if (registry != null)
+		if (registry != null) {
 			registry.addListener(this, EXT_POINT);
+		}
 	}
 
 	/**
@@ -52,8 +53,9 @@ public class StructuredTextTypesCollector implements IRegistryEventListener {
 	 * @return a list of all the registered structured text handler types.
 	 */
 	public String[] getTypes() {
-		if (types == null)
+		if (types == null) {
 			read();
+		}
 		int size = types.size();
 		String[] result = new String[size];
 		types.keySet().toArray(result);
@@ -66,24 +68,28 @@ public class StructuredTextTypesCollector implements IRegistryEventListener {
 	 * @return the structured text handler instance.
 	 */
 	public StructuredTextTypeHandler getHandler(String type) {
-		if (types == null)
+		if (types == null) {
 			read();
+		}
 		Object handler = types.get(type);
-		if (handler instanceof StructuredTextTypeHandler)
+		if (handler instanceof StructuredTextTypeHandler) {
 			return (StructuredTextTypeHandler) handler;
+		}
 		return null;
 	}
 
 	private void read() {
-		if (types == null)
+		if (types == null) {
 			types = new HashMap<>();
-		else
+		} else {
 			types.clear();
+		}
 
-		if (factories == null)
+		if (factories == null) {
 			factories = new HashMap<>();
-		else
+		} else {
 			factories.clear();
+		}
 
 		IExtensionRegistry registry = RegistryFactory.getRegistry();
 		if (registry == null) {
@@ -95,9 +101,10 @@ public class StructuredTextTypesCollector implements IRegistryEventListener {
 
 		for (IExtension extension : extPoint.getExtensions()) {
 			for (IConfigurationElement confElement : extension.getConfigurationElements()) {
-				if (!CE_NAME.equals(confElement.getName()))
+				if (!CE_NAME.equals(confElement.getName())) {
 					StructuredTextActivator.logError("BiDi types: unexpected element name " + confElement.getName(), //$NON-NLS-1$
 							new IllegalArgumentException());
+				}
 				String type = confElement.getAttribute(ATTR_TYPE);
 				Object handler;
 				try {

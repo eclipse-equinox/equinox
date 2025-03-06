@@ -99,12 +99,14 @@ public final class StructuredTextProcessor {
 	 * @see #deprocess(String)
 	 */
 	public static String process(String str, String separators) {
-		if ((str == null) || (str.length() <= 1))
+		if ((str == null) || (str.length() <= 1)) {
 			return str;
+		}
 
 		// do not process a string that has already been processed.
-		if (str.charAt(0) == LRE && str.charAt(str.length() - 1) == PDF)
+		if (str.charAt(0) == LRE && str.charAt(str.length() - 1) == PDF) {
 			return str;
+		}
 
 		StructuredTextEnvironment env = new StructuredTextEnvironment(null, false,
 				StructuredTextEnvironment.ORIENT_UNKNOWN);
@@ -123,16 +125,19 @@ public final class StructuredTextProcessor {
 			}
 		}
 		while (!isStringBidi) {
-			if (!Character.isLetter(str.charAt(0)))
+			if (!Character.isLetter(str.charAt(0))) {
 				break;
+			}
 			c = str.charAt(strLength - 1);
-			if (!Character.isDigit(c) && !Character.isLetter(c))
+			if (!Character.isDigit(c) && !Character.isLetter(c)) {
 				break;
+			}
 			return str;
 		}
 
-		if (separators == null)
+		if (separators == null) {
 			separators = defaultSeparators;
+		}
 
 		// make sure that LRE/PDF are added around the string
 		StructuredTextTypeHandler handler = new StructuredTextTypeHandler(separators);
@@ -157,13 +162,15 @@ public final class StructuredTextProcessor {
 	 * @see #deprocessTyped
 	 */
 	public static String processTyped(String str, String textType) {
-		if ((str == null) || (str.length() <= 1))
+		if ((str == null) || (str.length() <= 1)) {
 			return str;
+		}
 
 		// do not process a string that has already been processed.
 		char c = str.charAt(0);
-		if (((c == LRE) || (c == RLE)) && str.charAt(str.length() - 1) == PDF)
+		if (((c == LRE) || (c == RLE)) && str.charAt(str.length() - 1) == PDF) {
 			return str;
+		}
 
 		// make sure that LRE/PDF are added around the string
 		StructuredTextEnvironment env = new StructuredTextEnvironment(null, false,
@@ -180,8 +187,9 @@ public final class StructuredTextProcessor {
 	 * @return string without directional formatting characters (<i>lean</i> text).
 	 */
 	public static String deprocess(String str) {
-		if ((str == null) || (str.length() <= 1))
+		if ((str == null) || (str.length() <= 1)) {
 			return str;
+		}
 
 		StringBuilder buf = new StringBuilder();
 		int strLen = str.length();
@@ -217,8 +225,9 @@ public final class StructuredTextProcessor {
 	 * @see #processTyped(String, String)
 	 */
 	public static String deprocessTyped(String str, String textType) {
-		if ((str == null) || (str.length() <= 1))
+		if ((str == null) || (str.length() <= 1)) {
 			return str;
+		}
 
 		// make sure that LRE/PDF are removed from the string
 		StructuredTextEnvironment env = new StructuredTextEnvironment(null, false,

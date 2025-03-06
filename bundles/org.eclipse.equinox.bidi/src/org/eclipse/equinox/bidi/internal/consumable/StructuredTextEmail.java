@@ -48,16 +48,19 @@ public class StructuredTextEmail extends StructuredTextDelimsEsc {
 	@Override
 	public int getDirection(IStructuredTextExpert expert, String text, StructuredTextCharTypes charTypes) {
 		String language = expert.getEnvironment().getLanguage();
-		if (!language.equals("ar")) //$NON-NLS-1$
+		if (!language.equals("ar")) { //$NON-NLS-1$
 			return IStructuredTextExpert.DIR_LTR;
+		}
 		int domainStart;
 		domainStart = text.indexOf('@');
-		if (domainStart < 0)
+		if (domainStart < 0) {
 			domainStart = 0;
+		}
 		for (int i = domainStart; i < text.length(); i++) {
 			byte charType = charTypes.getBidiTypeAt(i);
-			if (charType == AL || charType == R)
+			if (charType == AL || charType == R) {
 				return IStructuredTextExpert.DIR_RTL;
+			}
 		}
 		return IStructuredTextExpert.DIR_LTR;
 	}

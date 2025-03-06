@@ -68,8 +68,9 @@ public abstract class StructuredTextDelims extends StructuredTextTypeHandler {
 		int loc = separLocation + 1;
 		char delim = getDelimiters().charAt((caseNumber * 2) - 1);
 		loc = text.indexOf(delim, loc);
-		if (loc < 0)
+		if (loc < 0) {
 			return text.length();
+		}
 		return loc + 1;
 	}
 

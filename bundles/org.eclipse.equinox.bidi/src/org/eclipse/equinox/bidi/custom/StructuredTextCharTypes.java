@@ -92,8 +92,9 @@ public class StructuredTextCharTypes {
 	 *         DIR_LTR} or {@link IStructuredTextExpert#DIR_RTL DIR_RTL}.
 	 */
 	public int getDirection() {
-		if (direction < 0)
+		if (direction < 0) {
 			direction = handler.getDirection(expert, text, this);
+		}
 		return direction;
 	}
 
@@ -115,13 +116,15 @@ public class StructuredTextCharTypes {
 	 *         returned by {@link Character#getDirectionality(char)}.
 	 */
 	public byte getBidiTypeAt(int index) {
-		if (hasCachedTypeAt(index))
+		if (hasCachedTypeAt(index)) {
 			return getCachedTypeAt(index);
+		}
 		byte charType = Character.getDirectionality(text.charAt(index));
 		if (charType == B) {
 			if (direction < 0) {
-				if (direction < -1) // called by handler.getDirection
+				if (direction < -1) { // called by handler.getDirection
 					return charType; // avoid infinite recursion
+				}
 				direction = -2; // signal we go within handler.getDirection
 				direction = handler.getDirection(expert, text, this);
 			}
@@ -166,15 +169,19 @@ public class StructuredTextCharTypes {
 		for (int i = 0; i < len; i++) {
 			if (!hasCachedTypeAt(i)) {
 				charType = Character.getDirectionality(text.charAt(i));
-				if (charType == B) // B char resolves to L or R depending on orientation
+				if (charType == B) { // B char resolves to L or R depending on orientation
 					continue;
+				}
 				setBidiTypeAt(i, charType);
-			} else
+			} else {
 				charType = getCachedTypeAt(i);
-			if (charType == L)
+			}
+			if (charType == L) {
 				return StructuredTextEnvironment.ORIENT_LTR;
-			if (charType == R || charType == AL)
+			}
+			if (charType == R || charType == AL) {
 				return StructuredTextEnvironment.ORIENT_RTL;
+			}
 		}
 		return orient;
 	}
