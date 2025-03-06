@@ -46,25 +46,29 @@ public class CachingServicePlugin implements BundleActivator {
 	 */
 	@Override
 	public void start(final BundleContext context) throws Exception {
-		if (CachingServicePlugin.DEBUG)
+		if (CachingServicePlugin.DEBUG) {
 			System.out.println("> CachingServicePlugin.start() context=" + context);
+		}
 
 		loadOptions(context);
 
 		// are we on J9?
 		if (shouldRegister()) {
-			if (verbose)
+			if (verbose) {
 				System.err.println("[org.eclipse.equinox.weaving.caching.j9] info starting J9 caching service ...");
+			}
 			final String name = ICachingServiceFactory.class.getName();
 			final CachingServiceFactory cachingServiceFactory = new CachingServiceFactory();
 			context.registerService(name, cachingServiceFactory, null);
 		} else {
-			if (verbose)
+			if (verbose) {
 				System.err.println("[org.eclipse.equinox.weaving.caching.j9] warning cannot start J9 caching service");
+			}
 		}
 
-		if (CachingServicePlugin.DEBUG)
+		if (CachingServicePlugin.DEBUG) {
 			System.out.println("< CachingServicePlugin.start()");
+		}
 	}
 
 	/**
@@ -78,10 +82,12 @@ public class CachingServicePlugin implements BundleActivator {
 		// all this is only to get the application args
 		DebugOptions service = null;
 		final ServiceReference<?> reference = context.getServiceReference(DebugOptions.class.getName());
-		if (reference != null)
+		if (reference != null) {
 			service = (DebugOptions) context.getService(reference);
-		if (service == null)
+		}
+		if (service == null) {
 			return;
+		}
 		try {
 			DEBUG = service.getBooleanOption("org.aspectj.osgi.service.caching.j9/debug", false);
 		} finally {
@@ -91,16 +97,18 @@ public class CachingServicePlugin implements BundleActivator {
 	}
 
 	private boolean shouldRegister() {
-		if (CachingServicePlugin.DEBUG)
+		if (CachingServicePlugin.DEBUG) {
 			System.out.println("> CachingServicePlugin.shouldRegister()");
+		}
 
 		boolean enabled;
 		try {
 			Class.forName("com.ibm.oti.vm.VM"); // if this fails we are not on J9
 			final boolean sharing = Shared.isSharingEnabled(); // if not using shared classes we want a different
 																// adaptor
-			if (CachingServicePlugin.DEBUG)
+			if (CachingServicePlugin.DEBUG) {
 				System.out.println("- CachingServicePlugin.shouldRegister() sharing=" + sharing);
+			}
 
 			if (sharing) {
 				enabled = true;
@@ -108,14 +116,16 @@ public class CachingServicePlugin implements BundleActivator {
 				enabled = false;
 			}
 		} catch (final ClassNotFoundException ex) {
-			if (CachingServicePlugin.DEBUG)
+			if (CachingServicePlugin.DEBUG) {
 				System.out.println("E CachingServicePlugin.shouldRegister() ex=" + ex);
+			}
 			// not on J9
 			enabled = false;
 		}
 
-		if (CachingServicePlugin.DEBUG)
+		if (CachingServicePlugin.DEBUG) {
 			System.out.println("< CachingServicePlugin.shouldRegister() " + enabled);
+		}
 		return enabled;
 	}
 

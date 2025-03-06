@@ -42,9 +42,10 @@ public class CachingService implements ICachingService {
 	private final String partition;
 
 	public CachingService(final ClassLoader loader, final Bundle bundle, final String key) {
-		if (CachingServicePlugin.DEBUG)
+		if (CachingServicePlugin.DEBUG) {
 			System.out.println("> CachingService.<init>() bundle=" + bundle.getSymbolicName() + ", loader=" + loader
 					+ ", key='" + key + "'");
+		}
 		this.bundle = bundle;
 		this.classLoader = loader;
 		this.partition = hashNamespace(key + bundle.getBundleId() + bundle.getLastModified());
@@ -53,8 +54,9 @@ public class CachingService implements ICachingService {
 		} catch (final HelperAlreadyDefinedException e) {
 			e.printStackTrace();
 		}
-		if (CachingServicePlugin.DEBUG)
+		if (CachingServicePlugin.DEBUG) {
 			System.out.println("< CachingService.<init>() partition='" + partition + "', urlhelper=" + urlhelper);
+		}
 	}
 
 	/**
@@ -72,9 +74,10 @@ public class CachingService implements ICachingService {
 	@Override
 	public CacheEntry findStoredClass(final String namespace, final URL sourceFileURL, final String name) {
 		final byte[] bytes = urlhelper.findSharedClass(partition, sourceFileURL, name);
-		if (CachingServicePlugin.DEBUG && bytes != null)
+		if (CachingServicePlugin.DEBUG && bytes != null) {
 			System.out.println("- CachingService.findStoredClass() bundle=" + bundle.getSymbolicName() + ", name="
 					+ name + ", url=" + sourceFileURL + ", bytes=" + bytes);
+		}
 
 		if (bytes != null) {
 			return new CacheEntry(true, bytes);
@@ -127,9 +130,10 @@ public class CachingService implements ICachingService {
 	public boolean storeClass(final String namespace, final URL sourceFileURL, final Class<?> clazz,
 			final byte[] classbytes) {
 		final boolean success = urlhelper.storeSharedClass(partition, sourceFileURL, clazz);
-		if (CachingServicePlugin.DEBUG && success)
+		if (CachingServicePlugin.DEBUG && success) {
 			System.out.println("- CachingService.storeClass() bundle=" + bundle.getSymbolicName() + ", clazz=" + clazz
 					+ ", url=" + sourceFileURL);
+		}
 		return success;
 	}
 
