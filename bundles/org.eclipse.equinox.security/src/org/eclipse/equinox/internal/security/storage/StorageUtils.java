@@ -69,8 +69,9 @@ public class StorageUtils {
 			File file = new File(url.getPath());
 			if (!file.exists()) {
 				File parent = file.getParentFile();
-				if (parent != null && !parent.exists())
+				if (parent != null && !parent.exists()) {
 					parent.mkdirs();
+				}
 			}
 			return new FileOutputStream(file);
 		}
@@ -83,8 +84,9 @@ public class StorageUtils {
 	}
 
 	public static InputStream getInputStream(URL url) throws IOException {
-		if (url == null)
+		if (url == null) {
 			return null;
+		}
 		try {
 			return url.openStream();
 		} catch (FileNotFoundException e) {
@@ -119,8 +121,9 @@ public class StorageUtils {
 	 * conditions.
 	 */
 	public static byte[] getBytes(String string) {
-		if (string == null)
+		if (string == null) {
 			return null;
+		}
 		return string.getBytes(StandardCharsets.UTF_8);
 	}
 
@@ -132,8 +135,9 @@ public class StorageUtils {
 	 * allows round trip of non-ASCII characters.
 	 */
 	public static String getString(byte[] bytes) {
-		if (bytes == null)
+		if (bytes == null) {
 			return null;
+		}
 		return new String(bytes, StandardCharsets.UTF_8);
 	}
 

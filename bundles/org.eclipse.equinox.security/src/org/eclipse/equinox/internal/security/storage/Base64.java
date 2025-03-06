@@ -32,24 +32,28 @@ public class Base64 {
 	final static private byte[] decodeTable = new byte[256];
 
 	static {
-		for (int i = 0; i < 256; i++)
+		for (int i = 0; i < 256; i++) {
 			decodeTable[i] = BASE64_INVALID;
+		}
 
-		for (int i = 0; i < 64; i++)
+		for (int i = 0; i < 64; i++) {
 			decodeTable[encodeTable[i]] = (byte) i;
+		}
 
 		decodeTable['='] = BASE64_PADDING;
 	}
 
 	static private byte decode(char c) {
-		if (c >= 256)
+		if (c >= 256) {
 			throw new IllegalArgumentException();
+		}
 		return decodeTable[c];
 	}
 
 	static public byte[] decode(String str) {
-		if (str == null)
+		if (str == null) {
 			return null;
+		}
 
 		// eliminate all unexpected characters (might have EOLs inserted)
 		char[] source = str.toCharArray();
@@ -57,8 +61,9 @@ public class Base64 {
 		char[] tmp = new char[originalSize];
 		int count = 0;
 		for (int i = 0; i < originalSize; i++) {
-			if (decode(source[i]) != BASE64_INVALID)
+			if (decode(source[i]) != BASE64_INVALID) {
 				tmp[count++] = source[i];
+			}
 		}
 		char[] chars = new char[count];
 		System.arraycopy(tmp, 0, chars, 0, count);
@@ -73,10 +78,12 @@ public class Base64 {
 			byte group4 = (i + 3 < size) ? decode(chars[i + 3]) : 0;
 
 			result[pos++] = (byte) ((group1 << 2) | (group2 >> 4));
-			if (group3 != BASE64_PADDING)
+			if (group3 != BASE64_PADDING) {
 				result[pos++] = (byte) (((group2 & 0xF) << 4) | (group3 >> 2));
-			if (group4 != BASE64_PADDING)
+			}
+			if (group4 != BASE64_PADDING) {
 				result[pos++] = (byte) (((group3 & 0x3) << 6) | group4);
+			}
 		}
 
 		byte[] output = new byte[pos];
@@ -85,8 +92,9 @@ public class Base64 {
 	}
 
 	static public String encode(byte[] bytes) {
-		if (bytes == null)
+		if (bytes == null) {
 			return null;
+		}
 		char[] longResult = new char[bytes.length * 2 + 2];
 		int pos = 0;
 		for (int i = 0; i < bytes.length; i += 3) {

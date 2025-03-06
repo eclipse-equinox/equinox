@@ -48,8 +48,9 @@ public class ConfigurationFactory {
 			IConfigurationElement[] elements = extension.getConfigurationElements();
 			for (IConfigurationElement element : elements) {
 				Configuration provider = readProvider(element);
-				if (provider != null)
+				if (provider != null) {
 					returnValue.add(provider);
+				}
 			}
 		}
 		return returnValue.toArray(new Configuration[] {});

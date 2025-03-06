@@ -97,8 +97,9 @@ public class InternalExchangeUtils {
 	 */
 	static public URL defaultStorageLocation() {
 		ISecurePreferences defaultStorage = SecurePreferencesFactory.getDefault();
-		if (defaultStorage == null)
+		if (defaultStorage == null) {
 			return null;
+		}
 		return ((SecurePreferencesWrapper) defaultStorage).getContainer().getLocation();
 	}
 
@@ -107,18 +108,21 @@ public class InternalExchangeUtils {
 	 */
 	static public void defaultStorageDelete() {
 		ISecurePreferences defaultStorage = SecurePreferencesFactory.getDefault();
-		if (defaultStorage == null)
+		if (defaultStorage == null) {
 			return;
+		}
 		URL location = defaultStorageLocation();
-		if (location == null)
+		if (location == null) {
 			return;
+		}
 
 		// clear the default preferences store from the mapper
 		SecurePreferencesMapper.clearDefault();
 
 		// delete the actual file
-		if (StorageUtils.exists(location))
+		if (StorageUtils.exists(location)) {
 			StorageUtils.delete(location);
+		}
 
 		// FUTURE: this is a good place to notify delete listeners
 	}
@@ -135,8 +139,9 @@ public class InternalExchangeUtils {
 	static public String recoverPassword(String[] answers, ISecurePreferences node, String moduleID) {
 		SecurePreferencesRoot rootNode = ((SecurePreferencesWrapper) node).getContainer().getRootData();
 		String password = PasswordManagement.recoverPassword(answers, rootNode, moduleID);
-		if (password != null)
+		if (password != null) {
 			rootNode.cachePassword(moduleID, new PasswordExt(new PBEKeySpec(password.toCharArray()), moduleID));
+		}
 		return password;
 	}
 
@@ -151,15 +156,19 @@ public class InternalExchangeUtils {
 	 */
 	static public boolean isJUnitApp() {
 		BundleContext context = AuthPlugin.getDefault().getBundleContext();
-		if (context == null)
+		if (context == null) {
 			return false;
+		}
 		String app = context.getProperty("eclipse.application"); //$NON-NLS-1$
-		if (app == null)
+		if (app == null) {
 			return false;
-		if (app.startsWith(JUNIT_APPS1))
+		}
+		if (app.startsWith(JUNIT_APPS1)) {
 			return true;
-		if (app.startsWith(JUNIT_APPS2))
+		}
+		if (app.startsWith(JUNIT_APPS2)) {
 			return true;
+		}
 		return false;
 	}
 

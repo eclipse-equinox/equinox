@@ -44,10 +44,12 @@ public class EquinoxPublicCredential implements IPublicCredential {
 
 	@Override
 	public Principal getPrimaryRole() {
-		if (primaryRole != null)
+		if (primaryRole != null) {
 			return primaryRole;
-		if (roles != null && roles.length >= 1)
+		}
+		if (roles != null && roles.length >= 1) {
 			return roles[0];
+		}
 		return null;
 	}
 

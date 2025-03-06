@@ -87,8 +87,9 @@ public class SecurePreferencesMapper {
 			String[] args = infoService.getNonFrameworkArgs();
 			if (args != null && args.length != 0) {
 				for (int i = 0; i < args.length - 1; i++) {
-					if (args[i + 1].startsWith(("-"))) //$NON-NLS-1$
+					if (args[i + 1].startsWith(("-"))) { //$NON-NLS-1$
 						continue;
+					}
 					if (location == null && KEYRING_ARGUMENT.equalsIgnoreCase(args[i])) {
 						location = getKeyringFile(args[i + 1]).toURL(); // don't use File.toURI().toURL()
 						continue;

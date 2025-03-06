@@ -44,15 +44,17 @@ public class PersistedPath {
 		String result;
 		int pathLength = path == null ? 0 : path.length();
 		if (key.indexOf(IPath.SEPARATOR) == -1) {
-			if (pathLength == 0)
+			if (pathLength == 0) {
 				result = key;
-			else
+			} else {
 				result = path + IPath.SEPARATOR + key;
+			}
 		} else {
-			if (pathLength == 0)
+			if (pathLength == 0) {
 				result = DOUBLE_SLASH + key;
-			else
+			} else {
 				result = path + DOUBLE_SLASH + key;
+			}
 		}
 		return result;
 	}

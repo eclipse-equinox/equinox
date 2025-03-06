@@ -39,8 +39,9 @@ public class SecureContext implements ILoginContext {
 	public SecureContext(String configugationName, URL configFile, CallbackHandler handler) {
 		configName = configugationName;
 		SecurePlatformInternal platform = SecurePlatformInternal.getInstance();
-		if (configFile != null)
+		if (configFile != null) {
 			platform.addConfigURL(configFile); // this call MUST be done before start()
+		}
 		platform.start();
 		this.handler = handler;
 	}
@@ -83,26 +84,30 @@ public class SecureContext implements ILoginContext {
 
 	@Override
 	public Subject getSubject() throws LoginException {
-		if (!loggedIn)
+		if (!loggedIn) {
 			login();
+		}
 		return getLoginContext().getSubject();
 	}
 
 	@Override
 	public LoginContext getLoginContext() throws LoginException {
-		if (loginContext != null)
+		if (loginContext != null) {
 			return loginContext;
+		}
 
 		CallbackHandler callbackHandler;
-		if (handler == null)
+		if (handler == null) {
 			callbackHandler = SecurePlatformInternal.getInstance().loadCallbackHandler(configName);
-		else
+		} else {
 			callbackHandler = handler;
+		}
 
-		if (callbackHandler == null)
+		if (callbackHandler == null) {
 			loginContext = new LoginContext(configName);
-		else
+		} else {
 			loginContext = new LoginContext(configName, callbackHandler);
+		}
 		return loginContext;
 	}
 
