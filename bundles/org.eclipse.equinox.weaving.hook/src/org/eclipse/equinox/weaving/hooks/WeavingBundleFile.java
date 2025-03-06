@@ -56,8 +56,9 @@ public class WeavingBundleFile extends AbstractWeavingBundleFile {
 
 	@Override
 	public BundleEntry getEntry(final String path) {
-		if (Debug.DEBUG_BUNDLE)
+		if (Debug.DEBUG_BUNDLE) {
 			Debug.println("> AspectJBundleFile.getEntry() path=" + path + ", url=" + url);
+		}
 		BundleEntry entry = delegate.getEntry(path);
 
 		if (path.endsWith(".class") && entry != null) {
@@ -68,8 +69,9 @@ public class WeavingBundleFile extends AbstractWeavingBundleFile {
 				final CacheEntry cacheEntry = adaptor.findClass(name, url);
 				if (cacheEntry == null) {
 					entry = new WeavingBundleEntry(adaptor, entry, url, false);
-					if (Debug.DEBUG_BUNDLE)
+					if (Debug.DEBUG_BUNDLE) {
 						Debug.println("- AspectJBundleFile.getEntry() path=" + path + ", entry=" + entry);
+					}
 				} else if (cacheEntry.getCachedBytes() != null) {
 					entry = new CachedClassBundleEntry(adaptor, entry, path, cacheEntry.getCachedBytes(), url);
 				} else {
@@ -88,8 +90,9 @@ public class WeavingBundleFile extends AbstractWeavingBundleFile {
 			}
 		}
 
-		if (Debug.DEBUG_BUNDLE)
+		if (Debug.DEBUG_BUNDLE) {
 			Debug.println("< AspectJBundleFile.getEntry() entry=" + entry);
+		}
 		return entry;
 	}
 

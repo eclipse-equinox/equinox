@@ -288,9 +288,10 @@ public class SupplementerRegistry implements ISupplementerRegistry {
 			// remove the supplementer from the list of supplementers
 			final Supplementer supplementer = supplementers.get(bundle.getSymbolicName());
 			supplementers.remove(bundle.getSymbolicName());
-			if (AbstractWeavingHook.verbose)
+			if (AbstractWeavingHook.verbose) {
 				System.err.println("[org.eclipse.equinox.weaving.hook] info removing supplementer " //$NON-NLS-1$
 						+ bundle.getSymbolicName());
+			}
 
 			// refresh bundles that where supplemented by this bundle
 			final Bundle[] supplementedBundles = supplementer.getSupplementedBundles();

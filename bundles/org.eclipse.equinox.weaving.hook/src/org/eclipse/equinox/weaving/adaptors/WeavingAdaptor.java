@@ -90,16 +90,18 @@ public class WeavingAdaptor implements IWeavingAdaptor {
 		this.factory = serviceFactory;
 		this.symbolicName = generation.getRevision().getSymbolicName();
 		this.moduleLoader = classLoader;
-		if (Debug.DEBUG_GENERAL)
+		if (Debug.DEBUG_GENERAL) {
 			Debug.println("- WeavingAdaptor.WeavingAdaptor() bundle=" //$NON-NLS-1$
 					+ symbolicName);
+		}
 	}
 
 	@Override
 	public CacheEntry findClass(final String name, final URL sourceFileURL) {
-		if (Debug.DEBUG_CACHE)
+		if (Debug.DEBUG_CACHE) {
 			Debug.println("> WeavingAdaptor.findClass() bundle=" + symbolicName //$NON-NLS-1$
 					+ ", url=" + sourceFileURL + ", name=" + name); //$NON-NLS-1$ //$NON-NLS-2$
+		}
 		CacheEntry cacheEntry = null;
 
 		initialize();
@@ -107,40 +109,45 @@ public class WeavingAdaptor implements IWeavingAdaptor {
 			cacheEntry = cachingService.findStoredClass("", sourceFileURL, name); //$NON-NLS-1$
 		}
 
-		if (Debug.DEBUG_CACHE)
+		if (Debug.DEBUG_CACHE) {
 			Debug.println("< WeavingAdaptor.findClass() cacheEntry=" //$NON-NLS-1$
 					+ cacheEntry);
+		}
 		return cacheEntry;
 	}
 
 	@Override
 	public void initialize() {
 		synchronized (this) {
-			if (initialized)
+			if (initialized) {
 				return;
+			}
 
 			this.bundle = generation.getRevision().getBundle();
 			if (!identifyRecursionSet.contains(this)) {
 				identifyRecursionSet.put(this);
 
-				if (Debug.DEBUG_GENERAL)
+				if (Debug.DEBUG_GENERAL) {
 					Debug.println("> WeavingAdaptor.initialize() bundle=" //$NON-NLS-1$
 							+ symbolicName + ", moduleLoader=" + moduleLoader); //$NON-NLS-1$
+				}
 
 				if (symbolicName != null && symbolicName.startsWith("org.aspectj")) { //$NON-NLS-1$
-					if (Debug.DEBUG_GENERAL)
+					if (Debug.DEBUG_GENERAL) {
 						Debug.println("- WeavingAdaptor.initialize() symbolicName=" //$NON-NLS-1$
 								+ symbolicName + ", moduleLoader=" //$NON-NLS-1$
 								+ moduleLoader);
+					}
 				} else if (moduleLoader != null) {
 					weavingService = factory.getWeavingService(moduleLoader);
 					cachingService = factory.getCachingService(moduleLoader, bundle, weavingService);
 				} else if ((generation.getRevision().getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
 
 					final Bundle host = factory.getHost(bundle);
-					if (Debug.DEBUG_GENERAL)
+					if (Debug.DEBUG_GENERAL) {
 						Debug.println("- WeavingAdaptor.initialize() symbolicName=" //$NON-NLS-1$
 								+ symbolicName + ", host=" + host); //$NON-NLS-1$
+					}
 
 					final Generation hostGeneration = (Generation) ((ModuleRevision) host.adapt(BundleRevision.class))
 							.getRevisionInfo();
@@ -152,18 +159,20 @@ public class WeavingAdaptor implements IWeavingAdaptor {
 						cachingService = factory.getCachingService(hostAdaptor.moduleLoader, bundle, weavingService);
 					}
 				} else {
-					if (Debug.DEBUG_GENERAL)
+					if (Debug.DEBUG_GENERAL) {
 						Debug.println("W WeavingAdaptor.initialize() symbolicName=" //$NON-NLS-1$
 								+ symbolicName + ", baseLoader=" + moduleLoader); //$NON-NLS-1$
+					}
 				}
 				initialized = true;
 				identifyRecursionSet.remove(this);
 			}
 
-			if (Debug.DEBUG_GENERAL)
+			if (Debug.DEBUG_GENERAL) {
 				Debug.println("< WeavingAdaptor.initialize() weavingService=" //$NON-NLS-1$
 						+ (weavingService != null) + ", cachingService=" //$NON-NLS-1$
 						+ (cachingService != null));
+			}
 		}
 	}
 
@@ -175,11 +184,12 @@ public class WeavingAdaptor implements IWeavingAdaptor {
 	@Override
 	public boolean storeClass(final String name, final URL sourceFileURL, final Class<?> clazz,
 			final byte[] classbytes) {
-		if (Debug.DEBUG_CACHE)
+		if (Debug.DEBUG_CACHE) {
 			Debug.println("> WeavingAdaptor.storeClass() bundle=" //$NON-NLS-1$
 					+ symbolicName + ", url=" + sourceFileURL //$NON-NLS-1$
 					+ ", name=" //$NON-NLS-1$
 					+ name + ", clazz=" + clazz); //$NON-NLS-1$
+		}
 		boolean stored = false;
 
 		initialize();
@@ -194,21 +204,24 @@ public class WeavingAdaptor implements IWeavingAdaptor {
 							sourceFileURL, clazz, classbytes, generatedClasses);
 				} else {
 					weavingService.flushGeneratedClasses(moduleLoader);
-					if (Debug.DEBUG_CACHE)
+					if (Debug.DEBUG_CACHE) {
 						Debug.println("- WeavingAdaptor.storeClass() generatedClassesExistFor=true"); //$NON-NLS-1$
+					}
 				}
 			} else {
 				stored = cachingService.storeClass("", sourceFileURL, clazz, //$NON-NLS-1$
 						classbytes);
 				if (!stored) {
-					if (Debug.DEBUG_CACHE)
+					if (Debug.DEBUG_CACHE) {
 						Debug.println("E WeavingAdaptor.storeClass() bundle=" //$NON-NLS-1$
 								+ symbolicName + ", name=" + name); //$NON-NLS-1$
+					}
 				}
 			}
 		}
-		if (Debug.DEBUG_CACHE)
+		if (Debug.DEBUG_CACHE) {
 			Debug.println("< WeavingAdaptor.storeClass() stored=" + stored); //$NON-NLS-1$
+		}
 		return stored;
 	}
 
@@ -219,10 +232,11 @@ public class WeavingAdaptor implements IWeavingAdaptor {
 
 	@Override
 	public byte[] weaveClass(final String name, final byte[] bytes) {
-		if (Debug.DEBUG_WEAVE)
+		if (Debug.DEBUG_WEAVE) {
 			Debug.println("> WeavingAdaptor.weaveClass() bundle=" //$NON-NLS-1$
 					+ symbolicName + ", name=" + name + ", bytes=" //$NON-NLS-1$ //$NON-NLS-2$
 					+ bytes.length);
+		}
 		byte[] newBytes = null;
 
 		initialize();
@@ -234,8 +248,9 @@ public class WeavingAdaptor implements IWeavingAdaptor {
 			}
 		}
 
-		if (Debug.DEBUG_WEAVE)
+		if (Debug.DEBUG_WEAVE) {
 			Debug.println("< WeavingAdaptor.weaveClass() newBytes=" + newBytes); //$NON-NLS-1$
+		}
 		return newBytes;
 	}
 
