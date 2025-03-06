@@ -42,14 +42,15 @@ public class ExtLoginModuleLoader {
 		LoginModule loginModule = null;
 		for (IExtension extension : extensions) {
 			String sourcePoint = extension.getUniqueIdentifier();
-			if (sourcePoint == null) // technically, IDs on extensions are optional
+			if (sourcePoint == null) { // technically, IDs on extensions are optional
 				continue;
+			}
 			if (sourcePoint.equals(targetPoint)) {
 				IConfigurationElement[] elements = extension.getConfigurationElements();
 				int elementCount = elements.length;
-				if (elementCount == 1)
+				if (elementCount == 1) {
 					loginModule = readEntry(elements[0]);
-				else {
+				} else {
 					String message = NLS.bind(SecAuthMessages.invalidLoginmoduleCount, Integer.toString(elementCount));
 					AuthPlugin.getDefault().logError(message, null);
 				}

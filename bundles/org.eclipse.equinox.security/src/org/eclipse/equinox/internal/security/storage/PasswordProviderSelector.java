@@ -104,36 +104,43 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 
 		for (IExtension extension : extensions) {
 			String moduleID = extension.getUniqueIdentifier();
-			if (moduleID == null) // IDs on those extensions are mandatory; if not specified, ignore the extension
+			if (moduleID == null) { // IDs on those extensions are mandatory; if not specified, ignore the extension
 				continue;
+			}
 			moduleID = moduleID.toLowerCase();
 			boolean isFound = true;
-			if (expectedID != null && !expectedID.equals(moduleID))
+			if (expectedID != null && !expectedID.equals(moduleID)) {
 				isFound = false;
+			}
 			IConfigurationElement[] elements = extension.getConfigurationElements();
-			if (elements.length == 0)
+			if (elements.length == 0) {
 				continue;
+			}
 			IConfigurationElement element = elements[0]; // only one module is allowed per extension
 			if (!STORAGE_MODULE.equals(element.getName())) {
-				if (!isFound) // don't bother issue error message if id doesn't match
+				if (!isFound) { // don't bother issue error message if id doesn't match
 					continue;
+				}
 				reportError(SecAuthMessages.unexpectedConfigElement, element.getName(), element, null);
 				continue;
 			}
 			String obsoletes = element.getAttribute(OBSOLETES_ID);
 			if (!isFound) {
 				// check if old id has been replaced by newer one (Bug 573950)
-				if (obsoletes == null || !expectedID.equals(obsoletes))
+				if (obsoletes == null || !expectedID.equals(obsoletes)) {
 					continue;
+				}
 			}
 			String attribute = element.getAttribute(MODULE_PRIORITY);
 			int priority = -1;
 			if (attribute != null) {
 				priority = Integer.parseInt(attribute);
-				if (priority < 0)
+				if (priority < 0) {
 					priority = 0;
-				if (priority > 10)
+				}
+				if (priority > 10) {
 					priority = 10;
+				}
 			}
 			String name = extension.getLabel();
 			String description = element.getAttribute(MODULE_DESCRIPTION);
@@ -143,8 +150,9 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 				suppliedHints = new ArrayList<>(hints.length);
 				for (IConfigurationElement h : hints) {
 					String hint = h.getAttribute(HINT_VALUE);
-					if (hint != null)
+					if (hint != null) {
 						suppliedHints.add(hint);
+					}
 				}
 			}
 			Object clazz;
@@ -153,8 +161,9 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 				// Bug 537833 - on some systems, the password provider does not work (e.g. Linux
 				// with KDE desktop) so these
 				// providers will request validation
-				if (clazz instanceof IValidatingPasswordProvider && !((IValidatingPasswordProvider) clazz).isValid())
+				if (clazz instanceof IValidatingPasswordProvider && !((IValidatingPasswordProvider) clazz).isValid()) {
 					continue;
+				}
 			} catch (CoreException e) {
 				continue;
 			}
@@ -172,11 +181,13 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 	}
 
 	public PasswordProviderModuleExt findStorageModule(String expectedID) throws StorageException {
-		if (expectedID != null)
+		if (expectedID != null) {
 			expectedID = expectedID.toLowerCase(); // ID is case-insensitive
+		}
 		synchronized (modules) {
-			if (modules.containsKey(expectedID))
+			if (modules.containsKey(expectedID)) {
 				return modules.get(expectedID);
+			}
 		}
 
 		List<ExtStorageModule> allAvailableModules = findAvailableModules(expectedID);
@@ -184,8 +195,9 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 
 		for (ExtStorageModule module : allAvailableModules) {
 
-			if (expectedID == null && disabledModules != null && disabledModules.contains(module.moduleID))
+			if (expectedID == null && disabledModules != null && disabledModules.contains(module.moduleID)) {
 				continue;
+			}
 
 			Object clazz;
 			try {
@@ -195,16 +207,18 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 						module.element, e);
 				continue;
 			}
-			if (!(clazz instanceof PasswordProvider))
+			if (!(clazz instanceof PasswordProvider)) {
 				continue;
+			}
 
 			PasswordProviderModuleExt result = new PasswordProviderModuleExt((PasswordProvider) clazz, module.moduleID,
 					module.obsoleteID);
 
 			// cache the result
 			synchronized (modules) {
-				if (expectedID == null)
+				if (expectedID == null) {
 					modules.put(null, result);
+				}
 				modules.put(module.moduleID, result);
 			}
 
@@ -213,10 +227,11 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 
 		// the secure storage module was not found - error in app's configuration
 		String msg;
-		if (expectedID == null)
+		if (expectedID == null) {
 			msg = SecAuthMessages.noSecureStorageModules;
-		else
+		} else {
 			msg = NLS.bind(SecAuthMessages.noSecureStorageModule, expectedID);
+		}
 		throw new StorageException(StorageException.NO_SECURE_MODULE, msg);
 	}
 
@@ -275,8 +290,9 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 		IPreferencesService preferencesService = getPreferencesService();
 		String tmp = preferencesService.getString(AuthPlugin.PI_AUTH, IStorageConstants.DISABLED_PROVIDERS_KEY,
 				defaultPreferenceValue, scopes);
-		if (tmp == null || tmp.length() == 0)
+		if (tmp == null || tmp.length() == 0) {
 			return null;
+		}
 		HashSet<String> disabledModules = new HashSet<>();
 		String[] disabledProviders = tmp.split(","); //$NON-NLS-1$
 		for (String disabledProvider : disabledProviders) {

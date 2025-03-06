@@ -108,12 +108,14 @@ public class PasswordManagement {
 		SecurePreferences node = recoveryNode(root, moduleID);
 		for (int i = 0;; i++) {
 			String key = PASSWORD_RECOVERY_QUESTION + Integer.toString(i + 1);
-			if (!node.hasKey(key))
+			if (!node.hasKey(key)) {
 				break;
+			}
 			try {
 				String question = node.get(key, null, null);
-				if (question == null)
+				if (question == null) {
 					break;
+				}
 				questions.add(question);
 			} catch (StorageException e) {
 				// can't happen for non-encrypted values
@@ -163,8 +165,9 @@ public class PasswordManagement {
 		int pos = tmp.length() - 1;
 		for (int i = 0; i <= pos; i++) {
 			mix.append(tmp.charAt(i));
-			if (i < pos)
+			if (i < pos) {
 				mix.append(tmp.charAt(pos));
+			}
 			pos--;
 		}
 		// create digest

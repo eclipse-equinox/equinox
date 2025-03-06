@@ -34,8 +34,9 @@ public class CallbacksProvider {
 	}
 
 	static public CallbacksProvider getDefault() {
-		if (instance == null)
+		if (instance == null) {
 			instance = new CallbacksProvider();
+		}
 		return instance;
 	}
 
@@ -45,14 +46,17 @@ public class CallbacksProvider {
 		IExtension[] extensions = point.getExtensions();
 
 		// little bit of validation
-		if (extensions.length == 0)
+		if (extensions.length == 0) {
 			return;
+		}
 		IConfigurationElement[] elements = extensions[0].getConfigurationElements();
-		if (elements.length == 0)
+		if (elements.length == 0) {
 			return;
+		}
 		IConfigurationElement element = elements[0]; // only one module is allowed per extension
-		if (!PROVIDER_MODULE.equals(element.getName()))
+		if (!PROVIDER_MODULE.equals(element.getName())) {
 			return;
+		}
 
 		Object clazz;
 		try {
@@ -61,27 +65,32 @@ public class CallbacksProvider {
 			return;
 		}
 
-		if ((clazz instanceof IUICallbacks))
+		if ((clazz instanceof IUICallbacks)) {
 			callback = ((IUICallbacks) clazz);
+		}
 	}
 
 	public void setupChallengeResponse(String moduleID, IPreferencesContainer container) {
-		if (callback == null)
+		if (callback == null) {
 			init();
-		if (callback != null)
+		}
+		if (callback != null) {
 			callback.setupPasswordRecovery(NUMBER_OF_QUESTIONS, moduleID, container);
+		}
 	}
 
 	public IUICallbacks getCallback() {
-		if (callback == null)
+		if (callback == null) {
 			init();
+		}
 		return callback;
 	}
 
 	public boolean runningUI() {
 		IUICallbacks callbackInstalled = getCallback();
-		if (callbackInstalled == null)
+		if (callbackInstalled == null) {
 			return false; // no UI bundle installed
+		}
 		return callbackInstalled.runningUI();
 	}
 }

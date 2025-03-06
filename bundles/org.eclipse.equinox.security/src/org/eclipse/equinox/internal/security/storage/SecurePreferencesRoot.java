@@ -105,8 +105,9 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 	}
 
 	public void load() throws IOException {
-		if (location == null)
+		if (location == null) {
 			return;
+		}
 
 		Properties properties = new Properties();
 		try (InputStream is = StorageUtils.getInputStream(location)) {
@@ -123,8 +124,9 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 
 		// In future new versions could be added
 		Object version = properties.get(VERSION_KEY);
-		if ((version != null) && !VERSION_VALUE.equals(version))
+		if ((version != null) && !VERSION_VALUE.equals(version)) {
 			return;
+		}
 		properties.remove(VERSION_KEY);
 
 		// Process encryption algorithms
@@ -161,11 +163,12 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 			IUICallbacks callback = CallbacksProvider.getDefault().getCallback();
 			if (callback != null) {
 				Boolean response = callback.ask(SecAuthMessages.fileModifiedMsg);
-				if (response == null)
+				if (response == null) {
 					AuthPlugin.getDefault().frameworkLogError(SecAuthMessages.fileModifiedNote,
 							FrameworkLogEntry.WARNING, null);
-				else if (!response.booleanValue())
+				} else if (!response.booleanValue()) {
 					return; // by default go ahead with save
+				}
 			}
 		}
 
@@ -200,17 +203,20 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 			throws StorageException {
 		if (encryption) { // provides password for a new entry
 			PasswordExt defaultPassword = getDefaultPassword(container);
-			if (defaultPassword != null)
+			if (defaultPassword != null) {
 				return defaultPassword;
+			}
 			moduleID = getDefaultModuleID(container);
 		} else { // provides password for previously encrypted entry using its specified password
 					// provider module
-			if (moduleID == null)
+			if (moduleID == null) {
 				throw new StorageException(StorageException.NO_SECURE_MODULE, SecAuthMessages.invalidEntryFormat);
+			}
 			if (DEFAULT_PASSWORD_ID.equals(moduleID)) { // was default password used?
 				PasswordExt defaultPassword = getDefaultPassword(container);
-				if (defaultPassword != null)
+				if (defaultPassword != null) {
 					return defaultPassword;
+				}
 				throw new StorageException(StorageException.NO_SECURE_MODULE, SecAuthMessages.noDefaultPassword);
 			}
 		}
@@ -218,8 +224,9 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 	}
 
 	private PasswordExt getModulePassword(String moduleID, IPreferencesContainer container) throws StorageException {
-		if (DEFAULT_PASSWORD_ID.equals(moduleID)) // this should never happen but add this check just in case
+		if (DEFAULT_PASSWORD_ID.equals(moduleID)) { // this should never happen but add this check just in case
 			throw new StorageException(StorageException.NO_PASSWORD, SecAuthMessages.loginNoPassword);
+		}
 
 		PasswordProviderModuleExt moduleExt = PasswordProviderSelector.getInstance().findStorageModule(moduleID);
 		String key = moduleExt.getID();
@@ -233,8 +240,9 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 			lock.acquire(); // make sure process of password creation is not re-entered by another thread
 			// Quick check first: it is cached?
 			synchronized (passwordCache) {
-				if (passwordCache.containsKey(key))
+				if (passwordCache.containsKey(key)) {
 					return passwordCache.get(key);
+				}
 			}
 
 			// if this is (a headless run or JUnit) and prompt hint is not set up, set it to
@@ -255,8 +263,9 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 
 			for (int i = 0; i < MAX_ATTEMPTS; i++) {
 				PBEKeySpec password = moduleExt.getPassword(container, passwordType);
-				if (password == null)
+				if (password == null) {
 					return null;
+				}
 				passwordExt = new PasswordExt(password, key);
 				if (newPassword) {
 					String test = createTestString();
@@ -278,8 +287,9 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 						break;
 					}
 				} catch (IllegalBlockSizeException | BadPaddingException e) {
-					if (!moduleExt.changePassword(e, container))
+					if (!moduleExt.changePassword(e, container)) {
 						break;
+					}
 				}
 			}
 			if (validPassword) {
@@ -295,10 +305,12 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 			lock.release();
 		}
 
-		if (!validPassword)
+		if (!validPassword) {
 			throw new StorageException(StorageException.NO_PASSWORD, SecAuthMessages.loginNoPassword);
-		if (setupPasswordRecovery)
+		}
+		if (setupPasswordRecovery) {
 			CallbacksProvider.getDefault().setupChallengeResponse(key, container);
+		}
 		return passwordExt;
 	}
 
@@ -308,8 +320,9 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 	private PasswordExt getDefaultPassword(IPreferencesContainer container) {
 		if (container.hasOption(IProviderHints.DEFAULT_PASSWORD)) {
 			Object passwordHint = container.getOption(IProviderHints.DEFAULT_PASSWORD);
-			if (passwordHint instanceof PBEKeySpec spec)
+			if (passwordHint instanceof PBEKeySpec spec) {
 				return new PasswordExt(spec, DEFAULT_PASSWORD_ID);
+			}
 		}
 		return null;
 	}
@@ -336,8 +349,9 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 		// obtain new password first
 		int passwordType = PasswordProvider.CREATE_NEW_PASSWORD | PasswordProvider.PASSWORD_CHANGE;
 		PBEKeySpec password = moduleExt.getPassword(container, passwordType);
-		if (password == null)
+		if (password == null) {
 			return false;
+		}
 
 		// create verification node
 		String key = moduleExt.getID();
@@ -402,21 +416,26 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 	 * or a string generated according to the rules in {@link #createTestString()}.
 	 */
 	private boolean verifyTestString(String test) {
-		if (test == null || test.length() == 0)
+		if (test == null || test.length() == 0) {
 			return false;
+		}
 		// backward compatibility: check if it is the original hard-coded string
-		if (PASSWORD_VERIFICATION_SAMPLE.equals(test))
+		if (PASSWORD_VERIFICATION_SAMPLE.equals(test)) {
 			return true;
+		}
 		String[] parts = test.split("\t"); //$NON-NLS-1$
-		if (parts == null || parts.length == 0)
+		if (parts == null || parts.length == 0) {
 			return false;
-		if (parts.length != 4)
+		}
+		if (parts.length != 4) {
 			return false;
+		}
 		long num1 = -1;
 		long num2 = -1;
 		for (int i = 0; i < 4; i++) {
-			if (parts[i] == null || parts[i].length() == 0)
+			if (parts[i] == null || parts[i].length() == 0) {
 				return false;
+			}
 			try {
 				switch (i) {
 				case 0:
@@ -427,14 +446,16 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 					break;
 				case 2: {
 					long tmp = Long.decode(parts[i]).longValue();
-					if (tmp != num2)
+					if (tmp != num2) {
 						return false;
+					}
 					break;
 				}
 				case 3: {
 					long tmp = Long.decode(parts[i]).longValue();
-					if (tmp != num1)
+					if (tmp != num1) {
 						return false;
+					}
 					break;
 				}
 				}

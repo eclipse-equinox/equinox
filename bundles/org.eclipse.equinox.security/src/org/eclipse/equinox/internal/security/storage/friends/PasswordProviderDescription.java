@@ -49,18 +49,21 @@ public class PasswordProviderDescription {
 	}
 
 	public boolean hasHint(String hint) {
-		if (hints == null)
+		if (hints == null) {
 			return false;
+		}
 		for (String candidate : hints) {
-			if (hint.equalsIgnoreCase(candidate))
+			if (hint.equalsIgnoreCase(candidate)) {
 				return true;
+			}
 		}
 		return false;
 	}
 
 	public String getName() {
-		if (name == null || name.length() == 0)
+		if (name == null || name.length() == 0) {
 			return id;
+		}
 		return name;
 	}
 }

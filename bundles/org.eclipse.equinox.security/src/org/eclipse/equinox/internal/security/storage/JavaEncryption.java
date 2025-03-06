@@ -78,16 +78,17 @@ public class JavaEncryption {
 	}
 
 	private void init() throws StorageException {
-		if (initialized)
+		if (initialized) {
 			return;
+		}
 		initialized = true;
 
 		try {
 			lock.acquire(); // avoid multiple simultaneous initializations
 			IUICallbacks callback = CallbacksProvider.getDefault().getCallback();
-			if (callback == null)
+			if (callback == null) {
 				internalInitialize();
-			else {
+			} else {
 				callback.execute(() -> internalInitialize());
 			}
 		} finally {
@@ -97,8 +98,9 @@ public class JavaEncryption {
 
 	protected void internalInitialize() throws StorageException {
 		if (cipherAlgorithm != null && keyFactoryAlgorithm != null) {
-			if (roundtrip(cipherAlgorithm, keyFactoryAlgorithm))
+			if (roundtrip(cipherAlgorithm, keyFactoryAlgorithm)) {
 				return;
+			}
 			// this is a bad situation - JVM cipher no longer available. Both log and throw
 			// an exception
 			String msg = NLS.bind(SecAuthMessages.noAlgorithm, cipherAlgorithm);
@@ -112,13 +114,15 @@ public class JavaEncryption {
 			keyFactoryAlgorithm = eclipseNode.get(IStorageConstants.KEY_FACTORY_KEY,
 					IStorageConstants.DEFAULT_KEY_FACTORY);
 		}
-		if (roundtrip(cipherAlgorithm, keyFactoryAlgorithm))
+		if (roundtrip(cipherAlgorithm, keyFactoryAlgorithm)) {
 			return;
+		}
 		String unavailableCipher = cipherAlgorithm;
 
 		detect();
-		if (availableCiphers.size() == 0)
+		if (availableCiphers.size() == 0) {
 			throw new StorageException(StorageException.INTERNAL_ERROR, SecAuthMessages.noAlgorithms);
+		}
 
 		// use first available
 		cipherAlgorithm = availableCiphers.keySet().iterator().next();
@@ -207,8 +211,9 @@ public class JavaEncryption {
 	}
 
 	private void handle(Exception e, int internalCode) throws StorageException {
-		if (AuthPlugin.DEBUG_LOGIN_FRAMEWORK)
+		if (AuthPlugin.DEBUG_LOGIN_FRAMEWORK) {
 			e.printStackTrace();
+		}
 		StorageException exception = new StorageException(internalCode, e);
 		throw exception;
 	}
@@ -221,8 +226,9 @@ public class JavaEncryption {
 	 */
 	public HashMap<String, String> detect() {
 		IUICallbacks callback = CallbacksProvider.getDefault().getCallback();
-		if (callback == null)
+		if (callback == null) {
 			return internalDetect();
+		}
 
 		IStorageTask task = () -> internalDetect();
 		try {
@@ -263,13 +269,16 @@ public class JavaEncryption {
 		for (Provider provider : providers) {
 			for (Entry<Object, Object> entry : provider.entrySet()) {
 				Object key = entry.getKey();
-				if (key == null)
+				if (key == null) {
 					continue;
-				if (!(key instanceof String))
+				}
+				if (!(key instanceof String)) {
 					continue;
+				}
 				String value = (String) key;
-				if (value.indexOf(' ') != -1) // skips properties like "[Cipher.ABC SupportedPaddings]"
+				if (value.indexOf(' ') != -1) { // skips properties like "[Cipher.ABC SupportedPaddings]"
 					continue;
+				}
 				if (value.startsWith(prefix)) {
 					String keyFactory = value.substring(prefixLength);
 					algorithms.add(keyFactory);

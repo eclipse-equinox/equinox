@@ -65,8 +65,9 @@ public class AuthPlugin implements BundleActivator {
 		singleton = this;
 
 		DEBUG = getBooleanOption(PI_AUTH + "/debug", false); //$NON-NLS-1$
-		if (DEBUG)
+		if (DEBUG) {
 			DEBUG_LOGIN_FRAMEWORK = getBooleanOption(PI_AUTH + "/debug/loginFramework", false); //$NON-NLS-1$
+		}
 
 		// SecurePlatformInternal is started lazily when first SecureContext is created
 		// (this reduces
@@ -114,17 +115,20 @@ public class AuthPlugin implements BundleActivator {
 
 	public boolean getBooleanOption(String option, boolean defaultValue) {
 		if (debugTracker == null) {
-			if (bundleContext == null)
+			if (bundleContext == null) {
 				return defaultValue;
+			}
 			debugTracker = new ServiceTracker<>(bundleContext, DebugOptions.class, null);
 			debugTracker.open();
 		}
 		DebugOptions options = debugTracker.getService();
-		if (options == null)
+		if (options == null) {
 			return defaultValue;
+		}
 		String value = options.getOption(option);
-		if (value == null)
+		if (value == null) {
 			return defaultValue;
+		}
 		return value.equalsIgnoreCase("true"); //$NON-NLS-1$
 	}
 
@@ -140,15 +144,17 @@ public class AuthPlugin implements BundleActivator {
 			configTracker.open();
 		}
 		Location location = configTracker.getService();
-		if (location == null)
+		if (location == null) {
 			return null;
+		}
 		return location.getURL();
 	}
 
 	public EnvironmentInfo getEnvironmentInfoService() {
 		if (environmentTracker == null) {
-			if (bundleContext == null)
+			if (bundleContext == null) {
 				return null;
+			}
 			environmentTracker = new ServiceTracker<>(bundleContext, EnvironmentInfo.class, null);
 			environmentTracker.open();
 		}
@@ -173,13 +179,15 @@ public class AuthPlugin implements BundleActivator {
 			logTracker.open();
 		}
 		FrameworkLog log = (logTracker == null) ? null : (FrameworkLog) logTracker.getService();
-		if (log != null)
+		if (log != null) {
 			log.log(new FrameworkLogEntry(PI_AUTH, severity, 0, msg, 0, e, null));
-		else {
-			if (msg != null)
+		} else {
+			if (msg != null) {
 				System.err.println(msg);
-			if (e != null)
+			}
+			if (e != null) {
 				e.printStackTrace(System.err);
+			}
 		}
 	}
 

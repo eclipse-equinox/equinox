@@ -40,37 +40,45 @@ public class ExtCallbackHandlerLoader {
 		String extensionId = null;
 		for (IExtension extender : extenders) {
 			IConfigurationElement[] confEelements = extender.getConfigurationElements();
-			if (confEelements.length != 1)
+			if (confEelements.length != 1) {
 				continue; // TBD error message?
+			}
 			extensionId = loadMappingEntry(confEelements[0], configName);
-			if (extensionId != null)
+			if (extensionId != null) {
 				break;
+			}
 		}
-		if (extensionId == null)
+		if (extensionId == null) {
 			return null;
+		}
 
 		// Next, load class specified by the callback handler ID
 		IExtensionPoint pointCallbackHandler = registry.getExtensionPoint(POINT_HANDLER);
 		IExtension extension = pointCallbackHandler.getExtension(extensionId);
-		if (extension == null)
+		if (extension == null) {
 			return null;
+		}
 		IConfigurationElement[] elements = extension.getConfigurationElements();
-		if (elements.length != 1)
+		if (elements.length != 1) {
 			return null; // TBD error message?
+		}
 		return loadHandlerClass(elements[0]);
 	}
 
 	private String loadMappingEntry(IConfigurationElement element, String configName) {
-		if (!expectedElement(element, ELEM_MAPPING))
+		if (!expectedElement(element, ELEM_MAPPING)) {
 			return null;
-		if (configName.equals(element.getAttribute(ATTR_MAPPING_CONFIGNAME)))
+		}
+		if (configName.equals(element.getAttribute(ATTR_MAPPING_CONFIGNAME))) {
 			return element.getAttribute(ATTR_MAPPING_CALLBACKID);
+		}
 		return null;
 	}
 
 	private CallbackHandler loadHandlerClass(IConfigurationElement element) {
-		if (!expectedElement(element, ELEM_HANDLER))
+		if (!expectedElement(element, ELEM_HANDLER)) {
 			return null;
+		}
 		try {
 			return (CallbackHandler) element.createExecutableExtension(ATTR_HANDLER_CLASS);
 		} catch (CoreException e) {
@@ -81,8 +89,9 @@ public class ExtCallbackHandlerLoader {
 	}
 
 	private boolean expectedElement(IConfigurationElement element, String expectedName) {
-		if (expectedName.equals(element.getName()))
+		if (expectedName.equals(element.getName())) {
 			return true;
+		}
 		String supplier = element.getContributor().getName();
 		String message = NLS.bind(SecAuthMessages.unexpectedConfigElement, element.getName(), supplier);
 		AuthPlugin.getDefault().logError(message, null);

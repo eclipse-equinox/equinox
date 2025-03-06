@@ -60,8 +60,9 @@ public class SecurePlatformInternal {
 	 * default Java config provider ("login.configuration.provider")
 	 */
 	public void start() {
-		if (running)
+		if (running) {
 			return;
+		}
 
 		// Kludge for the bug 215828 "JAAS and server-side Eclipse": for the time being
 		// configuration
@@ -89,8 +90,9 @@ public class SecurePlatformInternal {
 	}
 
 	public void stop() {
-		if (!running)
+		if (!running) {
 			return;
+		}
 		if (defaultConfiguration != null) {
 			Configuration.setConfiguration(defaultConfiguration);
 			defaultConfiguration = null;
@@ -99,15 +101,17 @@ public class SecurePlatformInternal {
 	}
 
 	public boolean addConfigURL(URL url) {
-		if (url == null)
+		if (url == null) {
 			return false;
+		}
 
 		// stop on a first empty URL entry - we will use it to add our new element
 		for (int i = 1; i <= MAX_PROVIDER_URL_COUNT; i++) {
 			String tag = PROVIDER_URL_BASE + Integer.toString(i);
 			String currentURL = Security.getProperty(tag);
-			if (currentURL != null && currentURL.length() != 0)
+			if (currentURL != null && currentURL.length() != 0) {
 				continue;
+			}
 			String path;
 			try {
 				// in case URL is contained in a JARed bundle, this will extract it into a file

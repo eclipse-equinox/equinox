@@ -35,11 +35,13 @@ final public class SlashEncode {
 	final private static String ENCODED_BACK_SLASH = "\\5c"; //$NON-NLS-1$
 
 	static public String decode(String str) {
-		if (str == null)
+		if (str == null) {
 			return null;
+		}
 		int size = str.length();
-		if (size == 0)
+		if (size == 0) {
 			return str;
+		}
 
 		StringBuffer processed = new StringBuffer(size);
 		int processedPos = 0;
@@ -47,36 +49,44 @@ final public class SlashEncode {
 		for (int i = 0; i < size; i++) {
 			char c = str.charAt(i);
 			if (c == BACK_SLASH) {
-				if (i + 2 >= size)
+				if (i + 2 >= size) {
 					continue;
+				}
 				String encoded = str.substring(i, i + 3);
 				char decoded = 0;
-				if (ENCODED_SLASH.equals(encoded))
+				if (ENCODED_SLASH.equals(encoded)) {
 					decoded = SLASH;
-				else if (ENCODED_BACK_SLASH.equals(encoded))
+				} else if (ENCODED_BACK_SLASH.equals(encoded)) {
 					decoded = BACK_SLASH;
-				if (decoded == 0)
+				}
+				if (decoded == 0) {
 					continue;
-				if (i > processedPos)
+				}
+				if (i > processedPos) {
 					processed.append(str.substring(processedPos, i));
+				}
 				processed.append(decoded);
 				processedPos = i + 3;
 				i += 2; // skip over remaining encoded portion
 			}
 		}
-		if (processedPos == 0)
+		if (processedPos == 0) {
 			return str;
-		if (processedPos < size)
+		}
+		if (processedPos < size) {
 			processed.append(str.substring(processedPos));
+		}
 		return new String(processed);
 	}
 
 	static public String encode(String str) {
-		if (str == null)
+		if (str == null) {
 			return null;
+		}
 		int size = str.length();
-		if (size == 0)
+		if (size == 0) {
 			return str;
+		}
 
 		StringBuffer processed = new StringBuffer(size);
 		int processedPos = 0;
@@ -84,19 +94,23 @@ final public class SlashEncode {
 		for (int i = 0; i < size; i++) {
 			char c = str.charAt(i);
 			if (c == SLASH || c == BACK_SLASH) {
-				if (i > processedPos)
+				if (i > processedPos) {
 					processed.append(str.substring(processedPos, i));
-				if (c == SLASH)
+				}
+				if (c == SLASH) {
 					processed.append(ENCODED_SLASH);
-				else if (c == BACK_SLASH)
+				} else if (c == BACK_SLASH) {
 					processed.append(ENCODED_BACK_SLASH);
+				}
 				processedPos = i + 1;
 			}
 		}
-		if (processedPos == 0)
+		if (processedPos == 0) {
 			return str;
-		if (processedPos < size)
+		}
+		if (processedPos < size) {
 			processed.append(str.substring(processedPos));
+		}
 		return new String(processed);
 	}
 

@@ -88,11 +88,13 @@ public class SecurePreferences {
 
 	public String absolutePath() {
 		checkRemoved();
-		if (parent == null)
+		if (parent == null) {
 			return PATH_SEPARATOR;
+		}
 		String parentPath = parent.absolutePath();
-		if (PATH_SEPARATOR.equals(parentPath)) // parent is the root node?
+		if (PATH_SEPARATOR.equals(parentPath)) { // parent is the root node?
 			return parentPath + name;
+		}
 		return parentPath + PATH_SEPARATOR + name;
 	}
 
@@ -110,8 +112,9 @@ public class SecurePreferences {
 
 	public String[] keys() {
 		checkRemoved();
-		if (values == null)
+		if (values == null) {
 			return EMPTY_STRING_ARRAY;
+		}
 		Set<String> keys = values.keySet();
 		int size = keys.size();
 		String[] result = new String[size];
@@ -124,8 +127,9 @@ public class SecurePreferences {
 
 	public String[] childrenNames() {
 		checkRemoved();
-		if (children == null)
+		if (children == null) {
 			return EMPTY_STRING_ARRAY;
+		}
 		Set<String> keys = children.keySet();
 		int size = keys.size();
 		String[] result = new String[size];
@@ -139,41 +143,46 @@ public class SecurePreferences {
 	protected SecurePreferencesRoot getRoot() {
 		if (root == null) {
 			SecurePreferences result = this;
-			while (result.parent() != null)
+			while (result.parent() != null) {
 				result = result.parent();
+			}
 			root = (SecurePreferencesRoot) result;
 		}
 		return root;
 	}
 
 	protected SecurePreferences navigateToNode(String pathName, boolean create) {
-		if (pathName == null || pathName.length() == 0)
+		if (pathName == null || pathName.length() == 0) {
 			return this;
+		}
 		int pos = pathName.indexOf(IPath.SEPARATOR);
-		if (pos == -1)
+		if (pos == -1) {
 			return getChild(pathName, create);
-		else if (pos == 0) // if path requested is absolute, pass it to the root without "/"
+		} else if (pos == 0) { // if path requested is absolute, pass it to the root without "/"
 			return getRoot().navigateToNode(pathName.substring(1), create);
-		else { // if path requested contains segments, isolate top segment and rest
+		} else { // if path requested contains segments, isolate top segment and rest
 			String topSegment = pathName.substring(0, pos);
 			String otherSegments = pathName.substring(pos + 1);
 			SecurePreferences child = getChild(topSegment, create);
-			if (child == null && !create)
+			if (child == null && !create) {
 				return null;
+			}
 			return child.navigateToNode(otherSegments, create);
 		}
 	}
 
 	synchronized private SecurePreferences getChild(String segment, boolean create) {
 		if (children == null) {
-			if (create)
+			if (create) {
 				children = new HashMap<>(5);
-			else
+			} else {
 				return null;
+			}
 		}
 		SecurePreferences child = children.get(segment);
-		if (!create || (child != null))
+		if (!create || (child != null)) {
 			return child;
+		}
 		child = new SecurePreferences(this, segment);
 		children.put(segment, child);
 		return child;
@@ -188,12 +197,13 @@ public class SecurePreferences {
 
 	public void flush(Properties properties, String parentsPath) {
 		String thisNodePath;
-		if (name == null)
+		if (name == null) {
 			thisNodePath = null;
-		else if (parentsPath == null)
+		} else if (parentsPath == null) {
 			thisNodePath = PATH_SEPARATOR + name;
-		else
+		} else {
 			thisNodePath = parentsPath + PATH_SEPARATOR + name;
+		}
 
 		if (values != null) {
 			for (Entry<String, String> entry : values.entrySet()) {
@@ -216,8 +226,9 @@ public class SecurePreferences {
 
 	public void put(String key, String value, boolean encrypt, SecurePreferencesContainer container)
 			throws StorageException {
-		if (key == null)
+		if (key == null) {
 			throw new NullPointerException();
+		}
 		checkRemoved();
 
 		if (!encrypt || value == null) {
@@ -252,23 +263,27 @@ public class SecurePreferences {
 
 	public String get(String key, String def, SecurePreferencesContainer container) throws StorageException {
 		checkRemoved();
-		if (!hasKey(key))
+		if (!hasKey(key)) {
 			return def;
+		}
 		String encryptedValue = internalGet(key);
-		if (encryptedValue == null)
+		if (encryptedValue == null) {
 			return null;
+		}
 
 		CryptoData data = new CryptoData(encryptedValue);
 		String moduleID = data.getModuleID();
 		if (moduleID == null) { // clear-text value, not encrypted
-			if (data.getData() == null)
+			if (data.getData() == null) {
 				return null;
+			}
 			return StorageUtils.getString(data.getData());
 		}
 
 		PasswordExt passwordExt = getRoot().getPassword(moduleID, container, false);
-		if (passwordExt == null)
+		if (passwordExt == null) {
 			throw new StorageException(StorageException.NO_PASSWORD, SecAuthMessages.loginNoPassword);
+		}
 
 		try {
 			byte[] clearText = getRoot().getCipher().decrypt(passwordExt, data);
@@ -282,16 +297,19 @@ public class SecurePreferences {
 	 * For internal use - retrieve moduleID used to encrypt this value
 	 */
 	public String getModule(String key) {
-		if (!hasKey(key))
+		if (!hasKey(key)) {
 			return null;
+		}
 		String encryptedValue = internalGet(key);
-		if (encryptedValue == null)
+		if (encryptedValue == null) {
 			return null;
+		}
 		try {
 			CryptoData data = new CryptoData(encryptedValue);
 			String moduleID = data.getModuleID();
-			if (DEFAULT_PASSWORD_ID.equals(moduleID))
+			if (DEFAULT_PASSWORD_ID.equals(moduleID)) {
 				return null;
+			}
 			return moduleID;
 		} catch (StorageException e) {
 			return null;
@@ -299,14 +317,16 @@ public class SecurePreferences {
 	}
 
 	synchronized protected void internalPut(String key, String value) {
-		if (values == null)
+		if (values == null) {
 			values = new HashMap<>(5);
+		}
 		values.put(key, value);
 	}
 
 	protected String internalGet(String key) {
-		if (values == null)
+		if (values == null) {
 			return null;
+		}
 		return values.get(key);
 	}
 
@@ -316,8 +336,9 @@ public class SecurePreferences {
 
 	synchronized public void clear() {
 		checkRemoved();
-		if (values != null)
+		if (values != null) {
 			values.clear();
+		}
 		markModified();
 	}
 
@@ -331,15 +352,17 @@ public class SecurePreferences {
 
 	public void removeNode() {
 		checkRemoved();
-		if (parent != null)
+		if (parent != null) {
 			parent.removeNode(name);
+		}
 		markRemoved();
 	}
 
 	public void markRemoved() {
 		removed = true;
-		if (children == null)
+		if (children == null) {
 			return;
+		}
 		for (Entry<String, SecurePreferences> entry : children.entrySet()) {
 			SecurePreferences child = entry.getValue();
 			child.markRemoved();
@@ -347,20 +370,24 @@ public class SecurePreferences {
 	}
 
 	synchronized protected void removeNode(String childName) {
-		if (children == null)
+		if (children == null) {
 			return;
-		if (children.remove(childName) != null)
+		}
+		if (children.remove(childName) != null) {
 			markModified();
+		}
 	}
 
 	private void checkRemoved() {
-		if (removed)
+		if (removed) {
 			throw new IllegalStateException(NLS.bind(SecAuthMessages.removedNode, name));
+		}
 	}
 
 	private void validatePath(String path) {
-		if (isValid(path))
+		if (isValid(path)) {
 			return;
+		}
 		String msg = NLS.bind(SecAuthMessages.invalidNodePath, path);
 		throw new IllegalArgumentException(msg);
 	}
@@ -373,16 +400,19 @@ public class SecurePreferences {
 	 * slash.
 	 */
 	private boolean isValid(String path) {
-		if (path == null || path.length() == 0)
+		if (path == null || path.length() == 0) {
 			return true;
+		}
 		char[] chars = path.toCharArray();
 		boolean lastSlash = false;
 		for (char c : chars) {
-			if ((c <= 31) || (c >= 127))
+			if ((c <= 31) || (c >= 127)) {
 				return false;
+			}
 			boolean isSlash = (c == IPath.SEPARATOR);
-			if (lastSlash && isSlash)
+			if (lastSlash && isSlash) {
 				return false;
+			}
 			lastSlash = isSlash;
 		}
 		return (chars.length > 1) ? (chars[chars.length - 1] != IPath.SEPARATOR) : true;
@@ -393,8 +423,9 @@ public class SecurePreferences {
 
 	public boolean getBoolean(String key, boolean defaultValue, SecurePreferencesContainer container)
 			throws StorageException {
-		if (!hasKey(key))
+		if (!hasKey(key)) {
 			return defaultValue;
+		}
 		String value = get(key, null, container);
 		return value == null ? defaultValue : TRUE.equalsIgnoreCase(value);
 	}
@@ -405,11 +436,13 @@ public class SecurePreferences {
 	}
 
 	public int getInt(String key, int defaultValue, SecurePreferencesContainer container) throws StorageException {
-		if (!hasKey(key))
+		if (!hasKey(key)) {
 			return defaultValue;
+		}
 		String value = get(key, null, container);
-		if (value == null)
+		if (value == null) {
 			return defaultValue;
+		}
 		try {
 			return Integer.parseInt(value);
 		} catch (NumberFormatException e) {
@@ -423,11 +456,13 @@ public class SecurePreferences {
 	}
 
 	public long getLong(String key, long defaultValue, SecurePreferencesContainer container) throws StorageException {
-		if (!hasKey(key))
+		if (!hasKey(key)) {
 			return defaultValue;
+		}
 		String value = get(key, null, container);
-		if (value == null)
+		if (value == null) {
 			return defaultValue;
+		}
 		try {
 			return Long.parseLong(value);
 		} catch (NumberFormatException e) {
@@ -442,11 +477,13 @@ public class SecurePreferences {
 
 	public float getFloat(String key, float defaultValue, SecurePreferencesContainer container)
 			throws StorageException {
-		if (!hasKey(key))
+		if (!hasKey(key)) {
 			return defaultValue;
+		}
 		String value = get(key, null, container);
-		if (value == null)
+		if (value == null) {
 			return defaultValue;
+		}
 		try {
 			return Float.parseFloat(value);
 		} catch (NumberFormatException e) {
@@ -461,11 +498,13 @@ public class SecurePreferences {
 
 	public double getDouble(String key, double defaultValue, SecurePreferencesContainer container)
 			throws StorageException {
-		if (!hasKey(key))
+		if (!hasKey(key)) {
 			return defaultValue;
+		}
 		String value = get(key, null, container);
-		if (value == null)
+		if (value == null) {
 			return defaultValue;
+		}
 		try {
 			return Double.parseDouble(value);
 		} catch (NumberFormatException e) {
@@ -480,8 +519,9 @@ public class SecurePreferences {
 
 	public byte[] getByteArray(String key, byte[] defaultValue, SecurePreferencesContainer container)
 			throws StorageException {
-		if (!hasKey(key))
+		if (!hasKey(key)) {
 			return defaultValue;
+		}
 		String value = get(key, null, container);
 		return Base64.decode(value);
 	}
@@ -502,11 +542,13 @@ public class SecurePreferences {
 
 	public boolean isEncrypted(String key) throws StorageException {
 		checkRemoved();
-		if (!hasKey(key))
+		if (!hasKey(key)) {
 			return false;
+		}
 		String encryptedValue = internalGet(key);
-		if (encryptedValue == null)
+		if (encryptedValue == null) {
 			return false;
+		}
 
 		CryptoData data = new CryptoData(encryptedValue);
 		String moduleID = data.getModuleID();

@@ -74,10 +74,12 @@ public class SecurePreferencesWrapper implements ISecurePreferences {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null)
+		if (obj == null) {
 			return false;
-		if (!(obj instanceof SecurePreferencesWrapper))
+		}
+		if (!(obj instanceof SecurePreferencesWrapper)) {
 			return false;
+		}
 		SecurePreferencesWrapper other = (SecurePreferencesWrapper) obj;
 		return container.equals(other.container) && node.equals(other.node);
 	}
@@ -99,8 +101,9 @@ public class SecurePreferencesWrapper implements ISecurePreferences {
 	@Override
 	public ISecurePreferences parent() {
 		SecurePreferences parent = node.parent();
-		if (parent == null)
+		if (parent == null) {
 			return null;
+		}
 		return container.wrapper(node.parent());
 	}
 

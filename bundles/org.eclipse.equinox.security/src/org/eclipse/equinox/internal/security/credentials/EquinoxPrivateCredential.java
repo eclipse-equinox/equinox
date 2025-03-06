@@ -38,8 +38,9 @@ public class EquinoxPrivateCredential implements IPrivateCredential {
 
 	@Override
 	public void clear() {
-		if (key != null)
+		if (key != null) {
 			key.clearPassword();
+		}
 	}
 
 }

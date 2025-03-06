@@ -78,13 +78,16 @@ public class ReEncrypter {
 					if (!node.isEncrypted(key)) {
 						continue;
 					}
-					if (!(node instanceof SecurePreferencesWrapper))
+					if (!(node instanceof SecurePreferencesWrapper)) {
 						continue;
+					}
 					String encryptionModule = ((SecurePreferencesWrapper) node).getModule(key);
-					if (encryptionModule == null)
+					if (encryptionModule == null) {
 						continue;
-					if (!encryptionModule.equals(moduleID))
+					}
+					if (!encryptionModule.equals(moduleID)) {
 						continue;
+					}
 					map.put(key, node.get(key, null));
 				} catch (StorageException e) {
 					// this value will not be re-coded
@@ -93,8 +96,9 @@ public class ReEncrypter {
 					processedOK = false;
 				}
 			}
-			if (map.size() != 0)
+			if (map.size() != 0) {
 				elements.add(new TmpElement(node.absolutePath(), map));
+			}
 		}
 		String[] childrenNames = node.childrenNames();
 		for (String childrenName : childrenNames) {
@@ -143,10 +147,11 @@ public class ReEncrypter {
 				}
 			}
 		}
-		if (originalProperty != null)
+		if (originalProperty != null) {
 			container.setOption(IProviderHints.REQUIRED_MODULE_ID, originalProperty);
-		else
+		} else {
 			container.removeOption(IProviderHints.REQUIRED_MODULE_ID);
+		}
 
 		try {
 			// Ensure modified entries are persisted and avoid potential inconsistent state

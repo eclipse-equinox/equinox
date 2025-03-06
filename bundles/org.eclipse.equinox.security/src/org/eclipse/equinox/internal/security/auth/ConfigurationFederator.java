@@ -41,8 +41,9 @@ public class ConfigurationFederator extends Configuration {
 	@Override
 	public synchronized AppConfigurationEntry[] getAppConfigurationEntry(String name) {
 		AppConfigurationEntry[] returnValue = configCache.get(name);
-		if (returnValue != null)
+		if (returnValue != null) {
 			return returnValue;
+		}
 
 		// Note: adding default config provider last; extension-point based configs are
 		// queried first
@@ -56,8 +57,9 @@ public class ConfigurationFederator extends Configuration {
 		for (Configuration c : allConfigs) {
 			boolean found = false;
 			AppConfigurationEntry[] config = c.getAppConfigurationEntry(name);
-			if (config == null)
+			if (config == null) {
 				continue;
+			}
 			String cachedProviderName = configToProviderMap.get(name);
 			if (cachedProviderName != null && !cachedProviderName.equals(c.getClass().getName())) {
 				String message = NLS.bind(SecAuthMessages.duplicateJaasConfig1, name, cachedProviderName);
@@ -87,16 +89,18 @@ public class ConfigurationFederator extends Configuration {
 		for (Configuration federatedConfig : federatedConfigs) {
 			federatedConfig.refresh();
 		}
-		if (defaultConfiguration != null)
+		if (defaultConfiguration != null) {
 			defaultConfiguration.refresh();
+		}
 
 		configCache.clear();
 		configToProviderMap.clear();
 	}
 
 	private Configuration[] getFederatedConfigs() {
-		if (federatedConfigs == null)
+		if (federatedConfigs == null) {
 			federatedConfigs = ConfigurationFactory.getInstance().getConfigurations();
+		}
 		return federatedConfigs;
 	}
 }

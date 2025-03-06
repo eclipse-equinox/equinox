@@ -85,14 +85,16 @@ public class SecurePreferencesContainer implements IPreferencesContainer {
 		if (options != null) { // make a copy to avoid problems if original is modified later
 			this.options = new HashMap<>(options.size());
 			this.options.putAll(options);
-		} else
+		} else { // make a copy to avoid problems if original is modified later
 			this.options = new HashMap<>(2);
+		}
 	}
 
 	public ISecurePreferences wrapper(SecurePreferences node) {
 		synchronized (wrappers) {
-			if (wrappers.containsKey(node))
+			if (wrappers.containsKey(node)) {
 				return wrappers.get(node);
+			}
 			SecurePreferencesWrapper newWrapper = new SecurePreferencesWrapper(node, this);
 			wrappers.put(node, newWrapper);
 			return newWrapper;
@@ -101,8 +103,9 @@ public class SecurePreferencesContainer implements IPreferencesContainer {
 
 	public void removeWrapper(SecurePreferences node) {
 		synchronized (wrappers) {
-			if (wrappers.containsKey(node))
+			if (wrappers.containsKey(node)) {
 				wrappers.remove(node);
+			}
 		}
 	}
 
