@@ -57,11 +57,12 @@ public class XSLTStreamTransformer {
 			try {
 				InputSource streamSource = new InputSource(original);
 				XMLReader reader = XMLReaderFactory.createXMLReader();
-				if (resolver != null)
+				if (resolver != null) {
 					reader.setEntityResolver(resolver);
-				else
+				} else {
 					reader.setFeature("http://xml.org/sax/features/validation", //$NON-NLS-1$
 							false);
+				}
 
 				SAXSource saxSource = new SAXSource(reader, streamSource);
 				transformer.transform(saxSource, new StreamResult(result));
@@ -147,8 +148,9 @@ public class XSLTStreamTransformer {
 			templates = templatesRef.get();
 		}
 
-		if (templates != null)
+		if (templates != null) {
 			return templates;
+		}
 
 		try (InputStream xsltStream = transformerURL.openStream()) {
 			TransformerFactory tFactory = null;
@@ -159,11 +161,12 @@ public class XSLTStreamTransformer {
 
 				InputSource inputSource = new InputSource(xsltStream);
 				XMLReader reader = XMLReaderFactory.createXMLReader();
-				if (resolver != null)
+				if (resolver != null) {
 					reader.setEntityResolver(resolver);
-				else
+				} else {
 					reader.setFeature("http://xml.org/sax/features/validation", //$NON-NLS-1$
 							false);
+				}
 				SAXSource xsltSource = new SAXSource(reader, inputSource);
 
 				try {
@@ -195,10 +198,12 @@ public class XSLTStreamTransformer {
 	void log(int severity, String msg, Throwable t) {
 		FrameworkLog log = logTracker.getService();
 		if (log == null) {
-			if (msg != null)
+			if (msg != null) {
 				System.err.println(msg);
-			if (t != null)
+			}
+			if (t != null) {
 				t.printStackTrace();
+			}
 			return;
 		}
 
