@@ -189,8 +189,9 @@ public abstract class MultiplexingFactory {
 		// Framework.installContentHandlerFactory(BundleContext, FrameworkAdaptor)
 		// Framework.uninstallURLStreamHandlerFactory
 		// Framework.uninstallContentHandlerFactory()
-		if (released == null || released.isEmpty())
+		if (released == null || released.isEmpty()) {
 			return getParentFactory();
+		}
 		Object successor = released.remove(0);
 		try {
 			Class<?> clazz = successor.getClass();
@@ -216,12 +217,15 @@ public abstract class MultiplexingFactory {
 		Class<?>[] classStack = internalSecurityManager.getClassContext();
 		for (Class<?> clazz : classStack) {
 			if (clazz == InternalSecurityManager.class || clazz == MultiplexingFactory.class
-					|| ignoredClasses.contains(clazz) || isSystemClass(clazz))
+					|| ignoredClasses.contains(clazz) || isSystemClass(clazz)) {
 				continue;
-			if (hasAuthority(clazz))
+			}
+			if (hasAuthority(clazz)) {
 				return this;
-			if (current == null)
+			}
+			if (current == null) {
 				continue;
+			}
 			for (Object factory : current) {
 				try {
 					Method hasAuthorityMethod = factory.getClass().getMethod("hasAuthority", //$NON-NLS-1$
@@ -266,8 +270,9 @@ public abstract class MultiplexingFactory {
 	}
 
 	private synchronized List<Object> releaseFactories() {
-		if (factories == null)
+		if (factories == null) {
 			return null;
+		}
 
 		List<Object> released = new LinkedList<>(factories);
 		factories = null;
