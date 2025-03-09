@@ -35,8 +35,9 @@ public class MultiSourcePackage extends PackageSource {
 		Class<?> result = null;
 		for (SingleSourcePackage supplier : suppliers) {
 			result = supplier.loadClass(name);
-			if (result != null)
+			if (result != null) {
 				return result;
+			}
 		}
 		return result;
 	}
@@ -46,8 +47,9 @@ public class MultiSourcePackage extends PackageSource {
 		URL result = null;
 		for (SingleSourcePackage supplier : suppliers) {
 			result = supplier.getResource(name);
-			if (result != null)
+			if (result != null) {
 				return result;
+			}
 		}
 		return result;
 	}
@@ -67,8 +69,9 @@ public class MultiSourcePackage extends PackageSource {
 		for (SingleSourcePackage source : suppliers) {
 			Collection<String> sourceResources = source.listResources(path, filePattern);
 			for (String resource : sourceResources) {
-				if (!result.contains(resource))
+				if (!result.contains(resource)) {
 					result.add(resource);
+				}
 			}
 		}
 		return result;

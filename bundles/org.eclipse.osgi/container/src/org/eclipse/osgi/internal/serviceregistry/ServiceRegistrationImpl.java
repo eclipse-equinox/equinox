@@ -739,17 +739,20 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 	 */
 	Bundle[] getUsingBundles() {
 		synchronized (registrationLock) {
-			if (state == UNREGISTERED) /* service unregistered */
+			if (state == UNREGISTERED) { /* service unregistered */
 				return null;
+			}
 
 			int size = contextsUsing.size();
-			if (size == 0)
+			if (size == 0) {
 				return null;
+			}
 
 			/* Copy list of BundleContext into an array of Bundle. */
 			Bundle[] bundles = new Bundle[size];
-			for (int i = 0; i < size; i++)
+			for (int i = 0; i < size; i++) {
 				bundles[i] = contextsUsing.get(i).getBundleImpl();
+			}
 
 			return bundles;
 		}

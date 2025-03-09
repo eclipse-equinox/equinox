@@ -58,6 +58,7 @@ public interface SignerInfo {
 	 * @deprecated This information is not readily available using the JAR APIs
 	 *             included with Java. A value {@literal unknown} will be returned.
 	 */
+	@Deprecated
 	public String getMessageDigestAlgorithm();
 
 }
