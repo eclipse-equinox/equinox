@@ -1,12 +1,10 @@
 # Equinox Documentation
 
-This is the documentation of the Eclipse Equinox Framework.
-[https://github.com/eclipse-equinox/equinox](https://github.com/eclipse-equinox/equinox)
+This is the documentation of the [Eclipse Equinox Framework](https://projects.eclipse.org/projects/eclipse.equinox).
 
 Equinox is an implementation of the OSGi core framework specification, a set of bundles that implement various optional OSGi services and other infrastructure for running OSGi-based systems.
 
-PRs to improve the documentation are always welcome.
-
+Github: [https://github.com/eclipse-equinox/equinox](https://github.com/eclipse-equinox/equinox)
 
 
 ## Articles
@@ -43,3 +41,6 @@ PRs to improve the documentation are always welcome.
         {% endfor %}
     </tbody>
 </table>
+
+
+PRs on [Github](https://github.com/eclipse-equinox/equinox/tree/master/docs) to improve the documentation are always welcome.
