@@ -32,7 +32,8 @@ Equinox implements the follwoing specification with the given level of complianc
 
 # More information
 
-- Homepage: https://www.eclipse.org/equinox/
+- Homepage: https://projects.eclipse.org/projects/eclipse.equinox
+- Documentation: https://equinox.eclipseprojects.io/
 - Bug tracker: https://github.com/eclipse-equinox/equinox/issues
 - Asking questions and share ideas: https://github.com/eclipse-equinox/equinox/discussions
 
