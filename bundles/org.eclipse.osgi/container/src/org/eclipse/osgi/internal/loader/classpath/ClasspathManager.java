@@ -83,7 +83,7 @@ public class ClasspathManager {
 	private ArrayMap<String, String> loadedLibraries = null;
 	// used to detect recusive defineClass calls for the same class on the same
 	// class loader (bug 345500)
-	private ThreadLocal<DefineContext> currentDefineContext = new ThreadLocal<>();
+	private final ThreadLocal<DefineContext> currentDefineContext = new ThreadLocal<>();
 
 	/**
 	 * Constructs a classpath manager for the given generation and module class
@@ -258,9 +258,10 @@ public class ClasspathManager {
 	private boolean addEclipseClassPathEntry(ArrayList<ClasspathEntry> result, String cp, ClasspathManager hostManager,
 			Generation source) {
 		String var = hasPrefix(cp);
-		if (var != null)
+		if (var != null) {
 			// find internal library using eclipse predefined vars
 			return addInternalClassPath(var, result, cp, hostManager, source);
+		}
 		if (cp.startsWith(NativeCodeFinder.EXTERNAL_LIB_PREFIX)) {
 			cp = cp.substring(NativeCodeFinder.EXTERNAL_LIB_PREFIX.length());
 			// find external library using system property substitution
@@ -277,19 +278,22 @@ public class ClasspathManager {
 	private boolean addInternalClassPath(String var, ArrayList<ClasspathEntry> cpEntries, String cp,
 			ClasspathManager hostManager, Generation source) {
 		EquinoxConfiguration configuration = source.getBundleInfo().getStorage().getConfiguration();
-		if (var.equals("ws")) //$NON-NLS-1$
+		if (var.equals("ws")) { //$NON-NLS-1$
 			return ClasspathManager.addStandardClassPathEntry(cpEntries,
-					"ws/" + configuration.getWS() + cp.substring(4), hostManager, source); //$NON-NLS-1$
-		if (var.equals("os")) //$NON-NLS-1$
+			"ws/" + configuration.getWS() + cp.substring(4), hostManager, source); //$NON-NLS-1$
+		}
+		if (var.equals("os")) { //$NON-NLS-1$
 			return ClasspathManager.addStandardClassPathEntry(cpEntries,
-					"os/" + configuration.getOS() + cp.substring(4), hostManager, source); //$NON-NLS-1$
+			"os/" + configuration.getOS() + cp.substring(4), hostManager, source); //$NON-NLS-1$
+		}
 		if (var.equals("nl")) { //$NON-NLS-1$
 			cp = cp.substring(4);
 			List<String> NL_JAR_VARIANTS = source.getBundleInfo().getStorage()
 					.getConfiguration().ECLIPSE_NL_JAR_VARIANTS;
 			for (String nlVariant : NL_JAR_VARIANTS) {
-				if (ClasspathManager.addStandardClassPathEntry(cpEntries, "nl/" + nlVariant + cp, hostManager, source)) //$NON-NLS-1$
+				if (ClasspathManager.addStandardClassPathEntry(cpEntries, "nl/" + nlVariant + cp, hostManager, source)) { //$NON-NLS-1$
 					return true;
+				}
 			}
 		}
 		return false;
@@ -297,12 +301,15 @@ public class ClasspathManager {
 
 	// return a String representing the string found between the $s
 	private static String hasPrefix(String libPath) {
-		if (libPath.startsWith("$ws$")) //$NON-NLS-1$
+		if (libPath.startsWith("$ws$")) { //$NON-NLS-1$
 			return "ws"; //$NON-NLS-1$
-		if (libPath.startsWith("$os$")) //$NON-NLS-1$
+		}
+		if (libPath.startsWith("$os$")) { //$NON-NLS-1$
 			return "os"; //$NON-NLS-1$
-		if (libPath.startsWith("$nl$")) //$NON-NLS-1$
+		}
+		if (libPath.startsWith("$nl$")) { //$NON-NLS-1$
 			return "nl"; //$NON-NLS-1$
+		}
 		return null;
 	}
 
@@ -320,13 +327,14 @@ public class ClasspathManager {
 		File file;
 		BundleEntry cpEntry = cpGeneration.getBundleFile().getEntry(cp);
 		// check for internal library directories in a bundle jar file
-		if (cpEntry != null && cpEntry.getName().endsWith("/")) //$NON-NLS-1$
+		if (cpEntry != null && cpEntry.getName().endsWith("/")) { //$NON-NLS-1$
 			bundlefile = createBundleFile(cp, cpGeneration);
-		// check for internal library jars
-		else if ((file = cpGeneration.getBundleFile().getFile(cp, false)) != null)
+		} else if ((file = cpGeneration.getBundleFile().getFile(cp, false)) != null) {
 			bundlefile = createBundleFile(file, cpGeneration);
-		if (bundlefile != null)
+		}
+		if (bundlefile != null) {
 			return createClassPathEntry(bundlefile, cpGeneration);
+		}
 		return null;
 	}
 
@@ -340,11 +348,13 @@ public class ClasspathManager {
 	 */
 	public ClasspathEntry getExternalClassPath(String cp, Generation cpGeneration) {
 		File file = new File(cp);
-		if (!file.isAbsolute())
+		if (!file.isAbsolute()) {
 			return null;
+		}
 		BundleFile bundlefile = createBundleFile(file, cpGeneration);
-		if (bundlefile != null)
+		if (bundlefile != null) {
 			return createClassPathEntry(bundlefile, cpGeneration);
+		}
 		return null;
 	}
 
@@ -377,10 +387,11 @@ public class ClasspathManager {
 
 	private ClasspathEntry createClassPathEntry(BundleFile bundlefile, Generation source) {
 		ClasspathEntry entry;
-		if (classloader != null)
+		if (classloader != null) {
 			entry = classloader.createClassPathEntry(bundlefile, source);
-		else
+		} else {
 			entry = new ClasspathEntry(bundlefile, source.getDomain(), source);
+		}
 		return entry;
 	}
 
@@ -500,8 +511,9 @@ public class ClasspathManager {
 			findLocalResources(resource, fragCP.getEntries(), m, classPathIndex, resources);
 		}
 
-		if (resources.size() > 0)
+		if (resources.size() > 0) {
 			return Collections.enumeration(resources);
+		}
 		return Collections.emptyEnumeration();
 	}
 
@@ -613,8 +625,9 @@ public class ClasspathManager {
 				hook.preFindLocalClass(classname, this);
 			}
 			result = classloader.publicFindLoaded(classname);
-			if (result != null)
+			if (result != null) {
 				return result;
+			}
 			result = findLocalClassImpl(classname, hooks);
 			return result;
 		} finally {
@@ -666,23 +679,26 @@ public class ClasspathManager {
 	}
 
 	private Class<?> findClassImpl(String name, ClasspathEntry classpathEntry, List<ClassLoaderHook> hooks) {
-		if (debug.DEBUG_LOADER)
+		if (debug.DEBUG_LOADER) {
 			debug.trace(OPTION_DEBUG_LOADER,
 					"ModuleClassLoader[" + classloader.getBundleLoader() + " - " + classpathEntry.getBundleFile() //$NON-NLS-1$ //$NON-NLS-2$
 					+ "].findClassImpl(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
 		String filename = name.replace('.', '/').concat(".class"); //$NON-NLS-1$
 
 		BundleEntry entry = classpathEntry.findEntry(filename);
-		if (entry == null)
+		if (entry == null) {
 			return null;
+		}
 
 		byte[] classbytes;
 		try {
 			classbytes = entry.getBytes();
 		} catch (IOException e) {
-			if (debug.DEBUG_LOADER)
+			if (debug.DEBUG_LOADER) {
 				debug.trace(OPTION_DEBUG_LOADER,
 						"  IOException reading " + filename + " from " + classpathEntry.getBundleFile()); //$NON-NLS-1$ //$NON-NLS-2$
+			}
 			throw (LinkageError) new LinkageError("Error reading class bytes: " + name).initCause(e); //$NON-NLS-1$
 		}
 		if (debug.DEBUG_LOADER) {
@@ -694,8 +710,9 @@ public class ClasspathManager {
 		try {
 			return defineClass(name, classbytes, classpathEntry, entry, hooks);
 		} catch (Error e) {
-			if (debug.DEBUG_LOADER)
+			if (debug.DEBUG_LOADER) {
 				debug.trace(OPTION_DEBUG_LOADER, "  error defining class " + name); //$NON-NLS-1$
+			}
 			throw e;
 		}
 	}
@@ -875,8 +892,9 @@ public class ClasspathManager {
 	 */
 	public String findLibrary(String libname) {
 		synchronized (this) {
-			if (loadedLibraries == null)
+			if (loadedLibraries == null) {
 				loadedLibraries = new ArrayMap<>(1);
+			}
 		}
 		synchronized (loadedLibraries) {
 			// we assume that each classloader will load a small number of of libraries
@@ -884,12 +902,14 @@ public class ClasspathManager {
 			// libraries
 			// each element is a String[2], each array is {"libname", "libpath"}
 			String libpath = loadedLibraries.get(libname);
-			if (libpath != null)
+			if (libpath != null) {
 				return libpath;
+			}
 
 			libpath = findLibrary0(libname);
-			if (libpath != null)
+			if (libpath != null) {
 				loadedLibraries.put(libname, libpath);
+			}
 			return libpath;
 		}
 	}
@@ -940,13 +960,15 @@ public class ClasspathManager {
 		generations.add(generation);
 		// next get the attached fragments bundle files
 		FragmentClasspath[] currentFragments = getFragmentClasspaths();
-		for (FragmentClasspath fragmentClasspath : currentFragments)
+		for (FragmentClasspath fragmentClasspath : currentFragments) {
 			generations.add(fragmentClasspath.getGeneration());
+		}
 
 		// now search over all the bundle files
 		Enumeration<URL> eURLs = Storage.findEntries(generations, path, filePattern, options);
-		if (eURLs == null)
+		if (eURLs == null) {
 			return Collections.emptyList();
+		}
 		return Collections.unmodifiableList(Collections.list(eURLs));
 	}
 

@@ -131,10 +131,11 @@ public abstract class StorageHookFactory<S, L, H extends StorageHookFactory.Stor
 		}
 		Class<?> factoryClass = getClass();
 		Class<?> factoryClassOfStorageHook = result.getFactoryClass();
-		if (!factoryClass.equals(factoryClassOfStorageHook))
+		if (!factoryClass.equals(factoryClassOfStorageHook)) {
 			throw new IllegalStateException(String.format(
 					"The factory class '%s' of storage hook '%s' does not match the creating factory class of '%s'", //$NON-NLS-1$
 					factoryClassOfStorageHook.getName(), result, factoryClass.getName()));
+		}
 		return result;
 	}
 

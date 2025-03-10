@@ -44,8 +44,9 @@ public final class DisabledInfo {
 	 * @param bundle     the bundle
 	 */
 	public DisabledInfo(String policyName, String message, BundleDescription bundle) {
-		if (policyName == null || bundle == null)
+		if (policyName == null || bundle == null) {
 			throw new IllegalArgumentException();
+		}
 		this.policyName = policyName;
 		this.message = message;
 		this.bundle = bundle;
@@ -80,14 +81,17 @@ public final class DisabledInfo {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == this)
+		if (obj == this) {
 			return true;
-		if (!(obj instanceof DisabledInfo))
+		}
+		if (!(obj instanceof DisabledInfo)) {
 			return false;
+		}
 		DisabledInfo other = (DisabledInfo) obj;
 		if (getBundle() == other.getBundle() && getPolicyName().equals(other.getPolicyName())) {
-			if (getMessage() == null ? other.getMessage() == null : getMessage().equals(other.getMessage()))
+			if (getMessage() == null ? other.getMessage() == null : getMessage().equals(other.getMessage())) {
 				return true;
+			}
 		}
 		return false;
 	}
