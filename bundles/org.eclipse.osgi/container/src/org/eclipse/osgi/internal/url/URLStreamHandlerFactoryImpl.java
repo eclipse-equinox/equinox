@@ -43,9 +43,9 @@ public class URLStreamHandlerFactoryImpl extends MultiplexingFactory implements 
 
 	private static final List<Class<?>> ignoredClasses = Arrays.asList(
 			new Class<?>[] { MultiplexingURLStreamHandler.class, URLStreamHandlerFactoryImpl.class, URL.class });
-	private Map<String, URLStreamHandlerProxy> proxies;
+	private final Map<String, URLStreamHandlerProxy> proxies;
 	private URLStreamHandlerFactory parentFactory;
-	private ThreadLocal<List<String>> creatingProtocols = new ThreadLocal<>();
+	private final ThreadLocal<List<String>> creatingProtocols = new ThreadLocal<>();
 
 	/**
 	 * Create the factory.
@@ -58,8 +58,9 @@ public class URLStreamHandlerFactoryImpl extends MultiplexingFactory implements 
 	}
 
 	private Class<?> getBuiltIn(String protocol, String builtInHandlers) {
-		if (builtInHandlers == null)
+		if (builtInHandlers == null) {
 			return null;
+		}
 		Class<?> clazz;
 		StringTokenizer tok = new StringTokenizer(builtInHandlers, "|"); //$NON-NLS-1$
 		while (tok.hasMoreElements()) {
@@ -70,8 +71,9 @@ public class URLStreamHandlerFactoryImpl extends MultiplexingFactory implements 
 			name.append(".Handler"); //$NON-NLS-1$
 			try {
 				clazz = secureAction.loadSystemClass(name.toString());
-				if (clazz != null)
+				if (clazz != null) {
 					return clazz; // this class exists, it is a built in handler
+				}
 			} catch (ClassNotFoundException ex) {
 				// keep looking
 			}
@@ -88,25 +90,29 @@ public class URLStreamHandlerFactoryImpl extends MultiplexingFactory implements 
 	@Override
 	public URLStreamHandler createURLStreamHandler(String protocol) {
 		// Check if we are recursing
-		if (isRecursive(protocol))
+		if (isRecursive(protocol)) {
 			return null;
+		}
 		try {
 			// first check for built in handlers
 			String builtInHandlers = secureAction.getProperty(PROTOCOL_HANDLER_PKGS);
 			Class<?> clazz = getBuiltIn(protocol, builtInHandlers);
-			if (clazz != null)
+			if (clazz != null) {
 				return null; // let the VM handle it
+			}
 			URLStreamHandler result = null;
 			if (isMultiplexing()) {
 				URLStreamHandler authorized = findAuthorizedURLStreamHandler(protocol);
-				if (authorized != null)
+				if (authorized != null) {
 					result = new MultiplexingURLStreamHandler(protocol, this, authorized);
+				}
 			} else {
 				result = createInternalURLStreamHandler(protocol);
 			}
 			// if parent is present do parent lookup
-			if (result == null && parentFactory != null)
+			if (result == null && parentFactory != null) {
 				result = parentFactory.createURLStreamHandler(protocol);
+			}
 			return result; // result may be null; let the VM handle it (consider sun.net.protocol.www.*)
 		} catch (Throwable t) {
 			container.getLogServices().log(URLStreamHandlerFactoryImpl.class.getName(), FrameworkLogEntry.ERROR,
@@ -123,8 +129,9 @@ public class URLStreamHandlerFactoryImpl extends MultiplexingFactory implements 
 			protocols = new ArrayList<>(1);
 			creatingProtocols.set(protocols);
 		}
-		if (protocols.contains(protocol))
+		if (protocols.contains(protocol)) {
 			return true;
+		}
 		protocols.add(protocol);
 		return false;
 	}
@@ -165,11 +172,13 @@ public class URLStreamHandlerFactoryImpl extends MultiplexingFactory implements 
 
 	protected URLStreamHandler findAuthorizedURLStreamHandler(String protocol) {
 		Object factory = findAuthorizedFactory(ignoredClasses);
-		if (factory == null)
+		if (factory == null) {
 			return null;
+		}
 
-		if (factory == this)
+		if (factory == this) {
 			return createInternalURLStreamHandler(protocol);
+		}
 
 		try {
 			Method createInternalURLStreamHandlerMethod = factory.getClass().getMethod("createInternalURLStreamHandler", //$NON-NLS-1$
@@ -189,7 +198,8 @@ public class URLStreamHandlerFactoryImpl extends MultiplexingFactory implements 
 
 	@Override
 	public void setParentFactory(Object parentFactory) {
-		if (this.parentFactory == null) // only allow it to be set once
+		if (this.parentFactory == null) { // only allow it to be set once
 			this.parentFactory = (URLStreamHandlerFactory) parentFactory;
+		}
 	}
 }

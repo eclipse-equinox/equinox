@@ -388,9 +388,10 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	 * Releases the lock for state changes for the specified transition event.
 	 */
 	protected final void unlockStateChange(ModuleEvent transitionEvent) {
-		if (stateChangeLock.getHoldCount() == 0 || !stateTransitionEvents.contains(transitionEvent))
+		if (stateChangeLock.getHoldCount() == 0 || !stateTransitionEvents.contains(transitionEvent)) {
 			throw new IllegalMonitorStateException(
 					"Current thread does not hold the state change lock for: " + transitionEvent); //$NON-NLS-1$
+		}
 		stateTransitionEvents.remove(transitionEvent);
 		stateChangeLock.unlock();
 	}
@@ -466,8 +467,9 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 				// Do nothing; start level is not met
 				return;
 			}
-			if (State.ACTIVE.equals(getState()))
+			if (State.ACTIVE.equals(getState())) {
 				return;
+			}
 			if (getState().equals(State.INSTALLED)) {
 				ResolutionReport report;
 				// must unlock to avoid out of order locks when multiple unresolved
@@ -488,8 +490,9 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 						throw (BundleException) e.getCause();
 					}
 				}
-				if (State.ACTIVE.equals(getState()))
+				if (State.ACTIVE.equals(getState())) {
 					return;
+				}
 				if (getState().equals(State.INSTALLED)) {
 					String reportMessage = report.getResolutionReportMessage(getCurrentRevision());
 					throw new BundleException(Msg.Module_ResolveError + reportMessage, BundleException.RESOLVE_ERROR);
@@ -513,8 +516,9 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		}
 
 		if (event != null) {
-			if (!EnumSet.of(ModuleEvent.STARTED, ModuleEvent.LAZY_ACTIVATION, ModuleEvent.STOPPED).contains(event))
+			if (!EnumSet.of(ModuleEvent.STARTED, ModuleEvent.LAZY_ACTIVATION, ModuleEvent.STOPPED).contains(event)) {
 				throw new IllegalStateException("Wrong event type: " + event); //$NON-NLS-1$
+			}
 			publishEvent(event);
 			// only print bundleTime information if we actually fired an event for this
 			// bundle
@@ -542,8 +546,9 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	 */
 	public void stop(StopOptions... options) throws BundleException {
 		revisions.getContainer().checkAdminPermission(getBundle(), AdminPermission.EXECUTE);
-		if (options == null)
+		if (options == null) {
 			options = new StopOptions[0];
+		}
 		ModuleEvent event;
 		BundleException stopError = null;
 		lockStateChange(ModuleEvent.STOPPED);
@@ -551,8 +556,9 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 			checkValid();
 			checkFragment();
 			persistStopOptions(options);
-			if (!Module.ACTIVE_SET.contains(getState()))
+			if (!Module.ACTIVE_SET.contains(getState())) {
 				return;
+			}
 			try {
 				event = doStop();
 			} catch (BundleException e) {
@@ -565,12 +571,14 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		}
 
 		if (event != null) {
-			if (!ModuleEvent.STOPPED.equals(event))
+			if (!ModuleEvent.STOPPED.equals(event)) {
 				throw new IllegalStateException("Wrong event type: " + event); //$NON-NLS-1$
+			}
 			publishEvent(event);
 		}
-		if (stopError != null)
+		if (stopError != null) {
 			throw stopError;
+		}
 	}
 
 	private void checkFragment() throws BundleException {
@@ -592,8 +600,9 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	}
 
 	final void checkValid() {
-		if (getState().equals(State.UNINSTALLED))
+		if (getState().equals(State.UNINSTALLED)) {
 			throw new IllegalStateException(Msg.Module_UninstalledError + ' ' + this);
+		}
 	}
 
 	private ModuleEvent doStart(StartOptions... options) throws BundleException {
@@ -647,8 +656,9 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 			// must fire stopping event
 			setState(State.STOPPING);
 			publishEvent(ModuleEvent.STOPPING);
-			if (t instanceof BundleException)
+			if (t instanceof BundleException) {
 				throw (BundleException) t;
+			}
 			throw new BundleException(Msg.Module_StartError + ' ' + this, BundleException.ACTIVATOR_ERROR, t);
 		}
 	}
@@ -699,8 +709,9 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 			stopWorker();
 			return ModuleEvent.STOPPED;
 		} catch (Throwable t) {
-			if (t instanceof BundleException)
+			if (t instanceof BundleException) {
 				throw (BundleException) t;
+			}
 			throw new BundleException(Msg.Module_StopError + ' ' + this, BundleException.ACTIVATOR_ERROR, t);
 		} finally {
 			// must always set the state to stopped
@@ -739,8 +750,9 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	}
 
 	private void persistStopOptions(StopOptions... options) {
-		if (StopOptions.TRANSIENT.isContained(options))
+		if (StopOptions.TRANSIENT.isContained(options)) {
 			return;
+		}
 		settings.remove(Settings.USE_ACTIVATION_POLICY);
 		settings.remove(Settings.AUTO_START);
 		revisions.getContainer().moduleDatabase.persistSettings(settings, this);

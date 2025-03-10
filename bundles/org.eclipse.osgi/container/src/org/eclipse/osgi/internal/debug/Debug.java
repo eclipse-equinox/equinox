@@ -240,8 +240,9 @@ public class Debug implements DebugOptionsListener {
 	 * @param t
 	 */
 	public void traceThrowable(String topic, Throwable t) {
-		if (t == null)
+		if (t == null) {
 			return;
+		}
 		LogService current = logService;
 		if (current != null) {
 			current.getLogger(topic).trace(topic, t);
