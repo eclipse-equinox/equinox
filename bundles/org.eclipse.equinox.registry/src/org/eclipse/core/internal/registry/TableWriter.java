@@ -381,8 +381,7 @@ public class TableWriter {
 		// save the children
 		saveArray(filter(actualCe.getRawChildren()), currentOutput);
 
-		if (actualCe instanceof ConfigurationElementMulti) {
-			ConfigurationElementMulti multiCE = (ConfigurationElementMulti) actualCe;
+		if (actualCe instanceof ConfigurationElementMulti multiCE) {
 			int NLs = multiCE.getNumCachedLocales();
 			currentOutput.writeInt(NLs);
 			if (NLs != 0) {
