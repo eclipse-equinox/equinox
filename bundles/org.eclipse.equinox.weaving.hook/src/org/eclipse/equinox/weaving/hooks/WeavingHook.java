@@ -155,8 +155,7 @@ public class WeavingHook extends AbstractWeavingHook {
 	public byte[] processClass(final String name, final byte[] classbytes, final ClasspathEntry classpathEntry,
 			final BundleEntry entry, final ClasspathManager manager) {
 		byte[] newClassytes = null;
-		if (entry instanceof WeavingBundleEntry) {
-			final WeavingBundleEntry ajBundleEntry = (WeavingBundleEntry) entry;
+		if (entry instanceof final WeavingBundleEntry ajBundleEntry) {
 			if (!ajBundleEntry.dontWeave()) {
 				final IWeavingAdaptor adaptor = ajBundleEntry.getAdaptor();
 				newClassytes = adaptor.weaveClass(name, classbytes);
@@ -178,8 +177,7 @@ public class WeavingHook extends AbstractWeavingHook {
 			}
 			return;
 		}
-		if (entry instanceof WeavingBundleEntry) {
-			final WeavingBundleEntry ajBundleEntry = (WeavingBundleEntry) entry;
+		if (entry instanceof final WeavingBundleEntry ajBundleEntry) {
 			if (!ajBundleEntry.dontWeave()) {
 				final IWeavingAdaptor adaptor = ajBundleEntry.getAdaptor();
 				final URL sourceFileURL = ajBundleEntry.getBundleFileURL();
