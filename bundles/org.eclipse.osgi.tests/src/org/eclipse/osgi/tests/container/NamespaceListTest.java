@@ -171,8 +171,7 @@ public class NamespaceListTest extends AbstractTest {
 
 		@Override
 		public boolean equals(Object o) {
-			if (o instanceof NamespaceElement) {
-				NamespaceElement other = (NamespaceElement) o;
+			if (o instanceof NamespaceElement other) {
 				return this.id == other.id && this.namespace.equals(other.namespace);
 			}
 			return false;

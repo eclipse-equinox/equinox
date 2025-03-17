@@ -115,10 +115,9 @@ public class TestCondition implements Condition {
 
 	@Override
 	public boolean equals(Object o) {
-		if (!(o instanceof TestCondition)) {
+		if (!(o instanceof TestCondition otherCondition)) {
 			return false;
 		}
-		TestCondition otherCondition = (TestCondition) o;
 		return id.equals(otherCondition.id) && postponed == otherCondition.postponed
 				&& satisfied == otherCondition.satisfied && mutable == otherCondition.mutable
 				&& bundle == otherCondition.bundle;
