@@ -289,11 +289,10 @@ public class ValuesView {
 				}
 				StructuredSelection selection = (StructuredSelection) tableViewer.getSelection();
 				Object selected = selection.getFirstElement();
-				if (!(selected instanceof TableValuesElement)) {
+				if (!(selected instanceof TableValuesElement node)) {
 					return;
 				}
 
-				TableValuesElement node = (TableValuesElement) selected;
 				String key = node.getKey();
 
 				// "Are you sure?" dialog
@@ -328,11 +327,10 @@ public class ValuesView {
 				}
 				StructuredSelection selection = (StructuredSelection) tableViewer.getSelection();
 				Object selected = selection.getFirstElement();
-				if (!(selected instanceof TableValuesElement)) {
+				if (!(selected instanceof TableValuesElement node)) {
 					return;
 				}
 
-				TableValuesElement node = (TableValuesElement) selected;
 				String key = node.getKey();
 				try {
 					String value = selectedNode.get(key, null);
@@ -384,11 +382,10 @@ public class ValuesView {
 		}
 		StructuredSelection selection = (StructuredSelection) tableViewer.getSelection();
 		Object selected = selection.getFirstElement();
-		if (!(selected instanceof TableValuesElement)) {
+		if (!(selected instanceof TableValuesElement node)) {
 			return;
 		}
 
-		TableValuesElement node = (TableValuesElement) selected;
 		String key = node.getKey();
 		String value;
 		try {

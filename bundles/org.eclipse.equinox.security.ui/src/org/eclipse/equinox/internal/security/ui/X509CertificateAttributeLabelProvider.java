@@ -49,8 +49,7 @@ public class X509CertificateAttributeLabelProvider extends LabelProvider impleme
 	public String getColumnText(Object element, int columnIndex) {
 		String text = ""; //$NON-NLS-1$
 
-		if (element instanceof X509CertificateAttribute) {
-			X509CertificateAttribute curEntry = (X509CertificateAttribute) element;
+		if (element instanceof X509CertificateAttribute curEntry) {
 			switch (columnIndex) {
 			// Attribute/field Name
 			case 0:

@@ -101,9 +101,7 @@ public class X509CertificateAttributeContentProvider implements IStructuredConte
 		clear(false); // clear the viewer.
 
 		// Be safe ... check the input
-		if (newInput instanceof X509Certificate) {
-
-			X509Certificate theCert = (X509Certificate) newInput;
+		if (newInput instanceof X509Certificate theCert) {
 
 			X509CertificateAttribute ver = new X509CertificateAttribute(SecurityUIMsg.CERTPROP_X509_VERSION,
 					Integer.toString(theCert.getVersion()));

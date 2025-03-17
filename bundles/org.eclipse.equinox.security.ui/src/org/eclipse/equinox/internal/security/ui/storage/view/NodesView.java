@@ -72,10 +72,9 @@ public class NodesView {
 
 		@Override
 		public Object getParent(Object child) {
-			if (!(child instanceof ISecurePreferences)) {
+			if (!(child instanceof ISecurePreferences node)) {
 				return null;
 			}
-			ISecurePreferences node = (ISecurePreferences) child;
 			ISecurePreferences parentNode = node.parent();
 			if (parentNode == null) {
 				return null;
@@ -85,10 +84,9 @@ public class NodesView {
 
 		@Override
 		public Object[] getChildren(Object parent) {
-			if (!(parent instanceof ISecurePreferences)) {
+			if (!(parent instanceof ISecurePreferences node)) {
 				return new Object[0];
 			}
-			ISecurePreferences node = (ISecurePreferences) parent;
 			String[] childrenNames = node.childrenNames();
 			ISecurePreferences[] result = new ISecurePreferences[childrenNames.length];
 			for (int i = 0; i < childrenNames.length; i++) {
@@ -99,10 +97,9 @@ public class NodesView {
 
 		@Override
 		public boolean hasChildren(Object parent) {
-			if (!(parent instanceof ISecurePreferences)) {
+			if (!(parent instanceof ISecurePreferences node)) {
 				return false;
 			}
-			ISecurePreferences node = (ISecurePreferences) parent;
 			String[] childrenNames = node.childrenNames();
 			return (childrenNames.length > 0);
 		}
@@ -112,10 +109,9 @@ public class NodesView {
 
 		@Override
 		public String getText(Object obj) {
-			if (!(obj instanceof ISecurePreferences)) {
+			if (!(obj instanceof ISecurePreferences node)) {
 				return obj.toString();
 			}
-			ISecurePreferences node = (ISecurePreferences) obj;
 			if (node.parent() == null) {
 				return '[' + SecUIMessages.rootNodeName + ']';
 			}
@@ -161,8 +157,7 @@ public class NodesView {
 			boolean canAdd = false;
 			TreeSelection selection = (TreeSelection) nodeTreeViewer.getSelection();
 			Object selected = selection.getFirstElement();
-			if (selected instanceof ISecurePreferences) {
-				ISecurePreferences node = (ISecurePreferences) selected;
+			if (selected instanceof ISecurePreferences node) {
 				boolean isRoot = (node.parent() == null);
 				boolean isInternal = node.absolutePath().startsWith(IStorageConst.PROVIDER_NODE);
 				canRemove = (!isRoot && !isInternal);
@@ -198,9 +193,7 @@ public class NodesView {
 			public void run() {
 				TreeSelection selection = (TreeSelection) nodeTreeViewer.getSelection();
 				Object selected = selection.getFirstElement();
-				if (selected instanceof ISecurePreferences) {
-					ISecurePreferences node = (ISecurePreferences) selected;
-
+				if (selected instanceof ISecurePreferences node) {
 					NewNodeDialog nodeDialog = new NewNodeDialog(nodeTreeViewer.getControl().getShell());
 					if (nodeDialog.open() != Window.OK) {
 						return;
@@ -233,8 +226,7 @@ public class NodesView {
 				TreeSelection selection = (TreeSelection) nodeTreeViewer.getSelection();
 				Object selected = selection.getFirstElement();
 
-				if (selected instanceof ISecurePreferences) {
-					ISecurePreferences node = (ISecurePreferences) selected;
+				if (selected instanceof ISecurePreferences node) {
 					ISecurePreferences parentNode = node.parent();
 					if (parentNode == null) {
 						return; // can't remove root node

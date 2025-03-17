@@ -378,8 +378,7 @@ public class TabPassword {
 	private String getModuleId(TableItem item) {
 		String moduleId = null;
 		Object itemData = item.getData();
-		if (itemData instanceof PasswordProviderDescription) {
-			PasswordProviderDescription module = (PasswordProviderDescription) itemData;
+		if (itemData instanceof PasswordProviderDescription module) {
 			moduleId = module.getId();
 		}
 		return moduleId;
