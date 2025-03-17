@@ -42,11 +42,10 @@ public class RolePrincipal implements Principal {
 			return true;
 		}
 
-		if (!(role instanceof RolePrincipal)) {
+		if (!(role instanceof RolePrincipal otherRole)) {
 			return false;
 		}
 
-		RolePrincipal otherRole = (RolePrincipal) role;
 		if (roleName != null) {
 			if (roleName.equals(otherRole.roleName)) {
 				return true;
