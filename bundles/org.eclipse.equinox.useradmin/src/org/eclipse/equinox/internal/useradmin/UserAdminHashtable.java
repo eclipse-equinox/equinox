@@ -90,11 +90,9 @@ public class UserAdminHashtable extends Hashtable<String, Object> {
 
 	@Override
 	public synchronized Object remove(Object key) {
-		if (!(key instanceof String)) {
+		if (!(key instanceof String name)) {
 			throw new IllegalArgumentException(UserAdminMsg.INVALID_KEY_EXCEPTION);
 		}
-
-		String name = (String) key;
 
 		switch (propertyType) {
 		case PROPERTIES:
@@ -161,11 +159,9 @@ public class UserAdminHashtable extends Hashtable<String, Object> {
 
 	@Override
 	public Object get(Object key) {
-		if (!(key instanceof String)) {
+		if (!(key instanceof String name)) {
 			throw new IllegalArgumentException(UserAdminMsg.INVALID_KEY_EXCEPTION);
 		}
-
-		String name = (String) key;
 
 		if (propertyType == CREDENTIALS) {
 			userAdmin.checkGetCredentialPermission(name);
