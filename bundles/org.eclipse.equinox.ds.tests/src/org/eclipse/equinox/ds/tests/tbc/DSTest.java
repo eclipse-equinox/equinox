@@ -1499,8 +1499,7 @@ public class DSTest {
 			return false;
 		}
 		for (Object service : services) {
-			if (service instanceof NamespaceProvider) {
-				NamespaceProvider s = (NamespaceProvider) service;
+			if (service instanceof NamespaceProvider s) {
 				if (s.getComponentNSID() == nsid) {
 					return true;
 				}
@@ -3070,8 +3069,7 @@ public class DSTest {
 			return null;
 		}
 		for (Object service : services) {
-			if (service instanceof PropertiesProvider) {
-				PropertiesProvider s = (PropertiesProvider) service;
+			if (service instanceof PropertiesProvider s) {
 				Dictionary props = s.getProperties();
 				if (props != null && ((String) props.get(ComponentConstants.COMPONENT_NAME)).equals(componentName)) {
 					return s;
