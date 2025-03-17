@@ -190,11 +190,9 @@ public class ApplicationAdminPermission extends Permission {
 			return false;
 		}
 				
-		if(!(otherPermission instanceof ApplicationAdminPermission)) {
+		if(!(otherPermission instanceof ApplicationAdminPermission other)) {
 			return false;
 		}
-
-		ApplicationAdminPermission other = (ApplicationAdminPermission) otherPermission;
 
 		if( !filter.equals("*") ) {
 			if( other.applicationDescriptor == null ) {
@@ -235,11 +233,9 @@ public class ApplicationAdminPermission extends Permission {
 
 	@Override
 	public boolean equals(Object with) {
-		if( with == null || !(with instanceof ApplicationAdminPermission) ) {
+		if( with == null || !(with instanceof ApplicationAdminPermission other) ) {
 			return false;
 		}
-		
-		ApplicationAdminPermission other = (ApplicationAdminPermission)with;  	
 		
 		// Compare actions:
 		if( other.actionsVector.size() != actionsVector.size() ) {
@@ -342,10 +338,9 @@ public class ApplicationAdminPermission extends Permission {
 		
 		@Override
 		public boolean equals(Object o) {
-			if (!(o instanceof SignerWrapper)) {
+			if (!(o instanceof SignerWrapper other)) {
 				return false;
 			}
-			SignerWrapper other = (SignerWrapper) o;
 			ApplicationDescriptor matchAppDesc = (ApplicationDescriptor) (appDesc != null ? appDesc : other.appDesc);
 			String matchPattern = appDesc != null ? other.pattern : pattern;
 			return matchAppDesc.matchDNChain(matchPattern);
