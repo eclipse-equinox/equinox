@@ -60,9 +60,7 @@ public class Adapters {
 			return (T) sourceObject;
 		}
 
-		if (sourceObject instanceof IAdaptable) {
-			IAdaptable adaptable = (IAdaptable) sourceObject;
-
+		if (sourceObject instanceof IAdaptable adaptable) {
 			Object result = adaptable.getAdapter(adapter);
 			if (result != null) {
 				// Sanity-check

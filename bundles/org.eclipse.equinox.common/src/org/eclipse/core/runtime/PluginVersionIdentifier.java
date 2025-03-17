@@ -243,10 +243,9 @@ public final class PluginVersionIdentifier {
 	 */
 	@Override
 	public boolean equals(Object object) {
-		if (!(object instanceof PluginVersionIdentifier)) {
+		if (!(object instanceof PluginVersionIdentifier v)) {
 			return false;
 		}
-		PluginVersionIdentifier v = (PluginVersionIdentifier) object;
 		return version.equals(v.version);
 	}
 
