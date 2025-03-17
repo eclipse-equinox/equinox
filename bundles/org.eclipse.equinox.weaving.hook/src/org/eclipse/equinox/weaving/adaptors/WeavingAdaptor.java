@@ -152,8 +152,7 @@ public class WeavingAdaptor implements IWeavingAdaptor {
 					final Generation hostGeneration = (Generation) ((ModuleRevision) host.adapt(BundleRevision.class))
 							.getRevisionInfo();
 					final BundleFile bundleFile = hostGeneration.getBundleFile();
-					if (bundleFile instanceof WeavingBundleFile) {
-						final WeavingBundleFile hostFile = (WeavingBundleFile) bundleFile;
+					if (bundleFile instanceof final WeavingBundleFile hostFile) {
 						final WeavingAdaptor hostAdaptor = (WeavingAdaptor) hostFile.getAdaptor();
 						weavingService = hostAdaptor.weavingService;
 						cachingService = factory.getCachingService(hostAdaptor.moduleLoader, bundle, weavingService);
