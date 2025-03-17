@@ -272,10 +272,9 @@ public class JavaEncryption {
 				if (key == null) {
 					continue;
 				}
-				if (!(key instanceof String)) {
+				if (!(key instanceof String value)) {
 					continue;
 				}
-				String value = (String) key;
 				if (value.indexOf(' ') != -1) { // skips properties like "[Cipher.ABC SupportedPaddings]"
 					continue;
 				}

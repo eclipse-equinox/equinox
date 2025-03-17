@@ -77,10 +77,9 @@ public class SecurePreferencesWrapper implements ISecurePreferences {
 		if (obj == null) {
 			return false;
 		}
-		if (!(obj instanceof SecurePreferencesWrapper)) {
+		if (!(obj instanceof SecurePreferencesWrapper other)) {
 			return false;
 		}
-		SecurePreferencesWrapper other = (SecurePreferencesWrapper) obj;
 		return container.equals(other.container) && node.equals(other.node);
 	}
 
