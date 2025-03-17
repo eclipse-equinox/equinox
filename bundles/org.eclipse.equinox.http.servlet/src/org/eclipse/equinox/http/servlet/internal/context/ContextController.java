@@ -496,10 +496,9 @@ public class ContextController {
 	private void recordErrorPageShadowing(ErrorPageRegistration newRegistration) {
 		Set<ErrorPageRegistration> shadowedEPs = new HashSet<>();
 		for (EndpointRegistration<?> existingRegistration : endpointRegistrations) {
-			if (!(existingRegistration instanceof ErrorPageRegistration)) {
+			if (!(existingRegistration instanceof ErrorPageRegistration existingSRegistration)) {
 				continue;
 			}
-			ErrorPageRegistration existingSRegistration = (ErrorPageRegistration) existingRegistration;
 			ExtendedErrorPageDTO existingErrorPageDTO = existingSRegistration.getD();
 			if ((existingErrorPageDTO == null) || (((existingErrorPageDTO.errorCodeType == ErrorCodeType.RANGE_4XX)
 					|| (existingErrorPageDTO.errorCodeType == ErrorCodeType.RANGE_5XX))
@@ -992,12 +991,10 @@ public class ContextController {
 					DTOConstants.FAILURE_REASON_VALIDATION_FAILED);
 		}
 
-		if (!(prefixObj instanceof String)) {
+		if (!(prefixObj instanceof String prefix)) {
 			throw new HttpWhiteboardFailureException("Prefix must be String.", //$NON-NLS-1$
 					DTOConstants.FAILURE_REASON_VALIDATION_FAILED);
 		}
-
-		String prefix = (String) prefixObj;
 
 		if (prefix.endsWith(Const.SLASH) && !prefix.equals(Const.SLASH)) {
 			throw new HttpWhiteboardFailureException("Invalid prefix '" + prefix + "'", //$NON-NLS-1$ //$NON-NLS-2$

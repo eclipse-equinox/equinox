@@ -105,11 +105,9 @@ public class ServletContextAdaptor {
 
 		InvocationHandler invocationHandler = Proxy.getInvocationHandler(obj);
 
-		if (!(invocationHandler instanceof AdaptorInvocationHandler)) {
+		if (!(invocationHandler instanceof AdaptorInvocationHandler adaptorInvocationHandler)) {
 			return false;
 		}
-
-		AdaptorInvocationHandler adaptorInvocationHandler = (AdaptorInvocationHandler) invocationHandler;
 
 		return contextController.equals(adaptorInvocationHandler.getContextController());
 	}

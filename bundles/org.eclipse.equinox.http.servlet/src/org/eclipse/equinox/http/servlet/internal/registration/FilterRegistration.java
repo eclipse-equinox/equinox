@@ -128,11 +128,9 @@ public class FilterRegistration extends MatchableRegistration<Filter, FilterDTO>
 
 	@Override
 	public boolean equals(Object obj) {
-		if (!(obj instanceof FilterRegistration)) {
+		if (!(obj instanceof FilterRegistration filterRegistration)) {
 			return false;
 		}
-
-		FilterRegistration filterRegistration = (FilterRegistration) obj;
 
 		return getT().equals(filterRegistration.getT());
 	}

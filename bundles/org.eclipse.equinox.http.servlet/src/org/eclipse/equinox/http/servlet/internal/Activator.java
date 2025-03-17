@@ -101,12 +101,10 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer<Http
 		try {
 			HttpServlet httpServlet = currentContext.getService(serviceReference);
 
-			if (!(httpServlet instanceof ProxyServlet)) {
+			if (!(httpServlet instanceof ProxyServlet proxyServlet)) {
 				currentContext.ungetService(serviceReference);
 				return null;
 			}
-
-			ProxyServlet proxyServlet = (ProxyServlet) httpServlet;
 
 			ServletConfig servletConfig = proxyServlet.getServletConfig();
 			ServletContext servletContext = servletConfig.getServletContext();

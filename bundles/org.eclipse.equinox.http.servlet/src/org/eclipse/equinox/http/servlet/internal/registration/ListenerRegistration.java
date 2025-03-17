@@ -92,11 +92,9 @@ public class ListenerRegistration extends Registration<EventListener, ListenerDT
 
 	@Override
 	public boolean equals(Object obj) {
-		if (!(obj instanceof ListenerRegistration)) {
+		if (!(obj instanceof ListenerRegistration listenerRegistration)) {
 			return false;
 		}
-
-		ListenerRegistration listenerRegistration = (ListenerRegistration) obj;
 
 		return listenerRegistration.getT().equals(super.getT());
 	}

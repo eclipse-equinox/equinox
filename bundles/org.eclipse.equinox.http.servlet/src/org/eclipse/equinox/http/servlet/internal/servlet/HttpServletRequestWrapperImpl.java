@@ -454,9 +454,7 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 	public AsyncContext startAsync() throws IllegalStateException {
 		EndpointRegistration<?> endpointRegistration = dispatchTargets.peek().getServletRegistration();
 
-		if (endpointRegistration instanceof ServletRegistration) {
-			ServletRegistration servletRegistration = (ServletRegistration) endpointRegistration;
-
+		if (endpointRegistration instanceof ServletRegistration servletRegistration) {
 			if (servletRegistration.getD().asyncSupported) {
 				return request.startAsync();
 			}
