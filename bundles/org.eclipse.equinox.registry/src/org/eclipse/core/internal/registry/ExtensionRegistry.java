@@ -1062,8 +1062,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 					});
 				}
 			}
-			if (listenerInfo.listener instanceof IRegistryEventListener) {
-				IRegistryEventListener extensionListener = (IRegistryEventListener) listenerInfo.listener;
+			if (listenerInfo.listener instanceof IRegistryEventListener extensionListener) {
 				IExtension[] extensions = extendedDelta.getExtensions(listenerInfo.filter);
 				IExtensionPoint[] extensionPoints = extendedDelta.getExtensionPoints(listenerInfo.filter);
 
