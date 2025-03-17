@@ -118,8 +118,7 @@ public class PlatformLogWriter implements SynchronousLogListener, LogFilter {
 		if (context instanceof IStatus) {
 			return (IStatus) context;
 		}
-		if (context instanceof FrameworkLogEntry) {
-			FrameworkLogEntry fLogEntry = (FrameworkLogEntry) context;
+		if (context instanceof FrameworkLogEntry fLogEntry) {
 			context = fLogEntry.getContext();
 			if (context instanceof IStatus) {
 				return (IStatus) context;

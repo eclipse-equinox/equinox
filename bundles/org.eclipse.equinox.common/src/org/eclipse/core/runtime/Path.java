@@ -706,10 +706,9 @@ public final class Path implements IPath, Cloneable {
 		if (this == obj) {
 			return true;
 		}
-		if (!(obj instanceof Path)) {
+		if (!(obj instanceof Path target)) {
 			return false;
 		}
-		Path target = (Path) obj;
 		// check leading separators
 		if ((flags & (HAS_LEADING | IS_UNC)) != (target.flags & (HAS_LEADING | IS_UNC))) {
 			return false;

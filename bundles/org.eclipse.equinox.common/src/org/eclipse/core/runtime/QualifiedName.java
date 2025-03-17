@@ -69,10 +69,9 @@ public final class QualifiedName {
 		if (obj == this) {
 			return true;
 		}
-		if (!(obj instanceof QualifiedName)) {
+		if (!(obj instanceof QualifiedName qName)) {
 			return false;
 		}
-		QualifiedName qName = (QualifiedName) obj;
 		/* There may or may not be a qualifier */
 		if (qualifier == null && qName.getQualifier() != null) {
 			return false;

@@ -52,15 +52,13 @@ public class AdapterFactoryBridge
 
 	private static String[] getMultiProperty(ServiceReference<?> reference, String propertyName) {
 		Object property = reference.getProperty(propertyName);
-		if (property instanceof String) {
-			String string = (String) property;
+		if (property instanceof String string) {
 			if (string.length() > 0) {
 				return new String[] { string };
 			}
 		} else if (property instanceof String[]) {
 			return (String[]) property;
-		} else if (property instanceof Collection<?>) {
-			Collection<?> collection = (Collection<?>) property;
+		} else if (property instanceof Collection<?> collection) {
 			return collection.stream().filter(String.class::isInstance).map(String.class::cast).toArray(String[]::new);
 		}
 		return new String[0];
@@ -71,8 +69,7 @@ public class AdapterFactoryBridge
 		String[] adaptableClasses = getMultiProperty(reference, IAdapterFactory.SERVICE_PROPERTY_ADAPTABLE_CLASS);
 		AdapterManager manager = AdapterManager.getDefault();
 		manager.unregisterAdapters(proxy);
-		if (proxy instanceof LazyAdapterFactoryExtServiceProxy) {
-			LazyAdapterFactoryExtServiceProxy lazy = (LazyAdapterFactoryExtServiceProxy) proxy;
+		if (proxy instanceof LazyAdapterFactoryExtServiceProxy lazy) {
 			lazy.adapterNames = getMultiProperty(reference, IAdapterFactory.SERVICE_PROPERTY_ADAPTER_NAMES);
 		}
 		for (String adaptableClass : adaptableClasses) {

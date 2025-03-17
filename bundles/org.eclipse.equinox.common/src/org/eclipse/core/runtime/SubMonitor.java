@@ -548,8 +548,7 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 
 		// Optimization: if the given monitor already a SubMonitor, no conversion is
 		// necessary
-		if (monitor instanceof SubMonitor) {
-			SubMonitor subMonitor = (SubMonitor) monitor;
+		if (monitor instanceof SubMonitor subMonitor) {
 			subMonitor.beginTaskImpl(taskName, work);
 			return subMonitor;
 		}
