@@ -77,11 +77,10 @@ public class UserPrincipal implements Principal {
 			return true;
 		}
 
-		if (!(userPrincipal instanceof UserPrincipal)) {
+		if (!(userPrincipal instanceof UserPrincipal otherUser)) {
 			return false;
 		}
 
-		UserPrincipal otherUser = (UserPrincipal) userPrincipal;
 		if (username != null) {
 			if (!username.equals(otherUser.username)) {
 				return false;
