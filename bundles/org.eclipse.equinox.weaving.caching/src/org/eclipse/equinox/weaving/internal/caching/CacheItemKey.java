@@ -49,10 +49,9 @@ public final class CacheItemKey {
 
 	@Override
 	public boolean equals(final Object obj) {
-		if (!(obj instanceof CacheItemKey)) {
+		if (!(obj instanceof final CacheItemKey other)) {
 			return false;
 		}
-		final CacheItemKey other = (CacheItemKey) obj;
 		return Objects.equals(other.name, name) && Objects.equals(other.directory, directory);
 	}
 
