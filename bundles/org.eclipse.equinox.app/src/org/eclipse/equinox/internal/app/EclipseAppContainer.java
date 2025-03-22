@@ -692,8 +692,8 @@ public class EclipseAppContainer
 		if (appRunnable != null) {
 			// found a main threaded app; start it now that the app launcher is available
 			appLauncher.launch(appRunnable,
-					appRunnable instanceof EclipseAppHandle
-							? ((EclipseAppHandle) appRunnable).getArguments().get(IApplicationContext.APPLICATION_ARGS)
+					appRunnable instanceof EclipseAppHandle e
+							? e.getArguments().get(IApplicationContext.APPLICATION_ARGS)
 							: null);
 		}
 		return appLauncher;
