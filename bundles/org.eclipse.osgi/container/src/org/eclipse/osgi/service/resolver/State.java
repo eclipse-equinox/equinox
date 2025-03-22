@@ -208,6 +208,7 @@ public interface State {
 	 * @deprecated use
 	 *             {@link #resolveBundle(BundleDescription, boolean, BundleDescription[], ExportPackageDescription[], ExportPackageDescription[], GenericDescription[], BundleDescription[], ExportPackageDescription[], GenericDescription[], Map)}
 	 */
+	@Deprecated
 	public void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] hosts,
 			ExportPackageDescription[] selectedExports, BundleDescription[] resolvedRequires,
 			ExportPackageDescription[] resolvedImports);
@@ -240,6 +241,7 @@ public interface State {
 	 * @deprecated use
 	 *             {@link #resolveBundle(BundleDescription, boolean, BundleDescription[], ExportPackageDescription[], ExportPackageDescription[], GenericDescription[], BundleDescription[], ExportPackageDescription[], GenericDescription[], Map)}
 	 */
+	@Deprecated
 	public void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] hosts,
 			ExportPackageDescription[] selectedExports, ExportPackageDescription[] substitutedExports,
 			BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports);
@@ -438,6 +440,7 @@ public interface State {
 	 * @deprecated The exact form of this has never been defined. There is no
 	 *             alternative method available.
 	 */
+	@Deprecated
 	public void setOverrides(Object value);
 
 	/**

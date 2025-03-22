@@ -74,8 +74,9 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 	static {
 		AllPermission allPerm = new AllPermission();
 		ALLPERMISSIONS = allPerm.newPermissionCollection();
-		if (ALLPERMISSIONS != null)
+		if (ALLPERMISSIONS != null) {
 			ALLPERMISSIONS.add(allPerm);
+		}
 	}
 
 	/**
@@ -101,6 +102,7 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 
 	private static final class ClassNameLock {
 		static final Function<String, ClassNameLock> SUPPLIER = new Function<String, ClassNameLock>() {
+			@Override
 			public ClassNameLock apply(String className) {
 				return new ClassNameLock(className);
 			}
@@ -232,8 +234,9 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 		}
 
 		URL url = getBundleLoader().findResource(name);
-		if (url != null)
+		if (url != null) {
 			return (url);
+		}
 
 		if (getDebug().DEBUG_LOADER) {
 			getDebug().trace(OPTION_DEBUG_LOADER,
@@ -422,8 +425,9 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 	public String toString() {
 		Bundle b = getBundle();
 		StringBuilder result = new StringBuilder(super.toString());
-		if (b == null)
+		if (b == null) {
 			return result.toString();
+		}
 		return result.append('[').append(b.getSymbolicName()).append(':').append(b.getVersion()).append("(id=") //$NON-NLS-1$
 				.append(b.getBundleId()).append(")]").toString(); //$NON-NLS-1$
 	}

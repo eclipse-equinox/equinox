@@ -286,8 +286,9 @@ public final class BundleInfo {
 				lastModified = 0;
 				return;
 			}
-			if (isDirectory)
+			if (isDirectory) {
 				content = new File(content, OSGI_BUNDLE_MANIFEST); // $NON-NLS-1$
+			}
 			lastModified = Storage.secureAction.lastModified(content);
 		}
 
@@ -305,8 +306,9 @@ public final class BundleInfo {
 		public <S, L, H extends StorageHook<S, L>> H getStorageHook(
 				Class<? extends StorageHookFactory<S, L, H>> factoryClass) {
 			synchronized (this.genMonitor) {
-				if (this.storageHooks == null)
+				if (this.storageHooks == null) {
 					return null;
+				}
 				for (StorageHook<?, ?> hook : storageHooks) {
 					if (hook.getFactoryClass().equals(factoryClass)) {
 						return (H) hook;
@@ -387,13 +389,15 @@ public final class BundleInfo {
 		public void storeContent(File destination, InputStream in, boolean nativeCode) throws IOException {
 			Debug debug = getStorage().getConfiguration().getDebug();
 			/* the entry has not been cached */
-			if (debug.DEBUG_STORAGE)
+			if (debug.DEBUG_STORAGE) {
 				debug.trace(OPTION_DEBUG_STORAGE, "Creating file: " + destination.getPath()); //$NON-NLS-1$
+			}
 			/* create the necessary directories */
 			File dir = new File(destination.getParent());
 			if (!dir.mkdirs() && !dir.isDirectory()) {
-				if (debug.DEBUG_STORAGE)
+				if (debug.DEBUG_STORAGE) {
 					debug.trace(OPTION_DEBUG_STORAGE, "Unable to create directory: " + dir.getPath()); //$NON-NLS-1$
+				}
 				throw new IOException(NLS.bind(Msg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION, dir.getAbsolutePath()));
 			}
 			/* copy the entry to the cache */
@@ -573,9 +577,10 @@ public final class BundleInfo {
 		if (!Storage.secureAction.isDirectory(dataRoot) && (storage.isReadOnly()
 				|| !(Storage.secureAction.mkdirs(dataRoot) || Storage.secureAction.isDirectory(dataRoot)))) {
 			Debug debug = getStorage().getConfiguration().getDebug();
-			if (debug.DEBUG_STORAGE)
+			if (debug.DEBUG_STORAGE) {
 				debug.trace(OPTION_DEBUG_STORAGE,
 						"Unable to create bundle data directory: " + dataRoot.getAbsolutePath()); //$NON-NLS-1$
+			}
 			return null;
 		}
 		return path == null ? dataRoot : new File(dataRoot, path);
@@ -595,19 +600,22 @@ public final class BundleInfo {
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(manifest.getInputStream()))) {
 			String line;
 			while ((line = br.readLine()) != null) {
-				if (line.length() < 20)
+				if (line.length() < 20) {
 					continue;
+				}
 				switch (line.charAt(0)) {
 				case 'S':
 					if (line.charAt(1) == 'p' && (line.startsWith("Specification-Title: ") //$NON-NLS-1$
 							|| line.startsWith("Specification-Version: ") //$NON-NLS-1$
-							|| line.startsWith("Specification-Vendor: "))) //$NON-NLS-1$
+							|| line.startsWith("Specification-Vendor: "))) { //$NON-NLS-1$
 						return true;
+					}
 					break;
 				case 'I':
 					if (line.startsWith("Implementation-Title: ") || line.startsWith("Implementation-Version: ") //$NON-NLS-1$ //$NON-NLS-2$
-							|| line.startsWith("Implementation-Vendor: ")) //$NON-NLS-1$
+							|| line.startsWith("Implementation-Vendor: ")) { //$NON-NLS-1$
 						return true;
+					}
 					break;
 				}
 			}
