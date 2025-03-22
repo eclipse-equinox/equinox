@@ -301,8 +301,8 @@ public final class AdapterManager implements IAdapterManager {
 		Assert.isNotNull(adapterType);
 		return getFactories(adaptable.getClass()).getOrDefault(adapterType, Collections.emptyList()) //
 				.stream() //
-				.map(factory -> force && factory instanceof IAdapterFactoryExt
-						? ((IAdapterFactoryExt) factory).loadFactory(true)
+				.map(factory -> force && factory instanceof IAdapterFactoryExt i
+						? i.loadFactory(true)
 						: factory) //
 				.filter(Objects::nonNull).map(factory -> {
 					Class<?> adapterClass = classForName(factory, adapterType);
