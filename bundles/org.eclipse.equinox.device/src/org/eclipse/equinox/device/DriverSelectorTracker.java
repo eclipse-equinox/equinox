@@ -120,11 +120,11 @@ public class DriverSelectorTracker extends ServiceTracker {
 		// first we check service rankings
 		Object property = ref1.getProperty(org.osgi.framework.Constants.SERVICE_RANKING);
 
-		int ref1Ranking = (property instanceof Integer) ? ((Integer) property).intValue() : 0;
+		int ref1Ranking = (property instanceof Integer i) ? i.intValue() : 0;
 
 		property = ref2.getProperty(org.osgi.framework.Constants.SERVICE_RANKING);
 
-		int ref2Ranking = (property instanceof Integer) ? ((Integer) property).intValue() : 0;
+		int ref2Ranking = (property instanceof Integer i) ? i.intValue() : 0;
 
 		if (ref1Ranking > ref2Ranking) {
 			return ref1;
