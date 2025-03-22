@@ -266,7 +266,7 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 		// (bug 321386) only set the exit code if the result != null; when result ==
 		// null we assume an exception was thrown
 		if (isDefault() && result != null) {
-			int exitCode = result instanceof Integer ? ((Integer) result).intValue() : 0;
+			int exitCode = result instanceof Integer i ? i.intValue() : 0;
 			// Use the EnvironmentInfo Service to set properties
 			Activator.setProperty(PROP_ECLIPSE_EXITCODE, Integer.toString(exitCode));
 		}
@@ -332,9 +332,9 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 				// sort in descending order
 				// sort based on service ranking first; highest rank wins
 				Object property = ref1.getProperty(Constants.SERVICE_RANKING);
-				int rank1 = (property instanceof Integer) ? ((Integer) property).intValue() : 0;
+				int rank1 = (property instanceof Integer i) ? i.intValue() : 0;
 				property = ref2.getProperty(Constants.SERVICE_RANKING);
-				int rank2 = (property instanceof Integer) ? ((Integer) property).intValue() : 0;
+				int rank2 = (property instanceof Integer i) ? i.intValue() : 0;
 				if (rank1 != rank2) {
 					return rank1 > rank2 ? -1 : 1;
 				}
