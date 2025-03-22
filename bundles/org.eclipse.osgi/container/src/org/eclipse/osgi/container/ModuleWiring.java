@@ -274,8 +274,9 @@ public final class ModuleWiring implements BundleWiring {
 
 	@Override
 	public List<URL> findEntries(String path, String filePattern, int options) {
-		if (!hasResourcePermission())
+		if (!hasResourcePermission()) {
 			return Collections.emptyList();
+		}
 		if (!isValid) {
 			return null;
 		}
@@ -289,8 +290,9 @@ public final class ModuleWiring implements BundleWiring {
 
 	@Override
 	public Collection<String> listResources(String path, String filePattern, int options) {
-		if (!hasResourcePermission())
+		if (!hasResourcePermission()) {
 			return Collections.emptyList();
+		}
 		if (!isValid) {
 			return null;
 		}

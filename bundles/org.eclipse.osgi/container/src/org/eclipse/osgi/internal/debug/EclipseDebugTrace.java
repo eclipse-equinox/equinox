@@ -158,8 +158,9 @@ class EclipseDebugTrace implements DebugTrace {
 	 *         this bundle; Otherwise false.
 	 */
 	private final boolean isDebuggingEnabled(final String optionPath) {
-		if (optionPath == null)
+		if (optionPath == null) {
 			return true;
+		}
 		boolean debugEnabled = false;
 		if (debugOptions.isDebugEnabled()) {
 			final String option = bundleSymbolicName + optionPath;

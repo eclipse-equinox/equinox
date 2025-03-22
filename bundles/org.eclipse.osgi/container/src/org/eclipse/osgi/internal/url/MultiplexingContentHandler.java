@@ -17,8 +17,8 @@ import java.net.URLConnection;
 
 public class MultiplexingContentHandler extends ContentHandler {
 
-	private String contentType;
-	private ContentHandlerFactoryImpl factory;
+	private final String contentType;
+	private final ContentHandlerFactoryImpl factory;
 
 	public MultiplexingContentHandler(String contentType, ContentHandlerFactoryImpl factory) {
 		this.contentType = contentType;
@@ -28,8 +28,9 @@ public class MultiplexingContentHandler extends ContentHandler {
 	@Override
 	public Object getContent(URLConnection uConn) throws IOException {
 		ContentHandler handler = factory.findAuthorizedContentHandler(contentType);
-		if (handler != null)
+		if (handler != null) {
 			return handler.getContent(uConn);
+		}
 
 		return uConn.getInputStream();
 	}
