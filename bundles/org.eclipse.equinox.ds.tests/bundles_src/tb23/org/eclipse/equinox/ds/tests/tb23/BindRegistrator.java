@@ -72,7 +72,7 @@ public class BindRegistrator implements ComponentContextProvider {
 			return;
 		}
 		Object prop = properties.get("config.base.data");
-		int data = (prop instanceof Integer) ? ((Integer) prop).intValue() : 0;
+		int data = (prop instanceof Integer i) ? i.intValue() : 0;
 		properties.put("config.base.data", Integer.valueOf(data | value));
 	}
 

@@ -1884,8 +1884,8 @@ public class DSTest {
 		final String CC_BC_MAP_INT_NS110 = "org.eclipse.equinox.ds.tests.tb12.CcBcMapIntNS110";
 
 		PropertiesProvider bs = getBaseService(NOTSET_NS100);
-		ComponentContext cc = (bs instanceof ComponentContextProvider)
-				? ((ComponentContextProvider) bs).getComponentContext()
+		ComponentContext cc = (bs instanceof ComponentContextProvider c)
+				? c.getComponentContext()
 				: null;
 		assertNotNull("Component context should be available", cc);
 
@@ -2029,8 +2029,8 @@ public class DSTest {
 
 		bs = getBaseService(INT_NS110);
 		assertNotNull(bs);
-		ComponentContext ccIntNS110 = (bs instanceof ComponentContextProvider)
-				? ((ComponentContextProvider) bs).getComponentContext()
+		ComponentContext ccIntNS110 = (bs instanceof ComponentContextProvider c)
+				? c.getComponentContext()
 				: null;
 		assertNotNull("Component context should be available for " + INT_NS110, ccIntNS110);
 		ccIntNS110.getComponentInstance().dispose();
@@ -2125,8 +2125,8 @@ public class DSTest {
 		assertNull("Component " + OPT_REF_100 + " should not be activated", getBaseService(OPT_REF_100));
 		assertNotNull("Component " + OPT_REF_110 + " should be activated", bs = getBaseService(OPT_REF_110));
 
-		ComponentContext cc = (bs instanceof ComponentContextProvider)
-				? ((ComponentContextProvider) bs).getComponentContext()
+		ComponentContext cc = (bs instanceof ComponentContextProvider c)
+				? c.getComponentContext()
 				: null;
 		assertNotNull("Component context should be available", cc);
 		assertNotNull("Optional reference name should be set to interface attribute",
@@ -2152,8 +2152,8 @@ public class DSTest {
 		PropertiesProvider serviceC3 = getBaseService(C3);
 		assertNotNull("Component " + C3 + " should be activated", serviceC3);
 
-		ComponentContext cc = (serviceC1 instanceof ComponentContextProvider)
-				? ((ComponentContextProvider) serviceC1).getComponentContext()
+		ComponentContext cc = (serviceC1 instanceof ComponentContextProvider c)
+				? c.getComponentContext()
 				: null;
 		assertNotNull("Component context should be available", cc);
 
@@ -2178,8 +2178,8 @@ public class DSTest {
 		final String C2 = "org.eclipse.equinox.ds.tests.tb16.C2";
 
 		PropertiesProvider bs = getBaseService(EXPOSER);
-		ComponentContext cc = (bs instanceof ComponentContextProvider)
-				? ((ComponentContextProvider) bs).getComponentContext()
+		ComponentContext cc = (bs instanceof ComponentContextProvider c)
+				? c.getComponentContext()
 				: null;
 		assertNotNull("Component context should be available", cc);
 
