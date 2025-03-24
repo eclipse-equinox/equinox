@@ -234,6 +234,9 @@ gboolean gdbus_call_FileOpen () {
 /* Get current scaling-factor */
 float scaleFactor () {
 	float scaleFactor = 1;
+	if (isGtk4()) {
+		return scaleFactor;
+	}
 	GdkScreen * screen;
 	double resolution;
 	screen = gtk.gdk_screen_get_default();
@@ -261,11 +264,22 @@ int showSplash( const char* featureImage ) {
 	
 	if( initWindowSystem(&initialArgc, initialArgv) != 0)
 		return -1;
-	
-	shellHandle = gtk.gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	if (!isGtk4()) {
+		shellHandle = gtk.gtk_window_new(GTK_WINDOW_TOPLEVEL);
+		gtk.gtk_window_set_type_hint((GtkWindow*)(shellHandle), 4 /*GDK_WINDOW_TYPE_HINT_SPLASHSCREEN*/);
+		gtk.gtk_window_set_position((GtkWindow*)(shellHandle), GTK_WIN_POS_CENTER);
+		gtk.g_signal_connect_data((gpointer)shellHandle, "destroy", (GCallback)(gtk.gtk_widget_destroyed), &shellHandle, NULL, 0);
+	} else {
+		void *gtkLib = dlopen(GTK4_LIB, RTLD_LAZY);
+		GtkWidget * (*func)();
+		*(void**) (&func) = dlsym(gtkLib, "gtk_window_new");
+		if (dlerror() == NULL && func) {
+			shellHandle = (*func)();
+		} else {
+			printf(dlerror());
+		}
+	}
 	gtk.gtk_window_set_decorated((GtkWindow*)(shellHandle), FALSE);
-	gtk.gtk_window_set_type_hint((GtkWindow*)(shellHandle), 4 /*GDK_WINDOW_TYPE_HINT_SPLASHSCREEN*/);
-	gtk.g_signal_connect_data((gpointer)shellHandle, "destroy", (GCallback)(gtk.gtk_widget_destroyed), &shellHandle, NULL, 0);
 		
 	pixbuf = gtk.gdk_pixbuf_new_from_file(featureImage, NULL);
 	width = gtk.gdk_pixbuf_get_width(pixbuf);
@@ -277,18 +291,25 @@ int showSplash( const char* featureImage ) {
 	} else {
 		scaledPixbuf = pixbuf;
 	}
-	
-	image = gtk.gtk_image_new_from_pixbuf(scaledPixbuf);
-	if (pixbuf) {
+	if (!isGtk4()) {
+		image = gtk.gtk_image_new_from_pixbuf(scaledPixbuf);
+	} else {
+		image = gtk.gtk_picture_new_for_pixbuf(scaledPixbuf);
+	}
+	if (pixbuf) 	{
 		gtk.g_object_unref(pixbuf);
 	}
-	gtk.gtk_container_add((GtkContainer*)(shellHandle), image);
-	
 	if (getOfficialName() != NULL)
-		gtk.gtk_window_set_title((GtkWindow*)(shellHandle), getOfficialName());
-	gtk.gtk_window_set_position((GtkWindow*)(shellHandle), GTK_WIN_POS_CENTER);
-	gtk.gtk_window_resize((GtkWindow*)(shellHandle), gtk.gdk_pixbuf_get_width(scaledPixbuf), gtk.gdk_pixbuf_get_height(scaledPixbuf));
-	gtk.gtk_widget_show_all((GtkWidget*)(shellHandle));
+		gtk.gtk_window_set_title((GtkWindow*) shellHandle, getOfficialName());
+
+	if (!isGtk4()) {
+		gtk.gtk_container_add((GtkContainer*) shellHandle, image);
+		gtk.gtk_window_resize((GtkWindow*) shellHandle, gtk.gdk_pixbuf_get_width(scaledPixbuf), gtk.gdk_pixbuf_get_height(scaledPixbuf));
+		gtk.gtk_widget_show_all((GtkWidget*) shellHandle);
+	} else {
+		gtk.gtk_window_set_child((GtkWindow*) shellHandle, image);
+		gtk.gtk_window_present((GtkWindow*) shellHandle);
+	}
 	splashHandle = shellHandle;
 	dispatchMessages();
 	return 0;
@@ -305,7 +326,9 @@ jlong getSplashHandle() {
 
 void takeDownSplash() {
 	if(shellHandle != 0) {
-		gtk.gtk_widget_destroy(shellHandle);
+		if (!isGtk4()) {
+			gtk.gtk_widget_destroy(shellHandle);
+		}
 		dispatchMessages();
 		splashHandle = 0;
 		shellHandle = NULL;

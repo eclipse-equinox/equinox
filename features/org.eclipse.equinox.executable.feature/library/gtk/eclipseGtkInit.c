@@ -30,23 +30,29 @@ static int minGtkMajorVersion = 3;
 static int minGtkMinorVersion = 22;
 static int minGtkMicroVersion = 0;
 
+static gboolean isGTK4 = 0;
+
 /* tables to help initialize the function pointers */
 /* functions from libgtk-3.so.0*/
 static FN_TABLE gtkFunctions[] = {
-	FN_TABLE_ENTRY(gtk_container_add, 1),
-	FN_TABLE_ENTRY(gtk_dialog_run, 1),
+	FN_TABLE_ENTRY(gtk_container_add, 0),
+	FN_TABLE_ENTRY(gtk_dialog_run, 0),
 	FN_TABLE_ENTRY(gtk_image_new_from_pixbuf, 1),
-	FN_TABLE_ENTRY(gtk_init_with_args, 1),
+	FN_TABLE_ENTRY(gtk_picture_new_for_pixbuf, 0),
+	FN_TABLE_ENTRY(gtk_init_check, 1),
+	FN_TABLE_ENTRY(gtk_init_with_args, 0),
 	FN_TABLE_ENTRY(gtk_message_dialog_new, 1),
-	FN_TABLE_ENTRY(gtk_widget_destroy, 1),
-	FN_TABLE_ENTRY(gtk_widget_destroyed, 1),
-	FN_TABLE_ENTRY(gtk_widget_show_all, 1),
+	FN_TABLE_ENTRY(gtk_widget_destroy, 0),
+	FN_TABLE_ENTRY(gtk_widget_destroyed, 0),
+	FN_TABLE_ENTRY(gtk_widget_show_all, 0),
 	FN_TABLE_ENTRY(gtk_window_new, 1),
-	FN_TABLE_ENTRY(gtk_window_resize, 1),
+	FN_TABLE_ENTRY(gtk_window_present, 0),
+	FN_TABLE_ENTRY(gtk_window_resize, 0),
+	FN_TABLE_ENTRY(gtk_window_set_child, 0),
 	FN_TABLE_ENTRY(gtk_window_set_title, 1),
 	FN_TABLE_ENTRY(gtk_window_set_decorated, 1),
-	FN_TABLE_ENTRY(gtk_window_set_type_hint, 1),
-	FN_TABLE_ENTRY(gtk_window_set_position, 1),
+	FN_TABLE_ENTRY(gtk_window_set_type_hint, 0),
+	FN_TABLE_ENTRY(gtk_window_set_position, 0),
 	FN_TABLE_ENTRY(gtk_dialog_new_with_buttons, 1),
 	FN_TABLE_ENTRY(gtk_window_set_resizable, 1),
 	FN_TABLE_ENTRY(gtk_window_set_default_size, 1),
@@ -56,13 +62,13 @@ static FN_TABLE gtkFunctions[] = {
 	FN_TABLE_ENTRY(gtk_text_buffer_set_text, 1),
 	FN_TABLE_ENTRY(gtk_text_view_set_editable, 1),
 	FN_TABLE_ENTRY(gtk_dialog_get_content_area, 1),
-	FN_TABLE_ENTRY(gtk_box_pack_start, 1),
+	FN_TABLE_ENTRY(gtk_box_pack_start, 0),
 	{ NULL, NULL }
 };
 /* functions from libgdk-3.so.0*/
 static FN_TABLE gdkFunctions[] = {
-	FN_TABLE_ENTRY(gdk_screen_get_default, 1),
-	FN_TABLE_ENTRY(gdk_screen_get_resolution, 1),
+	FN_TABLE_ENTRY(gdk_screen_get_default, 0),
+	FN_TABLE_ENTRY(gdk_screen_get_resolution, 0),
 	{ NULL, NULL }
 };
 /* functions from libgio-2.0.so.0*/
@@ -118,10 +124,17 @@ int loadGtk() {
 
 	void *gioLib = NULL, *glibLib = NULL, *gdkLib = NULL, *gtkLib = NULL, *objLib = NULL, *pixLib = NULL;
 	
-	gdkLib = dlopen(GDK3_LIB, DLFLAGS);
-	gtkLib = dlopen(GTK3_LIB, DLFLAGS);
+	char *gtk4 = getenv("SWT_GTK4");
+	if (gtk4 != NULL && strcmp(gtk4,"1") == 0) {
+		gdkLib = dlopen(GDK4_LIB, DLFLAGS);
+		gtkLib = dlopen(GTK4_LIB, DLFLAGS);
+	}
 
 	if (!gtkLib || !gdkLib) {
+		gdkLib = dlopen(GDK3_LIB, DLFLAGS);
+		gtkLib = dlopen(GTK3_LIB, DLFLAGS);
+		setenv("SWT_GTK4","0",1);
+		isGTK4 = 0;
 		const char * (*func)(int, int, int);
 		dlerror();
 
@@ -133,7 +146,7 @@ int loadGtk() {
 				int gtkMajorVersion, gtkMinorVersion, gtkMicroVersion;
 				void *gtkMajorPtr, *gtkMinorPtr, *gtkMicroPtr;
 
-				/* this code is applicable for GTK+ 2 only*/
+				/* this code is applicable for GTK+ 3 only*/
 				dlerror();
 				gtkMajorPtr = dlsym(gtkLib, "gtk_major_version");
 				if ((dlerror() != NULL) || (gtkMajorPtr == NULL)) return -1;
@@ -168,6 +181,11 @@ int loadGtk() {
 						printf("%s", gtkInitFail);
 						exit (1);
 					}
+				} else if (gtk.gtk_init_check) {
+					if (!gtk.gtk_init_check()) {
+						printf("%s", gtkInitFail);
+						exit(1);
+					}
 				}
 				dialog = gtk.gtk_message_dialog_new(NULL, GTK_DIALOG_DESTROY_WITH_PARENT,
 						GTK_MESSAGE_ERROR, GTK_BUTTONS_OK,
@@ -184,6 +202,8 @@ int loadGtk() {
 				exit (1);
 			}
 		}
+	} else {
+		isGTK4 = 1;
 	}
 
 
@@ -197,10 +217,14 @@ int loadGtk() {
 
 	if ( gtkLib == NULL || loadGtkSymbols(gtkLib, gtkFunctions)  != 0) return -1;
 	if ( gdkLib == NULL || loadGtkSymbols(gdkLib, gdkFunctions)  != 0) return -1;
-	if ( gioLib == NULL || loadGtkSymbols(gdkLib, gioFunctions)  != 0) return -1;
-	if ( glibLib == NULL || loadGtkSymbols(gdkLib, glibFunctions)  != 0) return -1;
+	if ( gioLib == NULL || loadGtkSymbols(gioLib, gioFunctions)  != 0) return -1;
+	if ( glibLib == NULL || loadGtkSymbols(glibLib, glibFunctions)  != 0) return -1;
 	if ( pixLib == NULL || loadGtkSymbols(pixLib, pixFunctions)  != 0) return -1;
 	if ( objLib == NULL || loadGtkSymbols(objLib, gobjFunctions) != 0) return -1;
 
 	return 0;
+}
+
+gboolean isGtk4() {
+	return isGTK4;
 }
