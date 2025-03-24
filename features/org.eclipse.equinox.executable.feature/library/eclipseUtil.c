@@ -247,59 +247,6 @@ int isVMLibrary( _TCHAR* vm )
 #endif
 }
 
-#ifdef AIX
-
-#include <sys/types.h>
-#include <time.h>
-
-/* Return the JVM version in the format x.x.x 
- */
-char* getVMVersion( char *vmPath )
-{
-    char   cmd[MAX_LINE_LENGTH];
-    char   lineString[MAX_LINE_LENGTH];
-    char*  firstChar;
-    char   fileName[MAX_LINE_LENGTH];
-    time_t curTime;
-    FILE*  fp;
-    int    numChars = 0;
-    char*  version  = NULL;
-
-	/* Define a unique filename for the java output. */
-    (void) time(&curTime);
-    (void) sprintf(fileName, "/tmp/tmp%ld.txt", curTime);
-
-    /* Write java -version output to a temp file */
-    (void) sprintf(cmd,"%s -version 2> %s", vmPath, fileName);
-    (void) system(cmd); 
-
-    fp = fopen(fileName, "r");
-    if (fp != NULL)
-    {
-    	/* Read java -version output from a temp file */
-    	if (fgets(lineString, MAX_LINE_LENGTH, fp) == NULL)
-    		lineString[0] = '\0';
-    	fclose(fp);
-    	unlink(fileName);
-
-    	/* Extract version number */
-    	firstChar = (char *) (strchr(lineString, '"') + 1);
-    	if (firstChar != NULL)
-    		numChars = (int)  (strrchr(lineString, '"') - firstChar);
-    	
-    	/* Allocate a buffer and copy the version string into it. */
-    	if (numChars > 0)
-    	{
-    		version = malloc( numChars + 1 );
-    		strncpy(version, firstChar, numChars);
-			version[numChars] = '\0';
-		}
-	}  
-
-    return version;
-}
-#endif /* AIX */
-
 /* Compare JVM Versions of the form "x.x.x..."
  *     
  *    Returns -1 if ver1 < ver2

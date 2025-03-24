@@ -32,18 +32,6 @@ static char**       saveArgv   = 0;
 
 gboolean     gtkInitialized = FALSE;
 
-#ifdef SOLARIS
-/* a call to this function appears inline in glib/gstring.h on Solaris,
-   so provide a definition here and hook it up
-   */
-GString* g_string_insert_c (GString *string, gssize pos, gchar c) {
-	/* see bug 264615, we can get here without having initialized the gtk pointers */
-	if (gtk.not_initialized)
-		loadGtk();
-	return gtk.g_string_insert_c(string, pos, c);
-}
-#endif
-
 /* Display a Message */
 void displayMessage(char* title, char* message)
 {

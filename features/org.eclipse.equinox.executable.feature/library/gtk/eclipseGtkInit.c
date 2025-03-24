@@ -97,9 +97,6 @@ static FN_TABLE gobjFunctions[] = {
 	FN_TABLE_ENTRY(g_timeout_add, 1),
 	FN_TABLE_ENTRY(g_error_free, 1),
 	FN_TABLE_ENTRY(g_type_init, 1),
-#ifdef SOLARIS
-	FN_TABLE_ENTRY(g_string_insert_c, 1),
-#endif
 	{ NULL, NULL }
 };
 
@@ -118,11 +115,7 @@ static int loadGtkSymbols( void * library, FN_TABLE * table) {
 }
 
 int loadGtk() {
-#ifdef AIX 
-#define DLFLAGS RTLD_LAZY | RTLD_MEMBER
-#else
 #define DLFLAGS RTLD_LAZY
-#endif
 
 	void *gioLib = NULL, *glibLib = NULL, *gdkLib = NULL, *gtkLib = NULL, *objLib = NULL, *pixLib = NULL;
 	

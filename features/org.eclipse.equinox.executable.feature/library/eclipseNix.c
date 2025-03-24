@@ -38,11 +38,7 @@
 #define JAVA_ARCH DEFAULT_OS_ARCH
 #endif
 
-#ifdef AIX
-#define LIB_PATH_VAR _T_ECLIPSE("LIBPATH")
-#else
 #define LIB_PATH_VAR _T_ECLIPSE("LD_LIBRARY_PATH")
-#endif
 
 #define MAX_LOCATION_LENGTH 40 /* none of the jvmLocations strings should be longer than this */ 
 static const char* jvmLocations [] = { "j9vm", "../jre/bin/j9vm",
