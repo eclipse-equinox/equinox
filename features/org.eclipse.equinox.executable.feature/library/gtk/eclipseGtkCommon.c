@@ -109,12 +109,18 @@ int initWindowSystem(int* pArgc, char* argv[])
 
 	/* Initialize GTK. */
     GError *error = NULL;
-    if (!gtk.gtk_init_with_args(0, NULL, NULL, NULL, NULL, &error)) {
-        if (error) {
-            fprintf(stderr, "%s: %s\n", getOfficialName(), error->message);
-            gtk.g_error_free(error);
-        }
-        return -1;
+    if (gtk.gtk_init_with_args) {
+		if (!gtk.gtk_init_with_args(0, NULL, NULL, NULL, NULL, &error)) {
+			if (error) {
+				fprintf(stderr, "%s: %s\n", getOfficialName(), error->message);
+				gtk.g_error_free(error);
+			}
+			return -1;
+		}
+    } else if (gtk.gtk_init_check) {
+    	if (!gtk.gtk_init_check()) {
+    		return -1;
+    	}
     }
 
 	/*_gdk_set_program_class(getOfficialName());*/

@@ -23,13 +23,17 @@ struct GTK_PTRS {
 	void		(*gtk_container_add)		(GtkContainer*, GtkWidget*);
 	gint		(*gtk_dialog_run)			(GtkDialog *);
 	GtkWidget*	(*gtk_image_new_from_pixbuf)(GdkPixbuf*);
+	GtkWidget*	(*gtk_picture_new_for_pixbuf)(GdkPixbuf*);
+	gboolean    (*gtk_init_check)           (); //GTK4 variant of the function has no params
 	gboolean	(*gtk_init_with_args)		(int*, char***, const char *, void *, const char *, GError **);
 	GtkWidget*	(*gtk_message_dialog_new)	(GtkWindow*, GtkDialogFlags, GtkMessageType, GtkButtonsType, const gchar*, ...);
 	void		(*gtk_widget_destroy)		(GtkWidget*);
 	void		(*gtk_widget_destroyed)		(GtkWidget*, GtkWidget**);
 	void		(*gtk_widget_show_all)		(GtkWidget*);
 	GtkWidget*	(*gtk_window_new)			(GtkWindowType);
+	void		(*gtk_window_present)		(GtkWindow*);
 	void		(*gtk_window_resize)		(GtkWindow*, gint, gint);
+	void		(*gtk_window_set_child)		(GtkWindow*, GtkWidget*);
 	void		(*gtk_window_set_title)		(GtkWindow*, const gchar*);
 	void		(*gtk_window_set_decorated)	(GtkWindow*, gboolean);
 	void		(*gtk_window_set_type_hint)	(GtkWindow*, int);
@@ -80,5 +84,7 @@ typedef struct {
 
 /* load the gtk libraries and initialize the function pointers */
 extern int loadGtk();
+
+extern gboolean isGtk4();
 
 #endif
