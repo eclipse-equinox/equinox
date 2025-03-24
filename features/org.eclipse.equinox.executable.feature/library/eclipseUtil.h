@@ -53,11 +53,6 @@ extern _TCHAR* concatPaths(_TCHAR** paths, _TCHAR pathSeparator);
 /* check that the buffer contains all the given paths */
 extern int containsPaths(_TCHAR * str, _TCHAR** paths);
 
-#ifdef AIX
-/* Get the version of the VM */
-extern char* getVMVersion( char* vm );
-#endif
-
 /* Compare JVM Versions */
 extern int versionCmp( char* ver1, char* ver2 );
 

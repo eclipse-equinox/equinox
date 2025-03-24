@@ -59,9 +59,6 @@ struct GTK_PTRS {
 	GVariant * 	(*g_variant_new) 			(const gchar *, GVariantBuilder *);
 	void 		(*g_variant_builder_unref) 	(GVariantBuilder *);
 	void		(*g_variant_unref) 			(GVariant *);
-#ifdef SOLARIS
-	GString* 	(*g_string_insert_c) 		(GString *, gssize, gchar);
-#endif	
 		
 	GdkDisplay* (*gdk_display_get_default)  		();
 	GdkPixbuf*	(*gdk_pixbuf_new_from_file)			(const char*, GError **);
