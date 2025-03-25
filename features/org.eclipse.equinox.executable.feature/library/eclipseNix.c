@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2016 IBM Corporation and others.
+ * Copyright (c) 2008, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -26,12 +26,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#ifdef i386
-#define JAVA_ARCH "i386"
-#elif defined(__ppc__) || defined(__powerpc64__)
+#if defined(__ppc__) || defined(__powerpc64__)
 #define JAVA_ARCH "ppc" 
-#elif defined(SOLARIS)
-#define JAVA_ARCH "sparc"
 #elif defined(__amd64__) || defined(__x86_64__) 
 #define JAVA_ARCH "amd64"
 #else
