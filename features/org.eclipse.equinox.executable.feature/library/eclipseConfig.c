@@ -69,12 +69,21 @@ _TCHAR* getIniFile(_TCHAR* program, int consoleLauncher){
 			extension = config_file + _tcslen(config_file);
 		}
 		_tcscpy(extension, _T_ECLIPSE(".ini"));
-		if(consoleLauncher){
+		struct _stat stats;
+		if(consoleLauncher && _tstat(config_file, &stats) != 0){
 			/* We are the console version, if the ini file does not exist, try
-			 * removing the 'c' from the end of the program name */
-			struct _stat stats; 
-			if (_tstat( config_file, &stats ) != 0 && *(extension - 1) == _T('c')) {
-				_tcscpy(extension - 1, extension);
+			 * removing the suffix from the end of the program name */
+			static const _TCHAR* consoleLauncherSuffixes[] = {
+				_T_ECLIPSE("c"), // eclipsec.exe
+				_T_ECLIPSE("-cli"), // eclipse-cli.exe
+				NULL
+			};
+			for (const _TCHAR** suffix = consoleLauncherSuffixes; *suffix; suffix++) {
+				size_t suffixLen = _tcslen(*suffix);
+				if (_tcsncmp(extension - suffixLen, *suffix, suffixLen) == 0) {
+					_tcscpy(extension - suffixLen, extension);
+					break;
+				}
 			}
 		}
 	}
