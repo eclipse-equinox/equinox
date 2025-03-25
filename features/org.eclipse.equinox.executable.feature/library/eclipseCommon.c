@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2011 IBM Corporation and others.
+ * Copyright (c) 2006, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -130,42 +130,7 @@ char *toNarrow(const _TCHAR* src)
 #endif
 }
 
-
-/**
- * Set an environment variable.
- * Solaris versions <= Solaris 9 did not know setenv in libc,
- * so emulate it here.
- */
-#if defined(SOLARIS) || defined(HPUX)
-int setenv (const char *name, const char *value, int replace)
-{
-	int namelen, valuelen, rc;
-	char *var;
-	if (replace == 0) {
-		const char *oldval = getenv(name);
-		if (oldval != NULL) {
-			return 0;
-	    }
-	}
-	namelen = strlen(name);
-	valuelen = strlen(value);
-	var = malloc( (namelen + valuelen + 2) * sizeof(char) );
-	if (var == NULL) {
-		return -1;
-	}
-	/* Use strncpy as protection, in case a thread modifies var
-	 * after we obtained its length */
-	strncpy(var, name, namelen);
-	var[namelen] = '=';
-	strncpy( &var[namelen + 1], value, valuelen);
-	var[namelen + valuelen + 1] = '\0';
-	rc = putenv(var);
-	if (rc != 0) rc = -1; /*putenv returns non-zero on error; setenv -1*/
-	return rc;
-}
-#endif
- 	
- /*
+/*
  * Find the absolute pathname to where a command resides.
  *
  * The string returned by the function must be freed.
