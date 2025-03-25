@@ -17,7 +17,7 @@
       source="http://www.eclipse.org/oomph/setup/BrandingInfo">
     <detail
         key="imageURI">
-      <value>https://www.eclipse.org/equinox/images/logo_small.png</value>
+      <value>https://equinox.eclipseprojects.io/assets/img/logo.png</value>
     </detail>
     <detail
         key="siteURI">
