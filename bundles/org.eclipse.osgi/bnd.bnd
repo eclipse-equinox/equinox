@@ -4,6 +4,8 @@
 -include: ~META-INF/MANIFEST.MF
 
 Require-Capability: \
- osgi.serviceloader;osgi.serviceloader="org.osgi.framework.connect.FrameworkUtilHelper"
+ osgi.serviceloader;osgi.serviceloader="org.osgi.framework.connect.FrameworkUtilHelper", \
+ osgi.serviceloader;osgi.serviceloader="java.net.ContentHandlerFactory", \
+ osgi.serviceloader;osgi.serviceloader="java.net.URLStreamHandlerFactory"
  
 
