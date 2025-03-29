@@ -121,8 +121,9 @@ public class KeyStoreTrustEngine extends TrustEngine {
 			}
 		}
 
-		if (keyStore == null)
+		if (keyStore == null) {
 			throw new KeyStoreException(NLS.bind(SignedContentMessages.Default_Trust_Keystore_Load_Failed, getPath()));
+		}
 
 		return keyStore;
 	}
@@ -130,8 +131,9 @@ public class KeyStoreTrustEngine extends TrustEngine {
 	@Override
 	public Certificate findTrustAnchor(Certificate[] certChain) throws IOException {
 
-		if (certChain == null || certChain.length == 0)
+		if (certChain == null || certChain.length == 0) {
 			throw new IllegalArgumentException("Certificate chain is required"); //$NON-NLS-1$
+		}
 
 		try {
 			Certificate rootCert = null;
@@ -157,19 +159,21 @@ public class KeyStoreTrustEngine extends TrustEngine {
 
 				synchronized (store) {
 					String alias = rootCert == null ? null : store.getCertificateAlias(rootCert);
-					if (alias != null)
+					if (alias != null) {
 						return store.getCertificate(alias);
-					else if (rootCert != certChain[i]) {
+					} else if (rootCert != certChain[i]) {
 						alias = store.getCertificateAlias(certChain[i]);
-						if (alias != null)
+						if (alias != null) {
 							return store.getCertificate(alias);
+						}
 					}
 					// if we have reached the end and the last cert is not found to be a valid root
 					// CA
 					// then we need to back off the root CA and try to find an alternative
 					if (certChain.length > 1 && i == certChain.length - 1
-							&& certChain[i - 1] instanceof X509Certificate)
+							&& certChain[i - 1] instanceof X509Certificate) {
 						return findAlternativeRoot((X509Certificate) certChain[i - 1], store);
+					}
 				}
 			}
 		} catch (KeyStoreException e) {
@@ -201,8 +205,9 @@ public class KeyStoreTrustEngine extends TrustEngine {
 
 	@Override
 	protected String doAddTrustAnchor(Certificate cert, String alias) throws IOException, GeneralSecurityException {
-		if (isReadOnly())
+		if (isReadOnly()) {
 			throw new IOException(SignedContentMessages.Default_Trust_Read_Only);
+		}
 		if (cert == null) {
 			throw new IllegalArgumentException("Certificate must be specified"); //$NON-NLS-1$
 		}
@@ -210,11 +215,13 @@ public class KeyStoreTrustEngine extends TrustEngine {
 			KeyStore store = getKeyStore();
 			synchronized (store) {
 				String oldAlias = store.getCertificateAlias(cert);
-				if (null != oldAlias)
+				if (null != oldAlias) {
 					throw new CertificateException(SignedContentMessages.Default_Trust_Existing_Cert);
+				}
 				Certificate oldCert = store.getCertificate(alias);
-				if (null != oldCert)
+				if (null != oldCert) {
 					throw new CertificateException(SignedContentMessages.Default_Trust_Existing_Alias);
+				}
 				store.setCertificateEntry(alias, cert);
 				final OutputStream out = getOutputStream();
 				try {
@@ -231,8 +238,9 @@ public class KeyStoreTrustEngine extends TrustEngine {
 
 	@Override
 	protected void doRemoveTrustAnchor(Certificate cert) throws IOException, GeneralSecurityException {
-		if (isReadOnly())
+		if (isReadOnly()) {
 			throw new IOException(SignedContentMessages.Default_Trust_Read_Only);
+		}
 		if (cert == null) {
 			throw new IllegalArgumentException("Certificate must be specified"); //$NON-NLS-1$
 		}
@@ -260,8 +268,9 @@ public class KeyStoreTrustEngine extends TrustEngine {
 			KeyStore store = getKeyStore();
 			synchronized (store) {
 				Certificate oldCert = store.getCertificate(alias);
-				if (oldCert == null)
+				if (oldCert == null) {
 					throw new CertificateException(SignedContentMessages.Default_Trust_Cert_Not_Found);
+				}
 				store.deleteEntry(alias);
 				final OutputStream out = getOutputStream();
 				try {
@@ -333,8 +342,9 @@ public class KeyStoreTrustEngine extends TrustEngine {
 	 */
 	private void safeClose(OutputStream out) {
 		try {
-			if (out != null)
+			if (out != null) {
 				out.close();
+			}
 		} catch (IOException e) {
 			// ignore
 		}
@@ -357,8 +367,9 @@ public class KeyStoreTrustEngine extends TrustEngine {
 	private OutputStream getOutputStream() throws IOException {
 
 		File file = new File(getPath());
-		if (!file.exists())
+		if (!file.exists()) {
 			file.createNewFile();
+		}
 
 		return new FileOutputStream(file);
 	}

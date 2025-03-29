@@ -204,6 +204,7 @@ public interface Location {
 	 * @throws IllegalStateException if the location's value is already set
 	 * @deprecated use {@link #set(URL, boolean)} instead.
 	 */
+	@Deprecated
 	public boolean setURL(URL value, boolean lock) throws IllegalStateException;
 
 	/**

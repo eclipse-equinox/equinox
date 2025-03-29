@@ -660,8 +660,9 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	@Override
 	public <S> S getService(ServiceReference<S> reference) {
 		checkValid();
-		if (reference == null)
+		if (reference == null) {
 			throw new NullPointerException("A null service reference is not allowed."); //$NON-NLS-1$
+		}
 		provisionServicesInUseMap();
 		S service = container.getServiceRegistry().getService(this, (ServiceReferenceImpl<S>) reference);
 		return service;
@@ -825,8 +826,9 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 						try {
 							bundleActivator.start(BundleContextImpl.this);
 						} finally {
-							if (previousTCCL != Boolean.FALSE)
+							if (previousTCCL != Boolean.FALSE) {
 								Thread.currentThread().setContextClassLoader((ClassLoader) previousTCCL);
+							}
 						}
 					}
 					return null;
@@ -852,8 +854,9 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	}
 
 	Object setContextFinder() {
-		if (!container.getConfiguration().BUNDLE_SET_TCCL)
+		if (!container.getConfiguration().BUNDLE_SET_TCCL) {
 			return Boolean.FALSE;
+		}
 		Thread currentThread = Thread.currentThread();
 		ClassLoader previousTCCL = currentThread.getContextClassLoader();
 		ClassLoader contextFinder = container.getContextFinder();
@@ -895,8 +898,9 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 							/* Stop the bundle synchronously */
 							bundleActivator.stop(BundleContextImpl.this);
 						} finally {
-							if (previousTCCL != Boolean.FALSE)
+							if (previousTCCL != Boolean.FALSE) {
 								Thread.currentThread().setContextClassLoader((ClassLoader) previousTCCL);
+							}
 						}
 					}
 					return null;
@@ -941,9 +945,10 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	 */
 	public void provisionServicesInUseMap() {
 		synchronized (contextLock) {
-			if (servicesInUse == null)
+			if (servicesInUse == null) {
 				// Cannot predict how many services a bundle will use, start with a small table.
 				servicesInUse = new HashMap<>(10);
+			}
 		}
 	}
 
@@ -1023,8 +1028,9 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 				container.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, bundle, t);
 			}
 		} finally {
-			if (previousTCCL != Boolean.FALSE)
+			if (previousTCCL != Boolean.FALSE) {
 				Thread.currentThread().setContextClassLoader((ClassLoader) previousTCCL);
+			}
 		}
 	}
 
@@ -1106,8 +1112,9 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	@Override
 	public <S> ServiceObjects<S> getServiceObjects(ServiceReference<S> reference) {
 		checkValid();
-		if (reference == null)
+		if (reference == null) {
 			throw new NullPointerException("A null service reference is not allowed."); //$NON-NLS-1$
+		}
 		provisionServicesInUseMap();
 		ServiceObjects<S> serviceObjects = container.getServiceRegistry().getServiceObjects(this,
 				(ServiceReferenceImpl<S>) reference);
