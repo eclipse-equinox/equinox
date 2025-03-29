@@ -145,8 +145,9 @@ abstract public class BundleFile {
 	 */
 	public URL getResourceURL(String path, Module hostModule, int index) {
 		BundleEntry bundleEntry = getEntry(path);
-		if (bundleEntry == null)
+		if (bundleEntry == null) {
 			return null;
+		}
 		return createResourceURL(bundleEntry, hostModule, index, path);
 	}
 
@@ -201,20 +202,24 @@ abstract public class BundleFile {
 	}
 
 	public static String fixTrailingSlash(String path, BundleEntry entry) {
-		if (path.length() == 0)
+		if (path.length() == 0) {
 			return "/"; //$NON-NLS-1$
-		if (path.charAt(0) != '/')
+		}
+		if (path.charAt(0) != '/') {
 			path = '/' + path;
+		}
 		String name = entry.getName();
-		if (name.length() == 0)
+		if (name.length() == 0) {
 			return path;
+		}
 		boolean pathSlash = path.charAt(path.length() - 1) == '/';
 		boolean entrySlash = name.length() > 0 && name.charAt(name.length() - 1) == '/';
 		if (entrySlash != pathSlash) {
-			if (entrySlash)
+			if (entrySlash) {
 				path = path + '/';
-			else
+			} else {
 				path = path.substring(0, path.length() - 1);
+			}
 		}
 		return path;
 	}

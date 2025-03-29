@@ -46,8 +46,9 @@ public class BundleURLConverter implements URLConverter {
 			 * connection.getFileURL returned null then there was a problem extracting the
 			 * file to disk. See bug 259241.
 			 **/
-			if (result == null)
+			if (result == null) {
 				throw new IOException(NLS.bind(Msg.ECLIPSE_PLUGIN_EXTRACTION_PROBLEM, url));
+			}
 			return result;
 		}
 		return url;
@@ -62,8 +63,9 @@ public class BundleURLConverter implements URLConverter {
 	@Override
 	public URL resolve(URL url) throws IOException {
 		URLConnection connection = url.openConnection();
-		if (connection instanceof BundleURLConnection)
+		if (connection instanceof BundleURLConnection) {
 			return ((BundleURLConnection) connection).getLocalURL();
+		}
 		return url;
 	}
 }
