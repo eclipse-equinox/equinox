@@ -506,7 +506,6 @@ public class Main {
 
 	private String getLibraryPath(String fragmentName, URL[] defaultPath) {
 		String libPath = null;
-		String fragment = null;
 		if (inDevelopmentMode && devClassPathProps != null) {
 			String devPathList = devClassPathProps.getProperty(PLUGIN_ID);
 			String[] locations = getArrayFromList(devPathList);
@@ -514,7 +513,7 @@ public class Main {
 				File location = new File(locations[0]);
 				if (location.isAbsolute()) {
 					String dir = location.getParent();
-					fragment = searchFor(fragmentName, dir);
+					String fragment = searchFor(fragmentName, dir);
 					if (fragment != null) {
 						libPath = getLibraryFromFragment(fragment);
 					}
@@ -528,9 +527,7 @@ public class Main {
 				for (int i = urls.length - 1; i >= 0 && libPath == null; i--) {
 					File entryFile = new File(urls[i].getFile());
 					String dir = entryFile.getParent();
-					if (fragment == null) {
-						fragment = searchFor(fragmentName, dir);
-					}
+					String fragment = searchFor(fragmentName, dir);
 					if (fragment != null) {
 						libPath = getLibraryFromFragment(fragment);
 					}
@@ -541,7 +538,7 @@ public class Main {
 			URL install = getInstallLocation();
 			String location = install.getFile();
 			location += "/plugins/"; //$NON-NLS-1$
-			fragment = searchFor(fragmentName, location);
+			String fragment = searchFor(fragmentName, location);
 			if (fragment != null) {
 				libPath = getLibraryFromFragment(fragment);
 			}
@@ -1089,7 +1086,7 @@ public class Main {
 		if (result == -1) {
 			return null;
 		}
-		File candidate = new File(start, names[result]);
+		File candidate = new File(root, names[result]);
 		return candidate.getAbsolutePath().replace(File.separatorChar, '/') + (candidate.isDirectory() ? "/" : ""); //$NON-NLS-1$//$NON-NLS-2$
 	}
 
