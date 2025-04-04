@@ -17,19 +17,11 @@ package org.eclipse.equinox.launcher;
  * @author aniefer
  */
 class Constants {
-	public static final String INTERNAL_AMD64 = "amd64"; //$NON-NLS-1$
-	public static final String INTERNAL_OS_SUNOS = "SunOS"; //$NON-NLS-1$
-	public static final String INTERNAL_OS_LINUX = "Linux"; //$NON-NLS-1$
-	public static final String INTERNAL_OS_MACOSX = "Mac OS"; //$NON-NLS-1$
-	public static final String INTERNAL_OS_AIX = "AIX"; //$NON-NLS-1$
-	public static final String INTERNAL_OS_HPUX = "HP-UX"; //$NON-NLS-1$
-	public static final String INTERNAL_OS_QNX = "QNX"; //$NON-NLS-1$
-	public static final String INTERNAL_OS_OS400 = "OS/400"; //$NON-NLS-1$
-	public static final String INTERNAL_OS_OS390 = "OS/390"; //$NON-NLS-1$
-	public static final String INTERNAL_OS_ZOS = "z/OS"; //$NON-NLS-1$
+	static final String INTERNAL_AMD64 = "amd64"; //$NON-NLS-1$
+	static final String INTERNAL_OS_SUNOS = "sunos"; //$NON-NLS-1$
+	static final String INTERNAL_OS_HPUX = "hp-ux"; //$NON-NLS-1$
 
-	public static final String ARCH_X86 = "x86";//$NON-NLS-1$
-	public static final String ARCH_X86_64 = "x86_64";//$NON-NLS-1$
+	static final String ARCH_X86_64 = "x86_64";//$NON-NLS-1$
 
 	/**
 	 * Constant string (value "win32") indicating the platform is running on a
@@ -104,18 +96,6 @@ class Constants {
 	public static final String WS_WIN32 = "win32";//$NON-NLS-1$
 
 	/**
-	 * Constant string (value "wpf") indicating the platform is running on a
-	 * machine using the Windows Presendation Foundation system.
-	 */
-	public static final String WS_WPF = "wpf";//$NON-NLS-1$
-
-	/**
-	 * Constant string (value "motif") indicating the platform is running on a
-	 * machine using the Motif windowing system.
-	 */
-	public static final String WS_MOTIF = "motif";//$NON-NLS-1$
-
-	/**
 	 * Constant string (value "gtk") indicating the platform is running on a
 	 * machine using the GTK windowing system.
 	 */
@@ -126,12 +106,6 @@ class Constants {
 	 * machine using the Photon windowing system.
 	 */
 	public static final String WS_PHOTON = "photon";//$NON-NLS-1$
-
-	/**
-	 * Constant string (value "carbon") indicating the platform is running on a
-	 * machine using the Carbon windowing system (Mac OS X).
-	 */
-	public static final String WS_CARBON = "carbon";//$NON-NLS-1$
 
 	/**
 	 * Constant string (value "cocoa") indicating the platform is running on a
