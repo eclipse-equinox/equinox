@@ -19,7 +19,7 @@
 </parent>
   <groupId>org.eclipse.platform</groupId>
   <artifactId>org.eclipse.osgi</artifactId>
-  <version>3.23.0-SNAPSHOT</version>
+  <version>3.23.100-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
   <properties>
 	  <!-- The actual TCKs are executed in the org.eclipse.osgi.tck module because of reference to other service implementations -->
@@ -58,6 +58,9 @@
       <plugin>
 			<groupId>org.apache.maven.plugins</groupId>
 			<artifactId>maven-surefire-plugin</artifactId>
+			<configuration>
+				<argLine>--add-opens java.base/sun.net.www.protocol.jar=org.eclipse.osgi --add-opens java.base/java.net=org.eclipse.osgi</argLine>
+			</configuration>
 			<executions>
 				<execution>
 					<id>execute-tests</id>
