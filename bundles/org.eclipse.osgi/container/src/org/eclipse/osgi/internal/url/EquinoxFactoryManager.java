@@ -64,8 +64,9 @@ public class EquinoxFactoryManager {
 		// getBundle before we register this as a multiplexing handler
 		FrameworkUtil.asDictionary(Collections.emptyMap());
 		Field factoryField = getField(URL.class, URLStreamHandlerFactory.class, false);
-		if (factoryField == null)
+		if (factoryField == null) {
 			throw new Exception("Could not find URLStreamHandlerFactory field"); //$NON-NLS-1$
+		}
 		// look for a lock to synchronize on
 		Object lock = getURLStreamHandlerFactoryLock();
 		synchronized (lock) {
@@ -97,8 +98,9 @@ public class EquinoxFactoryManager {
 		if (handlersField != null) {
 			@SuppressWarnings("rawtypes")
 			Hashtable<?, ?> handlers = (Hashtable) handlersField.get(null);
-			if (handlers != null)
+			if (handlers != null) {
 				handlers.clear();
+			}
 		}
 	}
 
@@ -136,8 +138,9 @@ public class EquinoxFactoryManager {
 
 	private static void forceContentHandlerFactory(ContentHandlerFactoryImpl chf) throws Exception {
 		Field factoryField = getField(URLConnection.class, java.net.ContentHandlerFactory.class, false);
-		if (factoryField == null)
+		if (factoryField == null) {
 			throw new Exception("Could not find ContentHandlerFactory field"); //$NON-NLS-1$
+		}
 		synchronized (URLConnection.class) {
 			java.net.ContentHandlerFactory factory = (java.net.ContentHandlerFactory) factoryField.get(null);
 			// doing a null check here just in case, but it would be really strange if it
@@ -169,8 +172,9 @@ public class EquinoxFactoryManager {
 		if (handlersField != null) {
 			@SuppressWarnings("rawtypes")
 			Hashtable<?, ?> handlers = (Hashtable) handlersField.get(null);
-			if (handlers != null)
+			if (handlers != null) {
 				handlers.clear();
+			}
 		}
 	}
 
@@ -185,8 +189,9 @@ public class EquinoxFactoryManager {
 		}
 		try {
 			Field factoryField = getField(URL.class, URLStreamHandlerFactory.class, false);
-			if (factoryField == null)
+			if (factoryField == null) {
 				return; // oh well, we tried
+			}
 			Object lock = getURLStreamHandlerFactoryLock();
 			synchronized (lock) {
 				URLStreamHandlerFactory factory = (URLStreamHandlerFactory) factoryField.get(null);
@@ -203,8 +208,9 @@ public class EquinoxFactoryManager {
 				// but we want to be sure to clear it here just in case the parent is null.
 				// In this case the call below would not occur.
 				resetURLStreamHandlers();
-				if (factory != null)
+				if (factory != null) {
 					URL.setURLStreamHandlerFactory(factory);
+				}
 			}
 		} catch (Throwable e) {
 			// ignore and continue closing the framework
@@ -217,8 +223,9 @@ public class EquinoxFactoryManager {
 		}
 		try {
 			Field factoryField = getField(URLConnection.class, java.net.ContentHandlerFactory.class, false);
-			if (factoryField == null)
+			if (factoryField == null) {
 				return; // oh well, we tried.
+			}
 			synchronized (URLConnection.class) {
 				java.net.ContentHandlerFactory factory = (java.net.ContentHandlerFactory) factoryField.get(null);
 
@@ -238,8 +245,9 @@ public class EquinoxFactoryManager {
 				// Also it appears most java libraries actually do not clear the cache
 				// when setContentHandlerFactory is called, go figure!!
 				resetContentHandlers();
-				if (factory != null)
+				if (factory != null) {
 					URLConnection.setContentHandlerFactory(factory);
+				}
 			}
 		} catch (Throwable e) {
 			// ignore and continue closing the framework

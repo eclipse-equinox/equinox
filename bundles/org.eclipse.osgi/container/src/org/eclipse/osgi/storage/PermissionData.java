@@ -44,8 +44,9 @@ public class PermissionData {
 		synchronized (locations) {
 			String[] result = new String[locations.size()];
 			int i = 0;
-			for (Iterator<String> iLocs = locations.keySet().iterator(); iLocs.hasNext(); i++)
+			for (Iterator<String> iLocs = locations.keySet().iterator(); iLocs.hasNext(); i++) {
 				result[i] = iLocs.next();
+			}
 			return result;
 		}
 	}
@@ -62,11 +63,13 @@ public class PermissionData {
 	 *         permission data.
 	 */
 	public String[] getPermissionData(String location) {
-		if (location == null)
+		if (location == null) {
 			return defaultInfos;
+		}
 		synchronized (locations) {
-			if (locations.size() == 0)
+			if (locations.size() == 0) {
 				return null;
+			}
 			return locations.get(location);
 		}
 	}
@@ -87,10 +90,11 @@ public class PermissionData {
 			return;
 		}
 		synchronized (locations) {
-			if (data == null)
+			if (data == null) {
 				locations.remove(location);
-			else
+			} else {
 				locations.put(location, data);
+			}
 		}
 		setDirty(true);
 	}
@@ -135,8 +139,9 @@ public class PermissionData {
 				int numPerms = temp.readInt();
 				if (numPerms > 0) {
 					String[] perms = new String[numPerms];
-					for (int i = 0; i < numPerms; i++)
+					for (int i = 0; i < numPerms; i++) {
 						perms[i] = temp.readUTF();
+					}
 					setPermissionData(null, perms);
 				}
 				int numLocs = temp.readInt();
@@ -145,8 +150,9 @@ public class PermissionData {
 						String loc = temp.readUTF();
 						numPerms = temp.readInt();
 						String[] perms = new String[numPerms];
-						for (int j = 0; j < numPerms; j++)
+						for (int j = 0; j < numPerms; j++) {
 							perms[j] = temp.readUTF();
+						}
 						setPermissionData(loc, perms);
 					}
 				}
@@ -174,13 +180,14 @@ public class PermissionData {
 		// always write the default permissions first
 		String[] defaultPerms = getPermissionData(null);
 		temp.writeInt(defaultPerms == null ? 0 : defaultPerms.length);
-		if (defaultPerms != null)
+		if (defaultPerms != null) {
 			for (String defaultPerm : defaultPerms) {
 				temp.writeUTF(defaultPerm);
 			}
+		}
 		String[] locs = getLocations();
 		temp.writeInt(locs == null ? 0 : locs.length);
-		if (locs != null)
+		if (locs != null) {
 			for (String loc : locs) {
 				temp.writeUTF(loc);
 				String[] perms = getPermissionData(loc);
@@ -191,12 +198,14 @@ public class PermissionData {
 					}
 				}
 			}
+		}
 		String[] condPerms = getConditionalPermissionInfos();
 		temp.writeInt(condPerms == null ? 0 : condPerms.length);
-		if (condPerms != null)
+		if (condPerms != null) {
 			for (String condPerm : condPerms) {
 				temp.writeUTF(condPerm);
 			}
+		}
 		temp.close();
 
 		out.writeInt(tempBytes.size());

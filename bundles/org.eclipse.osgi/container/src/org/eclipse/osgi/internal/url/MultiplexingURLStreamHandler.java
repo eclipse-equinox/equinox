@@ -32,13 +32,14 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 	private static Field handlerField;
 	private static boolean methodsInitialized = false;
 
-	private String protocol;
-	private URLStreamHandlerFactoryImpl factory;
+	private final String protocol;
+	private final URLStreamHandlerFactoryImpl factory;
 	private final URLStreamHandler authorized;
 
 	private static synchronized void initializeMethods(URLStreamHandlerFactoryImpl factory) {
-		if (methodsInitialized)
+		if (methodsInitialized) {
 			return;
+		}
 		try {
 			openConnectionMethod = URLStreamHandler.class.getDeclaredMethod("openConnection", //$NON-NLS-1$
 					new Class[] { URL.class });
@@ -84,8 +85,9 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 				handlerField = URL.class.getDeclaredField("handler"); //$NON-NLS-1$
 			} catch (NoSuchFieldException e) {
 				handlerField = EquinoxFactoryManager.getField(URL.class, URLStreamHandler.class, true);
-				if (handlerField == null)
+				if (handlerField == null) {
 					throw e;
+				}
 			}
 			MultiplexingFactory.setAccessible(handlerField);
 		} catch (Exception e) {
@@ -111,8 +113,9 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 			try {
 				return (URLConnection) openConnectionMethod.invoke(handler, new Object[] { url });
 			} catch (InvocationTargetException e) {
-				if (e.getTargetException() instanceof IOException)
+				if (e.getTargetException() instanceof IOException) {
 					throw (IOException) e.getTargetException();
+				}
 				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
 				factory.container.getLogServices().log(MultiplexingURLStreamHandler.class.getName(),
@@ -130,8 +133,9 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 			try {
 				return (URLConnection) openConnectionProxyMethod.invoke(handler, new Object[] { url, proxy });
 			} catch (InvocationTargetException e) {
-				if (e.getTargetException() instanceof IOException)
+				if (e.getTargetException() instanceof IOException) {
 					throw (IOException) e.getTargetException();
+				}
 				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
 				factory.container.getLogServices().log(MultiplexingURLStreamHandler.class.getName(),

@@ -173,8 +173,9 @@ public class ClasspathEntry {
 	 * @return a user object which is keyed by the specified key
 	 */
 	public synchronized Object getUserObject(Object key) {
-		if (userObjects == null)
+		if (userObjects == null) {
 			return null;
+		}
 		return userObjects.get(key);
 
 	}
@@ -185,8 +186,9 @@ public class ClasspathEntry {
 	 * @param userObject the user object to add
 	 */
 	public synchronized void addUserObject(KeyedElement userObject) {
-		if (userObjects == null)
+		if (userObjects == null) {
 			userObjects = new HashMap<>(5);
+		}
 		if (!userObjects.containsKey(userObject.getKey())) {
 			userObjects.put(userObject.getKey(), userObject);
 		}
@@ -249,8 +251,9 @@ public class ClasspathEntry {
 					manIn = mfEntry.getInputStream();
 					return new Manifest(manIn);
 				} finally {
-					if (manIn != null)
+					if (manIn != null) {
 						manIn.close();
+					}
 				}
 			} catch (IOException e) {
 				// do nothing
