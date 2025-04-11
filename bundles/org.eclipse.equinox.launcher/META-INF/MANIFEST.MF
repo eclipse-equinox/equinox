@@ -8,4 +8,5 @@ Bundle-Vendor: %providerName
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-Localization: launcher
 Export-Package: org.eclipse.equinox.launcher;x-internal:=true
+Enable-Native-Access: ALL-UNNAMED
 Automatic-Module-Name: org.eclipse.equinox.launcher
