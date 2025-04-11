@@ -61,8 +61,9 @@ public abstract class SystemModule extends Module {
 			lockedStarted = true;
 			getContainer().getAdaptor().initBegin();
 			checkValid();
-			if (ACTIVE_SET.contains(getState()))
+			if (ACTIVE_SET.contains(getState())) {
 				return;
+			}
 			getRevisions().getContainer().open();
 			if (getState().equals(State.INSTALLED)) {
 				// must unlock to avoid out of order locks when multiple unresolved
@@ -84,8 +85,9 @@ public abstract class SystemModule extends Module {
 						throw (BundleException) e.getCause();
 					}
 				}
-				if (ACTIVE_SET.contains(getState()))
+				if (ACTIVE_SET.contains(getState())) {
 					return;
+				}
 				if (getState().equals(State.INSTALLED)) {
 					String reportMessage = report.getResolutionReportMessage(getCurrentRevision());
 					throw new BundleException(Msg.Module_ResolveError + reportMessage, BundleException.RESOLVE_ERROR);
