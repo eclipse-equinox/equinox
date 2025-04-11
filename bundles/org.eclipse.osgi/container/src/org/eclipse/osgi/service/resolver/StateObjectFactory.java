@@ -51,6 +51,7 @@ public interface StateObjectFactory {
 	 * @return the created state
 	 * @deprecated use {@link #createState(boolean) }
 	 */
+	@Deprecated
 	public State createState();
 
 	/**
@@ -99,6 +100,7 @@ public interface StateObjectFactory {
 	 * @deprecated use
 	 *             {@link #createBundleDescription(long, String, Version, String, BundleSpecification[], HostSpecification, ImportPackageSpecification[], ExportPackageDescription[], boolean, boolean, boolean, String, String[], GenericSpecification[], GenericDescription[])}
 	 */
+	@Deprecated
 	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location,
 			BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports,
 			ExportPackageDescription[] exports, String[] providedPackages, boolean singleton);
@@ -138,6 +140,7 @@ public interface StateObjectFactory {
 	 * @deprecated use
 	 *             {@link #createBundleDescription(long, String, Version, String, BundleSpecification[], HostSpecification, ImportPackageSpecification[], ExportPackageDescription[], boolean, boolean, boolean, String, String[], GenericSpecification[], GenericDescription[])}
 	 */
+	@Deprecated
 	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location,
 			BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports,
 			ExportPackageDescription[] exports, String[] providedPackages, boolean singleton, boolean attachFragments,
@@ -292,6 +295,7 @@ public interface StateObjectFactory {
 	 * @deprecated use
 	 *             {@link #createBundleDescription(State, Dictionary, String, long)}
 	 */
+	@Deprecated
 	public BundleDescription createBundleDescription(Dictionary<String, String> manifest, String location, long id)
 			throws BundleException;
 
@@ -435,6 +439,7 @@ public interface StateObjectFactory {
 	 * @deprecated use
 	 *             {@link #createGenericDescription(String, String, Version, Map)}
 	 */
+	@Deprecated
 	public GenericDescription createGenericDescription(String name, String type, Version version,
 			Map<String, ?> attributes);
 
@@ -551,6 +556,7 @@ public interface StateObjectFactory {
 	 * @deprecated use {@link #writeState(State, File)} instead
 	 * @since 3.1
 	 */
+	@Deprecated
 	public void writeState(State state, OutputStream stream) throws IOException;
 
 	/**
@@ -565,6 +571,7 @@ public interface StateObjectFactory {
 	 * @deprecated use {@link #writeState(State, File)} instead
 	 * @see #writeState(State, OutputStream)
 	 */
+	@Deprecated
 	public void writeState(State state, DataOutputStream stream) throws IOException;
 
 	/**
@@ -589,6 +596,7 @@ public interface StateObjectFactory {
 	 * @deprecated use {@link #readState(File)} instead
 	 * @since 3.1
 	 */
+	@Deprecated
 	public State readState(InputStream stream) throws IOException;
 
 	/**
@@ -601,6 +609,7 @@ public interface StateObjectFactory {
 	 * @deprecated use {@link #readState(File)} instead
 	 * @see #readState(InputStream)
 	 */
+	@Deprecated
 	public State readState(DataInputStream stream) throws IOException;
 
 	/**
@@ -615,7 +624,7 @@ public interface StateObjectFactory {
 
 	static class StateObjectFactoryProxy implements StateObjectFactory {
 		private static final String IMPL_NAME = "org.eclipse.osgi.internal.resolver.StateObjectFactoryImpl"; //$NON-NLS-1$
-		private Object monitor = new Object();
+		private final Object monitor = new Object();
 		private StateObjectFactory implementation;
 
 		private StateObjectFactory getImplementation() {
