@@ -50,8 +50,8 @@ import java.security.Permission;
 import java.security.PermissionCollection;
 import java.security.Policy;
 import java.security.ProtectionDomain;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
@@ -63,8 +63,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.Queue;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -138,8 +140,8 @@ public class Main {
 	private String exitData = null;
 
 	private String vm = null;
-	private String[] vmargs = null;
-	private String[] commands = null;
+	private List<String> vmargs;
+	private List<String> commands;
 	private List<String> extensionPaths = null;
 
 	private JNIBridge bridge = null;
@@ -192,8 +194,8 @@ public class Main {
 	private static final String PROTECT_BASE = "base"; //$NON-NLS-1$
 
 	private static final String LIBRARY = "--launcher.library"; //$NON-NLS-1$
-	private static final String APPEND_VMARGS = "--launcher.appendVmargs"; //$NON-NLS-1$
-	private static final String OVERRIDE_VMARGS = "--launcher.overrideVmargs"; //$NON-NLS-1$
+	private static final String APPEND_VMARGS = "--launcher.appendvmargs"; //$NON-NLS-1$
+	private static final String OVERRIDE_VMARGS = "--launcher.overridevmargs"; //$NON-NLS-1$
 	private static final String NL = "-nl"; //$NON-NLS-1$
 	private static final String ENDSPLASH = "-endsplash"; //$NON-NLS-1$
 	private static final String[] SPLASH_IMAGES = { //
@@ -204,7 +206,7 @@ public class Main {
 			"splash.bmp", //$NON-NLS-1$
 	};
 	private static final String CLEAN = "-clean"; //$NON-NLS-1$
-	private static final String NOEXIT = "-noExit"; //$NON-NLS-1$
+	private static final String NOEXIT = "-noexit"; //$NON-NLS-1$
 	private static final String OS = "-os"; //$NON-NLS-1$
 	private static final String WS = "-ws"; //$NON-NLS-1$
 	private static final String ARCH = "-arch"; //$NON-NLS-1$
@@ -528,8 +530,8 @@ public class Main {
 	 */
 	private void basicRun(String[] args) throws Exception {
 		System.setProperty("eclipse.startTime", Long.toString(System.currentTimeMillis())); //$NON-NLS-1$
-		commands = args;
-		String[] passThruArgs = processCommandLine(args);
+		commands = List.of(args);
+		String[] passThruArgs = processCommandLine(commands).toArray(String[]::new);
 
 		if (!debug) {
 			// debug can be specified as system property as well
@@ -1481,7 +1483,7 @@ public class Main {
 	}
 
 	/**
-	 * Processes the command line arguments.  The general principle is to NOT
+	 * Processes the command line arguments. The general principle is to NOT
 	 * consume the arguments and leave them to be processed by Eclipse proper.
 	 * There are a few args which are directed towards main() and a few others
 	 * which we need to know about. Very few should actually be consumed here.
@@ -1489,224 +1491,150 @@ public class Main {
 	 * @return the arguments to pass through to the launched application
 	 * @param args the command line arguments
 	 */
-	private String[] processCommandLine(String[] args) {
-		if (args.length == 0) {
-			return args;
-		}
-		int[] configArgs = new int[args.length];
-		configArgs[0] = -1; // need to initialize the first element to something that could not be an index.
-		int configArgIndex = 0;
-		for (int i = 0; i < args.length; i++) {
-			boolean found = false;
+	private List<String> processCommandLine(List<String> argsList) {
+		Queue<String> args = new ArrayDeque<>(argsList);
+		List<String> passThrough = new ArrayList<>();
+		while (!args.isEmpty()) {
 			// check for args without parameters (i.e., a flag arg)
 			// check if debug should be enabled for the entire platform
-			if (args[i].equalsIgnoreCase(DEBUG)) {
-				debug = true;
-				// passed thru this arg (i.e., do not set found = true)
+			String key = args.remove();
+			if (!key.startsWith("-")) { //$NON-NLS-1$
+				passThrough.add(key);
 				continue;
 			}
-
-			// look for and consume the nosplash directive.  This supercedes any
-			// -showsplash command that might be present.
-			if (args[i].equalsIgnoreCase(NOSPLASH)) {
-				splashDown = true;
-				found = true;
-			}
-
-			if (args[i].equalsIgnoreCase(NOEXIT)) {
-				System.setProperty(PROP_NOSHUTDOWN, "true"); //$NON-NLS-1$
-				found = true;
-			}
-
-			//just consume the --launcher.overrideVmargs and --launcher.appendVmargs
-			if (args[i].equalsIgnoreCase(APPEND_VMARGS) || args[i].equalsIgnoreCase(OVERRIDE_VMARGS)) {
-				found = true;
-			}
-
-			// check if this is initialization pass
-			if (args[i].equalsIgnoreCase(INITIALIZE)) {
-				initialize = true;
-				// passed thru this arg (i.e., do not set found = true)
-				continue;
-			}
-
-			// check if development mode should be enabled for the entire platform
-			// If this is the last arg or there is a following arg (i.e., arg+1 has a leading -),
-			// simply enable development mode.  Otherwise, assume that that the following arg is
-			// actually some additional development time class path entries.  This will be processed below.
-			if (args[i].equalsIgnoreCase(DEV) && ((i + 1 == args.length) || ((i + 1 < args.length) && (args[i + 1].startsWith("-"))))) { //$NON-NLS-1$
-				inDevelopmentMode = true;
-				// do not mark the arg as found so it will be passed through
-				continue;
-			}
-
-			// look for the command to use to show the splash screen
-			if (args[i].equalsIgnoreCase(SHOWSPLASH)) {
-				showSplash = true;
-				found = true;
-				//consume optional parameter for showsplash
-				if (i + 1 < args.length && !args[i + 1].startsWith("-")) { //$NON-NLS-1$
-					configArgs[configArgIndex++] = i++;
-					splashLocation = args[i];
+			boolean processed = switch (key.toLowerCase(Locale.ROOT)) {
+				case DEBUG -> {
+					debug = true;
+					passThrough.add(key); // pass thru this arg
+					yield true;
 				}
-			}
-
-			// look for the command to use to show the splash screen
-			if (args[i].equalsIgnoreCase(PROTECT)) {
-				found = true;
-				//consume next parameter
-				configArgs[configArgIndex++] = i++;
-				if (args[i].equalsIgnoreCase(PROTECT_MASTER) || args[i].equalsIgnoreCase(PROTECT_BASE)) {
-					protectBase = true;
+				case NOSPLASH -> { // look for and consume the nosplash directive.
+					// This supercedes any -showsplash command that might be present.
+					splashDown = true;
+					yield true;
 				}
-			}
-
-			// done checking for args.  Remember where an arg was found
-			if (found) {
-				configArgs[configArgIndex++] = i;
-				continue;
-			}
-
-			// look for the VM args arg.  We have to do that before looking to see
-			// if the next element is a -arg as the thing following -vmargs may in
-			// fact be another -arg.
-			if (args[i].equalsIgnoreCase(VMARGS)) {
-				// consume the -vmargs arg itself
-				args[i] = null;
-				i++;
-				vmargs = new String[args.length - i];
-				for (int j = 0; i < args.length; i++) {
-					vmargs[j++] = args[i];
-					args[i] = null;
+				case NOEXIT -> {
+					System.setProperty(PROP_NOSHUTDOWN, "true"); //$NON-NLS-1$
+					yield true;
 				}
-				continue;
-			}
-
-			// check for args with parameters. If we are at the last argument or if the next one
-			// has a '-' as the first character, then we can't have an arg with a parm so continue.
-			if (i == args.length - 1 || args[i + 1].startsWith("-")) { //$NON-NLS-1$
-				continue;
-			}
-			String arg = args[++i];
-
-			// look for the development mode and class path entries.
-			if (args[i - 1].equalsIgnoreCase(DEV)) {
-				inDevelopmentMode = true;
-				devClassPathProps = processDevArg(arg);
-				if (devClassPathProps != null) {
-					devClassPath = devClassPathProps.getProperty(OSGI);
-					if (devClassPath == null) {
-						devClassPath = devClassPathProps.getProperty("*"); //$NON-NLS-1$
+				case APPEND_VMARGS, OVERRIDE_VMARGS -> {
+					//just consume the --launcher.overrideVmargs and --launcher.appendVmargs
+					yield true;
+				}
+				case INITIALIZE -> { // check if this is initialization pass
+					initialize = true;
+					passThrough.add(key); // pass thru this arg
+					yield true;
+				}
+				case DEV -> { // check if development mode should be enabled for the entire platform
+					// enable development mode (regardless of a argument is present or not)
+					inDevelopmentMode = true;
+					passThrough.add(key); // pass thru this key and its optional value (if present)
+					consumeParameter(args, arg -> {
+						// assume that that the following arg is actually some additional development time class path entries.
+						// look for the development mode and class path entries.
+						devClassPathProps = processDevArg(arg);
+						if (devClassPathProps != null) {
+							devClassPath = devClassPathProps.getProperty(OSGI);
+							if (devClassPath == null) {
+								devClassPath = devClassPathProps.getProperty("*"); //$NON-NLS-1$
+							}
+						}
+						passThrough.add(arg); // pass thru this value
+					});
+					yield true;
+				}
+				case SHOWSPLASH -> { // look for the command to use to show the splash screen
+					showSplash = true;
+					consumeParameter(args, arg -> { //consume optional parameter for showsplash
+						splashLocation = arg;
+					});
+					yield true;
+				}
+				case PROTECT -> { // look for the command to use to show the splash screen
+					String arg = args.remove(); //consume next parameter
+					if (arg.equals(PROTECT_MASTER) || arg.equals(PROTECT_BASE)) {
+						protectBase = true;
 					}
+					yield true;
 				}
-				continue;
-			}
-
-			// look for the framework to run
-			if (args[i - 1].equalsIgnoreCase(FRAMEWORK)) {
-				framework = arg;
-				found = true;
-			}
-
-			if (args[i - 1].equalsIgnoreCase(OS)) {
-				os = arg;
-				// passed thru this arg
-				continue;
-			}
-
-			if (args[i - 1].equalsIgnoreCase(WS)) {
-				ws = arg;
-				continue;
-			}
-
-			if (args[i - 1].equalsIgnoreCase(ARCH)) {
-				arch = arg;
-				continue;
-			}
-
-			// look for explicitly set install root
-			// Consume the arg here to ensure that the launcher and Eclipse get the
-			// same value as each other.
-			if (args[i - 1].equalsIgnoreCase(INSTALL)) {
-				System.setProperty(PROP_INSTALL_AREA, arg);
-				found = true;
-			}
-
-			// look for the configuration to use.
-			// Consume the arg here to ensure that the launcher and Eclipse get the
-			// same value as each other.
-			if (args[i - 1].equalsIgnoreCase(CONFIGURATION)) {
-				System.setProperty(PROP_CONFIG_AREA, arg);
-				found = true;
-			}
-
-			if (args[i - 1].equalsIgnoreCase(EXITDATA)) {
-				exitData = arg;
-				found = true;
-			}
-
-			// look for the name to use by the launcher
-			if (args[i - 1].equalsIgnoreCase(NAME)) {
-				System.setProperty(PROP_LAUNCHER_NAME, arg);
-				found = true;
-			}
-
-			// look for the startup jar used
-			if (args[i - 1].equalsIgnoreCase(STARTUP)) {
-				//not doing anything with this right now, but still consume it
-				//startup = arg;
-				found = true;
-			}
-
-			// look for the launcher location
-			if (args[i - 1].equalsIgnoreCase(LAUNCHER)) {
-				//not doing anything with this right now, but still consume it
-				//launcher = arg;
-				System.setProperty(PROP_LAUNCHER, arg);
-				found = true;
-			}
-
-			if (args[i - 1].equalsIgnoreCase(LIBRARY)) {
-				library = arg;
-				found = true;
-			}
-
-			// look for the command to use to end the splash screen
-			if (args[i - 1].equalsIgnoreCase(ENDSPLASH)) {
-				endSplash = arg;
-				found = true;
-			}
-
-			// look for the VM location arg
-			if (args[i - 1].equalsIgnoreCase(VM)) {
-				vm = arg;
-				found = true;
-			}
-
-			//look for the nl setting
-			if (args[i - 1].equalsIgnoreCase(NL)) {
-				System.setProperty(PROP_NL, arg);
-				found = true;
-			}
-
-			// done checking for args.  Remember where an arg was found
-			if (found) {
-				configArgs[configArgIndex++] = i - 1;
-				configArgs[configArgIndex++] = i;
+				case VMARGS -> {
+					// look for the VM args arg. We have to do that before looking to see
+					// if the next element is a -arg as the thing following -vmargs may in
+					// fact be another -arg.
+					vmargs = new ArrayList<>(args);
+					args.clear(); // abort the loop after this
+					yield true;
+				}
+				// All keys below expect a suitable parameter and are ignored (and passed-through) if no value is available
+				case FRAMEWORK -> consumeParameter(args, arg -> { // look for the framework to run
+					framework = arg;
+				});
+				case OS -> consumeParameter(args, arg -> {
+					os = arg;
+					passThrough.addAll(List.of(key, arg)); // pass thru this arg
+				});
+				case WS -> consumeParameter(args, arg -> {
+					ws = arg;
+					passThrough.addAll(List.of(key, arg)); // pass thru this arg
+				});
+				case ARCH -> consumeParameter(args, arg -> {
+					arch = arg;
+					passThrough.addAll(List.of(key, arg)); // pass thru this arg
+				});
+				case INSTALL -> consumeParameter(args, arg -> { // look for explicitly set install root
+					// Consume the arg here to ensure that the launcher and Eclipse get the
+					// same value as each other.
+					System.setProperty(PROP_INSTALL_AREA, arg);
+				});
+				case CONFIGURATION -> consumeParameter(args, arg -> { // look for the configuration to use.
+					// Consume the arg here to ensure that the launcher and Eclipse get the
+					// same value as each other.
+					System.setProperty(PROP_CONFIG_AREA, arg);
+				});
+				case EXITDATA -> consumeParameter(args, arg -> {
+					exitData = arg;
+				});
+				case NAME -> consumeParameter(args, arg -> { // look for the name to use by the launcher
+					System.setProperty(PROP_LAUNCHER_NAME, arg);
+				});
+				case STARTUP -> consumeParameter(args, arg -> { // look for the startup jar used
+					// not doing anything with this right now, but still consume it
+					//startup = arg;
+				});
+				case LAUNCHER -> consumeParameter(args, arg -> { // look for the launcher location
+					// not doing anything with this right now, but still consume it
+					// launcher = arg;
+					System.setProperty(PROP_LAUNCHER, arg);
+				});
+				case LIBRARY -> consumeParameter(args, arg -> {
+					library = arg;
+				});
+				case ENDSPLASH -> consumeParameter(args, arg -> { // look for the command to use to end the splash screen
+					endSplash = arg;
+				});
+				case VM -> consumeParameter(args, arg -> { // look for the VM location arg
+					vm = arg;
+				});
+				case NL -> consumeParameter(args, arg -> { // look for the nl setting
+					System.setProperty(PROP_NL, arg);
+				});
+				default -> false;
+			};
+			if (!processed) {
+				passThrough.add(key);
 			}
 		}
-		// remove all the arguments consumed by this argument parsing
-		String[] passThruArgs = new String[args.length - configArgIndex - (vmargs == null ? 0 : vmargs.length + 1)];
-		configArgIndex = 0;
-		int j = 0;
-		for (int i = 0; i < args.length; i++) {
-			if (i == configArgs[configArgIndex]) {
-				configArgIndex++;
-			} else if (args[i] != null) {
-				passThruArgs[j++] = args[i];
-			}
+		return passThrough;
+	}
+
+	private static boolean consumeParameter(Queue<String> arguments, Consumer<String> consumer) {
+		// If we are at the last argument or if the next one has a '-' as the first character, then we can't have an arg with a parameter
+		if (!arguments.isEmpty() && !arguments.peek().startsWith("-")) { //$NON-NLS-1$
+			consumer.accept(arguments.remove());
+			return true;
 		}
-		return passThruArgs;
+		return false;
 	}
 
 	private Properties processDevArg(String arg) {
@@ -2302,7 +2230,7 @@ public class Main {
 		// if we have already extracted this file before, then return
 		if (splash.exists()) {
 			// if we are running with -clean then delete the cached splash file
-			boolean clean = Arrays.stream(commands).anyMatch(CLEAN::equalsIgnoreCase);
+			boolean clean = commands.stream().anyMatch(CLEAN::equalsIgnoreCase);
 			if (clean) {
 				splash.delete();
 			} else {
@@ -2592,7 +2520,7 @@ public class Main {
 		setMultiValueProperty(PROP_COMMANDS, commands);
 	}
 
-	private void setMultiValueProperty(String property, String[] values) {
+	private void setMultiValueProperty(String property, List<String> values) {
 		if (values != null) {
 			StringBuilder result = new StringBuilder(300);
 			for (String value : values) {
