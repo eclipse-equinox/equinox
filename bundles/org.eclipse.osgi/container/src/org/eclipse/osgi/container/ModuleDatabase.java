@@ -276,10 +276,12 @@ public class ModuleDatabase {
 			EnumSet<Settings> settings, int startlevel) {
 		// sanity check
 		checkWrite();
-		if (modulesByLocations.containsKey(location))
+		if (modulesByLocations.containsKey(location)) {
 			throw new IllegalArgumentException("Location is already used: " + location); //$NON-NLS-1$
-		if (modulesById.containsKey(id))
+		}
+		if (modulesById.containsKey(id)) {
 			throw new IllegalArgumentException("Id is already used: " + id); //$NON-NLS-1$
+		}
 		Module module;
 		if (id == 0) {
 			module = adaptor.createSystemModule();
@@ -289,8 +291,9 @@ public class ModuleDatabase {
 		builder.addRevision(module, revisionInfo);
 		modulesByLocations.put(location, module);
 		modulesById.put(id, module);
-		if (settings != null)
+		if (settings != null) {
 			moduleSettings.put(id, settings);
+		}
 		ModuleRevision newRevision = module.getCurrentRevision();
 		addCapabilities(newRevision);
 		return module;
@@ -382,8 +385,9 @@ public class ModuleDatabase {
 		checkWrite();
 		Collection<ModuleRevision> removalPending = getRemovalPending();
 		for (ModuleRevision removed : removalPending) {
-			if (wirings.get(removed) == null)
+			if (wirings.get(removed) == null) {
 				continue;
+			}
 			Collection<ModuleRevision> dependencyClosure = ModuleContainer.getDependencyClosure(removed, wirings);
 			boolean allPendingRemoval = true;
 			for (ModuleRevision pendingRemoval : dependencyClosure) {
@@ -446,8 +450,9 @@ public class ModuleDatabase {
 		readLock();
 		try {
 			for (ModuleWiring wiring : wirings.values()) {
-				if (!wiring.isCurrent())
+				if (!wiring.isCurrent()) {
 					removalPending.add(wiring.getRevision());
+				}
 			}
 		} finally {
 			readUnlock();
@@ -514,6 +519,7 @@ public class ModuleDatabase {
 		try {
 			Map<ModuleRevision, ModuleWiring> clonedWirings = new HashMap<>(wirings);
 			clonedWirings.replaceAll(new BiFunction<ModuleRevision, ModuleWiring, ModuleWiring>() {
+				@Override
 				public ModuleWiring apply(ModuleRevision r, ModuleWiring w) {
 					return new ModuleWiring(r, w.getCapabilities(), w.getRequirements(), w.getProvidedWires(),
 							w.getRequiredWires(), w.getSubstitutedNames());
@@ -612,8 +618,9 @@ public class ModuleDatabase {
 	}
 
 	final void sortModules(List<Module> modules, Sort... sortOptions) {
-		if (modules.size() < 2)
+		if (modules.size() < 2) {
 			return;
+		}
 		if (sortOptions == null || Sort.BY_ID.isContained(sortOptions) || sortOptions.length == 0) {
 			Collections.sort(modules, new Comparator<Module>() {
 				@Override
@@ -636,8 +643,9 @@ public class ModuleDatabase {
 				for (int i = 0; i < modules.size(); i++) {
 					Module module = modules.get(i);
 					if (currentSL != module.getStartLevel()) {
-						if (lazy)
+						if (lazy) {
 							sortByDependencies(modules.subList(currentSLindex, i));
+						}
 						currentSL = module.getStartLevel();
 						currentSLindex = i;
 						lazy = false;
@@ -645,8 +653,9 @@ public class ModuleDatabase {
 					lazy |= module.isLazyActivate();
 				}
 				// sort the last set of bundles
-				if (lazy)
+				if (lazy) {
 					sortByDependencies(modules.subList(currentSLindex, modules.size()));
+				}
 			} else {
 				// sort the whole list by dependency
 				sortByDependencies(modules);
@@ -691,8 +700,9 @@ public class ModuleDatabase {
 		toSort.clear();
 		toSort.addAll(Arrays.asList(sorted));
 
-		if (cycles.length == 0)
+		if (cycles.length == 0) {
 			return Collections.emptyList();
+		}
 
 		Collection<List<Module>> moduleCycles = new ArrayList<>(cycles.length);
 		for (Object[] cycle : cycles) {
@@ -706,8 +716,9 @@ public class ModuleDatabase {
 	}
 
 	private void checkWrite() {
-		if (monitor.getWriteHoldCount() == 0)
+		if (monitor.getWriteHoldCount() == 0) {
 			throw new IllegalMonitorStateException("Must hold the write lock."); //$NON-NLS-1$
+		}
 	}
 
 	/**
@@ -963,8 +974,9 @@ public class ModuleDatabase {
 	public final void load(DataInputStream in) throws IOException {
 		writeLock();
 		try {
-			if (allTimeStamp.get() != constructionTime)
+			if (allTimeStamp.get() != constructionTime) {
 				throw new IllegalStateException("Can only load into a empty database."); //$NON-NLS-1$
+			}
 			Persistence.load(this, in);
 		} finally {
 			writeUnlock();
@@ -1035,11 +1047,13 @@ public class ModuleDatabase {
 		private static final byte VALUE_LIST = 8;
 
 		private static int addToWriteTable(Object object, Map<Object, Integer> objectTable) {
-			if (object == null)
+			if (object == null) {
 				throw new NullPointerException();
+			}
 			Integer cur = objectTable.get(object);
-			if (cur != null)
+			if (cur != null) {
 				throw new IllegalStateException("Object is already in the write table: " + object); //$NON-NLS-1$
+			}
 			objectTable.put(object, Integer.valueOf(objectTable.size()));
 			// return the index of the object just added (i.e. size - 1)
 			return (objectTable.size() - 1);
@@ -1141,8 +1155,9 @@ public class ModuleDatabase {
 		private static void getStringsVersionsAndMaps(Module module, ModuleDatabase moduleDatabase,
 				Set<String> allStrings, Set<Version> allVersions, Set<Map<String, ?>> allMaps) {
 			ModuleRevision current = module.getCurrentRevision();
-			if (current == null)
+			if (current == null) {
 				return;
+			}
 
 			allStrings.add(module.getLocation());
 			allStrings.add(current.getSymbolicName());
@@ -1204,9 +1219,10 @@ public class ModuleDatabase {
 
 		public static void load(ModuleDatabase moduleDatabase, DataInputStream in) throws IOException {
 			int version = in.readInt();
-			if (version > VERSION || VERSION / 1000 != version / 1000)
+			if (version > VERSION || VERSION / 1000 != version / 1000) {
 				throw new IllegalArgumentException("The version of the persistent framework data is not compatible: " //$NON-NLS-1$
 						+ version + " expecting: " + VERSION); //$NON-NLS-1$
+			}
 			long revisionsTimeStamp = in.readLong();
 			long allTimeStamp = in.readLong();
 			moduleDatabase.nextId.set(in.readLong());
@@ -1236,8 +1252,9 @@ public class ModuleDatabase {
 
 			moduleDatabase.revisionsTimeStamp.set(revisionsTimeStamp);
 			moduleDatabase.allTimeStamp.set(allTimeStamp);
-			if (!in.readBoolean())
+			if (!in.readBoolean()) {
 				return; // no wires persisted
+			}
 
 			int numWirings = in.readInt();
 			// prime the table with all the required wires
@@ -1270,8 +1287,9 @@ public class ModuleDatabase {
 		private static void writeModule(Module module, ModuleDatabase moduleDatabase, DataOutputStream out,
 				Map<Object, Integer> objectTable) throws IOException {
 			ModuleRevision current = module.getCurrentRevision();
-			if (current == null)
+			if (current == null) {
 				return;
+			}
 			out.writeInt(addToWriteTable(current, objectTable));
 
 			writeString(module.getLocation(), out, objectTable);
@@ -1377,8 +1395,9 @@ public class ModuleDatabase {
 			Integer requirement = objectTable.get(w.getRequirement());
 			Integer requirer = objectTable.get(w.getRequirer());
 
-			if (capability == null || provider == null || requirement == null || requirer == null)
+			if (capability == null || provider == null || requirement == null || requirer == null) {
 				throw new NullPointerException("Could not find the expected indexes"); //$NON-NLS-1$
+			}
 
 			out.writeInt(addToWriteTable(wire, objectTable));
 
@@ -1396,8 +1415,9 @@ public class ModuleDatabase {
 			ModuleRequirement requirement = (ModuleRequirement) objectTable.get(in.readInt());
 			ModuleRevision requirer = (ModuleRevision) objectTable.get(in.readInt());
 
-			if (capability == null || provider == null || requirement == null || requirer == null)
+			if (capability == null || provider == null || requirement == null || requirer == null) {
 				throw new NullPointerException("Could not find the expected indexes"); //$NON-NLS-1$
+			}
 
 			ModuleWire result = new ModuleWire(capability, provider, requirement, requirer);
 
@@ -1407,16 +1427,18 @@ public class ModuleDatabase {
 		private static void writeWiring(ModuleWiring wiring, DataOutputStream out, Map<Object, Integer> objectTable)
 				throws IOException {
 			Integer revisionIndex = objectTable.get(wiring.getRevision());
-			if (revisionIndex == null)
+			if (revisionIndex == null) {
 				throw new NullPointerException("Could not find revision for wiring."); //$NON-NLS-1$
+			}
 			out.writeInt(revisionIndex);
 
 			List<ModuleCapability> capabilities = wiring.getModuleCapabilities(null);
 			out.writeInt(capabilities.size());
 			for (ModuleCapability capability : capabilities) {
 				Integer capabilityIndex = objectTable.get(capability);
-				if (capabilityIndex == null)
+				if (capabilityIndex == null) {
 					throw new NullPointerException("Could not find capability for wiring."); //$NON-NLS-1$
+				}
 				out.writeInt(capabilityIndex);
 			}
 
@@ -1424,8 +1446,9 @@ public class ModuleDatabase {
 			out.writeInt(requirements.size());
 			for (ModuleRequirement requirement : requirements) {
 				Integer requirementIndex = objectTable.get(requirement);
-				if (requirementIndex == null)
+				if (requirementIndex == null) {
 					throw new NullPointerException("Could not find requirement for wiring."); //$NON-NLS-1$
+				}
 				out.writeInt(requirementIndex);
 			}
 
@@ -1433,8 +1456,9 @@ public class ModuleDatabase {
 			out.writeInt(providedWires.size());
 			for (ModuleWire wire : providedWires) {
 				Integer wireIndex = objectTable.get(wire);
-				if (wireIndex == null)
+				if (wireIndex == null) {
 					throw new NullPointerException("Could not find provided wire for wiring."); //$NON-NLS-1$
+				}
 				out.writeInt(wireIndex);
 			}
 
@@ -1442,8 +1466,9 @@ public class ModuleDatabase {
 			out.writeInt(requiredWires.size());
 			for (ModuleWire wire : requiredWires) {
 				Integer wireIndex = objectTable.get(wire);
-				if (wireIndex == null)
+				if (wireIndex == null) {
 					throw new NullPointerException("Could not find required wire for wiring."); //$NON-NLS-1$
+				}
 				out.writeInt(wireIndex);
 			}
 
@@ -1456,8 +1481,9 @@ public class ModuleDatabase {
 
 		private static ModuleWiring readWiring(DataInputStream in, List<Object> objectTable) throws IOException {
 			ModuleRevision revision = (ModuleRevision) objectTable.get(in.readInt());
-			if (revision == null)
+			if (revision == null) {
 				throw new NullPointerException("Could not find revision for wiring."); //$NON-NLS-1$
+			}
 
 			int numCapabilities = in.readInt();
 			NamespaceList.Builder<ModuleCapability> capabilities = Builder.create(NamespaceList.CAPABILITY);
@@ -1500,8 +1526,9 @@ public class ModuleDatabase {
 
 			Integer attributesIndex = objectTable.get(attributes);
 			Integer directivesIndex = objectTable.get(directives);
-			if (attributesIndex == null || directivesIndex == null)
+			if (attributesIndex == null || directivesIndex == null) {
 				throw new NullPointerException("Could not find the expected indexes"); //$NON-NLS-1$
+			}
 			out.writeInt(attributesIndex);
 			out.writeInt(directivesIndex);
 		}
@@ -1514,8 +1541,9 @@ public class ModuleDatabase {
 					: readMap(in, objectTable);
 			Map<String, ?> directives = version >= 2 ? (Map<String, ?>) objectTable.get(in.readInt())
 					: readMap(in, objectTable);
-			if (attributes == null || directives == null)
+			if (attributes == null || directives == null) {
 				throw new NullPointerException("Could not find the expected indexes"); //$NON-NLS-1$
+			}
 			if (isCapability) {
 				builder.basicAddCapability(namespace, (Map<String, String>) directives, attributes);
 			} else {
@@ -1648,24 +1676,30 @@ public class ModuleDatabase {
 		}
 
 		private static byte getListType(List<?> list) {
-			if (list.size() == 0)
+			if (list.size() == 0) {
 				return -1;
+			}
 			Object type = list.get(0);
-			if (type instanceof String)
+			if (type instanceof String) {
 				return VALUE_STRING;
-			if (type instanceof Long)
+			}
+			if (type instanceof Long) {
 				return VALUE_LONG;
-			if (type instanceof Double)
+			}
+			if (type instanceof Double) {
 				return VALUE_DOUBLE;
-			if (type instanceof Version)
+			}
+			if (type instanceof Version) {
 				return VALUE_VERSION;
+			}
 			return -2;
 		}
 
 		private static List<?> readList(DataInputStream in, List<Object> objectTable) throws IOException {
 			int size = in.readInt();
-			if (size == 0)
+			if (size == 0) {
 				return Collections.emptyList();
+			}
 			byte listType = in.readByte();
 			if (size == 1) {
 				return Collections.singletonList(readListValue(listType, in, objectTable));
@@ -1714,8 +1748,9 @@ public class ModuleDatabase {
 
 		private static void writeQualifier(String string, DataOutputStream out, Map<Object, Integer> objectTable)
 				throws IOException {
-			if (string != null && string.length() == 0)
+			if (string != null && string.length() == 0) {
 				string = null;
+			}
 			writeString(string, out, objectTable);
 		}
 
@@ -1736,8 +1771,9 @@ public class ModuleDatabase {
 				int index = in.readInt();
 				return (Version) objectTable.get(index);
 			}
-			if (type == NULL)
+			if (type == NULL) {
 				return Version.emptyVersion;
+			}
 			int majorComponent = in.readInt();
 			int minorComponent = in.readInt();
 			int serviceComponent = in.readInt();
@@ -1755,9 +1791,9 @@ public class ModuleDatabase {
 				return;
 			}
 
-			if (string == null)
+			if (string == null) {
 				out.writeByte(NULL);
-			else {
+			} else {
 				byte[] data = string.getBytes(StandardCharsets.UTF_8);
 
 				if (data.length > 65535) {

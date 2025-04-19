@@ -59,14 +59,16 @@ public class FrameworkExtensionInstaller {
 	private final ArrayMap<BundleActivator, Bundle> hookActivators = new ArrayMap<>(5);
 
 	private static Method findAddURLMethod(ClassLoader cl, String name) {
-		if (cl == null)
+		if (cl == null) {
 			return null;
+		}
 		return findMethod(cl.getClass(), name, new Class[] { URL.class }, MultiplexingFactory.setAccessible);
 	}
 
 	private static Method findAddFilePathMethod(ClassLoader cl, String name) {
-		if (cl == null)
+		if (cl == null) {
 			return null;
+		}
 		return findMethod(cl.getClass(), name, new Class[] { String.class }, MultiplexingFactory.setAccessible);
 	}
 
@@ -74,8 +76,9 @@ public class FrameworkExtensionInstaller {
 	// inaccessable) method
 	private static Method findMethod(Class<?> clazz, String name, Class<?>[] args,
 			Collection<AccessibleObject> setAccessible) {
-		if (clazz == null)
+		if (clazz == null) {
 			return null; // ends the recursion when getSuperClass returns null
+		}
 		try {
 			Method result = clazz.getDeclaredMethod(name, args);
 			if (setAccessible != null) {
@@ -211,8 +214,9 @@ public class FrameworkExtensionInstaller {
 				results.add(((Generation) revision.getRevisionInfo()).getBundleFile().getBaseFile());
 			} else {
 				File result = ((Generation) revision.getRevisionInfo()).getBundleFile().getFile(path, false);
-				if (result != null)
+				if (result != null) {
 					results.add(result);
+				}
 			}
 		}
 		return results.toArray(new File[results.size()]);

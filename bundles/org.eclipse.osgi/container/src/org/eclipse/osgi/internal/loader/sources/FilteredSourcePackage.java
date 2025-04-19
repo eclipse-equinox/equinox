@@ -31,22 +31,25 @@ public class FilteredSourcePackage extends SingleSourcePackage {
 
 	@Override
 	public URL getResource(String name) {
-		if (isFiltered(name, getId()))
+		if (isFiltered(name, getId())) {
 			return null;
+		}
 		return super.getResource(name);
 	}
 
 	@Override
 	public Enumeration<URL> getResources(String name) {
-		if (isFiltered(name, getId()))
+		if (isFiltered(name, getId())) {
 			return null;
+		}
 		return super.getResources(name);
 	}
 
 	@Override
 	public Class<?> loadClass(String name) throws ClassNotFoundException {
-		if (isFiltered(name, getId()))
+		if (isFiltered(name, getId())) {
 			return null;
+		}
 		return super.loadClass(name);
 	}
 
@@ -56,28 +59,32 @@ public class FilteredSourcePackage extends SingleSourcePackage {
 	}
 
 	private String getName(String name, String pkgName) {
-		if (!BundleLoader.DEFAULT_PACKAGE.equals(pkgName) && pkgName.length() + 1 <= name.length())
+		if (!BundleLoader.DEFAULT_PACKAGE.equals(pkgName) && pkgName.length() + 1 <= name.length()) {
 			return name.substring(pkgName.length() + 1);
+		}
 		return name;
 	}
 
 	private boolean isIncluded(String name) {
-		if (includes == null)
+		if (includes == null) {
 			return true;
+		}
 		return isInList(name, includes);
 	}
 
 	private boolean isExcluded(String name) {
-		if (excludes == null)
+		if (excludes == null) {
 			return false;
+		}
 		return isInList(name, excludes);
 	}
 
 	private boolean isInList(String name, String[] list) {
 		for (String s : list) {
 			int len = s.length();
-			if (len == 0)
+			if (len == 0) {
 				continue;
+			}
 			if (s.charAt(0) == ALL && len == 1) {
 				return true; // handles "*" wild card
 			}
@@ -100,8 +107,9 @@ public class FilteredSourcePackage extends SingleSourcePackage {
 			String resource = resources.next();
 			int lastSlash = resource.lastIndexOf('/');
 			String fileName = lastSlash >= 0 ? resource.substring(lastSlash + 1) : resource;
-			if (!isIncluded(fileName) || isExcluded(fileName))
+			if (!isIncluded(fileName) || isExcluded(fileName)) {
 				resources.remove();
+			}
 		}
 		return result;
 	}

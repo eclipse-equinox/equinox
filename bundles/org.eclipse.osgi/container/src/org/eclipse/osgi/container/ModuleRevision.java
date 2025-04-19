@@ -59,6 +59,7 @@ public final class ModuleRevision implements BundleRevision {
 
 	private NamespaceList<ModuleCapability> createCapabilities(NamespaceList.Builder<GenericInfo> capabilityInfos) {
 		return capabilityInfos.transformIntoCopy(new Function<GenericInfo, ModuleCapability>() {
+			@Override
 			public ModuleCapability apply(GenericInfo i) {
 				Map<String, String> directives = i.mutable ? copyUnmodifiableMap(i.directives) : i.directives;
 				Map<String, Object> attributes = i.mutable ? copyUnmodifiableMap(i.attributes) : i.attributes;
@@ -82,6 +83,7 @@ public final class ModuleRevision implements BundleRevision {
 
 	private NamespaceList<ModuleRequirement> createRequirements(NamespaceList.Builder<GenericInfo> infos) {
 		return infos.transformIntoCopy(new Function<GenericInfo, ModuleRequirement>() {
+			@Override
 			public ModuleRequirement apply(GenericInfo i) {
 				return new ModuleRequirement(i.namespace, i.directives, i.attributes, ModuleRevision.this);
 			}
@@ -206,8 +208,9 @@ public final class ModuleRevision implements BundleRevision {
 	@Override
 	public String toString() {
 		List<ModuleCapability> identities = getModuleCapabilities(IdentityNamespace.IDENTITY_NAMESPACE);
-		if (identities.isEmpty())
+		if (identities.isEmpty()) {
 			return super.toString();
+		}
 		return identities.get(0).toString();
 	}
 

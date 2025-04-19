@@ -45,7 +45,7 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class SecureAction {
 	// make sure we use the correct controlContext;
-	private AccessControlContext controlContext;
+	private final AccessControlContext controlContext;
 
 	// uses initialization-on-demand holder idiom to do fast lazy loading
 	private static class BootClassLoaderHolder {
@@ -99,8 +99,9 @@ public class SecureAction {
 	 * @return the value of the property or null if it does not exist.
 	 */
 	public String getProperty(final String property) {
-		if (System.getSecurityManager() == null)
+		if (System.getSecurityManager() == null) {
 			return System.getProperty(property);
+		}
 		return AccessController.doPrivileged(new PrivilegedAction<String>() {
 			@Override
 			public String run() {
@@ -115,8 +116,9 @@ public class SecureAction {
 	 * @return the system properties.
 	 */
 	public Properties getProperties() {
-		if (System.getSecurityManager() == null)
+		if (System.getSecurityManager() == null) {
 			return System.getProperties();
+		}
 		return AccessController.doPrivileged(new PrivilegedAction<Properties>() {
 			@Override
 			public Properties run() {
@@ -134,8 +136,9 @@ public class SecureAction {
 	 * @throws FileNotFoundException if the File does not exist.
 	 */
 	public FileInputStream getFileInputStream(final File file) throws FileNotFoundException {
-		if (System.getSecurityManager() == null)
+		if (System.getSecurityManager() == null) {
 			return new FileInputStream(file);
+		}
 		try {
 			return AccessController.doPrivileged(new PrivilegedExceptionAction<FileInputStream>() {
 				@Override
@@ -144,8 +147,9 @@ public class SecureAction {
 				}
 			}, controlContext);
 		} catch (PrivilegedActionException e) {
-			if (e.getException() instanceof FileNotFoundException)
+			if (e.getException() instanceof FileNotFoundException) {
 				throw (FileNotFoundException) e.getException();
+			}
 			throw (RuntimeException) e.getException();
 		}
 	}
@@ -160,8 +164,9 @@ public class SecureAction {
 	 * @throws FileNotFoundException if the File does not exist.
 	 */
 	public FileOutputStream getFileOutputStream(final File file, final boolean append) throws FileNotFoundException {
-		if (System.getSecurityManager() == null)
+		if (System.getSecurityManager() == null) {
 			return new FileOutputStream(file.getAbsolutePath(), append);
+		}
 		try {
 			return AccessController.doPrivileged(new PrivilegedExceptionAction<FileOutputStream>() {
 				@Override
@@ -170,8 +175,9 @@ public class SecureAction {
 				}
 			}, controlContext);
 		} catch (PrivilegedActionException e) {
-			if (e.getException() instanceof FileNotFoundException)
+			if (e.getException() instanceof FileNotFoundException) {
 				throw (FileNotFoundException) e.getException();
+			}
 			throw (RuntimeException) e.getException();
 		}
 	}
@@ -183,8 +189,9 @@ public class SecureAction {
 	 * @return the length of a file.
 	 */
 	public long length(final File file) {
-		if (System.getSecurityManager() == null)
+		if (System.getSecurityManager() == null) {
 			return file.length();
+		}
 		return AccessController.doPrivileged(new PrivilegedAction<Long>() {
 			@Override
 			public Long run() {
@@ -202,8 +209,9 @@ public class SecureAction {
 	 * @throws IOException on error
 	 */
 	public String getCanonicalPath(final File file) throws IOException {
-		if (System.getSecurityManager() == null)
+		if (System.getSecurityManager() == null) {
 			return file.getCanonicalPath();
+		}
 		try {
 			return AccessController.doPrivileged(new PrivilegedExceptionAction<String>() {
 				@Override
@@ -212,8 +220,9 @@ public class SecureAction {
 				}
 			}, controlContext);
 		} catch (PrivilegedActionException e) {
-			if (e.getException() instanceof IOException)
+			if (e.getException() instanceof IOException) {
 				throw (IOException) e.getException();
+			}
 			throw (RuntimeException) e.getException();
 		}
 	}
@@ -225,8 +234,9 @@ public class SecureAction {
 	 * @return the absolute file.
 	 */
 	public File getAbsoluteFile(final File file) {
-		if (System.getSecurityManager() == null)
+		if (System.getSecurityManager() == null) {
 			return file.getAbsoluteFile();
+		}
 		return AccessController.doPrivileged(new PrivilegedAction<File>() {
 			@Override
 			public File run() {
@@ -242,8 +252,9 @@ public class SecureAction {
 	 * @return the canonical file.
 	 */
 	public File getCanonicalFile(final File file) throws IOException {
-		if (System.getSecurityManager() == null)
+		if (System.getSecurityManager() == null) {
 			return file.getCanonicalFile();
+		}
 		try {
 			return AccessController.doPrivileged(new PrivilegedExceptionAction<File>() {
 				@Override
@@ -252,8 +263,9 @@ public class SecureAction {
 				}
 			}, controlContext);
 		} catch (PrivilegedActionException e) {
-			if (e.getException() instanceof IOException)
+			if (e.getException() instanceof IOException) {
 				throw (IOException) e.getException();
+			}
 			throw (RuntimeException) e.getException();
 		}
 	}
@@ -266,8 +278,9 @@ public class SecureAction {
 	 * @return true if a file exists, otherwise false
 	 */
 	public boolean exists(final File file) {
-		if (System.getSecurityManager() == null)
+		if (System.getSecurityManager() == null) {
 			return file.exists();
+		}
 		return AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
 			@Override
 			public Boolean run() {
@@ -277,8 +290,9 @@ public class SecureAction {
 	}
 
 	public boolean mkdirs(final File file) {
-		if (System.getSecurityManager() == null)
+		if (System.getSecurityManager() == null) {
 			return file.mkdirs();
+		}
 		return AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
 			@Override
 			public Boolean run() {
@@ -295,8 +309,9 @@ public class SecureAction {
 	 * @return true if a file is a directory, otherwise false
 	 */
 	public boolean isDirectory(final File file) {
-		if (System.getSecurityManager() == null)
+		if (System.getSecurityManager() == null) {
 			return file.isDirectory();
+		}
 		return AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
 			@Override
 			public Boolean run() {
@@ -312,8 +327,9 @@ public class SecureAction {
 	 * @return a file's last modified stamp.
 	 */
 	public long lastModified(final File file) {
-		if (System.getSecurityManager() == null)
+		if (System.getSecurityManager() == null) {
 			return file.lastModified();
+		}
 		return AccessController.doPrivileged(new PrivilegedAction<Long>() {
 			@Override
 			public Long run() {
@@ -329,8 +345,9 @@ public class SecureAction {
 	 * @return a file's list.
 	 */
 	public String[] list(final File file) {
-		if (System.getSecurityManager() == null)
+		if (System.getSecurityManager() == null) {
 			return file.list();
+		}
 		return AccessController.doPrivileged(new PrivilegedAction<String[]>() {
 			@Override
 			public String[] run() {
@@ -349,8 +366,9 @@ public class SecureAction {
 	 */
 	public ZipFile getZipFile(final File file, final boolean verify) throws IOException {
 		try {
-			if (System.getSecurityManager() == null)
+			if (System.getSecurityManager() == null) {
 				return new ZipFile(file);
+			}
 			try {
 				return AccessController.doPrivileged(new PrivilegedExceptionAction<ZipFile>() {
 					@Override
@@ -359,8 +377,9 @@ public class SecureAction {
 					}
 				}, controlContext);
 			} catch (PrivilegedActionException e) {
-				if (e.getException() instanceof IOException)
+				if (e.getException() instanceof IOException) {
 					throw (IOException) e.getException();
+				}
 				throw (RuntimeException) e.getException();
 			}
 		} catch (ZipException e) {
@@ -385,8 +404,9 @@ public class SecureAction {
 	 */
 	public URL getURL(final String protocol, final String host, final int port, final String file,
 			final URLStreamHandler handler) throws MalformedURLException {
-		if (System.getSecurityManager() == null)
+		if (System.getSecurityManager() == null) {
 			return new URL(protocol, host, port, file, handler);
+		}
 		try {
 			return AccessController.doPrivileged(new PrivilegedExceptionAction<URL>() {
 				@Override
@@ -395,8 +415,9 @@ public class SecureAction {
 				}
 			}, controlContext);
 		} catch (PrivilegedActionException e) {
-			if (e.getException() instanceof MalformedURLException)
+			if (e.getException() instanceof MalformedURLException) {
 				throw (MalformedURLException) e.getException();
+			}
 			throw (RuntimeException) e.getException();
 		}
 	}
@@ -411,8 +432,9 @@ public class SecureAction {
 	 * @return The new Thread
 	 */
 	public Thread createThread(final Runnable target, final String name, final ClassLoader contextLoader) {
-		if (System.getSecurityManager() == null)
+		if (System.getSecurityManager() == null) {
 			return createThread0(target, name, contextLoader);
+		}
 		return AccessController.doPrivileged(new PrivilegedAction<Thread>() {
 			@Override
 			public Thread run() {
@@ -423,8 +445,9 @@ public class SecureAction {
 
 	Thread createThread0(Runnable target, String name, ClassLoader contextLoader) {
 		Thread result = new Thread(target, name);
-		if (contextLoader != null)
+		if (contextLoader != null) {
 			result.setContextClassLoader(contextLoader);
+		}
 		return result;
 	}
 
@@ -436,8 +459,9 @@ public class SecureAction {
 	 * @return a service object
 	 */
 	public <S> S getService(final ServiceReference<S> reference, final BundleContext context) {
-		if (System.getSecurityManager() == null)
+		if (System.getSecurityManager() == null) {
 			return context.getService(reference);
+		}
 		return AccessController.doPrivileged(new PrivilegedAction<S>() {
 			@Override
 			public S run() {
@@ -453,8 +477,9 @@ public class SecureAction {
 	 * @return a Class
 	 */
 	public Class<?> forName(final String name) throws ClassNotFoundException {
-		if (System.getSecurityManager() == null)
+		if (System.getSecurityManager() == null) {
 			return Class.forName(name);
+		}
 		try {
 			return AccessController.doPrivileged(new PrivilegedExceptionAction<Class<?>>() {
 				@Override
@@ -463,8 +488,9 @@ public class SecureAction {
 				}
 			}, controlContext);
 		} catch (PrivilegedActionException e) {
-			if (e.getException() instanceof ClassNotFoundException)
+			if (e.getException() instanceof ClassNotFoundException) {
 				throw (ClassNotFoundException) e.getException();
+			}
 			throw (RuntimeException) e.getException();
 		}
 	}
@@ -492,8 +518,9 @@ public class SecureAction {
 				}
 			}, controlContext);
 		} catch (PrivilegedActionException e) {
-			if (e.getException() instanceof ClassNotFoundException)
+			if (e.getException() instanceof ClassNotFoundException) {
 				throw (ClassNotFoundException) e.getException();
+			}
 			throw (RuntimeException) e.getException();
 		}
 	}
@@ -537,8 +564,9 @@ public class SecureAction {
 				}
 			}, controlContext);
 		} catch (PrivilegedActionException e) {
-			if (e.getException() instanceof BundleException)
+			if (e.getException() instanceof BundleException) {
 				throw (BundleException) e.getException();
+			}
 			throw (RuntimeException) e.getException();
 		}
 	}
