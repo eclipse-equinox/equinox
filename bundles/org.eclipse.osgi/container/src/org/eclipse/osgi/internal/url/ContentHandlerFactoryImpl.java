@@ -40,7 +40,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * content handler.
  */
 public class ContentHandlerFactoryImpl extends MultiplexingFactory implements java.net.ContentHandlerFactory {
-	private ServiceTracker<ContentHandler, ContentHandler> contentHandlerTracker;
+	private final ServiceTracker<ContentHandler, ContentHandler> contentHandlerTracker;
 
 	private static final String contentHandlerClazz = "java.net.ContentHandler"; //$NON-NLS-1$
 	private static final String CONTENT_HANDLER_PKGS = "java.content.handler.pkgs"; //$NON-NLS-1$
@@ -49,7 +49,7 @@ public class ContentHandlerFactoryImpl extends MultiplexingFactory implements ja
 	private static final List<Class<?>> ignoredClasses = Arrays.asList(
 			new Class<?>[] { MultiplexingContentHandler.class, ContentHandlerFactoryImpl.class, URLConnection.class });
 
-	private Map<String, ContentHandlerProxy> proxies;
+	private final Map<String, ContentHandlerProxy> proxies;
 	private java.net.ContentHandlerFactory parentFactory;
 
 	public ContentHandlerFactoryImpl(BundleContext context, EquinoxContainer container) {
@@ -100,8 +100,9 @@ public class ContentHandlerFactoryImpl extends MultiplexingFactory implements ja
 			}
 		}
 
-		if (isMultiplexing())
+		if (isMultiplexing()) {
 			return new MultiplexingContentHandler(contentType, this);
+		}
 
 		return createInternalContentHandler(contentType);
 	}
@@ -116,8 +117,9 @@ public class ContentHandlerFactoryImpl extends MultiplexingFactory implements ja
 		if (serviceReferences != null) {
 			for (ServiceReference<ContentHandler> serviceReference : serviceReferences) {
 				Object prop = serviceReference.getProperty(URLConstants.URL_CONTENT_MIMETYPE);
-				if (prop instanceof String)
+				if (prop instanceof String) {
 					prop = new String[] { (String) prop }; // TODO should this be a warning?
+				}
 				if (!(prop instanceof String[])) {
 					String message = NLS.bind(Msg.URL_HANDLER_INCORRECT_TYPE, new Object[] {
 							URLConstants.URL_CONTENT_MIMETYPE, contentHandlerClazz, serviceReference.getBundle() });
@@ -137,8 +139,9 @@ public class ContentHandlerFactoryImpl extends MultiplexingFactory implements ja
 		// if parent is present do parent lookup before returning a proxy
 		if (parentFactory != null) {
 			ContentHandler parentHandler = parentFactory.createContentHandler(contentType);
-			if (parentHandler != null)
+			if (parentHandler != null) {
 				return parentHandler;
+			}
 		}
 		// If we can't find the content handler in the service registry, return Proxy
 		// with DefaultContentHandler set.
@@ -151,11 +154,13 @@ public class ContentHandlerFactoryImpl extends MultiplexingFactory implements ja
 
 	public synchronized ContentHandler findAuthorizedContentHandler(String contentType) {
 		Object factory = findAuthorizedFactory(ignoredClasses);
-		if (factory == null)
+		if (factory == null) {
 			return null;
+		}
 
-		if (factory == this)
+		if (factory == this) {
 			return createInternalContentHandler(contentType);
+		}
 
 		try {
 			Method createInternalContentHandlerMethod = factory.getClass().getMethod("createInternalContentHandler", //$NON-NLS-1$
@@ -175,7 +180,8 @@ public class ContentHandlerFactoryImpl extends MultiplexingFactory implements ja
 
 	@Override
 	public void setParentFactory(Object parentFactory) {
-		if (this.parentFactory == null) // only allow it to be set once
+		if (this.parentFactory == null) { // only allow it to be set once
 			this.parentFactory = (java.net.ContentHandlerFactory) parentFactory;
+		}
 	}
 }

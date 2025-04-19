@@ -47,16 +47,19 @@ import org.eclipse.osgi.container.ModuleWire;
 public class NamespaceList<E> {
 
 	public final static Function<ModuleWire, String> WIRE = new Function<ModuleWire, String>() {
+		@Override
 		public String apply(ModuleWire wire) {
 			return wire.getCapability().getNamespace();
 		}
 	};
 	public final static Function<ModuleCapability, String> CAPABILITY = new Function<ModuleCapability, String>() {
+		@Override
 		public String apply(ModuleCapability capability) {
 			return capability.getNamespace();
 		}
 	};
 	public final static Function<ModuleRequirement, String> REQUIREMENT = new Function<ModuleRequirement, String>() {
+		@Override
 		public String apply(ModuleRequirement requirement) {
 			return requirement.getNamespace();
 		}
@@ -188,6 +191,7 @@ public class NamespaceList<E> {
 					return inner.hasNext();
 				}
 
+				@Override
 				public E next() {
 					if (!hasNext()) {
 						throw new NoSuchElementException();
@@ -333,6 +337,7 @@ public class NamespaceList<E> {
 
 		private List<E> getNamespaceList(String namespace) {
 			return namespaceElements.computeIfAbsent(namespace, new Function<String, List<E>>() {
+				@Override
 				public List<E> apply(String n) {
 					return new ArrayList<>();
 				}
@@ -402,6 +407,7 @@ public class NamespaceList<E> {
 								targetList.add(toAdd);
 							} else {
 								addAfterLastMatch(toAdd, targetList, new Predicate<E>() {
+									@Override
 									public boolean test(E e) {
 										return insertionMatcher.test(toAdd, e);
 									}
@@ -448,6 +454,7 @@ public class NamespaceList<E> {
 
 		private void removeNamespaceElement(String namespace, E element) {
 			namespaceElements.computeIfPresent(namespace, new BiFunction<String, List<E>, List<E>>() {
+				@Override
 				public List<E> apply(String n, List<E> es) {
 					if (es.remove(element)) {
 						Builder.this.size--;
@@ -482,6 +489,7 @@ public class NamespaceList<E> {
 			prepareModification();
 
 			namespaceElements.entrySet().removeIf(new Predicate<Map.Entry<String, List<E>>>() {
+				@Override
 				public boolean test(Map.Entry<String, List<E>> e) {
 					if (filter.test(e.getKey())) {
 						Builder.this.size -= e.getValue().size();
@@ -498,6 +506,7 @@ public class NamespaceList<E> {
 
 			int s = size;
 			namespaceElements.values().removeIf(new Predicate<List<E>>() {
+				@Override
 				public boolean test(List<E> es) {
 					return removeElementsIf(es, filter) == null;
 				}
@@ -516,6 +525,7 @@ public class NamespaceList<E> {
 			prepareModification();
 
 			namespaceElements.computeIfPresent(namespace, new BiFunction<String, List<E>, List<E>>() {
+				@Override
 				public List<E> apply(String n, List<E> es) {
 					return removeElementsIf(es, filter);
 				}
@@ -555,6 +565,7 @@ public class NamespaceList<E> {
 
 				int[] start = new int[] { 0 };
 				namespaceElements.replaceAll(new BiFunction<String, List<E>, List<E>>() {
+					@Override
 					public List<E> apply(String n, List<E> es) {
 						int from = start[0];
 						int to = start[0] += es.size();
@@ -571,6 +582,7 @@ public class NamespaceList<E> {
 				// namespace-lists for subsequent modification
 				namespaceElements = new LinkedHashMap<>(namespaceElements);
 				namespaceElements.replaceAll(new BiFunction<String, List<E>, List<E>>() {
+					@Override
 					public List<E> apply(String n, List<E> es) {
 						return new ArrayList<>(es);
 					}

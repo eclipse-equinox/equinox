@@ -96,8 +96,9 @@ public class FrameworkDebugOptions
 		// Must ensure that the options slot is null as this is the signal to the
 		// platform that debugging is not enabled.
 		String debugOptionsFilename = environmentInfo.getConfiguration(OSGI_DEBUG);
-		if (debugOptionsFilename == null)
+		if (debugOptionsFilename == null) {
 			return;
+		}
 		options = new Properties();
 		URL optionsFile;
 		if (debugOptionsFilename.length() == 0) {
@@ -105,8 +106,9 @@ public class FrameworkDebugOptions
 			// is not a good candidate for a trace options that need to be updatable by
 			// by the user)
 			String userDir = System.getProperty("user.dir").replace(File.separatorChar, '/'); //$NON-NLS-1$
-			if (!userDir.endsWith("/")) //$NON-NLS-1$
+			if (!userDir.endsWith("/")) { //$NON-NLS-1$
 				userDir += "/"; //$NON-NLS-1$
+			}
 			debugOptionsFilename = new File(userDir, OPTIONS).toString();
 		}
 		optionsFile = LocationHelper.buildURL(debugOptionsFilename, false);
@@ -192,10 +194,11 @@ public class FrameworkDebugOptions
 	public Map<String, String> getOptions() {
 		Map<String, String> snapShot = new HashMap<>();
 		synchronized (lock) {
-			if (options != null)
+			if (options != null) {
 				snapShot.putAll((Map) options);
-			else if (disabledOptions != null)
+			} else if (disabledOptions != null) {
 				snapShot.putAll((Map) disabledOptions);
+			}
 		}
 		return snapShot;
 	}
@@ -233,8 +236,9 @@ public class FrameworkDebugOptions
 	 */
 	@Override
 	public void removeOption(String option) {
-		if (option == null)
+		if (option == null) {
 			return;
+		}
 		String fireChangedEvent = null;
 		synchronized (lock) {
 			if (options != null && options.remove(option) != null) {
@@ -288,21 +292,24 @@ public class FrameworkDebugOptions
 
 	private String getSymbolicName(String option) {
 		int firstSlashIndex = option.indexOf('/');
-		if (firstSlashIndex > 0)
+		if (firstSlashIndex > 0) {
 			return option.substring(0, firstSlashIndex);
+		}
 		return null;
 	}
 
 	@SuppressWarnings("cast")
 	@Override
 	public void setOptions(Map<String, String> ops) {
-		if (ops == null)
+		if (ops == null) {
 			throw new IllegalArgumentException("The options must not be null."); //$NON-NLS-1$
+		}
 		Properties newOptions = new Properties();
 		for (Map.Entry<String, String> entry : ops.entrySet()) {
-			if (!(entry.getKey() instanceof String) || !(entry.getValue() instanceof String))
+			if (!(entry.getKey() instanceof String) || !(entry.getValue() instanceof String)) {
 				throw new IllegalArgumentException(
 						"Option keys and values must be of type String: " + entry.getKey() + "=" + entry.getValue()); //$NON-NLS-1$ //$NON-NLS-2$
+			}
 			newOptions.put(entry.getKey(), entry.getValue().trim());
 		}
 		Set<String> fireChangesTo = null;
@@ -319,8 +326,9 @@ public class FrameworkDebugOptions
 				String key = (String) object;
 				if (!newOptions.containsKey(key)) {
 					String symbolicName = getSymbolicName(key);
-					if (symbolicName != null)
+					if (symbolicName != null) {
 						fireChangesTo.add(symbolicName);
+					}
 				}
 			}
 			// now check for changes to existing values
@@ -328,16 +336,19 @@ public class FrameworkDebugOptions
 				String existingValue = (String) options.get(entry.getKey());
 				if (!entry.getValue().equals(existingValue)) {
 					String symbolicName = getSymbolicName((String) entry.getKey());
-					if (symbolicName != null)
+					if (symbolicName != null) {
 						fireChangesTo.add(symbolicName);
+					}
 				}
 			}
 			// finally set the actual options
 			options = newOptions;
 		}
-		if (fireChangesTo != null)
-			for (String string : fireChangesTo)
+		if (fireChangesTo != null) {
+			for (String string : fireChangesTo) {
 				optionsChanged(string);
+			}
+		}
 	}
 
 	/*
@@ -362,8 +373,9 @@ public class FrameworkDebugOptions
 		boolean fireChangedEvent = false;
 		synchronized (lock) {
 			if (enabled) {
-				if (options != null)
+				if (options != null) {
 					return;
+				}
 				// notify the trace that a new session is started
 				this.newSession = true;
 
@@ -378,8 +390,9 @@ public class FrameworkDebugOptions
 					options = new Properties();
 				}
 			} else {
-				if (options == null)
+				if (options == null) {
 					return;
+				}
 				// disable platform debugging.
 				environmentInfo.clearConfiguration(OSGI_DEBUG);
 				if (options.size() > 0) {
@@ -450,10 +463,11 @@ public class FrameworkDebugOptions
 	public void setFile(final File traceFile) {
 		synchronized (lock) {
 			this.outFile = traceFile;
-			if (this.outFile != null)
+			if (this.outFile != null) {
 				environmentInfo.setConfiguration(PROP_TRACEFILE, this.outFile.getAbsolutePath());
-			else
+			} else {
 				environmentInfo.clearConfiguration(PROP_TRACEFILE);
+			}
 			// the file changed so start a new session
 			this.newSession = true;
 		}
@@ -509,8 +523,9 @@ public class FrameworkDebugOptions
 	private void optionsChanged(String bundleSymbolicName) {
 		// use osgi services to get the listeners
 		BundleContext bc = context;
-		if (bc == null)
+		if (bc == null) {
 			return;
+		}
 		// do not use the service tracker because that is only used to call all
 		// listeners initially when they are registered
 		// here we only want the services with the specified name.
@@ -521,12 +536,14 @@ public class FrameworkDebugOptions
 		} catch (InvalidSyntaxException e) {
 			// consider logging; should not happen
 		}
-		if (listenerRefs == null)
+		if (listenerRefs == null) {
 			return;
+		}
 		for (ServiceReference<?> listenerRef : listenerRefs) {
 			DebugOptionsListener service = (DebugOptionsListener) bc.getService(listenerRef);
-			if (service == null)
+			if (service == null) {
 				continue;
+			}
 			try {
 				service.optionsChanged(this);
 			} catch (Throwable t) {
