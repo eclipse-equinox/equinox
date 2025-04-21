@@ -30,6 +30,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 
+import org.eclipse.core.internal.runtime.RuntimeLog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -300,4 +301,26 @@ public class StatusTest {
 		assertArrayEquals(new IStatus[] {}, errorWithException.getChildren());
 	}
 
+	@Test
+	public void testCycleStatusLog() {
+		MultiStatus rootStatus = new MultiStatus("root.id", 42, new Status[0], "rootStatus", null);
+		MultiStatus child1 = new MultiStatus("child.id1", 1, new Status[0], "childStatus1", null);
+		MultiStatus child2 = new MultiStatus("child.id2", 2, new Status[0], "childStatus2", null);
+		MultiStatus child3 = new MultiStatus("child.id3", 3, new Status[0], "childStatus3", null);
+		MultiStatus child4 = new MultiStatus("child.id4", 4, new Status[0], "childStatus4", null);
+		MultiStatus child5 = new MultiStatus("child.id5", 5, new Status[0], "childStatus5", null);
+		MultiStatus child6 = new MultiStatus("child.id6", 6, new Status[0], "childStatus6", null);
+
+		rootStatus.add(child1);
+		rootStatus.add(child2);
+		child1.add(child3);
+		child1.add(child4);
+		child2.add(child5);
+		child2.add(child6);
+		child3.add(rootStatus);
+		child4.add(child1);
+		child5.add(child2);
+		child6.add(child3);
+		RuntimeLog.log(rootStatus);
+	}
 }
