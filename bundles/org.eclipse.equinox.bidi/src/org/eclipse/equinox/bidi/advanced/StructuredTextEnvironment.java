@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2011 IBM Corporation and others.
+ * Copyright (c) 2010, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Tue Ton - support for FreeBSD
  ******************************************************************************/
 package org.eclipse.equinox.bidi.advanced;
 
@@ -191,7 +192,7 @@ public class StructuredTextEnvironment {
 				osName = osName.toLowerCase();
 			}
 			boolean supportedOS = osName.startsWith("windows") || osName.startsWith("linux") //$NON-NLS-1$ //$NON-NLS-2$
-					|| osName.startsWith("mac"); //$NON-NLS-1$
+					|| osName.startsWith("mac") || osName.startsWith("freebsd"); //$NON-NLS-1$ //$NON-NLS-2$
 			if (supportedOS) {
 				// Check whether the current language uses a bidi script (Arabic, Hebrew, Farsi
 				// or Urdu)

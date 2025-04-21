@@ -15,6 +15,7 @@
  *     Ericsson AB (Pascal Rapicault) - bug 304132
  *     Rapicorp, Inc - Default the configuration to Application Support (bug 461725)
  *     Lars Vogel <Lars.Vogel@vogella.com> - Bug 221969
+ *     Tue Ton - support for FreeBSD
  *******************************************************************************/
 package org.eclipse.equinox.launcher;
 
@@ -370,6 +371,7 @@ public class Main {
 		return switch (osName) {
 			case Constants.OS_WIN32 -> Constants.WS_WIN32;
 			case Constants.OS_LINUX -> Constants.WS_GTK;
+			case Constants.OS_FREEBSD -> Constants.WS_GTK;
 			case Constants.OS_MACOSX -> Constants.WS_COCOA;
 			case Constants.OS_HPUX -> Constants.WS_GTK;
 			case Constants.OS_AIX -> Constants.WS_GTK;
@@ -392,6 +394,7 @@ public class Main {
 		return switch (osName) {
 			// EXCEPTION: All mappings of SunOS convert to Solaris
 			case Constants.INTERNAL_OS_SUNOS -> Constants.OS_SOLARIS;
+			case Constants.OS_FREEBSD -> Constants.OS_FREEBSD;
 			case Constants.OS_LINUX -> Constants.OS_LINUX;
 			case Constants.OS_QNX -> Constants.OS_QNX;
 			case Constants.OS_AIX -> Constants.OS_AIX;

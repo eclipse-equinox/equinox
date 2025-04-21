@@ -1,5 +1,5 @@
 #*******************************************************************************
-# Copyright (c) 2000, 2018 IBM Corporation and others.
+# Copyright (c) 2000, 2025 IBM Corporation and others.
 #
 # This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License 2.0
@@ -13,16 +13,17 @@
 #     Kevin Cornell (Rational Software Corporation)
 #     Tom Tromey (Red Hat, Inc.)
 #     Leo Ufimtsev (Red Hat, Inc) 2018
+#     Tue Ton - support for FreeBSD
 #*******************************************************************************
 
 include ../make_version.mak
-# Makefile for creating the GTK eclipse launcher program.
+# Makefile for creating the GTK eclipse launcher program, for Linux & FreeBSD.
 
 # Can work on it's own or reached from build.sh.
 # Common invocations:
-# make -f make_linux.mak clean all
-# make -f make_linux.mak clean all install # Install as part of eclipse build.
-# make -f make_linux.mak clean all dev_build_install   # For development/testing of launcher, install into your development eclipse, see target below.
+# make -f make_unix.mak clean all
+# make -f make_unix.mak clean all install # Install as part of eclipse build.
+# make -f make_unix.mak clean all dev_build_install   # For development/testing of launcher, install into your development eclipse, see target below.
 
 # This makefile expects the utility "pkg-config" to be in the PATH.
 # This makefile expects the following environment variables be set. If they are not set, it will figure out reasonable defaults targeting linux build.
@@ -39,7 +40,13 @@ include ../make_version.mak
 DEFAULT_OS ?= $(shell uname -s | tr "[:upper:]" "[:lower:]")
 DEFAULT_WS ?= gtk
 DEFAULT_OS_ARCH ?= $(shell uname -m)
+ifeq ($(DEFAULT_OS),freebsd)
+JAVA_HOME ?= /usr/local/openjdk17
+CC ?= cc
+else
 JAVA_HOME ?= $(shell readlink -f /usr/bin/java | sed "s:jre/::" | sed "s:bin/java::")
+CC ?= gcc
+endif
 PROGRAM_OUTPUT ?= eclipse
 PROGRAM_LIBRARY = $(PROGRAM_OUTPUT)_$(LIB_VERSION).so
 
@@ -56,9 +63,7 @@ ifeq ($(DEFAULT_OS_ARCH),x86_64)
 DEFAULT_JAVA ?= DEFAULT_JAVA_EXEC
 endif
 
-CC ?= gcc
-
-# Useful to figure out if there is any difference between running build.sh and make_linux directly.
+# Useful to figure out if there is any difference between running build.sh and make_unix directly.
 INFO_PROG=CC:$(CC)  PROGRAM_OUTPUT:$(PROGRAM_OUTPUT)  PROGRAM_LIBRARY:$(PROGRAM_LIBRARY) #
 INFO_ARCH=DEFAULT_OS:$(DEFAULT_OS)  DEFAULT_WS:$(DEFAULT_WS)  DEFAULT_OS_ARCH:$(DEFAULT_OS_ARCH)  M_ARCH:$(M_ARCH)  M_CFLAGS:$(M_CFLAGS) #
 INFO_JAVA=JAVA_HOME:$(JAVA_HOME)  DEFAULT_JAVA:$(DEFAULT_JAVA) #
@@ -82,7 +87,6 @@ LFLAGS = ${M_ARCH} -shared -fpic -Wl,--export-dynamic
 GTK_CFLAGS := $(shell pkg-config --cflags gtk+-3.0)
 CFLAGS = ${M_CFLAGS} ${M_ARCH} -g -s -Wall\
 	-fpic \
-	-DLINUX \
 	-DDEFAULT_OS="\"$(DEFAULT_OS)\"" \
 	-DDEFAULT_OS_ARCH="\"$(DEFAULT_OS_ARCH)\"" \
 	-DDEFAULT_WS="\"$(DEFAULT_WS)\"" \
@@ -90,8 +94,18 @@ CFLAGS = ${M_CFLAGS} ${M_ARCH} -g -s -Wall\
 	$(GTK_LIBS) \
 	-I. \
 	-I.. \
-	-I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux \
 	$(GTK_CFLAGS)
+
+ifeq ($(DEFAULT_OS),freebsd)
+CFLAGS := $(CFLAGS) \
+	-DFREEBSD \
+	-Wno-deprecated-non-prototype \
+	-I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/freebsd
+else
+CFLAGS := $(CFLAGS) \
+	-DLINUX \
+	-I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux
+endif
 
 all: $(EXEC) $(DLL)
 
