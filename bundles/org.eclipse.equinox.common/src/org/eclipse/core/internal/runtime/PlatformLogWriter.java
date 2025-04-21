@@ -14,7 +14,7 @@
  *******************************************************************************/
 package org.eclipse.core.internal.runtime;
 
-import java.util.ArrayList;
+import java.util.*;
 import org.eclipse.core.runtime.*;
 import org.eclipse.equinox.log.*;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
@@ -65,6 +65,10 @@ public class PlatformLogWriter implements SynchronousLogListener, LogFilter {
 	}
 
 	public static FrameworkLogEntry getLog(IStatus status) {
+		return getLogImpl(status, Collections.newSetFromMap(new IdentityHashMap<>()));
+	}
+
+	private static FrameworkLogEntry getLogImpl(IStatus status, Set<IStatus> visited) {
 		Throwable t = status.getException();
 		ArrayList<FrameworkLogEntry> childlist = new ArrayList<>();
 
@@ -73,14 +77,18 @@ public class PlatformLogWriter implements SynchronousLogListener, LogFilter {
 		if (stackCode == 1) {
 			IStatus coreStatus = ((CoreException) t).getStatus();
 			if (coreStatus != null) {
-				childlist.add(getLog(coreStatus));
+				if (visited.add(coreStatus)) {
+					childlist.add(getLogImpl(coreStatus, visited));
+				}
 			}
 		}
 
 		if (status.isMultiStatus()) {
 			IStatus[] children = status.getChildren();
 			for (IStatus child : children) {
-				childlist.add(getLog(child));
+				if (visited.add(child)) {
+					childlist.add(getLogImpl(child, visited));
+				}
 			}
 		}
 
