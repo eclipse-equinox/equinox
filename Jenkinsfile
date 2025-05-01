@@ -338,9 +338,14 @@ pipeline {
 			post {
 				always {
 					archiveArtifacts artifacts: '**/*.log, equinox/**/target/*.jar, equinox.binaries/**', allowEmptyArchive: true
-					junit '**/target/surefire-reports/TEST-*.xml'
 					discoverGitReferenceBuild referenceJob: 'equinox/master'
-					recordIssues publishAllIssues: true, tools: [eclipse(name: 'Compiler and API Tools', pattern: '**/target/compilelogs/*.xml'), mavenConsole(), javaDoc()]
+					junit allowEmptyResults: true, testResults: '**/target/surefire-reports/*.xml'
+					recordIssues publishAllIssues: true, ignoreQualityGate: true, enabledForFailure: true, tools: [
+							eclipse(name: 'Compiler', pattern: '**/target/compilelogs/*.xml'),
+							issues(name: 'API Tools', id: 'apitools', pattern: '**/target/apianalysis/*.xml'),
+							mavenConsole(),
+							javaDoc()
+						], qualityGates: [[threshold: 1, type: 'NEW', unstable: true]]
 				}
 			}
 		}
