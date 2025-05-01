@@ -67,7 +67,7 @@ def isOnMainIshBranch() {
 }
 
 def getLatestLauncherTag() {
-	return sh(script: 'git describe --abbrev=0 --tags --match LBv[0-9]*-[0-9][0-9][0-9][0-9]*', returnStdout: true).strip()
+	return sh(script: 'git describe --abbrev=0 --tags --match LBv[0-9]*-[0-9][0-9][0-9][0-9]*', returnStdout: true).trim()
 }
 
 def buildCurrentLauncherTag() {
@@ -77,11 +77,11 @@ def buildCurrentLauncherTag() {
 LAUNCHER_SOURCES_PATH = 'features/org.eclipse.equinox.executable.feature/library'
 
 def getLauncherVersion(String segmentName) {
-	return sh(script: "grep '${segmentName}=' ${WORKSPACE}/equinox/${LAUNCHER_SOURCES_PATH}/make_version.mak |cut -d= -f2", returnStdout: true).strip()
+	return sh(script: "grep '${segmentName}=' ${WORKSPACE}/equinox/${LAUNCHER_SOURCES_PATH}/make_version.mak |cut -d= -f2", returnStdout: true).trim()
 }
 
 def isLauncherSourceChanged(String baselineTag, String part) {
-	return !sh(script: "git diff ${baselineTag} HEAD -- ${LAUNCHER_SOURCES_PATH}/${part}", returnStdout: true).strip().isEmpty()
+	return !sh(script: "git diff ${baselineTag} HEAD -- ${LAUNCHER_SOURCES_PATH}/${part}", returnStdout: true).trim().isEmpty()
 }
 
 def BUILD_NATIVES = []
