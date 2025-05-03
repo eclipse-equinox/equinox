@@ -181,14 +181,12 @@ public class ValueTokenizer {
 			// If the cardinality is zero, the value must contain one and only one token.
 			if (cardinality == 0) {
 				if (values.size() != 1) {
-					return NLS.bind(MetaTypeMsg.CARDINALITY_VIOLATION,
-							new Object[] { getValuesAsString(), values.size(), 1, 1 });
+					return NLS.bind(MetaTypeMsg.CARDINALITY_VIOLATION, getValuesAsString(), values.size(), 1, 1);
 				}
 			}
 			// Otherwise, the number of tokens must be between 0 and cardinality, inclusive.
 			else if (values.size() > cardinality) {
-				return NLS.bind(MetaTypeMsg.CARDINALITY_VIOLATION,
-						new Object[] { getValuesAsString(), values.size(), 0, cardinality });
+				return NLS.bind(MetaTypeMsg.CARDINALITY_VIOLATION, getValuesAsString(), values.size(), 0, cardinality);
 			}
 			// Now inspect each token.
 			for (Iterator<String> i = values.iterator(); i.hasNext();) {

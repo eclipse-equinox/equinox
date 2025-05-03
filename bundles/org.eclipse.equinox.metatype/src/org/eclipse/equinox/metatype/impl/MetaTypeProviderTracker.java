@@ -184,7 +184,7 @@ public class MetaTypeProviderTracker implements EquinoxMetaTypeInformation {
 			}
 		}
 		log.log(LogTracker.LOG_WARNING, NLS.bind(MetaTypeMsg.INVALID_PID_METATYPE_PROVIDER_IGNORED,
-				new Object[] { _bundle.getSymbolicName(), _bundle.getBundleId(), name, value }), e);
+				_bundle.getSymbolicName(), _bundle.getBundleId(), name, value), e);
 		return new String[0];
 	}
 

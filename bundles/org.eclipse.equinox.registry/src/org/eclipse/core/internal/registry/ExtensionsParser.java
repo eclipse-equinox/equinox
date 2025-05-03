@@ -414,9 +414,9 @@ public class ExtensionsParser extends DefaultHandler {
 		String msg;
 		if (name.equals("")) { //$NON-NLS-1$
 			msg = NLS.bind(RegistryMessages.parse_error, ex.getMessage());
-		} else { //$NON-NLS-1$
-			msg = NLS.bind(RegistryMessages.parse_errorNameLineColumn, (new Object[] { name,
-			Integer.toString(ex.getLineNumber()), Integer.toString(ex.getColumnNumber()), ex.getMessage() }));
+		} else {
+			msg = NLS.bind(RegistryMessages.parse_errorNameLineColumn, name, ex.getLineNumber(), ex.getColumnNumber(),
+					ex.getMessage());
 		}
 		error(new Status(IStatus.WARNING, RegistryMessages.OWNER_NAME, PARSE_PROBLEM, msg, ex));
 	}
@@ -532,16 +532,16 @@ public class ExtensionsParser extends DefaultHandler {
 			if (existingExtension != null) {
 				String currentSupplier = contribution.getDefaultNamespace();
 				String existingSupplier = existingExtension.getContributor().getName();
-				String msg = NLS.bind(RegistryMessages.parse_duplicateExtension,
-						new String[] { currentSupplier, existingSupplier, uniqueId });
+				String msg = NLS.bind(RegistryMessages.parse_duplicateExtension, currentSupplier, existingSupplier,
+						uniqueId);
 				registry.log(new Status(IStatus.WARNING, RegistryMessages.OWNER_NAME, 0, msg, null));
 			} else if (processedExtensionIds != null) { // check elements in this contribution
 				for (String extensionId : processedExtensionIds) {
 					if (uniqueId.equals(extensionId)) {
 						String currentSupplier = contribution.getDefaultNamespace();
 						String existingSupplier = currentSupplier;
-						String msg = NLS.bind(RegistryMessages.parse_duplicateExtension,
-								new String[] { currentSupplier, existingSupplier, uniqueId });
+						String msg = NLS.bind(RegistryMessages.parse_duplicateExtension, currentSupplier,
+								existingSupplier, uniqueId);
 						registry.log(new Status(IStatus.WARNING, RegistryMessages.OWNER_NAME, 0, msg, null));
 						break;
 					}
@@ -562,8 +562,8 @@ public class ExtensionsParser extends DefaultHandler {
 		if (locator == null) {
 			internalError(NLS.bind(RegistryMessages.parse_missingAttribute, attribute, element));
 		} else {
-			internalError(NLS.bind(RegistryMessages.parse_missingAttributeLine,
-					(new String[] { attribute, element, Integer.toString(locator.getLineNumber()) })));
+			internalError(
+					NLS.bind(RegistryMessages.parse_missingAttributeLine, attribute, element, locator.getLineNumber()));
 		}
 	}
 
@@ -571,8 +571,8 @@ public class ExtensionsParser extends DefaultHandler {
 		if (locator == null) {
 			internalError(NLS.bind(RegistryMessages.parse_unknownAttribute, attribute, element));
 		} else {
-			internalError(NLS.bind(RegistryMessages.parse_unknownAttributeLine,
-					(new String[] { attribute, element, Integer.toString(locator.getLineNumber()) })));
+			internalError(
+					NLS.bind(RegistryMessages.parse_unknownAttributeLine, attribute, element, locator.getLineNumber()));
 		}
 	}
 
@@ -580,8 +580,8 @@ public class ExtensionsParser extends DefaultHandler {
 		if (locator == null) {
 			internalError(NLS.bind(RegistryMessages.parse_unknownElement, element, parent));
 		} else {
-			internalError(NLS.bind(RegistryMessages.parse_unknownElementLine,
-					(new String[] { element, parent, Integer.toString(locator.getLineNumber()) })));
+			internalError(
+					NLS.bind(RegistryMessages.parse_unknownElementLine, element, parent, locator.getLineNumber()));
 		}
 	}
 

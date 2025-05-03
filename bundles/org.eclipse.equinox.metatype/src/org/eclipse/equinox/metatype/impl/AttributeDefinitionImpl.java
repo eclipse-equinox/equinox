@@ -205,7 +205,7 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 				String reason = vt.validate(this);
 				if ((reason != null) && reason.length() > 0) {
 					logger.log(LogTracker.LOG_WARNING,
-							NLS.bind(MetaTypeMsg.INVALID_OPTIONS, new Object[] { values.get(index), getID(), reason }));
+							NLS.bind(MetaTypeMsg.INVALID_OPTIONS, values.get(index), getID(), reason));
 					labels.remove(index);
 					values.remove(index);
 					index--; // Because this one has been removed.
@@ -240,7 +240,7 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 		String reason = vt.validate(this);
 		if ((reason != null) && reason.length() > 0) {
 			logger.log(LogTracker.LOG_WARNING,
-					NLS.bind(MetaTypeMsg.INVALID_DEFAULTS, new Object[] { vt.getValuesAsString(), getID(), reason }));
+					NLS.bind(MetaTypeMsg.INVALID_DEFAULTS, vt.getValuesAsString(), getID(), reason));
 			return;
 		}
 		String[] defaults = vt.getValuesAsArray();

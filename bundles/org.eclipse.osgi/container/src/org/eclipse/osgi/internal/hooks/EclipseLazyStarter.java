@@ -123,9 +123,8 @@ public class EclipseLazyStarter extends ClassLoaderHook {
 			} catch (BundleException e) {
 				Bundle bundle = managerElement.getGeneration().getRevision().getBundle();
 				if (e.getType() == BundleException.STATECHANGE_ERROR) {
-					String message = NLS.bind(Msg.ECLIPSE_CLASSLOADER_CONCURRENT_STARTUP,
-							new Object[] { Thread.currentThread(), name, m.getStateChangeOwner(), bundle,
-									Long.valueOf(System.currentTimeMillis() - startTime) });
+					String message = NLS.bind(Msg.ECLIPSE_CLASSLOADER_CONCURRENT_STARTUP, Thread.currentThread(), name,
+							m.getStateChangeOwner(), bundle, Long.valueOf(System.currentTimeMillis() - startTime));
 					container.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.WARNING, message, e);
 					continue;
 				}

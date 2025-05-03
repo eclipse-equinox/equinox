@@ -461,9 +461,8 @@ public final class ModuleContainer implements DebugOptionsListener {
 					BundleContext context = bundle == null ? null : bundle.getBundleContext();
 					if (context != null && context.getBundle(existingLocation.getId()) == null) {
 						Bundle b = existingLocation.getBundle();
-						throw new BundleException(
-								NLS.bind(Msg.ModuleContainer_NameCollisionWithLocation,
-										new Object[] { b.getSymbolicName(), b.getVersion(), location }),
+						throw new BundleException(NLS.bind(Msg.ModuleContainer_NameCollisionWithLocation,
+								b.getSymbolicName(), b.getVersion(), location),
 								BundleException.REJECTED_BY_HOOK);
 					}
 				}

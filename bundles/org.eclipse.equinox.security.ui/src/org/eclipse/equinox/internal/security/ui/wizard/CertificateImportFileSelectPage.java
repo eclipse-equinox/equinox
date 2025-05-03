@@ -105,7 +105,7 @@ public class CertificateImportFileSelectPage extends WizardPage implements Liste
 	public IWizardPage getNextPage() {
 		File file = new File(filePathField.getText().trim());
 		if (file.isDirectory() || !file.exists()) {
-			setErrorMessage(NLS.bind(SecurityUIMsg.WIZARD_FILE_NOT_FOUND, new String[] { filePathField.getText() }));
+			setErrorMessage(NLS.bind(SecurityUIMsg.WIZARD_FILE_NOT_FOUND, filePathField.getText()));
 			return null;
 		}
 		saveFileSelection();

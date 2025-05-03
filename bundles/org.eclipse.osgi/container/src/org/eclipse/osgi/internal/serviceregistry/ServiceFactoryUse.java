@@ -263,7 +263,7 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 				debug.trace(OPTION_DEBUG_SERVICES, "Service object is not an instanceof " + invalidService); //$NON-NLS-1$
 			}
 			ServiceException se = new ServiceException(NLS.bind(Msg.SERVICE_FACTORY_NOT_INSTANCEOF_CLASS_EXCEPTION,
-					new Object[] { factory.getClass().getName(), service.getClass().getName(), invalidService }),
+					factory.getClass().getName(), service.getClass().getName(), invalidService),
 					ServiceException.FACTORY_ERROR);
 			context.getContainer().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR,
 					registration.getBundle(), se);

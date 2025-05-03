@@ -135,8 +135,7 @@ public class Adapters {
 			return Optional.ofNullable(adapt(sourceObject, adapter));
 		} catch (AssertionFailedException e) {
 			RuntimeLog.log(Status.error(
-					NLS.bind(CommonMessages.adapters_internal_error_of, new Object[] {
-							sourceObject.getClass().getName(), adapter.getClass().getName(), e.getLocalizedMessage() }),
+					NLS.bind(CommonMessages.adapters_internal_error_of, sourceObject.getClass().getName(), adapter.getClass().getName(), e.getLocalizedMessage()),
 					e));
 			return Optional.empty();
 		}

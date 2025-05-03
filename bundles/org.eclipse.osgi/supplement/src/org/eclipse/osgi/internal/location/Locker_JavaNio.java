@@ -104,7 +104,7 @@ public class Locker_JavaNio implements Locker {
 					if (debug)
 						System.out.println(NLS.bind(Msg.location_cannotLock, lockFile));
 					// produce a more specific message for clients
-					String specificMessage = NLS.bind(Msg.location_cannotLockNIO, new Object[] {lockFile, ioe.getMessage(), "\"-D" + LocationHelper.PROP_OSGI_LOCKING + "=none\""}); //$NON-NLS-1$ //$NON-NLS-2$
+					String specificMessage = NLS.bind(Msg.location_cannotLockNIO, lockFile, ioe.getMessage(), "\"-D" + LocationHelper.PROP_OSGI_LOCKING + "=none\""); //$NON-NLS-1$ //$NON-NLS-2$
 					throw new IOException(specificMessage);
 				}
 				if (tempLock != null) {
