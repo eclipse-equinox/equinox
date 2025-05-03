@@ -90,8 +90,7 @@ public class CoordinatorImpl implements Coordinator {
 		public void push(CoordinationImpl c) {
 			if (contains(c)) {
 				throw new CoordinationException(
-						NLS.bind(Messages.CoordinationAlreadyExists,
-								new Object[] { c.getName(), c.getId(), Thread.currentThread() }),
+						NLS.bind(Messages.CoordinationAlreadyExists, c.getName(), c.getId(), Thread.currentThread()),
 						c.getReferent(), CoordinationException.ALREADY_PUSHED);
 			}
 			c.setThreadAndEnclosingCoordination(Thread.currentThread(),
@@ -145,7 +144,7 @@ public class CoordinatorImpl implements Coordinator {
 		// Override the requested timeout with the max timeout, if necessary.
 		if (maxTimeout != 0) {
 			if (timeout == 0 || maxTimeout < timeout) {
-				logTracker.warn(NLS.bind(Messages.MaximumTimeout, new Object[] { timeout, maxTimeout, name }));
+				logTracker.warn(NLS.bind(Messages.MaximumTimeout, timeout, maxTimeout, name));
 				timeout = maxTimeout;
 			}
 		}
@@ -202,8 +201,8 @@ public class CoordinatorImpl implements Coordinator {
 			try {
 				checkPermission(CoordinationPermission.ADMIN, result.getName());
 			} catch (SecurityException e) {
-				logTracker.debug(NLS.bind(Messages.GetCoordinationNotPermitted,
-						new Object[] { Thread.currentThread(), result.getName(), result.getId() }), e);
+				logTracker.debug(NLS.bind(Messages.GetCoordinationNotPermitted, Thread.currentThread(),
+						result.getName(), result.getId()), e);
 				result = null;
 			}
 		}
@@ -226,8 +225,8 @@ public class CoordinatorImpl implements Coordinator {
 					checkPermission(CoordinationPermission.ADMIN, coordination.getName());
 					result.add(coordination.getReferent());
 				} catch (SecurityException e) {
-					logTracker.debug(NLS.bind(Messages.GetCoordinationNotPermitted,
-							new Object[] { Thread.currentThread(), coordination.getName(), coordination.getId() }), e);
+					logTracker.debug(NLS.bind(Messages.GetCoordinationNotPermitted, Thread.currentThread(),
+							coordination.getName(), coordination.getId()), e);
 				}
 			}
 		}

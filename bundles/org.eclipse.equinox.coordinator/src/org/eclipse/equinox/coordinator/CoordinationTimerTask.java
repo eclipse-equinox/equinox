@@ -35,8 +35,8 @@ public class CoordinationTimerTask extends TimerTask {
 		try {
 			coordination.fail(Coordination.TIMEOUT);
 		} catch (Throwable t) {
-			coordination.getLogService().error(NLS.bind(Messages.CoordinationTimedOutError,
-					new Object[] { coordination.getName(), coordination.getId(), Thread.currentThread() }), t);
+			coordination.getLogService().error(NLS.bind(Messages.CoordinationTimedOutError, coordination.getName(),
+					coordination.getId(), Thread.currentThread()), t);
 		}
 	}
 }

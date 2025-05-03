@@ -108,9 +108,8 @@ public class CoordinationImpl {
 					// any thread, and there's nothing to compare. If the coordination
 					// is using this thread, then we can't block due to risk of deadlock.
 					if (t == Thread.currentThread()) {
-						throw new CoordinationException(
-								NLS.bind(Messages.Deadlock, new Object[] { participant, getName(), getId() }), referent,
-								CoordinationException.DEADLOCK_DETECTED);
+						throw new CoordinationException(NLS.bind(Messages.Deadlock, participant, getName(), getId()),
+								referent, CoordinationException.DEADLOCK_DETECTED);
 					}
 				}
 			}
@@ -122,8 +121,8 @@ public class CoordinationImpl {
 			try {
 				coordination.join(1000);
 			} catch (InterruptedException e) {
-				String message = NLS.bind(Messages.LockInterrupted,
-						new Object[] { participant, name, id, coordination.getName(), coordination.getId() });
+				String message = NLS.bind(Messages.LockInterrupted, participant, name, id, coordination.getName(),
+						coordination.getId());
 				coordinator.getLogService().debug(message, e);
 				// This thread was interrupted while waiting for the coordination
 				// to terminate.
@@ -154,9 +153,8 @@ public class CoordinationImpl {
 				// pushed them onto the stack, if any.
 				if (thread != Thread.currentThread()) {
 					throw new CoordinationException(
-							NLS.bind(Messages.EndingThreadNotSame,
-									new Object[] { name, id, thread, Thread.currentThread() }),
-							referent, CoordinationException.WRONG_THREAD);
+							NLS.bind(Messages.EndingThreadNotSame, name, id, thread, Thread.currentThread()), referent,
+							CoordinationException.WRONG_THREAD);
 				}
 				// Unwind the stack in case there are other coordinations higher
 				// up than this one. See bug 421487 for why peek() may be null.
@@ -190,7 +188,7 @@ public class CoordinationImpl {
 			try {
 				participant.ended(referent);
 			} catch (Exception e) {
-				coordinator.getLogService().warn(NLS.bind(Messages.ParticipantEndedError, new Object[] { participant, name, id }), e);
+				coordinator.getLogService().warn(NLS.bind(Messages.ParticipantEndedError, participant, name, id), e);
 				// Only the first exception will be propagated.
 				if (exception == null) {
 					exception = e;
@@ -205,8 +203,8 @@ public class CoordinationImpl {
 		// If a partial ending has occurred, throw the required exception.
 		if (exception != null) {
 			throw new CoordinationException(
-					NLS.bind(Messages.CoordinationPartiallyEnded, new Object[] { name, id, exceptionParticipant }),
-					referent, CoordinationException.PARTIALLY_ENDED, exception);
+					NLS.bind(Messages.CoordinationPartiallyEnded, name, id, exceptionParticipant), referent,
+					CoordinationException.PARTIALLY_ENDED, exception);
 		}
 	}
 
@@ -243,7 +241,7 @@ public class CoordinationImpl {
 					timeInMillis = newTotalTimeout - maxTimeout;
 				}
 				// Otherwise, accept the full extension.
- else {
+				else {
 					totalTimeout = newTotalTimeout;
 				}
 			}
@@ -262,10 +260,8 @@ public class CoordinationImpl {
 					// Now determine how it terminated and throw the appropriate exception.
 					checkTerminated();
 				} catch (InterruptedException e) {
-					throw new CoordinationException(
-							NLS.bind(Messages.InterruptedTimeoutExtension,
-									new Object[] { totalTimeout, getName(), getId(), timeInMillis }),
-							referent, CoordinationException.UNKNOWN, e);
+					throw new CoordinationException(NLS.bind(Messages.InterruptedTimeoutExtension, totalTimeout,
+							getName(), getId(), timeInMillis), referent, CoordinationException.UNKNOWN, e);
 				}
 			}
 			// Create the new timeout.
@@ -306,7 +302,7 @@ public class CoordinationImpl {
 			try {
 				participant.failed(referent);
 			} catch (Exception e) {
-				coordinator.getLogService().warn(NLS.bind(Messages.ParticipantFailedError, new Object[] { participant, name, id }), e);
+				coordinator.getLogService().warn(NLS.bind(Messages.ParticipantFailedError, participant, name, id), e);
 			}
 		}
 		synchronized (this) {

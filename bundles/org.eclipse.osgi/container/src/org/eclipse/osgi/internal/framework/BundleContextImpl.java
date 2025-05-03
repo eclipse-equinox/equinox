@@ -845,8 +845,8 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 			clazz = bundleActivator.getClass().getName();
 
 			throw new BundleException(
-					NLS.bind(Msg.BUNDLE_ACTIVATOR_EXCEPTION, new Object[] { clazz, "start", //$NON-NLS-1$
-							bundle.getSymbolicName() == null ? "" + bundle.getBundleId() : bundle.getSymbolicName() }), //$NON-NLS-1$
+					NLS.bind(Msg.BUNDLE_ACTIVATOR_EXCEPTION, clazz, "start", //$NON-NLS-1$
+							bundle.getSymbolicName() == null ? "" + bundle.getBundleId() : bundle.getSymbolicName()), //$NON-NLS-1$
 					BundleException.ACTIVATOR_ERROR, t);
 		}
 	}
@@ -914,8 +914,8 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 			String clazz = (activator == null) ? "" : activator.getClass().getName(); //$NON-NLS-1$
 
 			throw new BundleException(
-					NLS.bind(Msg.BUNDLE_ACTIVATOR_EXCEPTION, new Object[] { clazz, "stop", //$NON-NLS-1$
-							bundle.getSymbolicName() == null ? "" + bundle.getBundleId() : bundle.getSymbolicName() }), //$NON-NLS-1$
+					NLS.bind(Msg.BUNDLE_ACTIVATOR_EXCEPTION, clazz, "stop", //$NON-NLS-1$
+												bundle.getSymbolicName() == null ? "" + bundle.getBundleId() : bundle.getSymbolicName()), //$NON-NLS-1$
 					BundleException.ACTIVATOR_ERROR, t);
 		} finally {
 			activator = null;

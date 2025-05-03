@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Josh Arnold - Bug 180080 Equinox Application Admin spec violations
@@ -229,9 +229,8 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 		}
 
 		if (Activator.DEBUG) {
-			System.out.println(NLS.bind(Messages.application_returned,
-					(new String[] { getApplicationDescriptor().getApplicationId(),
-							tempResult == null ? "null" : tempResult.toString() }))); //$NON-NLS-1$
+			System.out.println(NLS.bind(Messages.application_returned, getApplicationDescriptor().getApplicationId(),
+					tempResult == null ? "null" : tempResult.toString())); //$NON-NLS-1$
 		}
 		return tempResult;
 	}

@@ -258,8 +258,8 @@ public class FrameworkExtensionInstaller {
 			} catch (Exception e) {
 				Bundle b = current.get(activator);
 				BundleException eventException = new BundleException(
-						NLS.bind(Msg.BUNDLE_ACTIVATOR_EXCEPTION,
-								new Object[] { activator.getClass(), "stop", b == null ? "" : b.getSymbolicName() }), //$NON-NLS-1$ //$NON-NLS-2$
+						NLS.bind(Msg.BUNDLE_ACTIVATOR_EXCEPTION, activator.getClass(), "stop", //$NON-NLS-1$
+								b == null ? "" : b.getSymbolicName()), //$NON-NLS-1$
 						BundleException.ACTIVATOR_ERROR, e);
 				configuration.getHookRegistry().getContainer().getEventPublisher()
 						.publishFrameworkEvent(FrameworkEvent.ERROR, b, eventException);
@@ -290,10 +290,8 @@ public class FrameworkExtensionInstaller {
 				eventException = new BundleException(Msg.BundleContextImpl_LoadActivatorError + ' ' + extensionRevision,
 						BundleException.ACTIVATOR_ERROR, e);
 			} else {
-				eventException = new BundleException(
-						NLS.bind(Msg.BUNDLE_ACTIVATOR_EXCEPTION,
-								new Object[] { activator.getClass(), "start", extensionRevision.getSymbolicName() }), //$NON-NLS-1$
-						BundleException.ACTIVATOR_ERROR, e);
+				eventException = new BundleException(NLS.bind(Msg.BUNDLE_ACTIVATOR_EXCEPTION, activator.getClass(),
+						"start", extensionRevision.getSymbolicName()), BundleException.ACTIVATOR_ERROR, e); //$NON-NLS-1$
 			}
 			configuration.getHookRegistry().getContainer().getEventPublisher()
 					.publishFrameworkEvent(FrameworkEvent.ERROR, extensionRevision.getBundle(), eventException);

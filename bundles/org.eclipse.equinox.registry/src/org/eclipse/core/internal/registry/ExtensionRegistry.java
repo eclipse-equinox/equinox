@@ -1415,8 +1415,8 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 			if (existingExtension != null) {
 				String currentSupplier = contribution.getDefaultNamespace();
 				String existingSupplier = existingExtension.getContributor().getName();
-				String msg = NLS.bind(RegistryMessages.parse_duplicateExtension,
-						new String[] { currentSupplier, existingSupplier, uniqueId });
+				String msg = NLS.bind(RegistryMessages.parse_duplicateExtension, currentSupplier, existingSupplier,
+						uniqueId);
 				log(new Status(IStatus.WARNING, RegistryMessages.OWNER_NAME, 0, msg, null));
 				return false;
 			}

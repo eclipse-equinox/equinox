@@ -119,8 +119,8 @@ public class ContentHandlerFactoryImpl extends MultiplexingFactory implements ja
 				if (prop instanceof String)
 					prop = new String[] { (String) prop }; // TODO should this be a warning?
 				if (!(prop instanceof String[])) {
-					String message = NLS.bind(Msg.URL_HANDLER_INCORRECT_TYPE, new Object[] {
-							URLConstants.URL_CONTENT_MIMETYPE, contentHandlerClazz, serviceReference.getBundle() });
+					String message = NLS.bind(Msg.URL_HANDLER_INCORRECT_TYPE, URLConstants.URL_CONTENT_MIMETYPE,
+							contentHandlerClazz, serviceReference.getBundle());
 					container.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.WARNING, message, null);
 					continue;
 				}

@@ -1020,7 +1020,7 @@ public class PreferencesService implements IPreferencesService {
 		if (installed.getMajor() == pref.getMajor() && installed.getMinor() == pref.getMinor()) {
 			return null;
 		}
-		String msg = NLS.bind(PrefsMessages.preferences_incompatible, new Object[] { pref, bundle, installed });
+		String msg = NLS.bind(PrefsMessages.preferences_incompatible, pref, bundle, installed);
 		boolean isError = installed.getMajor() < pref.getMajor();
 		return isError ? Status.error(msg) : Status.warning(msg);
 	}

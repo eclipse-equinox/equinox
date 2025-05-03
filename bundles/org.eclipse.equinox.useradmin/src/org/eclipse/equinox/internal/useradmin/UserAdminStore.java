@@ -184,7 +184,7 @@ public class UserAdminStore {
 			});
 		} catch (PrivilegedActionException ex) {
 			log.error(NLS.bind(UserAdminMsg.Backing_Store_Write_Exception,
-					new Object[] { NLS.bind(UserAdminMsg.adding_Credential_to__15, role.getName()) }), ex);
+					NLS.bind(UserAdminMsg.adding_Credential_to__15, role.getName())), ex);
 			throw ((BackingStoreException) ex.getException());
 		}
 
@@ -217,10 +217,8 @@ public class UserAdminStore {
 				return (null);
 			});
 		} catch (PrivilegedActionException ex) {
-			log.error(
-					NLS.bind(UserAdminMsg.Backing_Store_Write_Exception,
-							new Object[] { NLS.bind(UserAdminMsg.adding_member__18, role.getName(), group.getName()) }),
-					ex);
+			log.error(NLS.bind(UserAdminMsg.Backing_Store_Write_Exception,
+					NLS.bind(UserAdminMsg.adding_member__18, role.getName(), group.getName())), ex);
 			throw ((BackingStoreException) ex.getException());
 		}
 	}
