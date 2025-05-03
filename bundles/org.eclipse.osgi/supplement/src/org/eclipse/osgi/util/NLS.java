@@ -119,7 +119,7 @@ public abstract class NLS {
 	 * @return the manipulated String
 	 * @throws IllegalArgumentException if the text appearing within curly braces in the given message does not map to an integer
 	 */
-	public static String bind(String message, Object[] bindings) {
+	public static String bind(String message, Object... bindings) {
 		return internalBind(message, bindings, null, null);
 	}
 

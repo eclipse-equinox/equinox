@@ -48,7 +48,6 @@ import org.eclipse.osgi.storage.BundleInfo;
 import org.eclipse.osgi.storage.Storage;
 import org.eclipse.osgi.storage.bundlefile.MRUBundleFileList;
 import org.eclipse.osgi.util.ManifestElement;
-import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.AdminPermission;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -267,7 +266,7 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 			current.setContextClassLoader(contextFinder);
 			return;
 		} catch (Exception e) {
-			logServices.log(NAME, FrameworkLogEntry.INFO, NLS.bind(Msg.CANNOT_SET_CONTEXTFINDER, null), e);
+			logServices.log(NAME, FrameworkLogEntry.INFO, Msg.CANNOT_SET_CONTEXTFINDER, e);
 		}
 
 	}
