@@ -79,6 +79,7 @@ public class PlatformLogWriter implements SynchronousLogListener, LogFilter {
 			if (coreStatus != null) {
 				if (visited.add(coreStatus)) {
 					childlist.add(getLogImpl(coreStatus, visited));
+					visited.remove(coreStatus);
 				}
 			}
 		}
@@ -88,6 +89,7 @@ public class PlatformLogWriter implements SynchronousLogListener, LogFilter {
 			for (IStatus child : children) {
 				if (visited.add(child)) {
 					childlist.add(getLogImpl(child, visited));
+					visited.remove(child);
 				}
 			}
 		}
