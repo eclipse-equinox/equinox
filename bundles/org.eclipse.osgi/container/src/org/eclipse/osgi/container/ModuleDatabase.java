@@ -39,7 +39,6 @@ import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
 import org.eclipse.osgi.container.ModuleRevisionBuilder.GenericInfo;
 import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
 import org.eclipse.osgi.framework.util.ObjectPool;
-import org.eclipse.osgi.internal.container.Capabilities;
 import org.eclipse.osgi.internal.container.ComputeNodeOrder;
 import org.eclipse.osgi.internal.container.NamespaceList;
 import org.eclipse.osgi.internal.container.NamespaceList.Builder;
@@ -126,7 +125,7 @@ public class ModuleDatabase {
 	 */
 	final long constructionTime;
 
-	private final Capabilities capabilities;
+	private final Capabilities<ModuleRevision, ModuleCapability> capabilities;
 
 	/**
 	 * A map of module settings keyed by module id.
@@ -176,7 +175,7 @@ public class ModuleDatabase {
 		this.revisionsTimeStamp = new AtomicLong(constructionTime);
 		this.allTimeStamp = new AtomicLong(constructionTime);
 		this.moduleSettings = new HashMap<>();
-		this.capabilities = new Capabilities();
+		this.capabilities = new Capabilities<>(rev -> rev.getModuleCapabilities(null));
 	}
 
 	/**
