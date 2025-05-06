@@ -28,13 +28,10 @@ import java.util.Map.Entry;
 public class ConfigurationDictionary extends Dictionary<String, Object> implements Serializable {
 
 	private static final long serialVersionUID = -3583299578203095532L;
-	private static final Collection<Class<?>> simples = Arrays.asList(new Class<?>[] { String.class, Integer.class,
-			Long.class, Float.class, Double.class, Byte.class, Short.class, Character.class, Boolean.class });
+	private static final Collection<Class<?>> simples = Arrays.asList(String.class, Integer.class, Long.class, Float.class, Double.class, Byte.class, Short.class, Character.class, Boolean.class);
 	private static final Collection<Class<?>> simpleArrays = Arrays
-			.asList(new Class<?>[] { String[].class, Integer[].class, Long[].class, Float[].class, Double[].class,
-					Byte[].class, Short[].class, Character[].class, Boolean[].class });
-	private static final Collection<Class<?>> primitiveArrays = Arrays.asList(new Class<?>[] { long[].class,
-			int[].class, short[].class, char[].class, byte[].class, double[].class, float[].class, boolean[].class });
+			.asList(String[].class, Integer[].class, Long[].class, Float[].class, Double[].class, Byte[].class, Short[].class, Character[].class, Boolean[].class);
+	private static final Collection<Class<?>> primitiveArrays = Arrays.asList(long[].class, int[].class, short[].class, char[].class, byte[].class, double[].class, float[].class, boolean[].class);
 
 	static class CaseInsensitiveStringComparator implements Comparator<String>, Serializable {
 		private static final long serialVersionUID = 6501536810492374044L;
