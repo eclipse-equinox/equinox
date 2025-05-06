@@ -1,6 +1,6 @@
 #!/bin/sh
 #*******************************************************************************
-# Copyright (c) 2000, 2018 IBM Corporation and others.
+# Copyright (c) 2000, 2025 IBM Corporation and others.
 #
 # This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License 2.0
@@ -14,6 +14,7 @@
 #     Kevin Cornell (Rational Software Corporation)
 # Martin Oberhuber (Wind River) - [176805] Support building with gcc and debug
 # Martin Oberhuber (Wind River) - [517013] Avoid memcpy@GLIBC_2.14 dependency
+#     Tue Ton - support for FreeBSD
 #*******************************************************************************
 #
 # Usage: sh build.sh [<optional switches>] [clean]
@@ -82,7 +83,7 @@ fi
 
 case $defaultOS in
 	"Linux" | "linux")
-		makefile="make_linux.mak"
+		makefile="make_unix.mak"
 		defaultOS="linux"
 		case $defaultOSArch in
 			"x86_64")
@@ -107,12 +108,37 @@ case $defaultOS in
 				defaultJava=DEFAULT_JAVA_EXEC
 				;;
 			*)
-				echo "*** Unknown MODEL <${MODEL}>"
+				echo "*** Unknown defaultOSArch <${defaultOSArch}>"
+				;;
+		esac
+		;;
+	"FreeBSD" | "freebsd")
+		makefile="make_unix.mak"
+		defaultOS="freebsd"
+		case $defaultOSArch in
+			"amd64" | "x86_64")
+				defaultOSArch="x86_64"
+				defaultJava=DEFAULT_JAVA_EXEC
+				;;
+			"powerpc64")
+				defaultOSArch="ppc64"
+				defaultJava=DEFAULT_JAVA_EXEC
+				;;
+			"powerpc64le")
+				defaultOSArch="ppc64le"
+				defaultJava=DEFAULT_JAVA_EXEC
+				;;
+			"aarch64" | "arm64")
+				defaultOSArch="aarch64"
+				defaultJava=DEFAULT_JAVA_EXEC
+				;;
+			*)
+				echo "*** Unknown defaultOSArch <${defaultOSArch}>"
 				;;
 		esac
 		;;
 	*)
-	echo "Unknown OS -- build aborted"
+	echo "Unknown OS $defaultOS -- build aborted"
 	;;
 esac
 export CC
@@ -144,16 +170,21 @@ if [ "$LIB_OUTPUT_DIR" = "" ]; then LIB_OUTPUT_DIR="$BINARIES_DIR/org.eclipse.eq
 
 export PROGRAM_OUTPUT DEFAULT_OS DEFAULT_OS_ARCH DEFAULT_WS DEFAULT_JAVA EXE_OUTPUT_DIR LIB_OUTPUT_DIR
 
+MAKE_TYPE=make
+if [ "$DEFAULT_OS" = "freebsd" ]; then
+	MAKE_TYPE=gmake
+fi
+
 # If the OS is supported (a makefile exists)
 if [ "$makefile" != "" ]; then
 	if [ "$extraArgs" != "" ]; then
-		make -f $makefile $extraArgs
+		${MAKE_TYPE} -f $makefile $extraArgs
 	else
 		echo "Building $OS launcher. Defaults: -os $DEFAULT_OS -arch $DEFAULT_OS_ARCH -ws $DEFAULT_WS"
-		make -f $makefile clean
+		${MAKE_TYPE} -f $makefile clean
 		case x$CC in
-		  x*gcc*) make -f $makefile all PICFLAG=-fpic ;;
-		  *)      make -f $makefile all ;;
+		  x*gcc*) ${MAKE_TYPE} -f $makefile all PICFLAG=-fpic ;;
+		  *)      ${MAKE_TYPE} -f $makefile all ;;
 		esac
 	fi
 else
