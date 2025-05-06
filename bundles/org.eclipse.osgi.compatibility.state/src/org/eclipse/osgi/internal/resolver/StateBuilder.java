@@ -497,8 +497,8 @@ public class StateBuilder {
 		} else if (ATTR_TYPE_URI.equalsIgnoreCase(type)) {
 			try {
 				Class<?> uriClazz = Class.forName("java.net.URI"); //$NON-NLS-1$
-				Constructor<?> constructor = uriClazz.getConstructor(new Class[] {String.class});
-				return constructor.newInstance(new Object[] {trimmed});
+				Constructor<?> constructor = uriClazz.getConstructor(String.class);
+				return constructor.newInstance(trimmed);
 			} catch (ClassNotFoundException e) {
 				// oh well cannot support; just use string
 				return value;

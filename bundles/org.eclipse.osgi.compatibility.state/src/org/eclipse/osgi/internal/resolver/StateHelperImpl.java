@@ -219,7 +219,7 @@ public final class StateHelperImpl implements StateHelper {
 	 */
 	@Override
 	public VersionConstraint[] getUnsatisfiedConstraints(BundleDescription bundle) {
-		ResolverHook hook = beginHook(bundle.getContainingState(), Arrays.asList(new BundleRevision[] {bundle}));
+		ResolverHook hook = beginHook(bundle.getContainingState(), Arrays.asList(bundle));
 		try {
 			return getUnsatisfiedConstraints(bundle, hook);
 		} finally {
@@ -301,7 +301,7 @@ public final class StateHelperImpl implements StateHelper {
 	 */
 	@Override
 	public boolean isResolvable(ImportPackageSpecification constraint) {
-		ResolverHook hook = beginHook(constraint.getBundle().getContainingState(), Arrays.asList(new BundleRevision[] {constraint.getBundle()}));
+		ResolverHook hook = beginHook(constraint.getBundle().getContainingState(), Arrays.asList(constraint.getBundle()));
 		try {
 			return isResolvable(constraint, hook);
 		} finally {
@@ -345,7 +345,7 @@ public final class StateHelperImpl implements StateHelper {
 	 * Returns whether a bundle specification/host specification can be resolved.
 	 */
 	private boolean isBundleConstraintResolvable(VersionConstraint constraint, String namespace) {
-		ResolverHook hook = beginHook(constraint.getBundle().getContainingState(), Arrays.asList(new BundleRevision[] {constraint.getBundle()}));
+		ResolverHook hook = beginHook(constraint.getBundle().getContainingState(), Arrays.asList(constraint.getBundle()));
 		try {
 			return isBundleConstraintResolvable(constraint, namespace, hook);
 		} finally {
