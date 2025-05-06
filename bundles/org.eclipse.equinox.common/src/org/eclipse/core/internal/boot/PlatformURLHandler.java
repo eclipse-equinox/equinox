@@ -65,7 +65,7 @@ public class PlatformURLHandler extends AbstractURLStreamHandlerService {
 
 		PlatformURLConnection connection = null;
 		try {
-			connection = (PlatformURLConnection) construct.newInstance(new Object[] { url });
+			connection = (PlatformURLConnection) construct.newInstance(url);
 		} catch (Exception e) {
 			throw new IOException(NLS.bind(CommonMessages.url_createConnection, e.getMessage()));
 		}
@@ -75,7 +75,7 @@ public class PlatformURLHandler extends AbstractURLStreamHandlerService {
 
 	public static void register(String type, Class<?> connectionClass) {
 		try {
-			Constructor<?> c = connectionClass.getConstructor(new Class[] { URL.class });
+			Constructor<?> c = connectionClass.getConstructor(URL.class);
 			connectionType.put(type, c);
 		} catch (NoSuchMethodException e) {
 			// don't register connection classes that don't conform to the spec
