@@ -45,7 +45,7 @@ public class ProxyStreamTransformer extends StreamTransformer {
 	 */
 	public ProxyStreamTransformer(Object object) throws SecurityException, NoSuchMethodException {
 		this.object = object;
-		method = object.getClass().getMethod("getInputStream", new Class[] { InputStream.class, URL.class }); //$NON-NLS-1$
+		method = object.getClass().getMethod("getInputStream", InputStream.class, URL.class); //$NON-NLS-1$
 		Class<?> returnType = method.getReturnType();
 		if (!returnType.equals(InputStream.class)) {
 			throw new NoSuchMethodException();
@@ -56,7 +56,7 @@ public class ProxyStreamTransformer extends StreamTransformer {
 	@Override
 	public InputStream getInputStream(InputStream inputStream, URL transformerUrl) throws IOException {
 		try {
-			return (InputStream) method.invoke(object, new Object[] { inputStream, transformerUrl });
+			return (InputStream) method.invoke(object, inputStream, transformerUrl);
 		} catch (IllegalArgumentException | IllegalAccessException e) {
 			throw new IOException(e.getMessage());
 		} catch (InvocationTargetException e) {
