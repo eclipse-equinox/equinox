@@ -523,8 +523,8 @@ final class StateReader {
 				value = readString(in, false);
 				try {
 					Class<?> uriClazz = Class.forName("java.net.URI"); //$NON-NLS-1$
-					Constructor<?> constructor = uriClazz.getConstructor(new Class[] {String.class});
-					value = constructor.newInstance(new Object[] {value});
+					Constructor<?> constructor = uriClazz.getConstructor(String.class);
+					value = constructor.newInstance(value);
 				} catch (ClassNotFoundException e) {
 					// oh well cannot support; just use the string
 				} catch (RuntimeException e) { // got some reflection exception
