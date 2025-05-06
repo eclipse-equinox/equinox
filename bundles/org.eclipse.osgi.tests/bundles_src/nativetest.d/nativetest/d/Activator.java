@@ -37,7 +37,7 @@ public class Activator implements BundleActivator {
 				String.class);
 		findLibrary.setAccessible(true);
 		AbstractBundleTests.simpleResults
-				.addEvent(findLibrary.invoke(this.getClass().getClassLoader(), new Object[] { "nativecode.txt" }));
+				.addEvent(findLibrary.invoke(this.getClass().getClassLoader(), "nativecode.txt"));
 	}
 
 	@Override
