@@ -85,7 +85,7 @@ public class ResolverHookTests extends AbstractResourceTest {
 			Bundle tb1v1 = installer.installBundle("singleton.tb1v1");
 			Bundle tb1v2 = installer.installBundle("singleton.tb1v2");
 			assertFalse(getContext().getBundle(0).adapt(FrameworkWiring.class)
-					.resolveBundles(Arrays.asList(new Bundle[] { tb1v1, tb1v2 })));
+					.resolveBundles(Arrays.asList(tb1v1, tb1v2)));
 			assertTrue("ResolverHook was not called", called[0]);
 			if (error[0] != null) {
 				throw error[0];
