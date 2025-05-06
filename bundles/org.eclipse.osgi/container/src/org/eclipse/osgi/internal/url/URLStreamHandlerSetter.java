@@ -31,7 +31,7 @@ public class URLStreamHandlerSetter implements org.osgi.service.url.URLStreamHan
 	 */
 	@Override
 	public void setURL(URL url, String protocol, String host, int port, String file, String ref) {
-		handlerProxy.setURL(url, protocol, host, port, file, ref);
+		handlerProxy.setURLInternal(url, protocol, host, port, file, ref);
 	}
 
 	/**
@@ -41,7 +41,7 @@ public class URLStreamHandlerSetter implements org.osgi.service.url.URLStreamHan
 	@Override
 	public void setURL(URL url, String protocol, String host, int port, String authority, String userInfo, String path,
 			String query, String ref) {
-		handlerProxy.setURL(url, protocol, host, port, authority, userInfo, path, query, ref);
+		handlerProxy.setURLInternal(url, protocol, host, port, authority, userInfo, path, query, ref);
 	}
 
 }
