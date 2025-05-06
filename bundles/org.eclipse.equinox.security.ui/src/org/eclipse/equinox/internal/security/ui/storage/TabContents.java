@@ -121,7 +121,7 @@ public class TabContents implements ISecurePreferencesSelection, IDeleteListener
 			new Text(page, SWT.READ_ONLY).setText(IPath.fromOSString(location.getFile()).toOSString());
 		}
 
-		sashForm.setWeights(new int[] { 30, 70 });
+		sashForm.setWeights(30, 70);
 
 		nodesView = new NodesView(nodeTree, this);
 		valuesView = new ValuesView(tableOfValues, this, shell);
