@@ -46,11 +46,11 @@ import org.osgi.util.tracker.ServiceTracker;
 public class WeavingAdaptorFactory {
 
 	private static final Collection<String> IGNORE_WEAVING_SERVICE_BUNDLES = Arrays
-			.asList(new String[] { "org.eclipse.equinox.weaving.aspectj", //$NON-NLS-1$
-					"org.eclipse.equinox.weaving.caching", //$NON-NLS-1$
-					"org.eclipse.equinox.weaving.caching.j9", //$NON-NLS-1$
-					"org.eclipse.equinox.simpleconfigurator", //$NON-NLS-1$
-					"org.eclipse.equinox.common" }); //$NON-NLS-1$
+				.asList("org.eclipse.equinox.weaving.aspectj", //$NON-NLS-1$
+						"org.eclipse.equinox.weaving.caching", //$NON-NLS-1$
+						"org.eclipse.equinox.weaving.caching.j9", //$NON-NLS-1$
+						"org.eclipse.equinox.simpleconfigurator", //$NON-NLS-1$
+						"org.eclipse.equinox.common"); //$NON-NLS-1$
 
 	private ServiceTracker<ICachingServiceFactory, ICachingServiceFactory> cachingServiceFactoryTracker;
 
