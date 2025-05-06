@@ -504,9 +504,9 @@ public abstract class ApplicationDescriptor {
 		return AppPersistence.isLocked(this);
 	}
 
-	private static final Collection scalars = Arrays.asList(new Class[] {String.class, Integer.class, Long.class, Float.class, Double.class, Byte.class, Short.class, Character.class, Boolean.class});
-	private static final Collection scalarsArrays = Arrays.asList(new Class[] {String[].class, Integer[].class, Long[].class, Float[].class, Double[].class, Byte[].class, Short[].class, Character[].class, Boolean[].class});
-	private static final Collection primitiveArrays = Arrays.asList(new Class[] {long[].class, int[].class, short[].class, char[].class, byte[].class, double[].class, float[].class, boolean[].class});
+	private static final Collection scalars = Arrays.asList(String.class, Integer.class, Long.class, Float.class, Double.class, Byte.class, Short.class, Character.class, Boolean.class);
+	private static final Collection scalarsArrays = Arrays.asList(String[].class, Integer[].class, Long[].class, Float[].class, Double[].class, Byte[].class, Short[].class, Character[].class, Boolean[].class);
+	private static final Collection primitiveArrays = Arrays.asList(long[].class, int[].class, short[].class, char[].class, byte[].class, double[].class, float[].class, boolean[].class);
 
 	private static Map checkArgs(Map arguments, boolean validateValues) throws ApplicationException {
 		if (arguments == null) {
