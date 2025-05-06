@@ -301,12 +301,12 @@ public class HttpServerManager implements ManagedServiceFactory {
 			Class<?> clazz = httpServiceServlet.getClass();
 
 			try {
-				sessionDestroyed = clazz.getMethod("sessionDestroyed", new Class<?>[] { String.class }); //$NON-NLS-1$
+				sessionDestroyed = clazz.getMethod("sessionDestroyed", String.class); //$NON-NLS-1$
 			} catch (Exception e) {
 				throw new IllegalStateException(e);
 			}
 			try {
-				sessionIdChanged = clazz.getMethod("sessionIdChanged", new Class<?>[] { String.class }); //$NON-NLS-1$
+				sessionIdChanged = clazz.getMethod("sessionIdChanged", String.class); //$NON-NLS-1$
 			} catch (Exception e) {
 				throw new IllegalStateException(e);
 			}
