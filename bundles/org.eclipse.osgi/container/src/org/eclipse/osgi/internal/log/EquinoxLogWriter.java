@@ -143,11 +143,12 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 	 * @param writer a writer to log messages to
 	 */
 	public EquinoxLogWriter(Writer writer, String loggerName, boolean enabled, EquinoxConfiguration environmentInfo) {
-		if (writer == null)
+		if (writer == null) {
 			// log to System.err by default
 			this.writer = logForErrorStream();
-		else
+		} else {
 			this.writer = writer;
+		}
 		this.loggerName = loggerName;
 		this.enabled = enabled;
 		this.environmentInfo = environmentInfo;
@@ -155,16 +156,19 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 
 	private Throwable getRoot(Throwable t) {
 		Throwable root = null;
-		if (t instanceof BundleException)
+		if (t instanceof BundleException) {
 			root = ((BundleException) t).getNestedException();
-		if (t instanceof InvocationTargetException)
+		}
+		if (t instanceof InvocationTargetException) {
 			root = ((InvocationTargetException) t).getTargetException();
+		}
 		// skip inner InvocationTargetExceptions and BundleExceptions
 		if (root instanceof InvocationTargetException || root instanceof BundleException) {
 			Throwable deeplyNested = getRoot(root);
-			if (deeplyNested != null)
+			if (deeplyNested != null) {
 				// if we have something more specific, use it, otherwise keep what we have
 				root = deeplyNested;
+			}
 		}
 		return root;
 	}
@@ -176,15 +180,17 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 	 * @param args   the list of arguments
 	 */
 	private void writeArgs(String header, String[] args) throws IOException {
-		if (args == null || args.length == 0)
+		if (args == null || args.length == 0) {
 			return;
+		}
 		write(header);
 		for (int i = 0; i < args.length; i++) {
 			// mask out the password argument for security
-			if (i > 0 && PASSWORD.equals(args[i - 1]))
+			if (i > 0 && PASSWORD.equals(args[i - 1])) {
 				write(" (omitted)"); //$NON-NLS-1$
-			else
+			} else {
 				write(" " + args[i]); //$NON-NLS-1$
+			}
 		}
 		writeln();
 	}
@@ -306,10 +312,12 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 	}
 
 	private synchronized void log(FrameworkLogEntry logEntry) {
-		if (logEntry == null)
+		if (logEntry == null) {
 			return;
-		if (!isLoggable(logEntry.getSeverity()))
+		}
+		if (!isLoggable(logEntry.getSeverity())) {
 			return;
+		}
 		try {
 			checkLogFileSize();
 			openFile();
@@ -429,11 +437,13 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 
 	private StringBuilder appendPaddedInt(int value, int pad, StringBuilder buffer) {
 		pad = pad - 1;
-		if (pad == 0)
+		if (pad == 0) {
 			return buffer.append(Integer.toString(value));
+		}
 		int padding = (int) Math.pow(10, pad);
-		if (value >= padding)
+		if (value >= padding) {
 			return buffer.append(Integer.toString(value));
+		}
 		while (padding > value && padding > 1) {
 			buffer.append('0');
 			padding = padding / 10;
@@ -449,8 +459,9 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 	 * @return a stacktrace string
 	 */
 	private String getStackTrace(Throwable t) {
-		if (t == null)
+		if (t == null) {
 			return null;
+		}
 
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw);
@@ -572,8 +583,9 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 	private void write(String message) throws IOException {
 		if (message != null) {
 			writer.write(message);
-			if (consoleLog)
+			if (consoleLog) {
 				System.out.print(message);
+			}
 		}
 	}
 
@@ -613,8 +625,9 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 	 * @return false if an error occured trying to rotate the log
 	 */
 	private boolean checkLogFileSize() {
-		if (maxLogSize == 0)
+		if (maxLogSize == 0) {
 			return true; // no size limitation.
+		}
 
 		boolean isBackupOK = true;
 		if (outFile != null) {
@@ -695,15 +708,16 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 
 		String newLogLevel = environmentInfo.getConfiguration(PROP_LOG_LEVEL);
 		if (newLogLevel != null) {
-			if (newLogLevel.equals("ERROR")) //$NON-NLS-1$
+			if (newLogLevel.equals("ERROR")) { //$NON-NLS-1$
 				logLevel = FrameworkLogEntry.ERROR;
-			else if (newLogLevel.equals("WARNING")) //$NON-NLS-1$
+			} else if (newLogLevel.equals("WARNING")) { //$NON-NLS-1$
 				logLevel = FrameworkLogEntry.ERROR | FrameworkLogEntry.WARNING;
-			else if (newLogLevel.equals("INFO")) //$NON-NLS-1$
+			} else if (newLogLevel.equals("INFO")) { //$NON-NLS-1$
 				logLevel = FrameworkLogEntry.INFO | FrameworkLogEntry.ERROR | FrameworkLogEntry.WARNING
-						| FrameworkLogEntry.CANCEL;
-			else
+				| FrameworkLogEntry.CANCEL;
+			} else {
 				logLevel = FrameworkLogEntry.OK; // OK (0) means log everything
+			}
 		}
 
 		includeCommandLine = "true".equals(environmentInfo.getConfiguration(PROP_LOG_INCLUDE_COMMAND_LINE, "true")); //$NON-NLS-1$//$NON-NLS-2$
@@ -741,25 +755,30 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 	 * Determines if the log entry should be logged based on log level.
 	 */
 	private boolean isLoggable(int fwkEntrySeverity) {
-		if (logLevel == 0)
+		if (logLevel == 0) {
 			return true;
+		}
 		return (fwkEntrySeverity & logLevel) != 0;
 	}
 
 	@SuppressWarnings("deprecation")
 	@Override
 	public boolean isLoggable(Bundle bundle, String loggableName, int loggableLevel) {
-		if (!enabled)
+		if (!enabled) {
 			return false;
-		if (loggerName.equals(loggableName))
+		}
+		if (loggerName.equals(loggableName)) {
 			return isLoggable(convertSeverity(loggableLevel));
-		if (EquinoxLogServices.PERF_LOGGER_NAME.equals(loggableName))
+		}
+		if (EquinoxLogServices.PERF_LOGGER_NAME.equals(loggableName)) {
 			// we don't want to do anything with performance logger unless
 			// this is the performance logger (check done above).
 			return false;
-		if (!EquinoxLogServices.EQUINOX_LOGGER_NAME.equals(loggerName))
+		}
+		if (!EquinoxLogServices.EQUINOX_LOGGER_NAME.equals(loggerName)) {
 			// only the equinox log writer should pay attention to other logs
 			return false;
+		}
 		// for now only log errors; probably need this to be configurable
 		return loggableLevel == LogService.LOG_ERROR;
 	}
@@ -767,9 +786,10 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 	@SuppressWarnings("deprecation")
 	@Override
 	public void logged(LogEntry entry) {
-		if (!(entry instanceof ExtendedLogEntry))
+		if (!(entry instanceof ExtendedLogEntry)) {
 			// TODO this should never happen
 			return;
+		}
 		ExtendedLogEntry extended = (ExtendedLogEntry) entry;
 		Object context = extended.getContext();
 		if (context instanceof FrameworkLogEntry) {
@@ -784,8 +804,9 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 
 	private static String getFwkEntryTag(LogEntry entry) {
 		Bundle b = entry.getBundle();
-		if (b != null && b.getSymbolicName() != null)
+		if (b != null && b.getSymbolicName() != null) {
 			return b.getSymbolicName();
+		}
 		return "unknown"; //$NON-NLS-1$
 	}
 

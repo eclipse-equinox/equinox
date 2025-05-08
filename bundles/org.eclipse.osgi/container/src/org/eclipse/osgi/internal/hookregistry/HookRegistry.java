@@ -163,8 +163,9 @@ public final class HookRegistry {
 				input = url.openStream();
 				configuratorProps.load(input);
 				String hooksValue = configuratorProps.getProperty(HOOK_CONFIGURATORS);
-				if (hooksValue == null)
+				if (hooksValue == null) {
 					continue;
+				}
 				boolean builtin = Boolean.valueOf(configuratorProps.getProperty(BUILTIN_HOOKS)).booleanValue();
 				String[] configurators = ManifestElement.getArrayFromList(hooksValue, ","); //$NON-NLS-1$
 				for (String configurator : configurators) {
@@ -181,12 +182,13 @@ public final class HookRegistry {
 						"error loading: " + url.toExternalForm(), 0, e, null)); //$NON-NLS-1$
 				// ignore and continue to next URL
 			} finally {
-				if (input != null)
+				if (input != null) {
 					try {
 						input.close();
 					} catch (IOException e) {
 						// do nothing
 					}
+				}
 			}
 		}
 	}
@@ -275,8 +277,9 @@ public final class HookRegistry {
 	}
 
 	private <H> void add(H hook, List<H> hooks) {
-		if (initialized)
+		if (initialized) {
 			throw new IllegalStateException("Cannot add hooks dynamically."); //$NON-NLS-1$
+		}
 		hooks.add(hook);
 	}
 
