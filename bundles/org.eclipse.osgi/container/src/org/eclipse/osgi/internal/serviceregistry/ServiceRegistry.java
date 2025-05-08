@@ -1237,37 +1237,46 @@ public class ServiceRegistry {
 		for (String element : clazzes) {
 			try {
 				Class<?> serviceClazz = cl == null ? Class.forName(element) : cl.loadClass(element);
-				if (!serviceClazz.isInstance(serviceObject))
+				if (!serviceClazz.isInstance(serviceObject)) {
 					return element;
+				}
 			} catch (ClassNotFoundException e) {
 				// This check is rarely done
-				if (extensiveCheckServiceClass(element, serviceObject.getClass()))
+				if (extensiveCheckServiceClass(element, serviceObject.getClass())) {
 					return element;
+				}
 			}
 		}
 		return null;
 	}
 
 	private static boolean extensiveCheckServiceClass(String clazz, Class<?> serviceClazz) {
-		if (clazz.equals(serviceClazz.getName()))
+		if (clazz.equals(serviceClazz.getName())) {
 			return false;
+		}
 		Class<?>[] interfaces = serviceClazz.getInterfaces();
-		for (Class<?> element : interfaces)
-			if (!extensiveCheckServiceClass(clazz, element))
+		for (Class<?> element : interfaces) {
+			if (!extensiveCheckServiceClass(clazz, element)) {
 				return false;
+			}
+		}
 		Class<?> superClazz = serviceClazz.getSuperclass();
-		if (superClazz != null)
-			if (!extensiveCheckServiceClass(clazz, superClazz))
+		if (superClazz != null) {
+			if (!extensiveCheckServiceClass(clazz, superClazz)) {
 				return false;
+			}
+		}
 		return true;
 	}
 
 	static boolean isAssignableTo(BundleContextImpl context, String clazz, ServiceReferenceImpl<?> reference) {
 		Bundle bundle = context.getBundleImpl();
 		String[] clazzes = reference.getClasses();
-		for (String element : clazzes)
-			if (!reference.getRegistration().isAssignableTo(bundle, element, element == clazz))
+		for (String element : clazzes) {
+			if (!reference.getRegistration().isAssignableTo(bundle, element, element == clazz)) {
 				return false;
+			}
+		}
 		return true;
 	}
 
