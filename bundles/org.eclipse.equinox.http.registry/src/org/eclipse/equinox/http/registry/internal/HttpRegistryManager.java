@@ -310,17 +310,16 @@ public class HttpRegistryManager {
 		try {
 			// First, try the Equinox http service method
 			registerFilterMethod = httpService.getClass().getMethod("registerFilter", //$NON-NLS-1$
-					new Class[] { String.class, Filter.class, Dictionary.class, HttpContext.class });
+					String.class, Filter.class, Dictionary.class, HttpContext.class);
 			registerFilterMethod.invoke(httpService,
-					new Object[] { contribution.alias, contribution.filter, contribution.initparams, context });
+					contribution.alias, contribution.filter, contribution.initparams, context);
 			return true;
 		} catch (NoSuchMethodException e) {
 			// Give the pax-web HttpService impl a try
 			try {
-				registerFilterMethod = httpService.getClass().getMethod("registerFilter", new Class[] { Filter.class, //$NON-NLS-1$
-						String[].class, String[].class, Dictionary.class, HttpContext.class });
-				registerFilterMethod.invoke(httpService, new Object[] { contribution.filter,
-						new String[] { contribution.alias }, null, contribution.initparams, context });
+				registerFilterMethod = httpService.getClass().getMethod("registerFilter", Filter.class, //$NON-NLS-1$
+										String[].class, String[].class, Dictionary.class, HttpContext.class);
+				registerFilterMethod.invoke(httpService, contribution.filter, new String[] { contribution.alias }, null, contribution.initparams, context);
 				return true;
 			} catch (Throwable t) {
 				// TODO: should log this
@@ -338,8 +337,8 @@ public class HttpRegistryManager {
 	private void unregisterFilter(Filter filter) {
 		try {
 			Method unregisterFilterMethod = httpService.getClass().getMethod("unregisterFilter", //$NON-NLS-1$
-					new Class[] { Filter.class });
-			unregisterFilterMethod.invoke(httpService, new Object[] { filter });
+					Filter.class);
+			unregisterFilterMethod.invoke(httpService, filter);
 		} catch (NoSuchMethodException t) {
 			// TODO: should log this
 			// for now ignore
