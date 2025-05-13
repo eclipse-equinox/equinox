@@ -44,6 +44,7 @@ import org.eclipse.osgi.internal.framework.BundleContextImpl;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.framework.FilterImpl;
 import org.eclipse.osgi.internal.messages.Msg;
+import org.eclipse.osgi.internal.serviceregistry.ServiceRegistrationImpl.FrameworkHookRegistration;
 import org.eclipse.osgi.internal.serviceregistry.ServiceUse.ServiceUseLock;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.eclipse.osgi.util.NLS;
@@ -126,6 +127,8 @@ public class ServiceRegistry {
 	 * Map of threads awaiting ServiceUseLocks. Used for deadlock detection.
 	 */
 	private final ConcurrentMap<Thread, ServiceUseLock> awaitedUseLocks = new ConcurrentHashMap<>();
+
+	private final ConcurrentMap<String, List<ServiceRegistrationImpl<?>>> frameworkHooks = new ConcurrentHashMap<>();
 
 	/**
 	 * Initializes the internal data structures of this ServiceRegistry.
@@ -308,6 +311,15 @@ public class ServiceRegistry {
 		default:
 			return hookTypes;
 		}
+	}
+
+	private void setHookRegistrations(String hookClass, List<ServiceRegistrationImpl<?>> hooks) {
+		hooks = hooks == null || hooks.isEmpty() ? Collections.emptyList() : new ArrayList<>(hooks);
+		frameworkHooks.put(hookClass, hooks);
+	}
+
+	private List<ServiceRegistrationImpl<?>> getHookRegistrations(String hookClass) {
+		return frameworkHooks.getOrDefault(hookClass, Collections.emptyList());
 	}
 
 	private List<Class<?>> addHook(Class<?> hookType, List<Class<?>> hookTypes) {
@@ -1018,6 +1030,9 @@ public class ServiceRegistry {
 			// The list is sorted, so we must find the proper location to insert
 			insertIndex = -Collections.binarySearch(services, registration) - 1;
 			services.add(insertIndex, registration);
+			if (registration instanceof FrameworkHookRegistration) {
+				setHookRegistrations(clazz, services);
+			}
 		}
 
 		// Add the ServiceRegistrationImpl to the list of all published Services.
@@ -1051,6 +1066,9 @@ public class ServiceRegistry {
 				// The list is sorted, so we must find the proper location to insert
 				insertIndex = -1 - Collections.binarySearch(services, registration);
 				services.add(insertIndex, registration);
+				if (registration instanceof FrameworkHookRegistration) {
+					setHookRegistrations(clazz, services);
+				}
 			}
 
 			// Remove the ServiceRegistrationImpl from the list of all published Services
@@ -1085,6 +1103,9 @@ public class ServiceRegistry {
 			services.remove(registration);
 			if (services.isEmpty()) { // remove empty list
 				publishedServicesByClass.remove(clazz);
+			}
+			if (registration instanceof FrameworkHookRegistration) {
+				setHookRegistrations(clazz, services);
 			}
 		}
 
@@ -1360,7 +1381,7 @@ public class ServiceRegistry {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> void notifyHooksPrivileged(Class<T> hookType, String serviceMethod, HookContext<T> hookContext) {
-		List<ServiceRegistrationImpl<?>> hooks = lookupServiceRegistrations(hookType.getName(), null);
+		List<ServiceRegistrationImpl<?>> hooks = getHookRegistrations(hookType.getName());
 		// Since the list is already sorted, we don't need to sort the list to call the
 		// hooks
 		// in the proper order.
