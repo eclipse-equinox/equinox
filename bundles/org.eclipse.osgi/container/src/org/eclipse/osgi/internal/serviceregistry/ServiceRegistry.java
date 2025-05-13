@@ -287,33 +287,43 @@ public class ServiceRegistry {
 		return registration;
 	}
 
+	private static List<Class<?>> getHookClass(String className, List<Class<?>> hookTypes) {
+		Class<?> hookClass = getHookClass(className);
+		return hookClass == null ? hookTypes : addHook(hookClass, hookTypes);
+	}
+
 	@SuppressWarnings("deprecation")
-	private List<Class<?>> getHookClass(String className, List<Class<?>> hookTypes) {
+	private static Class<?> getHookClass(String className) {
 		switch (className) {
 		case "org.osgi.framework.hooks.bundle.CollisionHook": //$NON-NLS-1$
-			return addHook(org.osgi.framework.hooks.bundle.CollisionHook.class, hookTypes);
+			return org.osgi.framework.hooks.bundle.CollisionHook.class;
 		case "org.osgi.framework.hooks.bundle.EventHook": //$NON-NLS-1$
-			return addHook(org.osgi.framework.hooks.bundle.EventHook.class, hookTypes);
+			return org.osgi.framework.hooks.bundle.EventHook.class;
 		case "org.osgi.framework.hooks.bundle.FindHook": //$NON-NLS-1$
-			return addHook(org.osgi.framework.hooks.bundle.FindHook.class, hookTypes);
+			return org.osgi.framework.hooks.bundle.FindHook.class;
 		case "org.osgi.framework.hooks.service.EventHook": //$NON-NLS-1$
-			return addHook(org.osgi.framework.hooks.service.EventHook.class, hookTypes);
+			return org.osgi.framework.hooks.service.EventHook.class;
 		case "org.osgi.framework.hooks.service.EventListenerHook": //$NON-NLS-1$
-			return addHook(org.osgi.framework.hooks.service.EventListenerHook.class, hookTypes);
+			return org.osgi.framework.hooks.service.EventListenerHook.class;
 		case "org.osgi.framework.hooks.service.FindHook": //$NON-NLS-1$
-			return addHook(org.osgi.framework.hooks.service.FindHook.class, hookTypes);
+			return org.osgi.framework.hooks.service.FindHook.class;
 		case "org.osgi.framework.hooks.service.ListenerHook": //$NON-NLS-1$
-			return addHook(org.osgi.framework.hooks.service.ListenerHook.class, hookTypes);
+			return org.osgi.framework.hooks.service.ListenerHook.class;
 		case "org.osgi.framework.hooks.weaving.WeavingHook": //$NON-NLS-1$
-			return addHook(org.osgi.framework.hooks.weaving.WeavingHook.class, hookTypes);
+			return org.osgi.framework.hooks.weaving.WeavingHook.class;
 		case "org.osgi.framework.hooks.weaving.WovenClassListener": //$NON-NLS-1$
-			return addHook(org.osgi.framework.hooks.weaving.WovenClassListener.class, hookTypes);
+			return org.osgi.framework.hooks.weaving.WovenClassListener.class;
 		default:
-			return hookTypes;
+			return null;
 		}
 	}
 
 	private void setHookRegistrations(String hookClass, List<ServiceRegistrationImpl<?>> hooks) {
+		if (getHookClass(hookClass) == null) {
+			// A FrameworkHookRegistration can be registered with other non-hook class names
+			// also; the hooks list here is for a non-hook class name, just ignore it.
+			return;
+		}
 		hooks = hooks == null || hooks.isEmpty() ? Collections.emptyList() : new ArrayList<>(hooks);
 		frameworkHooks.put(hookClass, hooks);
 	}
@@ -322,7 +332,7 @@ public class ServiceRegistry {
 		return frameworkHooks.getOrDefault(hookClass, Collections.emptyList());
 	}
 
-	private List<Class<?>> addHook(Class<?> hookType, List<Class<?>> hookTypes) {
+	private static List<Class<?>> addHook(Class<?> hookType, List<Class<?>> hookTypes) {
 		if (hookTypes == null) {
 			hookTypes = new ArrayList<>(1);
 		}
