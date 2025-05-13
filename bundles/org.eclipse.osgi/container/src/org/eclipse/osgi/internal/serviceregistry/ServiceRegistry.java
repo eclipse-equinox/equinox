@@ -128,15 +128,7 @@ public class ServiceRegistry {
 	 */
 	private final ConcurrentMap<Thread, ServiceUseLock> awaitedUseLocks = new ConcurrentHashMap<>();
 
-	private volatile List<ServiceRegistrationImpl<?>> bundleCollisionHooks = Collections.emptyList();
-	private volatile List<ServiceRegistrationImpl<?>> bundleEventHooks = Collections.emptyList();
-	private volatile List<ServiceRegistrationImpl<?>> bundleFindHooks = Collections.emptyList();
-	private volatile List<ServiceRegistrationImpl<?>> serviceEventHooks = Collections.emptyList();
-	private volatile List<ServiceRegistrationImpl<?>> serviceEventListenerHooks = Collections.emptyList();
-	private volatile List<ServiceRegistrationImpl<?>> serviceFindHooks = Collections.emptyList();
-	private volatile List<ServiceRegistrationImpl<?>> serviceListenerHooks = Collections.emptyList();
-	private volatile List<ServiceRegistrationImpl<?>> weavingHooks = Collections.emptyList();
-	private volatile List<ServiceRegistrationImpl<?>> wovenClassListeners = Collections.emptyList();
+	private final ConcurrentMap<String, List<ServiceRegistrationImpl<?>>> frameworkHooks = new ConcurrentHashMap<>();
 
 	/**
 	 * Initializes the internal data structures of this ServiceRegistry.
@@ -323,59 +315,11 @@ public class ServiceRegistry {
 
 	private void setHookRegistrations(String hookClass, List<ServiceRegistrationImpl<?>> hooks) {
 		hooks = hooks == null || hooks.isEmpty() ? Collections.emptyList() : new ArrayList<>(hooks);
-		switch (hookClass) {
-		case "org.osgi.framework.hooks.bundle.CollisionHook": //$NON-NLS-1$
-			bundleCollisionHooks = hooks;
-			break;
-		case "org.osgi.framework.hooks.bundle.EventHook": //$NON-NLS-1$
-			bundleEventHooks = hooks;
-			break;
-		case "org.osgi.framework.hooks.bundle.FindHook": //$NON-NLS-1$
-			bundleFindHooks = hooks;
-			break;
-		case "org.osgi.framework.hooks.service.EventHook": //$NON-NLS-1$
-			serviceEventHooks = hooks;
-			break;
-		case "org.osgi.framework.hooks.service.EventListenerHook": //$NON-NLS-1$
-			serviceEventListenerHooks = hooks;
-			break;
-		case "org.osgi.framework.hooks.service.FindHook": //$NON-NLS-1$
-			serviceFindHooks = hooks;
-			break;
-		case "org.osgi.framework.hooks.service.ListenerHook": //$NON-NLS-1$
-			serviceListenerHooks = hooks;
-			break;
-		case "org.osgi.framework.hooks.weaving.WeavingHook": //$NON-NLS-1$
-			weavingHooks = hooks;
-			break;
-		case "org.osgi.framework.hooks.weaving.WovenClassListener": //$NON-NLS-1$
-			wovenClassListeners = hooks;
-			break;
-		}
+		frameworkHooks.put(hookClass, hooks);
 	}
 
 	private List<ServiceRegistrationImpl<?>> getHookRegistrations(String hookClass) {
-		switch (hookClass) {
-		case "org.osgi.framework.hooks.bundle.CollisionHook": //$NON-NLS-1$
-			return bundleCollisionHooks;
-		case "org.osgi.framework.hooks.bundle.EventHook": //$NON-NLS-1$
-			return bundleEventHooks;
-		case "org.osgi.framework.hooks.bundle.FindHook": //$NON-NLS-1$
-			return bundleFindHooks;
-		case "org.osgi.framework.hooks.service.EventHook": //$NON-NLS-1$
-			return serviceEventHooks;
-		case "org.osgi.framework.hooks.service.EventListenerHook": //$NON-NLS-1$
-			return serviceEventListenerHooks;
-		case "org.osgi.framework.hooks.service.FindHook": //$NON-NLS-1$
-			return serviceFindHooks;
-		case "org.osgi.framework.hooks.service.ListenerHook": //$NON-NLS-1$
-			return serviceListenerHooks;
-		case "org.osgi.framework.hooks.weaving.WeavingHook": //$NON-NLS-1$
-			return weavingHooks;
-		case "org.osgi.framework.hooks.weaving.WovenClassListener": //$NON-NLS-1$
-			return wovenClassListeners;
-		}
-		return Collections.emptyList();
+		return frameworkHooks.getOrDefault(hookClass, Collections.emptyList());
 	}
 
 	private List<Class<?>> addHook(Class<?> hookType, List<Class<?>> hookTypes) {
