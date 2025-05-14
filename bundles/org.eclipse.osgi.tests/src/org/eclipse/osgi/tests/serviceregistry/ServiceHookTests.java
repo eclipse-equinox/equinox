@@ -19,13 +19,16 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import junit.framework.AssertionFailedError;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.bundles.AbstractBundleTests;
@@ -33,14 +36,17 @@ import org.junit.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.hooks.service.EventHook;
+import org.osgi.framework.hooks.service.EventListenerHook;
 import org.osgi.framework.hooks.service.FindHook;
 import org.osgi.framework.hooks.service.ListenerHook;
+import org.osgi.framework.hooks.service.ListenerHook.ListenerInfo;
 
 @SuppressWarnings("deprecation") // EventHook
 public class ServiceHookTests extends AbstractBundleTests {
@@ -614,6 +620,77 @@ public class ServiceHookTests extends AbstractBundleTests {
 		} finally {
 			if (regHook != null) {
 				regHook.unregister();
+			}
+		}
+	}
+
+	public static class MultiImplementHook implements FindHook, EventListenerHook, Runnable {
+		List<ServiceEvent> events = new ArrayList<>();
+		List<String> findClasses = new ArrayList<>();
+
+		@Override
+		public void run() {
+		}
+
+		@Override
+		public void event(ServiceEvent event, Map<BundleContext, Collection<ListenerInfo>> listeners) {
+			events.add(event);
+		}
+
+		@Override
+		public void find(BundleContext context, String name, String filter, boolean allServices,
+				Collection<ServiceReference<?>> references) {
+			findClasses.add(name);
+		}
+	}
+
+	@Test
+	public void testMultiImplementHook() {
+		final BundleContext testContext = OSGiTestsActivator.getContext();
+		final MultiImplementHook hook = new MultiImplementHook();
+		ServiceRegistration<?> regHook = testContext.registerService(
+				new String[] { FindHook.class.getName(), EventListenerHook.class.getName(), Runnable.class.getName() },
+				hook, FrameworkUtil.asDictionary(Collections.singletonMap("testMultiImplementHook", "true")));
+		ServiceRegistration<?> testReg = null;
+		try {
+			// Make sure we can get the hook service with the Runnable class;
+			// This also drives a find hook call
+			Collection<ServiceReference<Runnable>> runnables = testContext.getServiceReferences(Runnable.class,
+					"(testMultiImplementHook=true)");
+			assertEquals("Wrong number of runnables", 1, runnables.size());
+
+			// Create a registration event to record in the event hook
+			testReg = testContext.registerService(Object.class, new Object(), null);
+			// Make sure the test hook got called for both find and event
+			assertFalse("Wrong number of events: " + hook.events, hook.events.isEmpty());
+			assertFalse("Wrong number of finds: " + hook.findClasses, hook.findClasses.isEmpty());
+
+			ServiceRegistration<?> unregister = regHook;
+			regHook = null;
+			unregister.unregister();
+
+			unregister = testReg;
+			testReg = null;
+			unregister.unregister();
+
+			hook.events.clear();
+			hook.findClasses.clear();
+
+			// make sure our hook doesn't get called after unregistering
+			testReg = testContext.registerService(Object.class, new Object(), null);
+			testContext.getServiceReferences(Runnable.class, "(testMultiImplementHook=true)");
+			assertTrue("Wrong number of events: " + hook.events, hook.events.isEmpty());
+			assertTrue("Wrong number of finds: " + hook.findClasses, hook.findClasses.isEmpty());
+			runnables = testContext.getServiceReferences(Runnable.class, "(testMultiImplementHook=true)");
+			assertEquals("Wrong number of runnables", 0, runnables.size());
+		} catch (InvalidSyntaxException e) {
+			fail(e.getMessage());
+		} finally {
+			if (regHook != null) {
+				regHook.unregister();
+			}
+			if (testReg != null) {
+				testReg.unregister();
 			}
 		}
 	}
