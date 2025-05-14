@@ -128,7 +128,47 @@ public class ServiceRegistry {
 	 */
 	private final ConcurrentMap<Thread, ServiceUseLock> awaitedUseLocks = new ConcurrentHashMap<>();
 
-	private final ConcurrentMap<String, List<ServiceRegistrationImpl<?>>> frameworkHooks = new ConcurrentHashMap<>();
+	private final Map<String, FrameworkHookHolder> frameworkHooks = createFrameworkHooksMap();
+
+	static Map<String, FrameworkHookHolder> createFrameworkHooksMap() {
+		@SuppressWarnings("deprecation")
+		Class<?>[] hookClasses = {
+				org.osgi.framework.hooks.bundle.CollisionHook.class, //
+				org.osgi.framework.hooks.bundle.EventHook.class, //
+				org.osgi.framework.hooks.bundle.FindHook.class, //
+				org.osgi.framework.hooks.service.EventHook.class, //
+				org.osgi.framework.hooks.service.EventListenerHook.class, //
+				org.osgi.framework.hooks.service.FindHook.class, //
+				org.osgi.framework.hooks.service.ListenerHook.class, //
+				org.osgi.framework.hooks.weaving.WeavingHook.class, //
+				org.osgi.framework.hooks.weaving.WovenClassListener.class
+		};
+		Map<String, FrameworkHookHolder> result = new HashMap<>();
+		for (Class<?> clazz : hookClasses) {
+			result.put(clazz.getName(), new FrameworkHookHolder(clazz));
+		}
+		return Collections.unmodifiableMap(result);
+	}
+
+	static final FrameworkHookHolder NULL_HOLDER = new FrameworkHookHolder(null);
+
+	static class FrameworkHookHolder {
+		final Class<?> hookClass;
+		private volatile List<ServiceRegistrationImpl<?>> hooks = Collections.emptyList();
+
+		public FrameworkHookHolder(Class<?> hookClass) {
+			this.hookClass = hookClass;
+		}
+
+		void setHooks(List<ServiceRegistrationImpl<?>> hooks) {
+			this.hooks = hooks == null || hooks.isEmpty() ? Collections.emptyList()
+					: Collections.unmodifiableList(new ArrayList<>(hooks));
+		}
+
+		List<ServiceRegistrationImpl<?>> getHooks() {
+			return this.hooks;
+		}
+	}
 
 	/**
 	 * Initializes the internal data structures of this ServiceRegistry.
@@ -253,7 +293,7 @@ public class ServiceRegistry {
 			String clazz = clazzes[i].intern();
 			if (!copy.contains(clazz)) {
 				isListenerHook = isListenerHook || listenerHookName.equals(clazz);
-				hookTypes = getHookClass(clazz, hookTypes);
+				hookTypes = addHookClass(clazz, hookTypes);
 				copy.add(clazz);
 			}
 		}
@@ -287,57 +327,32 @@ public class ServiceRegistry {
 		return registration;
 	}
 
-	private static List<Class<?>> getHookClass(String className, List<Class<?>> hookTypes) {
-		Class<?> hookClass = getHookClass(className);
-		return hookClass == null ? hookTypes : addHook(hookClass, hookTypes);
-	}
-
-	@SuppressWarnings("deprecation")
-	private static Class<?> getHookClass(String className) {
-		switch (className) {
-		case "org.osgi.framework.hooks.bundle.CollisionHook": //$NON-NLS-1$
-			return org.osgi.framework.hooks.bundle.CollisionHook.class;
-		case "org.osgi.framework.hooks.bundle.EventHook": //$NON-NLS-1$
-			return org.osgi.framework.hooks.bundle.EventHook.class;
-		case "org.osgi.framework.hooks.bundle.FindHook": //$NON-NLS-1$
-			return org.osgi.framework.hooks.bundle.FindHook.class;
-		case "org.osgi.framework.hooks.service.EventHook": //$NON-NLS-1$
-			return org.osgi.framework.hooks.service.EventHook.class;
-		case "org.osgi.framework.hooks.service.EventListenerHook": //$NON-NLS-1$
-			return org.osgi.framework.hooks.service.EventListenerHook.class;
-		case "org.osgi.framework.hooks.service.FindHook": //$NON-NLS-1$
-			return org.osgi.framework.hooks.service.FindHook.class;
-		case "org.osgi.framework.hooks.service.ListenerHook": //$NON-NLS-1$
-			return org.osgi.framework.hooks.service.ListenerHook.class;
-		case "org.osgi.framework.hooks.weaving.WeavingHook": //$NON-NLS-1$
-			return org.osgi.framework.hooks.weaving.WeavingHook.class;
-		case "org.osgi.framework.hooks.weaving.WovenClassListener": //$NON-NLS-1$
-			return org.osgi.framework.hooks.weaving.WovenClassListener.class;
-		default:
-			return null;
+	private List<Class<?>> addHookClass(String className, List<Class<?>> hookTypes) {
+		Class<?> hookClass = frameworkHooks.getOrDefault(className, NULL_HOLDER).hookClass;
+		if (hookClass == null) {
+			// the className is not a hookClass; do nothing
+			return hookTypes;
 		}
-	}
-
-	private void setHookRegistrations(String hookClass, List<ServiceRegistrationImpl<?>> hooks) {
-		if (getHookClass(hookClass) == null) {
-			// A FrameworkHookRegistration can be registered with other non-hook class names
-			// also; the hooks list here is for a non-hook class name, just ignore it.
-			return;
-		}
-		hooks = hooks == null || hooks.isEmpty() ? Collections.emptyList() : new ArrayList<>(hooks);
-		frameworkHooks.put(hookClass, hooks);
-	}
-
-	private List<ServiceRegistrationImpl<?>> getHookRegistrations(String hookClass) {
-		return frameworkHooks.getOrDefault(hookClass, Collections.emptyList());
-	}
-
-	private static List<Class<?>> addHook(Class<?> hookType, List<Class<?>> hookTypes) {
 		if (hookTypes == null) {
 			hookTypes = new ArrayList<>(1);
 		}
-		hookTypes.add(hookType);
+		hookTypes.add(hookClass);
 		return hookTypes;
+
+	}
+
+	private void setHookRegistrations(String hookClass, List<ServiceRegistrationImpl<?>> hooks) {
+		FrameworkHookHolder holder = frameworkHooks.get(hookClass);
+		if (holder != null) {
+			// Holder will only be non-null for actual framework hook classes;
+			// Some hook implementations may be registered with multiple objectClass types.
+			// If one of the objectClass types is not a hook class then we ignore it.
+			holder.setHooks(hooks);
+		}
+	}
+
+	private List<ServiceRegistrationImpl<?>> getHookRegistrations(String hookClass) {
+		return frameworkHooks.getOrDefault(hookClass, NULL_HOLDER).getHooks();
 	}
 
 	/**
