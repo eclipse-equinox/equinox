@@ -150,8 +150,9 @@ public class CDSBundleFile extends BundleFileWrapper {
 	 *         the cache.
 	 */
 	private byte[] getClassBytes(String name) {
-		if (urlHelper == null || url == null)
+		if (urlHelper == null || url == null) {
 			return null;
+		}
 		byte[] results = urlHelper.findSharedClass(null, url, name);
 		print(debug, () -> results != null ? "Found shared class bytes for: " + name + ' ' + url //$NON-NLS-1$
 				: "No shared class bytes found for: " + name + ' ' + url); //$NON-NLS-1$

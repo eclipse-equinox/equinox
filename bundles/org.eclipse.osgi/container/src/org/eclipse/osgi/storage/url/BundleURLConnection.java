@@ -88,8 +88,9 @@ public class BundleURLConnection extends URLConnection implements BundleReferenc
 					}
 				}
 				try {
-					if (in.markSupported())
+					if (in.markSupported()) {
 						contentType = guessContentTypeFromStream(in);
+					}
 				} catch (IOException e) {
 					// do nothing
 				}

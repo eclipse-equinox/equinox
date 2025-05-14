@@ -51,6 +51,7 @@ public interface GenericDescription extends BaseDescription {
 	 * 
 	 * @deprecated matching should only be done against a capability's attributes.
 	 */
+	@Deprecated
 	@Override
 	public String getName();
 
@@ -63,6 +64,7 @@ public interface GenericDescription extends BaseDescription {
 	 * 
 	 * @deprecated matching should only be done against a capability's attributes.
 	 */
+	@Deprecated
 	@Override
 	public Version getVersion();
 }

@@ -29,8 +29,8 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public abstract class AuthorizationEngine {
 
-	private EventManager manager = new EventManager();
-	private EventDispatcher<AuthorizationListener, Object, AuthorizationEvent> dispatcher = new AuthEventDispatcher();
+	private final EventManager manager = new EventManager();
+	private final EventDispatcher<AuthorizationListener, Object, AuthorizationEvent> dispatcher = new AuthEventDispatcher();
 	private final ServiceTracker<AuthorizationListener, AuthorizationListener> listenerTracker;
 
 	public AuthorizationEngine(BundleContext context) {
@@ -53,11 +53,13 @@ public abstract class AuthorizationEngine {
 	}
 
 	private void fireEvent(AuthorizationEvent event) {
-		if (event == null)
+		if (event == null) {
 			return;
+		}
 		Object[] services = listenerTracker.getServices();
-		if (services == null)
+		if (services == null) {
 			return;
+		}
 		Map<AuthorizationListener, Object> listeners = new HashMap<>();
 		for (Object service : services) {
 			listeners.put((AuthorizationListener) service, service);
