@@ -151,7 +151,7 @@ public class ReliableFileOutputStream extends FilterOutputStream {
 
 	/**
 	 * Override default FilterOutputStream method.
-	 * 
+	 *
 	 * @see FilterOutputStream#write(byte[])
 	 */
 	@Override
@@ -161,7 +161,7 @@ public class ReliableFileOutputStream extends FilterOutputStream {
 
 	/**
 	 * Override default FilterOutputStream method.
-	 * 
+	 *
 	 * @see FilterOutputStream#write(byte[], int, int)
 	 */
 	@Override
@@ -172,7 +172,7 @@ public class ReliableFileOutputStream extends FilterOutputStream {
 
 	/**
 	 * Override default FilterOutputStream method.
-	 * 
+	 *
 	 * @see FilterOutputStream#write(int)
 	 */
 	@Override
