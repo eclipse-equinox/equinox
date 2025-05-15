@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -31,8 +31,8 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 /*
- * A MEG application container that understands eclipse applications.  This 
- * container will discover installed eclipse applications and register the 
+ * A MEG application container that understands eclipse applications.  This
+ * container will discover installed eclipse applications and register the
  * appropriate ApplicatoinDescriptor service with the service registry.
  */
 public class EclipseAppContainer

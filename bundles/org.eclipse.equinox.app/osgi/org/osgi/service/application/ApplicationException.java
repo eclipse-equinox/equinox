@@ -1,6 +1,6 @@
 /*
  * Copyright (c) OSGi Alliance (2005, 2010). All Rights Reserved.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,7 @@ package org.osgi.service.application;
 /**
  * This exception is used to indicate problems related to application lifecycle
  * management.
- * 
+ *
  * {@code ApplicationException} object is created by the Application Admin
  * to denote an exception condition in the lifecycle of an application.
  * {@code ApplicationException}s should not be created by developers. <br/>
@@ -40,23 +40,23 @@ package org.osgi.service.application;
  * <li> {@link #APPLICATION_EXITVALUE_NOT_AVAILABLE} - The exit value is not
  * available for an application instance because the instance has not
  * terminated.
- * <li> {@link #APPLICATION_INVALID_STARTUP_ARGUMENT} - One of the specified 
+ * <li> {@link #APPLICATION_INVALID_STARTUP_ARGUMENT} - One of the specified
  * startup arguments is invalid, for example its type is not permitted.
  * </ul>
- * 
+ *
  * @version $Id$
  */
 public class ApplicationException extends Exception {
 	private static final long serialVersionUID = -7173190453622508207L;
 	private final int errorCode;
-	
+
 	/**
 	 * The application couldn't be launched because it is locked.
 	 */
 	public static final int APPLICATION_LOCKED	= 0x01;
-	
+
 	/**
-	 * The application is not in launchable state, it's 
+	 * The application is not in launchable state, it's
 	 * {@link ApplicationDescriptor#APPLICATION_LAUNCHABLE}
 	 * attribute is false.
 	 */
@@ -67,14 +67,14 @@ public class ApplicationException extends Exception {
 	 * during launch. The exception is available from {@code getCause()}.
 	 */
 	public static final int APPLICATION_INTERNAL_ERROR = 0x03;
-	
+
 	/**
 	 * The application schedule could not be created due to some internal error
 	 * (for example, the schedule information couldn't be saved due to some
 	 * storage error).
 	 */
 	public static final int APPLICATION_SCHEDULING_FAILED = 0x04;
-	
+
 	/**
 	 * The application scheduling failed because the specified identifier
 	 * is already in use.
@@ -90,7 +90,7 @@ public class ApplicationException extends Exception {
 	public static final int APPLICATION_EXITVALUE_NOT_AVAILABLE = 0x06;
 
 	/**
-	 * One of the specified startup arguments is invalid, for example its 
+	 * One of the specified startup arguments is invalid, for example its
 	 * type is not permitted.
 	 *
 	 * @since 1.1
@@ -99,17 +99,17 @@ public class ApplicationException extends Exception {
 
 	/**
 	 * Creates an {@code ApplicationException} with the specified error code.
-	 * @param errorCode The code of the error 
+	 * @param errorCode The code of the error
 	 */
 	public ApplicationException(int errorCode) {
 		super();
 		this.errorCode = errorCode;
 	}
-	
+
 	/**
 	 * Creates a {@code ApplicationException} that wraps another exception.
-	 * 
-	 * @param errorCode The code of the error 
+	 *
+	 * @param errorCode The code of the error
 	 * @param cause The cause of this exception.
 	 */
 	public ApplicationException(int errorCode, Throwable cause) {
@@ -119,7 +119,7 @@ public class ApplicationException extends Exception {
 
 	/**
 	 * Creates an {@code ApplicationException} with the specified error code.
-	 * @param errorCode The code of the error 
+	 * @param errorCode The code of the error
 	 * @param message The associated message
 	 */
 	public ApplicationException(int errorCode, String message) {
@@ -129,8 +129,8 @@ public class ApplicationException extends Exception {
 
 	/**
 	 * Creates a {@code ApplicationException} that wraps another exception.
-	 * 
-	 * @param errorCode The code of the error 
+	 *
+	 * @param errorCode The code of the error
 	 * @param message The associated message.
 	 * @param cause The cause of this exception.
 	 */
@@ -142,7 +142,7 @@ public class ApplicationException extends Exception {
 	/**
 	 * Returns the cause of this exception or {@code null} if no cause was
 	 * set.
-	 * 
+	 *
 	 * @return The cause of this exception or {@code null} if no cause was
 	 *         set.
 	 */
@@ -153,7 +153,7 @@ public class ApplicationException extends Exception {
 
 	/**
 	 * Returns the error code associated with this exception.
-	 * 
+	 *
 	 * @return The error code of this exception.
 	 */
 	public int getErrorCode() {

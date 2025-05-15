@@ -1,6 +1,6 @@
 /*
  * Copyright (c) OSGi Alliance (2004, 2010). All Rights Reserved.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,12 +36,12 @@ import org.osgi.framework.InvalidSyntaxException;
  * {@code lifecycle}, {@code schedule} and {@code lock}. The
  * permission {@code schedule} implies the permission
  * {@code lifecycle}.
- * 
+ *
  * @version $Id$
  */
 public class ApplicationAdminPermission extends Permission {
 	private static final long serialVersionUID = 1L;
-	
+
 	/**
 	 * Allows the lifecycle management of the target applications.
 	 */
@@ -49,7 +49,7 @@ public class ApplicationAdminPermission extends Permission {
 
 	/**
 	 * Allows scheduling of the target applications. The permission to
-	 * schedule an application implies that the scheduler can also 
+	 * schedule an application implies that the scheduler can also
 	 * manage the lifecycle of that application i.e. {@code schedule}
 	 * implies {@code lifecycle}
 	 */
@@ -67,17 +67,17 @@ public class ApplicationAdminPermission extends Permission {
 	 * specifies the target application. The {@code filter} is an
 	 * LDAP-style filter, the recognized properties are {@code signer}
 	 * and {@code pid}. The pattern specified in the {@code signer}
-	 * is matched with the Distinguished Name chain used to sign the application. 
-	 * Wildcards in a DN are not matched according to the filter string rules, 
-	 * but according to the rules defined for a DN chain. The attribute 
+	 * is matched with the Distinguished Name chain used to sign the application.
+	 * Wildcards in a DN are not matched according to the filter string rules,
+	 * but according to the rules defined for a DN chain. The attribute
 	 * {@code pid} is matched with the PID of the application according to
-	 * the filter string rules. 
+	 * the filter string rules.
 	 * <p>
-	 * If the {@code filter} is {@code null} then it matches 
+	 * If the {@code filter} is {@code null} then it matches
 	 * {@code "*"}. If
 	 * {@code actions} is {@code "*"} then it identifies all the
 	 * possible actions.
-	 * 
+	 *
 	 * @param filter
 	 *            filter to identify application. The value {@code null}
 	 *            is equivalent to {@code "*"} and it indicates "all application".
@@ -86,27 +86,27 @@ public class ApplicationAdminPermission extends Permission {
 	 *            applications or "*" means all the actions. It must not be
 	 *            {@code null}. The order of the actions in the list is
 	 *            not significant.
-	 * @throws InvalidSyntaxException 
+	 * @throws InvalidSyntaxException
 	 *            is thrown if the specified {@code filter} is not syntactically
 	 *            correct.
-	 * 
+	 *
 	 * @exception NullPointerException
 	 *                is thrown if the actions parameter is {@code null}
-	 * 
+	 *
 	 * @see ApplicationDescriptor
 	 * @see org.osgi.framework.AdminPermission
 	 */
 	public ApplicationAdminPermission(String filter, String actions) throws InvalidSyntaxException {
 		super(filter == null ? "*" : filter);
-		
+
 		if( filter == null ) {
 			filter = "*";
 		}
-		
+
 		if( actions == null ) {
 			throw new NullPointerException( "Action string cannot be null!" );
 		}
-		
+
 		this.applicationDescriptor = null;
 		this.filter = (filter == null ? "*" : filter);
 		this.actions = actions;
@@ -116,40 +116,40 @@ public class ApplicationAdminPermission extends Permission {
 		}
 		init();
 	}
-	
+
 	/**
 	 * This contructor should be used when creating {@code ApplicationAdminPermission}
-	 * instance for {@code checkPermission} call. 
+	 * instance for {@code checkPermission} call.
 	 * @param application the tareget of the operation, it must not be {@code null}
 	 * @param actions the required operation. it must not be {@code null}
-	 * @throws NullPointerException if any of the arguments is null. 
+	 * @throws NullPointerException if any of the arguments is null.
 	 */
 	public ApplicationAdminPermission(ApplicationDescriptor application, String actions) {
 		super(application.getApplicationId());
-				
+
 		if( application == null || actions == null ) {
 			throw new NullPointerException( "ApplicationDescriptor and action string cannot be null!" );
 		}
-		
+
 		this.filter = application.getApplicationId();
 		this.applicationDescriptor = application;
 		this.actions = actions;
-		
+
 		init();
 	}
-	
+
 	/**
 	 * This method can be used in the {@link java.security.ProtectionDomain}
 	 * implementation in the {@code implies} method to insert the
 	 * application ID of the current application into the permission being
-	 * checked. This enables the evaluation of the 
+	 * checked. This enables the evaluation of the
 	 * {@code &lt;&lt;SELF&gt;&gt;} pseudo targets.
 	 * @param applicationId the ID of the current application.
 	 * @return the permission updated with the ID of the current application
 	 */
 	public ApplicationAdminPermission setCurrentApplicationId(String applicationId) {
 		ApplicationAdminPermission newPerm = null;
-		
+
 		if( this.applicationDescriptor == null ) {
 			try {
 				newPerm = new ApplicationAdminPermission( this.filter, this.actions );
@@ -159,9 +159,9 @@ public class ApplicationAdminPermission extends Permission {
 		} else {
 			newPerm = new ApplicationAdminPermission( this.applicationDescriptor, this.actions );
 		}
-		
+
 		newPerm.applicationID = applicationId;
-		
+
 		return newPerm;
 	}
 
@@ -173,13 +173,13 @@ public class ApplicationAdminPermission extends Permission {
 	 * <LI> The implied {@code otherPermission} was created for a particular {@link ApplicationDescriptor}
 	 *      (see {@link #ApplicationAdminPermission(ApplicationDescriptor, String)})
 	 * <LI> The {@code filter} of this permission mathes the {@code ApplicationDescriptor} specified
-	 *      in the {@code otherPermission}. If the filter in this permission is the 
-	 *      {@code &lt;&lt;SELF&gt;&gt;} pseudo target, then the currentApplicationId set in the 
-	 *      {@code otherPermission} is compared to the application Id of the target 
+	 *      in the {@code otherPermission}. If the filter in this permission is the
+	 *      {@code &lt;&lt;SELF&gt;&gt;} pseudo target, then the currentApplicationId set in the
+	 *      {@code otherPermission} is compared to the application Id of the target
 	 *      {@code ApplicationDescriptor}.
-	 * <LI> The list of permitted actions in this permission contains all actions required in the 
-	 *      {@code otherPermission}  
-	 * </UL> 
+	 * <LI> The list of permitted actions in this permission contains all actions required in the
+	 *      {@code otherPermission}
+	 * </UL>
 	 * Otherwise the method returns false.
 	 * @param otherPermission the implied permission
 	 * @return true if this permission implies the {@code otherPermission}, false otherwise.
@@ -189,7 +189,7 @@ public class ApplicationAdminPermission extends Permission {
 		if( otherPermission == null ) {
 			return false;
 		}
-				
+
 		if(!(otherPermission instanceof ApplicationAdminPermission other)) {
 			return false;
 		}
@@ -198,12 +198,12 @@ public class ApplicationAdminPermission extends Permission {
 			if( other.applicationDescriptor == null ) {
 				return false;
 			}
-			
+
 			if( filter.equals( "<<SELF>>") ) {
 				if( other.applicationID == null ) {
 					return false; /* it cannot be, this might be a bug */
 				}
-			
+
 				if( !other.applicationID.equals( other.applicationDescriptor.getApplicationId() ) ) {
 					return false;
 				}
@@ -212,22 +212,22 @@ public class ApplicationAdminPermission extends Permission {
 				Hashtable props = new Hashtable();
 				props.put( "pid", other.applicationDescriptor.getApplicationId() );
 				props.put( "signer", new SignerWrapper( other.applicationDescriptor ) );
-								
+
 				Filter flt = getFilter();
 				if( flt == null ) {
 					return false;
 				}
-			
+
 				if( !flt.match( props ) ) {
 					return false;
 				}
 			}
 		}
-		
+
 		if( !actionsVector.containsAll( other.actionsVector ) ) {
 			return false;
 		}
-		
+
 		return true;
 	}
 
@@ -236,23 +236,23 @@ public class ApplicationAdminPermission extends Permission {
 		if( with == null || !(with instanceof ApplicationAdminPermission other) ) {
 			return false;
 		}
-		
+
 		// Compare actions:
 		if( other.actionsVector.size() != actionsVector.size() ) {
 			return false;
 		}
-		
+
 		for( int i=0; i != actionsVector.size(); i++ ) {
 			if( !other.actionsVector.contains( actionsVector.get( i ) ) ) {
 				return false;
 			}
 		}
-		
-		
+
+
 		return equal(this.filter, other.filter ) && equal(this.applicationDescriptor, other.applicationDescriptor)
 				&& equal(this.applicationID, other.applicationID);
 	}
-	
+
 	/**
 	* Compares parameters for equality. If both object are null, they are considered
 	* equal.
@@ -266,7 +266,7 @@ public class ApplicationAdminPermission extends Permission {
 		if( a == b ) {
 			return true;
 		}
-		
+
 		return a.equals(b);
 	}
 
@@ -297,8 +297,8 @@ public class ApplicationAdminPermission extends Permission {
 	private              Vector actionsVector;
 	private final        String filter;
 	private final        String actions;
-	private              Filter appliedFilter = null; 
-	
+	private              Filter appliedFilter = null;
+
 	static {
 		ACTIONS.add(LIFECYCLE_ACTION);
 		ACTIONS.add(SCHEDULE_ACTION);
@@ -312,30 +312,30 @@ public class ApplicationAdminPermission extends Permission {
 			String action = t.nextToken().trim();
 			v.add(action.toLowerCase());
 		}
-		
+
 		if( v.contains( SCHEDULE_ACTION ) && !v.contains( LIFECYCLE_ACTION ) ) {
 			v.add( LIFECYCLE_ACTION );
 		}
-		
+
 		return v;
 	}
-	
+
 
 	private static class SignerWrapper extends Object {
 		private String pattern;
 		private ApplicationDescriptor appDesc;
-		
+
 		/**
 		 * @param pattern
 		 */
 		public SignerWrapper(String pattern) {
-			this.pattern = pattern;    			
+			this.pattern = pattern;
 		}
-		
+
 		SignerWrapper(ApplicationDescriptor appDesc) {
 			this.appDesc = appDesc;
 		}
-		
+
 		@Override
 		public boolean equals(Object o) {
 			if (!(o instanceof SignerWrapper other)) {
@@ -346,7 +346,7 @@ public class ApplicationAdminPermission extends Permission {
 			return matchAppDesc.matchDNChain(matchPattern);
 		}
 	}
-	
+
 	private void init() {
 		actionsVector = actionsVector( actions );
 
@@ -355,10 +355,10 @@ public class ApplicationAdminPermission extends Permission {
 		} else if (!ACTIONS.containsAll(actionsVector)) {
 			throw new IllegalArgumentException("Illegal action!");
 		}
-		
+
 		applicationID = null;
 	}
-	
+
 	private Filter getFilter() {
 		if (appliedFilter == null) {
 			try {
@@ -366,7 +366,7 @@ public class ApplicationAdminPermission extends Permission {
 			} catch (InvalidSyntaxException e) {
 				//we will return null
 			}
-		}	
+		}
 		return appliedFilter;
 	}
 }
