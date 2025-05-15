@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Alex Blewitt (bug 196071)
@@ -401,7 +401,7 @@ public class AppCommands implements CommandProvider {
 
 	/**
 	 * Handles the help command
-	 * 
+	 *
 	 * @return description for a particular command or false if there is no command
 	 *         with the specified name
 	 */

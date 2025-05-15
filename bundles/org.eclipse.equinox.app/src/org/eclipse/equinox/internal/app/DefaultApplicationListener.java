@@ -7,7 +7,7 @@
  *  https://www.eclipse.org/legal/epl-2.0/
  *
  *  SPDX-License-Identifier: EPL-2.0
- * 
+ *
  *  Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -26,7 +26,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
  * Listens for the default ApplicationHandle which run on any thread to be
  * destroyed. This is used to force the main thread to wait while a default
  * application runs on another thread.
- * 
+ *
  * A main threaded application may be launched using this class to launch the
  * main threaded application.
  */

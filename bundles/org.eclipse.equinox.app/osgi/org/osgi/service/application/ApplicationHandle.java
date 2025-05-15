@@ -1,6 +1,6 @@
 /*
  * Copyright (c) OSGi Alliance (2004, 2010). All Rights Reserved.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,7 @@ import org.osgi.framework.Constants;
  * of an application. It provides the functionality to query and manipulate the
  * lifecycle state of the represented application instance. It defines constants
  * for the lifecycle states.
- * 
+ *
  * @version $Revision: 1.6 $
  */
 public abstract class ApplicationHandle {
@@ -53,7 +53,7 @@ public abstract class ApplicationHandle {
 	/**
 	 * The property key for the supports exit value property of this application
 	 * instance.
-	 * 
+	 *
 	 * @since 1.1
 	 */
 	public final static String APPLICATION_SUPPORTS_EXITVALUE = "application.supports.exitvalue";
@@ -77,26 +77,26 @@ public abstract class ApplicationHandle {
 
 	/**
 	 * Application instance identifier is specified by the container when the
-	 * instance is created. The instance identifier must remain static for the 
+	 * instance is created. The instance identifier must remain static for the
 	 * lifetime of the instance, it must remain the same even across framework
 	 * restarts for the same application instance. This value must be the same
 	 * as the {@code service.pid} service property of this application
 	 * handle.
 	 * <p>
-	 * The instance identifier should follow the following scheme: 
+	 * The instance identifier should follow the following scheme:
 	 * &lt;<i>application descriptor PID</i>&gt;.&lt;<i>index</i>&gt;
-	 * where &lt;<i>application descriptor PID</i>&gt; is the PID of the 
+	 * where &lt;<i>application descriptor PID</i>&gt; is the PID of the
 	 * corresponding {@code ApplicationDescriptor} and &lt;<i>index</i>&gt;
-	 * is a unique integer index assigned by the application container. 
+	 * is a unique integer index assigned by the application container.
 	 * Even after destroying the application index the same index value should not
 	 * be reused in a reasonably long timeframe.
-	 * 
+	 *
 	 * @param instanceId the instance identifier of the represented application
 	 * instance. It must not be null.
-	 * 
+	 *
 	 * @param descriptor the {@code ApplicationDescriptor} of the represented
 	 * application instance. It must not be null.
-	 * 
+	 *
 	 * @throws NullPointerException if any of the arguments is null.
 	 */
 	protected ApplicationHandle(String instanceId, ApplicationDescriptor descriptor) {
@@ -109,9 +109,9 @@ public abstract class ApplicationHandle {
 	}
 
 	/**
-	 * Retrieves the {@code ApplicationDescriptor} to which this 
-	 * {@code ApplicationHandle} belongs. 
-	 * 
+	 * Retrieves the {@code ApplicationDescriptor} to which this
+	 * {@code ApplicationHandle} belongs.
+	 *
 	 * @return The corresponding {@code ApplicationDescriptor}
 	 */
 	public final ApplicationDescriptor getApplicationDescriptor() {
@@ -120,9 +120,9 @@ public abstract class ApplicationHandle {
 
 	/**
 	 * Get the state of the application instance.
-	 * 
+	 *
 	 * @return the state of the application.
-	 * 
+	 *
 	 * @throws IllegalStateException
 	 *             if the application handle is unregistered
 	 */
@@ -136,9 +136,9 @@ public abstract class ApplicationHandle {
 	 * <li> negative - The method does not wait for termination. If the
 	 * application has not terminated then an {@code ApplicationException}
 	 * is thrown.</li>
-	 * 
+	 *
 	 * <li> zero - The method waits until the application terminates.</li>
-	 * 
+	 *
 	 * <li> positive - The method waits until the application terminates or the
 	 * timeout expires. If the timeout expires and the application has not
 	 * terminated then an {@code ApplicationException} is thrown.</li>
@@ -148,7 +148,7 @@ public abstract class ApplicationHandle {
 	 * {@code UnsupportedOperationException}. The application model should
 	 * override this method if exit values are supported.
 	 * </p>
-	 * 
+	 *
 	 * @param timeout The maximum time in milliseconds to wait for the
 	 *        application to timeout.
 	 * @return The exit value for the application instance. The value is
@@ -160,7 +160,7 @@ public abstract class ApplicationHandle {
 	 * @throws ApplicationException If the application has not terminated. The
 	 *         error code will be
 	 *         {@link ApplicationException#APPLICATION_EXITVALUE_NOT_AVAILABLE}.
-	 * 
+	 *
 	 * @since 1.1
 	 */
 	public Object getExitValue(long timeout) throws ApplicationException, InterruptedException {
@@ -170,7 +170,7 @@ public abstract class ApplicationHandle {
 	/**
 	 * Returns the unique identifier of this instance. This value is also
 	 * available as a service property of this application handle's service.pid.
-	 * 
+	 *
 	 * @return the unique identifier of the instance
 	 */
 	public final String getInstanceId() {
@@ -189,8 +189,8 @@ public abstract class ApplicationHandle {
 	 * perform any application model specific steps for safe stopping of the
 	 * represented application instance.
 	 * <p>
-	 * At the end the {@code ApplicationHandle} must be unregistered. 
-	 * This method should  free all the resources related to this 
+	 * At the end the {@code ApplicationHandle} must be unregistered.
+	 * This method should  free all the resources related to this
 	 * {@code ApplicationHandle}.
 	 * <p>
 	 * When this method is completed the application instance has already made
@@ -198,11 +198,11 @@ public abstract class ApplicationHandle {
 	 * unregistered and its related resources has been freed. Further calls on
 	 * this application should not be made because they may have unexpected
 	 * results.
-	 * 
+	 *
 	 * @throws SecurityException
 	 *             if the caller doesn't have "lifecycle"
 	 *             {@code ApplicationAdminPermission} for the corresponding application.
-	 * 
+	 *
 	 * @throws IllegalStateException
 	 *             if the application handle is unregistered
 	 */
@@ -220,7 +220,7 @@ public abstract class ApplicationHandle {
 	/**
 	 * Called by the destroy() method to perform application model specific
 	 * steps to stop and destroy an application instance safely.
-	 * 
+	 *
 	 * @throws IllegalStateException
 	 *             if the application handle is unregistered
 	 */
