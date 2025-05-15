@@ -75,11 +75,11 @@ public final class StructuredTextProcessor {
 	 * (where capital letters indicate RTL text) should render as
 	 * <code>d:\myfolder\REDLOF\ELIFYM.java</code>.
 	 * </p>
-	 * 
+	 *
 	 * @param str the <i>lean</i> text to process
-	 * 
+	 *
 	 * @return the processed string (<i>full</i> text)
-	 * 
+	 *
 	 * @see #deprocess(String)
 	 */
 	public static String process(String str) {
@@ -90,12 +90,12 @@ public final class StructuredTextProcessor {
 	 * Processes a string that has a particular semantic meaning to render it
 	 * correctly in bidi environments. For more details, see
 	 * {@link #process(String)}.
-	 * 
+	 *
 	 * @param str        the <i>lean</i> text to process
 	 * @param separators characters by which the string will be segmented
-	 * 
+	 *
 	 * @return the processed string (<i>full</i> text)
-	 * 
+	 *
 	 * @see #deprocess(String)
 	 */
 	public static String process(String str, String separators) {
@@ -149,16 +149,16 @@ public final class StructuredTextProcessor {
 	 * Processes a string that has a particular semantic meaning to render it
 	 * correctly in bidi environments. For more details, see
 	 * {@link #process(String)}.
-	 * 
+	 *
 	 * @param str      the <i>lean</i> text to process.
 	 * @param textType an identifier for the structured text handler appropriate for
 	 *                 the type of the text submitted. It may be one of the
 	 *                 identifiers defined in
 	 *                 {@link StructuredTextTypeHandlerFactory} or a type handler
 	 *                 identifier registered by a plug-in.
-	 * 
+	 *
 	 * @return the processed string (<i>full</i> text).
-	 * 
+	 *
 	 * @see #deprocessTyped
 	 */
 	public static String processTyped(String str, String textType) {
@@ -181,9 +181,9 @@ public final class StructuredTextProcessor {
 
 	/**
 	 * Removes directional formatting characters in the given string.
-	 * 
+	 *
 	 * @param str string with directional characters to remove (<i>full</i> text).
-	 * 
+	 *
 	 * @return string without directional formatting characters (<i>lean</i> text).
 	 */
 	public static String deprocess(String str) {
@@ -211,7 +211,7 @@ public final class StructuredTextProcessor {
 
 	/**
 	 * Removes directional formatting characters in the given string.
-	 * 
+	 *
 	 * @param str      string with directional characters to remove (<i>full</i>
 	 *                 text).
 	 * @param textType an identifier for the structured text handler appropriate for
@@ -219,9 +219,9 @@ public final class StructuredTextProcessor {
 	 *                 identifiers defined in
 	 *                 {@link StructuredTextTypeHandlerFactory} or a type handler
 	 *                 identifier registered by a plug-in.
-	 * 
+	 *
 	 * @return string without directional formatting characters (<i>lean</i> text).
-	 * 
+	 *
 	 * @see #processTyped(String, String)
 	 */
 	public static String deprocessTyped(String str, String textType) {
@@ -239,7 +239,7 @@ public final class StructuredTextProcessor {
 	/**
 	 * Returns a string containing all the default separator characters to be used
 	 * to segment a given string.
-	 * 
+	 *
 	 * @return string containing all separators.
 	 */
 	public static String getDefaultSeparators() {

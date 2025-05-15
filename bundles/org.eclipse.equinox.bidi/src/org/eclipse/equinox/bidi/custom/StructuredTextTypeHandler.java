@@ -69,7 +69,7 @@ public class StructuredTextTypeHandler {
 
 	/**
 	 * Creates a new instance of the StructuredTextTypeHandler class.
-	 * 
+	 *
 	 * @param separators string consisting of characters that split the text into
 	 *                   fragments.
 	 */
@@ -87,7 +87,7 @@ public class StructuredTextTypeHandler {
 	 * <p>
 	 * A handler handling special cases must override this method.
 	 * </p>
-	 * 
+	 *
 	 * @param expert     IStructuredTextExpert instance through which this handler
 	 *                   is invoked. The handler can use IStructuredTextExpert
 	 *                   methods to query items stored in the expert instance, like
@@ -103,7 +103,7 @@ public class StructuredTextTypeHandler {
 	 *                   <code>indexOfSpecial</code>.
 	 * @param fromIndex  the index within <code>text</code> to start the search
 	 *                   from.
-	 * 
+	 *
 	 * @return the position where the start of the special case corresponding to
 	 *         <code>caseNumber</code> was located. The method must return the first
 	 *         occurrence of whatever identifies the start of the special case
@@ -149,7 +149,7 @@ public class StructuredTextTypeHandler {
 	 * A handler handling special cases (with a number of special cases greater than
 	 * zero) must override this method.
 	 * </p>
-	 * 
+	 *
 	 * @param expert        IStructuredTextExpert instance through which this
 	 *                      handler is invoked. The handler can use
 	 *                      IStructuredTextExpert methods to query items stored in
@@ -230,7 +230,7 @@ public class StructuredTextTypeHandler {
 	 * out according to the base direction, a mark will be added when generating the
 	 * <i>full</i> text.
 	 * </p>
-	 * 
+	 *
 	 * @param text          is the structured text string received as parameter to
 	 *                      <code>indexOfSpecial</code> or
 	 *                      <code>processSpecial</code>.
@@ -253,7 +253,7 @@ public class StructuredTextTypeHandler {
 	 * <p>
 	 * If no separators are specified, this method returns an empty string.
 	 * </p>
-	 * 
+	 *
 	 * @param expert IStructuredTextExpert instance through which this handler is
 	 *               invoked. The handler can use IStructuredTextExpert methods to
 	 *               query items stored in the expert instance, like the current
@@ -273,7 +273,7 @@ public class StructuredTextTypeHandler {
 	 * If not overridden, this method returns {@link IStructuredTextExpert#DIR_LTR
 	 * DIR_LTR}.
 	 * </p>
-	 * 
+	 *
 	 * @param expert IStructuredTextExpert instance through which this handler is
 	 *               invoked. The handler can use IStructuredTextExpert methods to
 	 *               query items stored in the expert instance, like the current
@@ -297,7 +297,7 @@ public class StructuredTextTypeHandler {
 	 * If not overridden, this method returns {@link IStructuredTextExpert#DIR_LTR
 	 * DIR_LTR}.
 	 * </p>
-	 * 
+	 *
 	 * @param expert    IStructuredTextExpert instance through which this handler is
 	 *                  invoked. The handler can use IStructuredTextExpert methods
 	 *                  to query items stored in the expert instance, like the
@@ -324,7 +324,7 @@ public class StructuredTextTypeHandler {
 	 * <p>
 	 * If not overridden, this method returns <code>zero</code>.
 	 * </p>
-	 * 
+	 *
 	 * @param expert IStructuredTextExpert instance through which this handler is
 	 *               invoked. The handler can use IStructuredTextExpert methods to
 	 *               query items stored in the expert instance, like the current
@@ -350,7 +350,7 @@ public class StructuredTextTypeHandler {
 	 * <p>
 	 * If not overridden, this method returns <code>false</code>.
 	 * </p>
-	 * 
+	 *
 	 * @param expert    IStructuredTextExpert instance through which this handler is
 	 *                  invoked. The handler can use IStructuredTextExpert methods
 	 *                  to query items stored in the expert instance, like the

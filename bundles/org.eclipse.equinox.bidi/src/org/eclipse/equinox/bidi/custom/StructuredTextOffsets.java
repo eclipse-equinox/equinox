@@ -49,7 +49,7 @@ public class StructuredTextOffsets {
 
 	/**
 	 * Stores the prefix length
-	 * 
+	 *
 	 * @param prefLen value assigned to the prefix length
 	 */
 	public void setPrefixLength(int prefLen) {
@@ -58,7 +58,7 @@ public class StructuredTextOffsets {
 
 	/**
 	 * Gets the number of used entries in the offsets array.
-	 * 
+	 *
 	 * @return the number of used entries in the offsets array.
 	 */
 	public int getCount() {
@@ -74,9 +74,9 @@ public class StructuredTextOffsets {
 
 	/**
 	 * Gets the value of a specified entry in the offsets array.
-	 * 
+	 *
 	 * @param index the index of the entry of interest.
-	 * 
+	 *
 	 * @return the value of the specified entry.
 	 */
 	public int getOffset(int index) {
@@ -86,9 +86,9 @@ public class StructuredTextOffsets {
 	/**
 	 * Inserts an offset value in the offset array so that the array stays in
 	 * ascending order.
-	 * 
+	 *
 	 * @param charTypes an object whose methods can be useful to the handler.
-	 * 
+	 *
 	 * @param offset    the value to insert.
 	 */
 	public void insertOffset(StructuredTextCharTypes charTypes, int offset) {
@@ -143,7 +143,7 @@ public class StructuredTextOffsets {
 
 	/**
 	 * Gets all and only the used offset entries.
-	 * 
+	 *
 	 * @return the current used entries of the offsets array.
 	 */
 	public int[] getOffsets() {

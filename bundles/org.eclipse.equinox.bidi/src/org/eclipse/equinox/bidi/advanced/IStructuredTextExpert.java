@@ -69,7 +69,7 @@ import org.eclipse.equinox.bidi.custom.StructuredTextTypeHandler;
  * (directory and file paths) in order to obtain the <i>full</i> text
  * corresponding to the given <i>lean</i> text.
  * </p>
- * 
+ *
  * <pre>
  * IStructuredTextExpert expert = StructuredTextExpertFactory.getExpert(StructuredTextTypeHandlerFactory.FILE);
  * String leanText = "D:\\\u05d0\u05d1\\\u05d2\\\u05d3.ext";
@@ -81,7 +81,7 @@ import org.eclipse.equinox.bidi.custom.StructuredTextTypeHandler;
  * order to obtain the <i>full</i> text corresponding to the <i>lean</i> text of
  * each line.
  * </p>
- * 
+ *
  * <pre>
  *   IStructuredTextExpert expert = StructuredTextExpertFactory.getStatefulExpert(StructuredTextTypeHandlerFactory.JAVA);
  *   String leanText = "int i = 3; // first Java statement";
@@ -115,7 +115,7 @@ public interface IStructuredTextExpert {
 	/**
 	 * Obtains the structured type handler associated with this
 	 * <code>IStructuredTextExpert</code> instance.
-	 * 
+	 *
 	 * @return the type handler instance.
 	 */
 	public StructuredTextTypeHandler getTypeHandler();
@@ -123,7 +123,7 @@ public interface IStructuredTextExpert {
 	/**
 	 * Obtains the environment associated with this
 	 * <code>IStructuredTextExpert</code> instance.
-	 * 
+	 *
 	 * @return the environment instance.
 	 */
 	public StructuredTextEnvironment getEnvironment();
@@ -131,7 +131,7 @@ public interface IStructuredTextExpert {
 	/**
 	 * Adds directional formatting characters to a structured text to ensure correct
 	 * presentation.
-	 * 
+	 *
 	 * @param text is the structured text string
 	 *
 	 * @return the structured text with directional formatting characters added to
@@ -162,7 +162,7 @@ public interface IStructuredTextExpert {
 	 * {@link StructuredTextEnvironment#getOrientation orientation} of the GUI
 	 * component used for display are not reflected in this method.
 	 * </p>
-	 * 
+	 *
 	 * @param text is the structured text string
 	 *
 	 * @return an array of offsets to the characters in the <code>text</code>
@@ -212,7 +212,7 @@ public interface IStructuredTextExpert {
 	 * {@link StructuredTextEnvironment#getOrientation orientation} of the GUI
 	 * component used for display.
 	 * </p>
-	 * 
+	 *
 	 * @param text is the structured text string including directional formatting
 	 *             characters
 	 *
@@ -245,9 +245,9 @@ public interface IStructuredTextExpert {
 	 * have the text orientation explicitly specified.</li>
 	 * <li>A value of 0 means that no prefix or suffix are needed.</li>
 	 * </ul>
-	 * 
+	 *
 	 * @see IStructuredTextExpert#leanBidiCharOffsets(String)
-	 * 
+	 *
 	 * @param text        the structured text string
 	 * @param offsets     an array of offsets to characters in <code>text</code>
 	 *                    before which an LRM or RLM will be inserted. The array
@@ -261,7 +261,7 @@ public interface IStructuredTextExpert {
 	 *                    0 means no prefix or suffix<br>
 	 *                    1 means one LRM or RLM as prefix and no suffix<br>
 	 *                    2 means 2 characters in both prefix and suffix.
-	 * 
+	 *
 	 * @return a string corresponding to the source <code>text</code> with
 	 *         directional marks (LRMs or RLMs) added at the specified offsets, and
 	 *         directional formatting characters (LRE, RLE, PDF) added as prefix and
@@ -288,7 +288,7 @@ public interface IStructuredTextExpert {
 	/**
 	 * Sets the state for the next text processing call. This method does nothing if
 	 * the expert instance is not a stateful one.
-	 * 
+	 *
 	 * @param state an object returned by a previous call to {@link #getState}.
 	 */
 	public void setState(Object state);
@@ -297,7 +297,7 @@ public interface IStructuredTextExpert {
 	 * Gets the state established by the last text processing call. This is
 	 * <code>null</code> if the expert instance is not a stateful one, or if the
 	 * last text processing call had nothing to pass to the next call.
-	 * 
+	 *
 	 * @return the last established state.
 	 */
 	public Object getState();

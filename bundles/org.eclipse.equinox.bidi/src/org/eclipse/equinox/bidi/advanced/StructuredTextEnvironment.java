@@ -131,7 +131,7 @@ public class StructuredTextEnvironment {
 
 	/**
 	 * Returns a 2-letters code representing a language as defined by ISO-639.
-	 * 
+	 *
 	 * @return language of the environment
 	 */
 	public String getLanguage() {
@@ -142,7 +142,7 @@ public class StructuredTextEnvironment {
 	 * Returns a flag indicating that structured text processed within this
 	 * environment should assume that the GUI is mirrored (globally going from right
 	 * to left).
-	 * 
+	 *
 	 * @return <code>true</code> if environment is mirrored
 	 */
 	public boolean getMirrored() {
@@ -178,9 +178,9 @@ public class StructuredTextEnvironment {
 	 * is typically controlled by the application via
 	 * {@code org.eclipse.jface.util.BidiUtils#setBidiSupport(boolean)}.
 	 * </p>
-	 * 
+	 *
 	 * @return <code>true</code> if bidi processing is needed in this environment.
-	 * 
+	 *
 	 * @deprecated let users control bidi processing independent of the locale
 	 */
 	@Deprecated
@@ -210,10 +210,10 @@ public class StructuredTextEnvironment {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * Computes the hashCode based on the values supplied when constructing the
 	 * instance and on the result of {@link #isProcessingNeeded()}.
-	 * 
+	 *
 	 * @return the hash code.
 	 */
 	@Override
@@ -229,10 +229,10 @@ public class StructuredTextEnvironment {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * Compare 2 environment instances and returns true if both instances were
 	 * constructed with the same arguments.
-	 * 
+	 *
 	 * @return true if the 2 instances can be used interchangeably.
 	 */
 	@Override

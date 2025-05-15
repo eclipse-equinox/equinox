@@ -23,11 +23,11 @@ import org.eclipse.equinox.bidi.custom.*;
  * separator, if any, are treated like regular characters of the second text
  * part. The handler makes sure that the text be presented in the form (assuming
  * that the equal sign is the separator):
- * 
+ *
  * <pre>
  * part1 = part2
  * </pre>
- * 
+ *
  * The string returned by {@link StructuredTextTypeHandler#getSeparators
  * getSeparators} for this handler should contain exactly one character.
  * Additional characters will be ignored.

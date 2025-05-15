@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -64,7 +64,7 @@ public class StructuredTextTypesCollector implements IRegistryEventListener {
 
 	/**
 	 * @param type the identifier for a structured text handler.
-	 * 
+	 *
 	 * @return the structured text handler instance.
 	 */
 	public StructuredTextTypeHandler getHandler(String type) {
@@ -148,7 +148,7 @@ public class StructuredTextTypesCollector implements IRegistryEventListener {
 	/**
 	 * Returns the default structured text type handlers. These handlers are also
 	 * supported without OSGi running.
-	 * 
+	 *
 	 * @return a map from structured text type handler identifier (key type:
 	 *         {@link String}) to structured text type handler (value type:
 	 *         {@link StructuredTextTypeHandler}).

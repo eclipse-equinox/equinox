@@ -65,12 +65,12 @@ public class StructuredTextCharTypes {
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param expert IStructuredTextExpert instance through which this handler is
 	 *               invoked. The handler can use IStructuredTextExpert methods to
 	 *               query items stored in the expert instance, like the current
 	 *               {@link StructuredTextEnvironment environment}.
-	 * 
+	 *
 	 * @param text   is the text whose characters are analyzed.
 	 */
 	public StructuredTextCharTypes(IStructuredTextExpert expert, String text) {
@@ -84,7 +84,7 @@ public class StructuredTextCharTypes {
 	/**
 	 * Indicates the base text direction appropriate for an instance of structured
 	 * text.
-	 * 
+	 *
 	 * @return the base direction of the structured text. This direction may not be
 	 *         the same depending on the environment and on whether the structured
 	 *         text contains Arabic or Hebrew letters.<br>
@@ -109,9 +109,9 @@ public class StructuredTextCharTypes {
 	/**
 	 * Gets the directionality of the character in the original string at the
 	 * specified index.
-	 * 
+	 *
 	 * @param index position of the character in the <i>lean</i> text
-	 * 
+	 *
 	 * @return the bidi type of the character. It is one of the values which can be
 	 *         returned by {@link Character#getDirectionality(char)}.
 	 */
@@ -136,9 +136,9 @@ public class StructuredTextCharTypes {
 
 	/**
 	 * Forces a bidi type on a character.
-	 * 
+	 *
 	 * @param index    position of the character whose bidi type is set.
-	 * 
+	 *
 	 * @param charType bidirectional type of the character. It must be one of the
 	 *                 values which can be returned by
 	 *                 <code>java.lang.Character.getDirectionality</code>.
@@ -149,7 +149,7 @@ public class StructuredTextCharTypes {
 
 	/**
 	 * Gets the orientation of the component in which the text will be displayed.
-	 * 
+	 *
 	 * @return the orientation as either
 	 *         {@link StructuredTextEnvironment#ORIENT_LTR},
 	 *         {@link StructuredTextEnvironment#ORIENT_RTL},

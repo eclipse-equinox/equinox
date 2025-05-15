@@ -41,14 +41,14 @@ import org.eclipse.equinox.bidi.internal.StructuredTextTypesCollector;
  * This class can be used without OSGi running, but only the structured text
  * types declared as string constants in this class are available in that mode.
  * </p>
- * 
+ *
  * @noinstantiate This class is not intended to be instantiated by clients.
  */
 public final class StructuredTextTypeHandlerFactory {
 
 	/**
 	 * Structured text handler identifier for comma-delimited lists, such as:
-	 * 
+	 *
 	 * <pre>
 	 *  part1,part2,part3
 	 * </pre>
@@ -86,7 +86,7 @@ public final class StructuredTextTypeHandlerFactory {
 	/**
 	 * Structured text handler identifier for compound names. It expects text to be
 	 * made of one or more parts separated by underscores:
-	 * 
+	 *
 	 * <pre>
 	 * part1_part2_part3
 	 * </pre>
@@ -115,7 +115,7 @@ public final class StructuredTextTypeHandlerFactory {
 
 	/**
 	 * Obtains a structured text handler of a given type.
-	 * 
+	 *
 	 * Supported type ids are:
 	 * <ul>
 	 * <li>the <code>String</code> constants in
@@ -123,7 +123,7 @@ public final class StructuredTextTypeHandlerFactory {
 	 * <li>if OSGi is running, the types that have been contributed to the
 	 * <code>org.eclipse.equinox.bidi.bidiTypes</code> extension point.</li>
 	 * </ul>
-	 * 
+	 *
 	 * @param id the string identifying a structured text handler
 	 * @return a handler of the required type, or <code>null</code> if the type is
 	 *         unknown
