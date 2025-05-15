@@ -17,7 +17,7 @@ import org.eclipse.equinox.bidi.internal.StructuredTextSingle;
 
 /**
  * Handler adapted to processing structured text with the following format:
- * 
+ *
  * <pre>
  * system(user)
  * </pre>
