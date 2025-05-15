@@ -73,7 +73,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 	/**
 	 * Constructs a new ReliableFileInputStream on the File <code>file</code>. If
 	 * the file does not exist, the <code>FileNotFoundException</code> is thrown.
-	 * 
+	 *
 	 * @param file       the File on which to stream reads.
 	 * @param generation a specific generation requested.
 	 * @param openMask   mask used to open data. are invalid (corrupt, missing,
@@ -85,7 +85,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param reliable   The ReliableFile on which to read.
 	 * @param generation a specific generation requested.
 	 * @param openMask   mask used to open data. are invalid (corrupt, missing,
@@ -126,7 +126,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 
 	/**
 	 * Override default FilterInputStream method.
-	 * 
+	 *
 	 * @see FilterInputStream#read(byte[], int, int)
 	 */
 	@Override
@@ -147,7 +147,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 
 	/**
 	 * Override default FilterInputStream method.
-	 * 
+	 *
 	 * @see FilterInputStream#read(byte[])
 	 */
 	@Override
@@ -157,7 +157,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 
 	/**
 	 * Override default FilterInputStream method.
-	 * 
+	 *
 	 * @see FilterInputStream#read()
 	 */
 	@Override
@@ -175,7 +175,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 
 	/**
 	 * Override default available method.
-	 * 
+	 *
 	 * @see FilterInputStream#available()
 	 */
 	@Override
@@ -188,7 +188,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 
 	/**
 	 * Override default skip method.
-	 * 
+	 *
 	 * @see FilterInputStream#skip(long)
 	 */
 	@Override
@@ -203,7 +203,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 
 	/**
 	 * Override default markSupported method.
-	 * 
+	 *
 	 * @see FilterInputStream#markSupported()
 	 */
 	@Override
@@ -213,7 +213,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 
 	/**
 	 * Override default mark method.
-	 * 
+	 *
 	 * @see FilterInputStream#mark(int)
 	 */
 	@Override
@@ -223,7 +223,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 
 	/**
 	 * Override default reset method.
-	 * 
+	 *
 	 * @see FilterInputStream#reset()
 	 */
 	@Override

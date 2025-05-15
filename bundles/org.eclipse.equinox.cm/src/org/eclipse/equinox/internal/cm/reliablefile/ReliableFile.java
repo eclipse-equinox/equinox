@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -341,7 +341,7 @@ public class ReliableFile {
 
 	/**
 	 * Returns an OutputStream object for writing the target file.
-	 * 
+	 *
 	 * @param append           append new data to an existing file.
 	 * @param appendGeneration specific generation of file to append from.
 	 * @return An OutputStream object which can be used to write the target file.
@@ -539,7 +539,7 @@ public class ReliableFile {
 	 * Answers a boolean indicating whether or not the specified reliable file
 	 * exists on the underlying file system. This call only returns if a file exists
 	 * and not if the file contents are valid.
-	 * 
+	 *
 	 * @param file returns true if the specified reliable file exists; otherwise
 	 *             false is returned
 	 *
@@ -569,7 +569,7 @@ public class ReliableFile {
 	/**
 	 * Returns the time that the reliable file was last modified. Only the time of
 	 * the last file generation is returned.
-	 * 
+	 *
 	 * @param file the file to determine the time of.
 	 * @return time the file was last modified (see java.io.File.lastModified()).
 	 */
@@ -605,7 +605,7 @@ public class ReliableFile {
 	/**
 	 * Returns the a version number of a reliable managed file. The version can be
 	 * expected to be unique for each successful file update.
-	 * 
+	 *
 	 * @param file the file to determine the version of.
 	 * @return a unique version of this current file. A value of -1 indicates the
 	 *         file does not exist or an error occurred.
@@ -620,7 +620,7 @@ public class ReliableFile {
 
 	/**
 	 * Delete the specified reliable file on the underlying file system.
-	 * 
+	 *
 	 * @param deleteFile the reliable file to delete
 	 *
 	 * @return <code>true</code> if the specified reliable file was deleted,
@@ -652,7 +652,7 @@ public class ReliableFile {
 	/**
 	 * Get a list of ReliableFile base names in a given directory. Only files with a
 	 * valid ReliableFile generation are included.
-	 * 
+	 *
 	 * @param directory the directory to inquire.
 	 * @return an array of ReliableFile names in the directory.
 	 * @throws IOException if an error occurs.
@@ -690,7 +690,7 @@ public class ReliableFile {
 
 	/**
 	 * Delete any old excess generations of a given reliable file.
-	 * 
+	 *
 	 * @param base realible file.
 	 */
 	public static void cleanupGenerations(File base) {
@@ -711,7 +711,7 @@ public class ReliableFile {
 
 	/**
 	 * Append a checksum value to the end of an output stream.
-	 * 
+	 *
 	 * @param out      the output stream.
 	 * @param checksum the checksum value to append to the file.
 	 * @throws IOException if a write error occurs.
