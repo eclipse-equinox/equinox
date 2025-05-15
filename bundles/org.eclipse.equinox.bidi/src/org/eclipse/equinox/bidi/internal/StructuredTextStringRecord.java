@@ -256,7 +256,7 @@ public class StructuredTextStringRecord {
 
 	/**
 	 * Retrieves the number of segments in a record.
-	 * 
+	 *
 	 * @return the number of segments in the current record
 	 */
 	public int getSegmentCount() {

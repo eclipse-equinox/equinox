@@ -66,7 +66,7 @@ public class StructuredTextRegex extends StructuredTextTypeHandler {
 
 	/**
 	 * Retrieves the number of special cases handled by this handler.
-	 * 
+	 *
 	 * @return the number of special cases for this handler.
 	 */
 	@Override

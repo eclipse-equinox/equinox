@@ -18,7 +18,7 @@ import org.eclipse.equinox.bidi.custom.StructuredTextTypeHandler;
 /**
  * Handler adapted to processing compound names. This type covers names made of
  * one or more parts, separated by underscores:
- * 
+ *
  * <pre>
  * part1_part2_part3
  * </pre>

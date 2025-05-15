@@ -65,7 +65,7 @@ final public class StructuredTextExpertFactory {
 	 * Obtains a IStructuredTextExpert instance for processing structured text with
 	 * a default type handler segmenting the text according to default separators.
 	 * This expert instance does not handle states.
-	 * 
+	 *
 	 * @return the IStructuredTextExpert instance.
 	 * @see StructuredTextProcessor#getDefaultSeparators()
 	 */
@@ -80,7 +80,7 @@ final public class StructuredTextExpertFactory {
 	/**
 	 * Obtains a IStructuredTextExpert instance for processing structured text with
 	 * the specified type handler. This expert instance does not handle states.
-	 * 
+	 *
 	 * @param type the identifier for the required type handler. This identifier may
 	 *             be one of those listed in
 	 *             {@link StructuredTextTypeHandlerFactory} or it may be have been
@@ -109,7 +109,7 @@ final public class StructuredTextExpertFactory {
 	 * Obtains a IStructuredTextExpert instance for processing structured text with
 	 * the specified type handler and the specified environment. This expert
 	 * instance does not handle states.
-	 * 
+	 *
 	 * @param type        the identifier for the required type handler. This
 	 *                    identifier may be one of those listed in
 	 *                    {@link StructuredTextTypeHandlerFactory} or it may be have
@@ -150,7 +150,7 @@ final public class StructuredTextExpertFactory {
 	/**
 	 * Obtains a IStructuredTextExpert instance for processing structured text with
 	 * the specified type handler. This expert instance can handle states.
-	 * 
+	 *
 	 * @param type the identifier for the required type handler. This identifier may
 	 *             be one of those listed in
 	 *             {@link StructuredTextTypeHandlerFactory} or it may be have been
@@ -167,7 +167,7 @@ final public class StructuredTextExpertFactory {
 	 * Obtains a IStructuredTextExpert instance for processing structured text with
 	 * the specified type handler and the specified environment. This expert
 	 * instance can handle states.
-	 * 
+	 *
 	 * @param type        the identifier for the required type handler. This
 	 *                    identifier may be one of those listed in
 	 *                    {@link StructuredTextTypeHandlerFactory} or it may be have
@@ -193,7 +193,7 @@ final public class StructuredTextExpertFactory {
 	 * Obtains a IStructuredTextExpert instance for processing structured text with
 	 * the specified type handler and the specified environment. This expert
 	 * instance can handle states.
-	 * 
+	 *
 	 * @param handler     the type handler instance. It may have been obtained using
 	 *                    {@link StructuredTextTypeHandlerFactory#getHandler(String)}
 	 *                    or by instantiating a type handler.

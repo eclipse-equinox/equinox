@@ -70,7 +70,7 @@ public class StructuredTextImpl implements IStructuredTextExpert {
 
 	/**
 	 * Constructor used in {@link StructuredTextExpertFactory}.
-	 * 
+	 *
 	 * @param structuredTextHandler the structured text handler used by this expert.
 	 * @param environment           the environment associated with this expert.
 	 * @param shared                flag which is true if the expert is stateful.
