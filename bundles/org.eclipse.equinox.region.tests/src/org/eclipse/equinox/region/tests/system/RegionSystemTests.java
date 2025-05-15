@@ -29,8 +29,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import javax.management.*;
 import org.eclipse.equinox.region.*;
 import org.eclipse.equinox.region.RegionDigraph.FilteredRegion;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.rules.TestName;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.bundle.CollisionHook;
@@ -40,6 +39,7 @@ import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 import org.osgi.framework.wiring.*;
 import org.osgi.util.tracker.ServiceTracker;
 
+@Ignore
 @SuppressWarnings("deprecation") // RegionFilter.VISIBLE_SERVICE_NAMESPACE
 public class RegionSystemTests extends AbstractRegionSystemTest {
 

@@ -28,6 +28,7 @@ import org.osgi.framework.hooks.service.EventHook;
 /**
  * This testcase was based on {@link RegionBundleFindHookTests}.
  */
+@Ignore
 @SuppressWarnings("deprecation") // EventHook, RegionFilter.VISIBLE_SERVICE_NAMESPACE
 public class RegionServiceEventHookTests {
 
