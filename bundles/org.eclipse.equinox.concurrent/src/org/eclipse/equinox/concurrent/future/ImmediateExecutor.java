@@ -30,7 +30,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
  * #execute(IProgressRunnable, IProgressMonitor) may block the calling thread
  * indefinitely.
  * </p>
- * 
+ *
  * @see ThreadsExecutor
  * @since 1.1
  */

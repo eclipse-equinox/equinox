@@ -31,7 +31,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
  * {@link IProgressRunnable#run(IProgressMonitor)} method will be invoked by
  * this executor in a timely manner <b>without</b> blocking.
  * </p>
- * 
+ *
  * @see IProgressRunnable
  * @see IFuture
  * @see #execute(IProgressRunnable, IProgressMonitor)
@@ -56,7 +56,7 @@ public interface IExecutor {
 	 * typically implement via some non-blocking asynchronous invocation mechanism,
 	 * e.g. Threads, Jobs, ThreadPools etc.
 	 * </p>
-	 * 
+	 *
 	 * @param runnable the {@link IProgressRunnable} to invoke. Must not be
 	 *                 <code>null</code>.
 	 * @param monitor  any {@link IProgressMonitor} to be passed to the runnable.

@@ -15,7 +15,7 @@ package org.eclipse.equinox.concurrent.future;
 
 /**
  * Timeout exception thrown when timeout occurs
- * 
+ *
  * @since 1.1
  */
 public class TimeoutException extends Exception {
@@ -35,7 +35,7 @@ public class TimeoutException extends Exception {
 
 	/**
 	 * Return the timeout duration.
-	 * 
+	 *
 	 * @return long the timeout duration that caused this timeout exception.
 	 */
 	public long getDuration() {
