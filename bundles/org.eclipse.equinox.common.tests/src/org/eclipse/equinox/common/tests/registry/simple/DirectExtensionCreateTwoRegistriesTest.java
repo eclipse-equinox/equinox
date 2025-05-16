@@ -28,7 +28,7 @@ import org.junit.Test;
 
 /**
  * Test simultaneous work of two extension registries.
- * 
+ *
  * @since 3.2
  */
 public class DirectExtensionCreateTwoRegistriesTest extends BaseExtensionRegistryRun {

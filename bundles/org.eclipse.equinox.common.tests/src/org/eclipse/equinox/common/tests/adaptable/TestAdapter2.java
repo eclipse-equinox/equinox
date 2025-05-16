@@ -10,7 +10,7 @@
  *
  * Contributors:
  *     IBM - Initial API and implementation
- *     Christoph Laeubrich - Bug 567344 
+ *     Christoph Laeubrich - Bug 567344
  *******************************************************************************/
 package org.eclipse.equinox.common.tests.adaptable;
 

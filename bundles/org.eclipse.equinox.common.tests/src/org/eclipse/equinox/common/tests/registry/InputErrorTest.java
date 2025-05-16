@@ -40,7 +40,7 @@ import org.osgi.framework.FrameworkUtil;
 
 /**
  * Test proper clean-up in case registry gets invalid XML contribution.
- * 
+ *
  * @since 3.4
  */
 public class InputErrorTest {

@@ -22,7 +22,7 @@ import org.eclipse.core.runtime.*;
  * Allows test cases to wait for event notification so they can make assertions
  * on the event. Similar to
  * org.eclipse.core.tests.harness.TestRegistryChangeListener.
- * 
+ *
  * @since 3.2
  */
 public class SimpleRegistryListener implements IRegistryChangeListener {

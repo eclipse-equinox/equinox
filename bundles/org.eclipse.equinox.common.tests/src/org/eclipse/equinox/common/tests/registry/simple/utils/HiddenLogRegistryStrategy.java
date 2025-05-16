@@ -20,7 +20,7 @@ import org.eclipse.core.runtime.spi.RegistryStrategy;
 
 /**
  * Registry strategy that keeps log output in an accessible string.
- * 
+ *
  * @since 3.2
  */
 public class HiddenLogRegistryStrategy extends RegistryStrategy {

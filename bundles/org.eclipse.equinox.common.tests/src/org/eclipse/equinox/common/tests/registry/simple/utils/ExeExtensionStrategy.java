@@ -21,7 +21,7 @@ import org.eclipse.core.runtime.spi.RegistryStrategy;
 /**
  * Registry strategy that uses class loader from this bundle to process
  * executable extensions.
- * 
+ *
  * @since 3.2
  */
 public class ExeExtensionStrategy extends RegistryStrategy {

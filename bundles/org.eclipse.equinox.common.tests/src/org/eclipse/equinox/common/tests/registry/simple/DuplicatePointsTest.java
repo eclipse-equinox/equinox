@@ -47,7 +47,7 @@ public class DuplicatePointsTest extends BaseExtensionRegistryRun {
 
 	/**
 	 * Use registry strategy with modified logging
-	 * 
+	 *
 	 * @return - open extension registry
 	 */
 	@Override

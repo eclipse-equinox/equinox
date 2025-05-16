@@ -32,7 +32,7 @@ import org.osgi.framework.FrameworkUtil;
 
 /**
  * Tests "new" registry event listener.
- * 
+ *
  * @since 3.4
  */
 public class RegistryListenerTest {

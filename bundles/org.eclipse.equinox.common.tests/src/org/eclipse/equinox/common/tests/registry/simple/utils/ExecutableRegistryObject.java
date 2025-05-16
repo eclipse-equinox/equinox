@@ -17,7 +17,7 @@ import org.eclipse.core.runtime.*;
 
 /**
  * Test class for the executable extensions.
- * 
+ *
  * @since 3.2
  */
 public class ExecutableRegistryObject implements IExecutableExtensionFactory {
