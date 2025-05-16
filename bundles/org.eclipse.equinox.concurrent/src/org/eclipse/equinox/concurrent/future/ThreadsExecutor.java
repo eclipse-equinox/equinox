@@ -31,7 +31,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
  * <p>
  * Subclasses may extend the behavior of this ThreadsExecutor.
  * </p>
- * 
+ *
  * @since 1.1
  */
 public class ThreadsExecutor extends AbstractExecutor {
@@ -47,7 +47,7 @@ public class ThreadsExecutor extends AbstractExecutor {
 	/**
 	 * Create a runnable given an {@link IProgressRunnable} and an
 	 * {@link ISafeProgressRunner} to run the runnable.
-	 * 
+	 *
 	 * @param runner           the safe progress runner to run the runnable
 	 * @param progressRunnable the runnable to run.
 	 * @return Runnable that when run will use the safe progress runner to run the
@@ -66,7 +66,7 @@ public class ThreadsExecutor extends AbstractExecutor {
 	 * Configure the given thread prior to starting it. Subclasses may override as
 	 * appropriate to configure the given thread appropriately. The default
 	 * implementation calls {@link Thread#setDaemon(boolean)}.
-	 * 
+	 *
 	 * @param thread the thread to configure
 	 */
 	protected void configureThreadForExecution(Thread thread) {
@@ -76,7 +76,7 @@ public class ThreadsExecutor extends AbstractExecutor {
 
 	/**
 	 * Create an {@link AbstractFuture} with the given IProgressMonitor.
-	 * 
+	 *
 	 * @param monitor a progress monitor to associate with the future. May be
 	 *                <code>null</code>.
 	 */

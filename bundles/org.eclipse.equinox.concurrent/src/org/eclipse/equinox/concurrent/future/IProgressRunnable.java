@@ -19,7 +19,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 /**
  * Interface defining a block of code that can be run, return an Object result,
  * and throw an arbitrary Exception.
- * 
+ *
  * @param <ResultType> the type that will be returned by
  *                     {@link #run(IProgressMonitor)}
  * @since 1.1
@@ -28,7 +28,7 @@ public interface IProgressRunnable<ResultType> {
 
 	/**
 	 * Perform some action that returns a result or throws an exception
-	 * 
+	 *
 	 * @param monitor the IProgressMonitor associated with this callable
 	 * @return result from the call
 	 */

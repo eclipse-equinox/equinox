@@ -24,7 +24,7 @@ import org.eclipse.core.runtime.*;
  * that they should/must be very careful with respect to overriding the
  * synchronized methods in this class.
  * </p>
- * 
+ *
  * @since 1.1
  */
 public class SingleOperationFuture<ResultType> extends AbstractFuture<ResultType> {
@@ -100,7 +100,7 @@ public class SingleOperationFuture<ResultType> extends AbstractFuture<ResultType
 	/**
 	 * This method is not intended to be called by clients. Rather it should only be
 	 * used by {@link IExecutor}s.
-	 * 
+	 *
 	 * @noreference
 	 */
 	@Override

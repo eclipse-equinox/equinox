@@ -1,6 +1,6 @@
 /******************************************************************************
  * Copyright (c) 2010, 2013 Composent, Inc. and others.
- * 
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -28,7 +28,7 @@ import org.eclipse.core.runtime.SafeRunner;
  * that they should/must be very careful with respect to overriding the
  * synchronized methods in this class.
  * </p>
- * 
+ *
  * @since 1.1
  */
 public class SingleOperationListenableFuture<ResultType> extends SingleOperationFuture<ResultType>

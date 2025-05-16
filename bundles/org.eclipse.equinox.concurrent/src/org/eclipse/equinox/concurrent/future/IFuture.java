@@ -27,13 +27,13 @@ import org.eclipse.core.runtime.OperationCanceledException;
  * </p>
  * <p>
  * So, for example, a simple usage of an IFuture would be:
- * 
+ *
  * <pre>
  * IFuture future = foo();
  * ...
  * Object result = future.get();
  * </pre>
- * 
+ *
  * Clients generally will hold onto the future for some amount of time, and then
  * call {@link #get()} or {@link #get(long)} to retrieve the result of the
  * operation. They may also call {@link #hasValue()} to determine whether any
@@ -46,7 +46,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
  * {@link #hasValue()} is <code>true</code>, {@link #getStatus()} will be
  * <code>null</code>.
  * </p>
- * 
+ *
  * @see IStatus
  * @param <ResultType> the type that will be returned by {@link #get()} and/or
  *                     {@link #get(long)}
@@ -56,7 +56,7 @@ public interface IFuture<ResultType> {
 
 	/**
 	 * Cancel the operation
-	 * 
+	 *
 	 * @return <code>false</code> if the operation could not be canceled, typically
 	 *         because it has already completed normally; <code>true</code> otherwise
 	 */
@@ -66,7 +66,7 @@ public interface IFuture<ResultType> {
 	 * Waits if necessary for one or more operations to complete, and then returns
 	 * result(s). This method will block until either a) at least one result is
 	 * available; or b) at least one operation throws an exception.
-	 * 
+	 *
 	 * @return Object result of the asynchronous operation(s)
 	 * @throws InterruptedException       if thread calling this method is
 	 *                                    interrupted.
@@ -79,7 +79,7 @@ public interface IFuture<ResultType> {
 	 * Waits if necessary for one or more operations to complete, and then returns
 	 * result(s). This method will block until either a) at least one result is
 	 * available; or b) at least one operation throws an exception.
-	 * 
+	 *
 	 * @param waitTimeInMillis the maximum time to wait in milliseconds for the
 	 *                         operation(s) to complete.
 	 * @return Object result of the asynchronous operation(s)
@@ -106,10 +106,10 @@ public interface IFuture<ResultType> {
 	 * Note that the returned IStatus instance may be an IMultiStatus, meaning that
 	 * multiple operations have completed or are pending completion.
 	 * </p>
-	 * 
+	 *
 	 * @return IStatus the status of completed operation(s). Will return
 	 *         <code>null</code> if {@link #hasValue()} returns <code>false</code>.
-	 * 
+	 *
 	 * @see #hasValue()
 	 */
 	public IStatus getStatus();
@@ -129,7 +129,7 @@ public interface IFuture<ResultType> {
 	 * <code>true</code> when <b>any</b> of the operations have completed. Until the
 	 * first operation is completed, it will return <code>false</code>.
 	 * </p>
-	 * 
+	 *
 	 * @return <code>true</code> if any operations represented by this future have
 	 *         completed.
 	 */
@@ -156,7 +156,7 @@ public interface IFuture<ResultType> {
 	 * cancellation -- in all of these cases, this method will return <code>true</code>
 	 * if all underlying operation(s) have been completed.
 	 * </p>
-	 * 
+	 *
 	 * @return <code>true</code> if all operation(s) have completed in some manner.
 	 */
 	boolean isDone();
