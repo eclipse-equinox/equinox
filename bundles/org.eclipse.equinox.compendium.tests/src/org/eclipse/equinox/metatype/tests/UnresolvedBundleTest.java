@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -21,7 +21,7 @@ import org.osgi.service.metatype.*;
 
 /*
  * Ensure the metadata XML information from an unresolved bundle is provided.
- * 
+ *
  * See https://bugs.eclipse.org/bugs/show_bug.cgi?id=363374.
  */
 public class UnresolvedBundleTest extends AbstractTest {

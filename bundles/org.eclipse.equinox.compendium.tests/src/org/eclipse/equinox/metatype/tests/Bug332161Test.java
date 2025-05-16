@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -29,21 +29,21 @@ import org.osgi.service.metatype.*;
  * implementations in terms of the 'default' XML attribute on the <AD> element
  * and the AttributeDefinition.getDefaultValue() method made supporting
  * whitespace characters impossible.
- * 
+ *
  * CPEG did not want to remove the whitespace stripping rules out of concern
  * for backwards compatibility. Consequently, it was decided that significant
- * whitespace should be escaped with '\', like the comma must be when it should 
+ * whitespace should be escaped with '\', like the comma must be when it should
  * not be used as a delimiter. Furthermore, the same whitespace stripping and
  * escape rules should apply to the AttributeDefinition.validate(String) method.
- * This decision, of course, had ramifications extending beyond the resolution 
+ * This decision, of course, had ramifications extending beyond the resolution
  * of the original issue, which is the reason for the complexity of this test.
- * 
+ *
  * The Equinox Metatype implementation employs the following strategy.
- * 
+ *
  * (1) Significant whitespace at the beginning or end of the 'default' XML
  *     attribute within the <AD> element must be escaped; otherwise, it will be
  *     stripped.
- * (2) Significant whitespace at the beginning or end of each comma delimited 
+ * (2) Significant whitespace at the beginning or end of each comma delimited
  *     token within the 'default' attribute must be escaped; otherwise, it will
  *     be stripped.
  * (3) Significant whitespace at the beginning or end of the argument passed to
@@ -51,12 +51,12 @@ import org.osgi.service.metatype.*;
  * (4) Significant whitespace at the beginning or end of the 'value' XML
  *     attribute within the <Option> element must be escaped; otherwise, it
  *     will be stripped.
- * (5) Escaping whitespace between two non-whitespace characters is permitted 
+ * (5) Escaping whitespace between two non-whitespace characters is permitted
  *     but not required. In other words, whitespace between two non-whitespace
  *     characters will never be stripped.
  * (6) An escape character occurring as the last character in the sequence will
  *     be treated the same as insignificant whitespace.
- * (7) Escape characters will not be preserved in the results of 
+ * (7) Escape characters will not be preserved in the results of
  *     AttributeDefinition.getDefaultValue() or
  *     AttributeDefinition.getOptionValues(). This has the nonintuitive
  *     consequence that
@@ -65,8 +65,8 @@ import org.osgi.service.metatype.*;
  *     AttributeDefinition.validate(AttributeDefinition.getOptionValues()[i])
  *     will not necessarily pass validation. However, preserving escape
  *     characters in the result would probably be even more nonintuitive.
- *     Moreover, this approach is not inconsistent with the requirement on 
- *     clients to escape certain characters (',', '\', and leading or trailing 
+ *     Moreover, this approach is not inconsistent with the requirement on
+ *     clients to escape certain characters (',', '\', and leading or trailing
  *     significant whitespace) on other parameters to the validate() method.
  *     Finally, the two operations referenced above are completely superfluous
  *     since it must be the case that any declared default or option value is
@@ -81,11 +81,11 @@ import org.osgi.service.metatype.*;
  *     cardinality of 5, AttributeDefinition.validate(",,,,") would pass.
  *(10) In order to be valid, a value must pass all of the following tests.
  *          (a) The value must not be null.
- *          (b) The value must be convertible into the attribute definition's 
+ *          (b) The value must be convertible into the attribute definition's
  *              type, unless it's an empty string and cardinality != 0.
- *          (c) The following relation must hold: min <= value <= max, if either 
+ *          (c) The following relation must hold: min <= value <= max, if either
  *              min or max is specified.
- *          (d) If options were specified, the value must be equal to one of 
+ *          (d) If options were specified, the value must be equal to one of
  *              them.
  *     Note this approach means validation will always be present since the type
  *     compatibility check can always be performed (i.e. the Equinox

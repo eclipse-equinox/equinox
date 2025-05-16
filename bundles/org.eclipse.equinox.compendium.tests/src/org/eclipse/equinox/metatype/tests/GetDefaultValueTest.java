@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -22,7 +22,7 @@ import org.osgi.service.metatype.*;
 /*
  * Ensure default values on attribute definitions are correct when the default
  * value is either unspecified or specified as an empty string.
- * 
+ *
  * See https://www.osgi.org/members/bugzilla/show_bug.cgi?id=2182.
  * See https://bugs.eclipse.org/bugs/show_bug.cgi?id=349189.
  */
