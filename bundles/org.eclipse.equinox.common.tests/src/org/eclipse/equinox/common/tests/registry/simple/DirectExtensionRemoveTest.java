@@ -35,7 +35,7 @@ import org.junit.Test;
 
 /**
  * Tests removal APIs using a simple registry.
- * 
+ *
  * @since 3.2
  */
 public class DirectExtensionRemoveTest extends BaseExtensionRegistryRun {

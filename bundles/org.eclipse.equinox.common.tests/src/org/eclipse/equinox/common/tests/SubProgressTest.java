@@ -68,7 +68,7 @@ public class SubProgressTest {
 
 	/**
 	 * Tests the style bits in SubProgressMonitor
-	 * 
+	 *
 	 * @deprecated to suppress deprecation warnings
 	 */
 	@Deprecated
@@ -146,7 +146,7 @@ public class SubProgressTest {
 	/**
 	 * Tests SubProgressMonitor nesting when using the default constructor. (Tests
 	 * parents in floating point mode)
-	 * 
+	 *
 	 * @deprecated to suppress deprecation warnings
 	 */
 	@Deprecated
@@ -197,7 +197,7 @@ public class SubProgressTest {
 	/**
 	 * Tests SubProgressMonitor nesting when using the default constructor. Tests
 	 * constructors in int mode.
-	 * 
+	 *
 	 * @deprecated to suppress deprecation warnings
 	 */
 	@Deprecated
@@ -247,7 +247,7 @@ public class SubProgressTest {
 	/**
 	 * Tests the automatic cleanup when progress monitors are created via their
 	 * constructor
-	 * 
+	 *
 	 * @deprecated to suppress deprecation warnings
 	 */
 	@Deprecated

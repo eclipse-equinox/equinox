@@ -33,7 +33,7 @@ import org.osgi.framework.FrameworkUtil;
 
 /**
  * Check dynamic contribution into the Eclipse registry itself.
- * 
+ *
  * @since 3.2
  */
 public class XMLExtensionCreateEclipseTest extends BaseExtensionRegistryRun {
