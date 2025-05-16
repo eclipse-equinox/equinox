@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -23,7 +23,7 @@ import org.osgi.service.coordinator.Participant;
 /*
  * Ensures participants are notified in reverse participation order when ending
  * or failing a coordination.
- * 
+ *
  * https://bugs.eclipse.org/bugs/show_bug.cgi?id=371980
  */
 public class ReverseParticipantOrderNotifyTest extends CoordinatorTest {

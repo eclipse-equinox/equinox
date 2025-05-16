@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -21,7 +21,7 @@ import org.osgi.service.metatype.*;
 
 /*
  * See https://bugs.eclipse.org/bugs/show_bug.cgi?id=395196.
- * 
+ *
  * This test enforces the behavior of rejecting a the default value of an
  * attribute definition in an XML file that does not match one of the specified
  * options. The attribute definition behaves as if no default value was

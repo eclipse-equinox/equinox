@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -41,7 +41,7 @@ public class EventAdminTest {
 	/*
 	 * Ensures EventAdmin does not deliver an event published on topic "a/b/c" to an
 	 * EventHandler listening to topic a/b/c/*.
-	 * 
+	 *
 	 * See https://bugs.eclipse.org/bugs/show_bug.cgi?id=325064.
 	 */
 	@Test
@@ -154,7 +154,7 @@ public class EventAdminTest {
 	/*
 	 * Ensures EventAdmin delivers an event published to topics "a/b/c" and
 	 * "a/b/c/d" to an EventHandler listening to topics "a/b/c" and "a/b/c/*".
-	 * 
+	 *
 	 * See https://bugs.eclipse.org/bugs/show_bug.cgi?id=325064.
 	 */
 	@Test

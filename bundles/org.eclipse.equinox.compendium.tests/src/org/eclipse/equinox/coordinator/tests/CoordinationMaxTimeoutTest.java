@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -24,7 +24,7 @@ import org.osgi.service.coordinator.*;
 /*
  * Ensures the Coordinator implementation honors a specified maximum timeout
  * for coordinations.
- * 
+ *
  * https://bugs.eclipse.org/bugs/show_bug.cgi?id=362137
  */
 public class CoordinationMaxTimeoutTest extends CoordinatorTest {
