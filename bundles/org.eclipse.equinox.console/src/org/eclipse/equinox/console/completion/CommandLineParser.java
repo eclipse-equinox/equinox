@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     Lazar Kirchev, SAP AG - initial API and implementation
  *******************************************************************************/
@@ -28,7 +28,7 @@ public class CommandLineParser {
 	/**
 	 * Determine the last token in the command line. The last token is the
 	 * substring, starting from one of the characters, considered as delimiters
-	 * 
+	 *
 	 * @param commandLine whole command line
 	 * @param cursor      current position in the command line
 	 * @return the current token

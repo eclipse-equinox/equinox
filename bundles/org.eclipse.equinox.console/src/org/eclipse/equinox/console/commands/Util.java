@@ -37,7 +37,7 @@ public class Util {
 	 * @param array the array of objects to sort
 	 * @param start the start index to begin sorting
 	 * @param stop  the end index to stop sorting
-	 * 
+	 *
 	 * @exception ArrayIndexOutOfBoundsException when <code>start &lt; 0</code> or
 	 *                                           <code>end &gt;= array.length</code>
 	 */
@@ -156,7 +156,7 @@ public class Util {
 
 	/**
 	 * Reverse the elements in the array.
-	 * 
+	 *
 	 * @param array the Object array to be reversed
 	 */
 	public static void swap(Object[] array) {

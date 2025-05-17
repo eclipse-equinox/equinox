@@ -98,7 +98,7 @@ public class CustomCommandInterpreter implements CommandInterpreter {
 
 	/**
 	 * Print a stack trace including nested exceptions.
-	 * 
+	 *
 	 * @param t The offending exception
 	 */
 	@Override

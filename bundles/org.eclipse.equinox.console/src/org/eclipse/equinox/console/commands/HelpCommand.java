@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     Lazar Kirchev, SAP AG - initial API and implementation
  *******************************************************************************/
@@ -97,10 +97,10 @@ public class HelpCommand {
 	/**
 	 * Provides help for the available commands. Prints the names, descriptions and
 	 * parameters of all registered commands.
-	 * 
+	 *
 	 * If -scope {@code <command_scope>} is passed to the command, help is printed only for
 	 * the commands with the specified scope.
-	 * 
+	 *
 	 * If a command name is passed as argument to the help command, then the help
 	 * message only for the particular command is displayed (if such is defined).
 	 */
