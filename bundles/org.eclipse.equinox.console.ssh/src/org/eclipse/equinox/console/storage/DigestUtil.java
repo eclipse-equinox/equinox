@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     Lazar Kirchev, SAP AG - initial API and implementation
  *******************************************************************************/
@@ -23,7 +23,7 @@ import java.security.MessageDigest;
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     Lazar Kirchev, SAP AG - initial API and implementation
  *******************************************************************************/
@@ -42,7 +42,7 @@ public class DigestUtil {
 	 * Create a one-way hash of an input strings. First a MD5 hash of the input
 	 * string is calculated and appended to the string, and then the new string is
 	 * hashed with SHA1
-	 * 
+	 *
 	 * @param originalText the string to be hashed
 	 * @return hashed string
 	 */
