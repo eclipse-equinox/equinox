@@ -59,11 +59,11 @@ public class LogTracker extends ServiceTracker<LogService, LogService> {
 	void debug(String message, Throwable exception) {
 		log(null, LogService.LOG_DEBUG, message, exception);
 	}
-	
+
 	void warn(String message, Throwable exception) {
 		log(null, LogService.LOG_WARNING, message, exception);
 	}
-	
+
 	void error(String message, Throwable exception) {
 		log(null, LogService.LOG_ERROR, message, exception);
 	}
