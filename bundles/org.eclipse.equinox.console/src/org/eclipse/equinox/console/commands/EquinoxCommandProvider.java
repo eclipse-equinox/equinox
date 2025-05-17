@@ -1717,7 +1717,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 
 	/**
 	 * Lists all packages visible from the specified bundle
-	 * 
+	 *
 	 * @param bundle bundle to list visible packages
 	 */
 

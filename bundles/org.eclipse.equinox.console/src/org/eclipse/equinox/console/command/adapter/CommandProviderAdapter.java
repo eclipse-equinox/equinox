@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     Thomas Watson, IBM Corporation - initial API and implementation
  *     Lazar Kirchev, SAP AG - initial API and implementation

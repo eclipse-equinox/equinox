@@ -7,10 +7,10 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Lazar Kirchev, SAP AG - derivative implementation 
+ *     Lazar Kirchev, SAP AG - derivative implementation
  *******************************************************************************/
 package org.eclipse.equinox.console.commands;
 

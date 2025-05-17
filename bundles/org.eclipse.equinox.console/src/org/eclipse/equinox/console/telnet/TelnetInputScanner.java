@@ -7,9 +7,9 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
- *     Lazar Kirchev, SAP AG - initial API and implementation  
+ *     Lazar Kirchev, SAP AG - initial API and implementation
  *     IBM Corporation - ongoing development
  *******************************************************************************/
 package org.eclipse.equinox.console.telnet;
@@ -99,7 +99,7 @@ public class TelnetInputScanner extends Scanner {
 	/*
 	 * Telnet command codes are described in RFC 854, TELNET PROTOCOL SPECIFICATION
 	 * available at http://www.ietf.org/rfc/rfc854.txt
-	 * 
+	 *
 	 * Telnet terminal type negotiation option is described in RFC 1091, Telnet
 	 * Terminal-Type Option available at http://www.ietf.org/rfc/rfc1091.txt
 	 */

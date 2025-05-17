@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     Lazar Kirchev, SAP AG - initial API and implementation
  *******************************************************************************/
@@ -22,7 +22,7 @@ import java.util.Map;
 public interface Completer {
 	/**
 	 * Returns the possible candidates for completion for the passed string.
-	 * 
+	 *
 	 * @param buffer text to be completed
 	 * @param cursor current position in the text
 	 * @return map of candidate completions, and on which position in the buffer
