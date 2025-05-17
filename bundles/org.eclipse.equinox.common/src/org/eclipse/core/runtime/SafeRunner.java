@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -23,7 +23,7 @@ import org.eclipse.osgi.util.NLS;
  * <p>
  * This class can be used without OSGi running.
  * </p>
- * 
+ *
  * @since org.eclipse.equinox.common 3.2
  */
 public final class SafeRunner {
@@ -61,7 +61,7 @@ public final class SafeRunner {
 	 * the code being executed. Severe errors that are not generally safe to catch
 	 * are not caught by this method.
 	 * </p>
-	 * 
+	 *
 	 * @param <T>  the result type
 	 *
 	 * @param code the runnable to run

@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Alexander Fedorov (ArSysOp) - Bug 561712
@@ -39,7 +39,7 @@ public class MultiStatus extends Status {
 	 * @param message     a human-readable message, localized to the current locale
 	 * @param exception   a low-level exception, or <code>null</code> if not
 	 *                    applicable
-	 * 
+	 *
 	 * @since 3.12
 	 */
 	public MultiStatus(Class<?> caller, int code, IStatus[] newChildren, String message, Throwable exception) {
@@ -72,7 +72,7 @@ public class MultiStatus extends Status {
 	 * @param message   a human-readable message, localized to the current locale
 	 * @param exception a low-level exception, or <code>null</code> if not
 	 *                  applicable
-	 * 
+	 *
 	 * @since 3.12
 	 */
 	public MultiStatus(Class<?> caller, int code, String message, Throwable exception) {
@@ -98,7 +98,7 @@ public class MultiStatus extends Status {
 	 * @param caller  the relevant class to build unique identifier from
 	 * @param code    the caller-specific status code
 	 * @param message a human-readable message, localized to the current locale
-	 * 
+	 *
 	 * @since 3.12
 	 */
 	public MultiStatus(Class<?> caller, int code, String message) {

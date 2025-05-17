@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -41,7 +41,7 @@ package org.eclipse.core.runtime;
  * <p>
  * This interface can be used without OSGi running.
  * </p>
- * 
+ *
  * @see MultiStatus
  * @see Status
  */
@@ -51,7 +51,7 @@ public interface IStatus {
 	 * Status severity constant (value 0) indicating this status represents the
 	 * nominal case. This constant is also used as the status code representing the
 	 * nominal case.
-	 * 
+	 *
 	 * @see #getSeverity()
 	 * @see #isOK()
 	 * @see Status#OK_STATUS
@@ -61,7 +61,7 @@ public interface IStatus {
 	/**
 	 * Status type severity (bit mask, value 1) indicating this status is
 	 * informational only.
-	 * 
+	 *
 	 * @see #getSeverity()
 	 * @see #matches(int)
 	 * @see Status#info(String)
@@ -71,7 +71,7 @@ public interface IStatus {
 	/**
 	 * Status type severity (bit mask, value 2) indicating this status represents a
 	 * warning.
-	 * 
+	 *
 	 * @see #getSeverity()
 	 * @see #matches(int)
 	 * @see Status#warning(String)
@@ -82,7 +82,7 @@ public interface IStatus {
 	/**
 	 * Status type severity (bit mask, value 4) indicating this status represents an
 	 * error.
-	 * 
+	 *
 	 * @see #getSeverity()
 	 * @see #matches(int)
 	 * @see Status#error(String)
@@ -93,7 +93,7 @@ public interface IStatus {
 	/**
 	 * Status type severity (bit mask, value 8) indicating this status represents a
 	 * cancelation
-	 * 
+	 *
 	 * @see #getSeverity()
 	 * @see #matches(int)
 	 * @see Status#CANCEL_STATUS

@@ -20,7 +20,7 @@ import java.net.*;
  * A utility class for manipulating URIs. This class works around some of the
  * undesirable behavior of the {@link java.net.URI} class, and provides
  * additional path manipulation methods that are not available on the URI class.
- * 
+ *
  * @noinstantiate This class is not intended to be instantiated by clients.
  * @since org.eclipse.equinox.common 3.5
  */
@@ -53,7 +53,7 @@ public final class URIUtil {
 	 * of the trailing slash depends on the existence of a local file on disk. This
 	 * method operates like a traditional path append and always preserves all
 	 * segments of the base path.
-	 * 
+	 *
 	 * @param base      The base URI to append to
 	 * @param extension The unencoded path extension to be added
 	 * @return The appended URI
@@ -110,7 +110,7 @@ public final class URIUtil {
 
 	/**
 	 * Ensures that UNC-Paths have at least four leading slashes.
-	 * 
+	 *
 	 * URI returns UNC-paths with two slashes, but needs four, when passing them as
 	 * path. See Java bug 4723726 or Eclipse bug 207103 for details
 	 */
@@ -144,7 +144,7 @@ public final class URIUtil {
 	 * URI specification. This method must not be called with a string that already
 	 * contains an encoded URI, since this will result in the URI escape character
 	 * ('%') being escaped itself.
-	 * 
+	 *
 	 * @param uriString An unencoded URI string
 	 * @return A URI corresponding to the given string
 	 * @throws URISyntaxException If the string cannot be formed into a valid URI
@@ -179,7 +179,7 @@ public final class URIUtil {
 
 	/**
 	 * Returns whether the given URI refers to a local file system URI.
-	 * 
+	 *
 	 * @param uri The URI to check
 	 * @return <code>true</code> if the URI is a local file system location, and
 	 *         <code>false</code> otherwise
@@ -235,7 +235,7 @@ public final class URIUtil {
 	 * Returns true if the two URIs are equal. URIs are considered equal if
 	 * {@link URI#equals(Object)} returns true, if the string representation of the
 	 * URIs is equal, or if they URIs are represent the same local file.
-	 * 
+	 *
 	 * @param uri1 The first URI to compare
 	 * @param uri2 The second URI to compare
 	 * @return <code>true</code> if the URIs are the same, and <code>false</code>
@@ -275,7 +275,7 @@ public final class URIUtil {
 	/**
 	 * Returns the URI as a local file, or <code>null</code> if the given URI does
 	 * not represent a local file.
-	 * 
+	 *
 	 * @param uri The URI to return the file for
 	 * @return The local file corresponding to the given URI, or <code>null</code>
 	 */
@@ -297,7 +297,7 @@ public final class URIUtil {
 	 * in a zip or jar file. If an entry path of <code>null</code> is provided, the
 	 * resulting URI will represent the jar file itself.
 	 * </p>
-	 * 
+	 *
 	 * @param uri       The URI of a zip or jar file
 	 * @param entryPath The path of a file inside the jar, or <code>null</code> to
 	 *                  obtain the URI for the jar file itself.
@@ -322,7 +322,7 @@ public final class URIUtil {
 	/**
 	 * Returns the URL as a URI. This method will handle URLs that are not properly
 	 * encoded (for example they contain unencoded space characters).
-	 * 
+	 *
 	 * @param url The URL to convert into a URI
 	 * @return A URI representing the given URL
 	 */
@@ -349,7 +349,7 @@ public final class URIUtil {
 
 	/**
 	 * An UNC-safe factory the the URI-ctor
-	 * 
+	 *
 	 * @param scheme   Scheme name
 	 * @param ssp      Scheme-specific part
 	 * @param fragment Fragment
@@ -368,7 +368,7 @@ public final class URIUtil {
 
 	/**
 	 * An UNC-safe factory the the URI-ctor
-	 * 
+	 *
 	 * @param scheme   Scheme name
 	 * @param userInfo User name and authorization information
 	 * @param host     Host name
@@ -395,7 +395,7 @@ public final class URIUtil {
 
 	/**
 	 * An UNC-safe factory the the URI-ctor
-	 * 
+	 *
 	 * @param scheme   Scheme name
 	 * @param host     Host name
 	 * @param path     Path
@@ -415,7 +415,7 @@ public final class URIUtil {
 
 	/**
 	 * An UNC-safe factory the the URI-ctor
-	 * 
+	 *
 	 * @param scheme    Scheme name
 	 * @param authority Authority
 	 * @param path      Path
@@ -440,7 +440,7 @@ public final class URIUtil {
 
 	/**
 	 * Returns a URI as a URL.
-	 * 
+	 *
 	 * <p>
 	 * Better use {@link URI#toURL()} instead.
 	 * </p>
@@ -453,7 +453,7 @@ public final class URIUtil {
 	 * Returns a string representation of the given URI that doesn't have illegal
 	 * characters encoded. This string is suitable for later passing to
 	 * {@link #fromString(String)}.
-	 * 
+	 *
 	 * @param uri The URI to convert to string format
 	 * @return An unencoded string representation of the URI
 	 */
@@ -481,7 +481,7 @@ public final class URIUtil {
 	 * {@link #makeRelative(URI, URI)}. That is, if R = makeRelative(O, B), then
 	 * makeAbsolute(R, B), will return the original URI O.
 	 * </p>
-	 * 
+	 *
 	 * @param relative the relative URI
 	 * @param baseURI  the base URI
 	 * @return an absolute URI
@@ -501,7 +501,7 @@ public final class URIUtil {
 	 * handling of file URIs. For file URIs, this method handles file system path
 	 * devices. If the URIs are not on the same device, then the original URI is
 	 * returned.
-	 * 
+	 *
 	 * @param original the original URI
 	 * @param baseURI  the base URI
 	 * @return a relative URI

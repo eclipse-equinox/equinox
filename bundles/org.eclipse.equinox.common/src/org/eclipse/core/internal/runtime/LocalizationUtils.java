@@ -18,7 +18,7 @@ import java.lang.reflect.Field;
 
 /**
  * Helper methods related to string localization.
- * 
+ *
  * @since org.eclipse.equinox.common 3.3
  */
 public class LocalizationUtils {
@@ -26,7 +26,7 @@ public class LocalizationUtils {
 	 * This method can be used in the absence of NLS class. The method tries to use
 	 * the NLS-based translation routine. If it falls, the method returns the
 	 * original non-translated key.
-	 * 
+	 *
 	 * @param key case-sensitive name of the filed in the translation file
 	 *            representing the string to be translated
 	 * @return The localized message or the non-translated key

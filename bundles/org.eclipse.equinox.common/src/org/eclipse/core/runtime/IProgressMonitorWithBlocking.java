@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM - Initial API and implementation
  *     Christoph Laeubrich - join with IProgressMonitorWithBlocking
@@ -31,7 +31,7 @@ package org.eclipse.core.runtime;
  * <p>
  * Clients may implement this interface.
  * </p>
- * 
+ *
  * @see IProgressMonitor
  * @since 3.0
  */
