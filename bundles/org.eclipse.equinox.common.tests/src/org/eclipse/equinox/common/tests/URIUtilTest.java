@@ -15,7 +15,7 @@ package org.eclipse.equinox.common.tests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -392,12 +392,13 @@ public class URIUtilTest {
 		URI correctURI = fileWithPercent20.toURI();
 
 		URL fileURL = fileWithPercent20.toURL();
-		assertNotSame("1.1", correctURI, fileURL.toURI());
+		assertNotEquals("1.1", correctURI, fileURL.toURI());
 		assertEquals("1.2", correctURI, URIUtil.toURI(fileURL));
-		assertNotSame("1.3", correctURI, new URI(fileURL.toString()));
+		assertNotEquals("1.3", correctURI, new URI(fileURL.toString()));
+		assertEquals("1.4", correctURI, URIUtil.toURI(correctURI.toURL()));
 		// we expect these to not be the same because fromString assumes a decoded URL
 		// String
-		assertNotSame("1.4", correctURI, URIUtil.fromString(fileURL.toString()));
+		assertNotEquals("1.4", correctURI, URIUtil.fromString(fileURL.toString()));
 	}
 
 	@Test
