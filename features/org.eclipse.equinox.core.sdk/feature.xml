@@ -92,6 +92,16 @@
          version="0.0.0"/>
 
    <plugin
+         id="org.eclipse.equinox.security.freebsd"
+         os="freebsd"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.eclipse.equinox.security.freebsd.source"
+         os="freebsd"
+         version="0.0.0"/>
+
+   <plugin
          id="org.eclipse.equinox.security.macosx"
          os="macosx"
          version="0.0.0"/>
