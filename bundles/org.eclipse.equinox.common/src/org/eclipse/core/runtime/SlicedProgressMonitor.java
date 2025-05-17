@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     Christoph Laeubrich - initial API and implementation
  *******************************************************************************/
@@ -16,7 +16,7 @@ package org.eclipse.core.runtime;
 /**
  * default implementation of a {@link SlicedProgressMonitor} that synchronizes
  * on the given monitor to report work
- * 
+ *
  * @since 3.14
  */
 public class SlicedProgressMonitor implements IProgressMonitor {

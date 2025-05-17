@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Alexander Fedorov (ArSysOp) - Bug 561712
@@ -47,7 +47,7 @@ public class Status implements IStatus {
 	public static final IStatus OK_STATUS = new Status(OK, unknownId, OK, LocalizationUtils.safeLocalize("ok"), null); //$NON-NLS-1$
 	/**
 	 * A standard CANCEL status with no message.
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	public static final IStatus CANCEL_STATUS = new Status(CANCEL, unknownId, 1, "", null); //$NON-NLS-1$
@@ -202,7 +202,7 @@ public class Status implements IStatus {
 	 *                  interpolated.
 	 * @param exception a low-level exception, or <code>null</code> if not
 	 *                  applicable
-	 * 
+	 *
 	 * @since 3.12
 	 */
 	public Status(int severity, Class<?> caller, int code, String message, Throwable exception) {
@@ -258,7 +258,7 @@ public class Status implements IStatus {
 	 *                  interpolated.
 	 * @param exception a low-level exception, or <code>null</code> if not
 	 *                  applicable
-	 * 
+	 *
 	 * @since 3.12
 	 */
 	public Status(int severity, Class<?> caller, String message, Throwable exception) {
@@ -282,7 +282,7 @@ public class Status implements IStatus {
 	 *                  interpolated.
 	 * @param exception a low-level exception, or <code>null</code> if not
 	 *                  applicable
-	 * 
+	 *
 	 * @since org.eclipse.equinox.common 3.3
 	 */
 	public Status(int severity, String pluginId, String message, Throwable exception) {
@@ -303,7 +303,7 @@ public class Status implements IStatus {
 	 *                 <code>CANCEL</code>
 	 * @param caller   the relevant class to build unique identifier from
 	 * @param message  a human-readable message, localized to the current locale
-	 * 
+	 *
 	 * @since 3.12
 	 */
 	public Status(int severity, Class<?> caller, String message) {
@@ -324,7 +324,7 @@ public class Status implements IStatus {
 	 *                 <code>CANCEL</code>
 	 * @param pluginId the unique identifier of the relevant plug-in
 	 * @param message  a human-readable message, localized to the current locale
-	 * 
+	 *
 	 * @since org.eclipse.equinox.common 3.3
 	 */
 	public Status(int severity, String pluginId, String message) {
@@ -338,7 +338,7 @@ public class Status implements IStatus {
 	/**
 	 * Extracts an identifier from the given class: either bundle symbolic name or
 	 * class name, never returns <code>null</code>
-	 * 
+	 *
 	 * @param caller the relevant class to build unique identifier from
 	 * @return identifier extracted for the given class
 	 */
