@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -25,7 +25,7 @@ import org.osgi.service.cm.ConfigurationPermission;
  * of a Jetty-based Http Service. The created instances are not persistent
  * across re-starts of the bundle.
  * </p>
- * 
+ *
  * @see org.eclipse.equinox.http.jetty.JettyConstants
  * @noextend This class is not intended to be subclassed by clients.
  * @noinstantiate This class is not intended to be instantiated by clients.
@@ -37,7 +37,7 @@ public class JettyConfigurator {
 
 	/**
 	 * Creates an instance of Jetty parameterized with a dictionary of settings
-	 * 
+	 *
 	 * @param id       The identifier for the server instance
 	 * @param settings The dictionary of settings used to configure the server
 	 *                 instance
@@ -55,7 +55,7 @@ public class JettyConfigurator {
 	/**
 	 * Stops a previously started instance of Jetty. If the identified instance is
 	 * not started this will call will do nothing.
-	 * 
+	 *
 	 * @param id The identifier for the server instance
 	 * @throws Exception If the server failed to stop for any reason.
 	 */

@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     Gunnar Wagenknecht - initial API and implementation
  *     IBM Corporation - improvements and ongoing maintenance
@@ -22,7 +22,7 @@ import java.util.Dictionary;
  * This abstract class must be extended by clients which wish to customize the
  * created Jetty contexts or connectors further.
  * </p>
- * 
+ *
  * @since 1.1
  */
 public abstract class JettyCustomizer {
@@ -36,7 +36,7 @@ public abstract class JettyCustomizer {
 	 * the context such as class loading are already configured by the framework.
 	 * Changing those may cause breakage and thus must be avoided.
 	 * </p>
-	 * 
+	 *
 	 * @param context  the Jetty context; in case of Jetty 7 the context is of type
 	 *                 <code>org.eclipse.jetty.servlet.ServletContextHandler</code>
 	 * @param settings the settings as passed to
@@ -54,7 +54,7 @@ public abstract class JettyCustomizer {
 	 * <p>
 	 * Implementors may perform additional configuration of the Jetty Connector.
 	 * </p>
-	 * 
+	 *
 	 * @param connector the Jetty connector; in case of Jetty 7 the context is of
 	 *                  type <code>org.eclipse.jetty.server.Connector</code>
 	 * @param settings  the settings as passed to
@@ -72,7 +72,7 @@ public abstract class JettyCustomizer {
 	 * <p>
 	 * Implementors may perform additional configuration of the Jetty Connector.
 	 * </p>
-	 * 
+	 *
 	 * @param connector the Jetty connector; in case of Jetty 7 the connector is of
 	 *                  type <code>oorg.eclipse.jetty.server.Connector</code>
 	 * @param settings  the settings as passed to

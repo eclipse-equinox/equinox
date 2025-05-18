@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Raymond Augé - bug fixes and enhancements
@@ -18,7 +18,7 @@ package org.eclipse.equinox.http.jetty;
  * <p>
  * Provides configuration constants for use with JettyConfigurator.
  * </p>
- * 
+ *
  * @since 1.1
  * @noextend This interface is not intended to be extended by clients.
  * @noimplement This interface is not intended to be implemented by clients.
@@ -43,7 +43,7 @@ public interface JettyConstants {
 	/**
 	 * name="http.nio" type="Boolean" (default: true, with some exceptions for JREs
 	 * with known NIO problems)
-	 * 
+	 *
 	 * @since 1.1
 	 */
 	public static final String HTTP_NIO = "http.nio"; //$NON-NLS-1$
@@ -65,14 +65,14 @@ public interface JettyConstants {
 
 	/**
 	 * name="http.maxThreads" type="Integer" (default: 200 -- max number of threads)
-	 * 
+	 *
 	 * @since 1.2
 	 */
 	public static final String HTTP_MAXTHREADS = "http.maxThreads"; //$NON-NLS-1$
 
 	/**
 	 * name="http.maxThreads" type="Integer" (default: 8 -- max number of threads)
-	 * 
+	 *
 	 * @since 1.2
 	 */
 	public static final String HTTP_MINTHREADS = "http.minThreads"; //$NON-NLS-1$
@@ -157,7 +157,7 @@ public interface JettyConstants {
 
 	/**
 	 * name="housekeeper.interval" type="Integer"
-	 * 
+	 *
 	 * @since 1.5
 	 */
 	public static final String HOUSEKEEPER_INTERVAL = "housekeeper.interval"; //$NON-NLS-1$
@@ -168,7 +168,7 @@ public interface JettyConstants {
 	 * <code>org.eclipse.equinox.http.jetty.JettyCustomizer</code> and has a public
 	 * no-arg constructor; the class must be supplied via a fragment to this
 	 * bundle's classpath)
-	 * 
+	 *
 	 * @since 1.1
 	 */
 	public static final String CUSTOMIZER_CLASS = "customizer.class"; //$NON-NLS-1$
