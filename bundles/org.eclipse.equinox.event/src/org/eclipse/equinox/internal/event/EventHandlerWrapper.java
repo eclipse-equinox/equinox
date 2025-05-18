@@ -34,7 +34,7 @@ public class EventHandlerWrapper {
 
 	/**
 	 * Create an EventHandlerWrapper.
-	 * 
+	 *
 	 * @param reference Reference to the EventHandler
 	 * @param context   Bundle Context of the Event Admin bundle
 	 * @param log       LogService object for logging
@@ -47,7 +47,7 @@ public class EventHandlerWrapper {
 
 	/**
 	 * Cache values from service properties
-	 * 
+	 *
 	 * @return true if the handler should be called; false if the handler should not
 	 *         be called
 	 */
@@ -108,7 +108,7 @@ public class EventHandlerWrapper {
 
 	/**
 	 * Get the event topics for the wrapped handler.
-	 * 
+	 *
 	 * @return The wrapped handler's event topics
 	 */
 	public synchronized String[] getTopics() {
@@ -117,7 +117,7 @@ public class EventHandlerWrapper {
 
 	/**
 	 * Return the wrapped handler.
-	 * 
+	 *
 	 * @return The wrapped handler.
 	 */
 	private EventHandler getHandler() {
@@ -164,7 +164,7 @@ public class EventHandlerWrapper {
 
 	/**
 	 * Get the filter object
-	 * 
+	 *
 	 * @return The handler's filter
 	 */
 	private synchronized Filter getFilter() {
@@ -174,7 +174,7 @@ public class EventHandlerWrapper {
 	/**
 	 * Dispatch event to handler. Perform final tests before actually calling the
 	 * handler.
-	 * 
+	 *
 	 * @param event The event to dispatch
 	 * @param perm  The permission to be checked
 	 */
