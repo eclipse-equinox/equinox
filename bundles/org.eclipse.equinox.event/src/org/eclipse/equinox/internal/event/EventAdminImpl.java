@@ -34,7 +34,7 @@ public class EventAdminImpl implements EventAdmin {
 
 	/**
 	 * Constructor for EventAdminImpl.
-	 * 
+	 *
 	 * @param context BundleContext
 	 */
 	EventAdminImpl(BundleContext context) {
@@ -76,7 +76,7 @@ public class EventAdminImpl implements EventAdmin {
 	/**
 	 * Internal main method for sendEvent() and postEvent(). Dispatching an event to
 	 * EventHandler. All exceptions are logged except when dealing with LogEntry.
-	 * 
+	 *
 	 * @param event   to be delivered
 	 * @param isAsync must be set to true for synchronous event delivery, false for
 	 *                asynchronous delivery.
@@ -135,7 +135,7 @@ public class EventAdminImpl implements EventAdmin {
 
 	/**
 	 * Checks if the caller bundle has right PUBLISH TopicPermision.
-	 * 
+	 *
 	 * @throws SecurityException if the caller does not have the right to PUBLISH
 	 *                           TopicPermission
 	 */

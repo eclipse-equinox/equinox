@@ -19,7 +19,7 @@ import org.osgi.service.event.EventAdmin;
 
 /**
  * Main class to redeliver framework published events via EventAdmin.
- * 
+ *
  * @version $Revision: 1.3 $
  */
 public class EventRedeliverer implements FrameworkListener, BundleListener, AllServiceListener {
