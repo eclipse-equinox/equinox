@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -35,7 +35,7 @@ public class SecureAction {
 	/**
 	 * Creates a new Thread from a Runnable. Same as calling new
 	 * Thread(target,name).
-	 * 
+	 *
 	 * @param target the Runnable to create the Thread from.
 	 * @param name   The name of the Thread.
 	 * @return The new Thread
