@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * SPDX-License-Identifier: Apache-2.0 
+ * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
 package org.osgi.service.http;
@@ -22,7 +22,7 @@ package org.osgi.service.http;
  * A NamespaceException is thrown to indicate an error with the caller's request
  * to register a servlet or resources into the URI namespace of the Http
  * Service. This exception indicates that the requested alias already is in use.
- * 
+ *
  * @author $Id$
  */
 public class NamespaceException extends Exception {
@@ -30,7 +30,7 @@ public class NamespaceException extends Exception {
 
 	/**
 	 * Construct a {@code NamespaceException} object with a detail message.
-	 * 
+	 *
 	 * @param message the detail message
 	 */
 	public NamespaceException(String message) {
@@ -40,7 +40,7 @@ public class NamespaceException extends Exception {
 	/**
 	 * Construct a {@code NamespaceException} object with a detail message and a
 	 * nested exception.
-	 * 
+	 *
 	 * @param message The detail message.
 	 * @param cause The nested exception.
 	 */
@@ -50,12 +50,12 @@ public class NamespaceException extends Exception {
 
 	/**
 	 * Returns the nested exception.
-	 * 
+	 *
 	 * <p>
 	 * This method predates the general purpose exception chaining mechanism.
 	 * The {@code getCause()} method is now the preferred means of obtaining
 	 * this information.
-	 * 
+	 *
 	 * @return The result of calling {@code getCause()}.
 	 */
 	public Throwable getException() {
@@ -64,7 +64,7 @@ public class NamespaceException extends Exception {
 
 	/**
 	 * Returns the cause of this exception or {@code null} if no cause was set.
-	 * 
+	 *
 	 * @return The cause of this exception or {@code null} if no cause was set.
 	 * @since 1.2
 	 */
@@ -75,7 +75,7 @@ public class NamespaceException extends Exception {
 
 	/**
 	 * Initializes the cause of this exception to the specified value.
-	 * 
+	 *
 	 * @param cause The cause of this exception.
 	 * @return This exception.
 	 * @throws IllegalArgumentException If the specified cause is this

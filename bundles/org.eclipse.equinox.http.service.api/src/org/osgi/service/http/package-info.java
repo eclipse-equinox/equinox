@@ -13,18 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * SPDX-License-Identifier: Apache-2.0 
+ * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
 /**
  * Http Service Package Version 1.2.
- * 
+ *
  * <p>
  * Bundles wishing to use this package must list the package in the
  * Import-Package header of the bundle's manifest. This package has two types of
  * users: the consumers that use the API in this package and the providers that
  * implement the API in this package.
- * 
+ *
  * <p>
  * Example import for consumers using the API in this package:
  * <p>
@@ -33,7 +33,7 @@
  * Example import for providers implementing the API in this package:
  * <p>
  * {@code  Import-Package: org.osgi.service.http; version="[1.2,1.3)"}
- * 
+ *
  * @author $Id$
  */
 
