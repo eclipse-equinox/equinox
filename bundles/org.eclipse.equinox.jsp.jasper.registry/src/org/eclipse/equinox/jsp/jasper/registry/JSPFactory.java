@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -32,7 +32,7 @@ import org.osgi.framework.Bundle;
  * </p>
  * e.g. class="org.eclipse.equinox.jsp.jasper.registry.JSPFactory:/A/PATH" or
  * &lt;parameter name="path" value="/A/PATH"/&gt;
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  * @noinstantiate This class is not intended to be instantiated by clients.
  */
