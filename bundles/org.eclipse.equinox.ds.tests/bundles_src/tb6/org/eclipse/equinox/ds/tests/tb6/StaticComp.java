@@ -62,7 +62,7 @@ public class StaticComp implements DSEventsProvider, BoundTester, ComponentConte
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.equinox.ds.tests.tbc.DSEventsProvider#resetComponentEvents()
 	 */
 	@Override
@@ -72,7 +72,7 @@ public class StaticComp implements DSEventsProvider, BoundTester, ComponentConte
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.equinox.ds.tests.tbc.PropertiesProvider#getProperties()
 	 */
 	@Override
@@ -82,7 +82,7 @@ public class StaticComp implements DSEventsProvider, BoundTester, ComponentConte
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.equinox.ds.tests.tbc.BoundTester#getBoundObject(int)
 	 */
 	@Override
@@ -92,7 +92,7 @@ public class StaticComp implements DSEventsProvider, BoundTester, ComponentConte
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.equinox.ds.tests.tbc.BoundTester#getBoundObjectsCount()
 	 */
 	@Override
@@ -102,7 +102,7 @@ public class StaticComp implements DSEventsProvider, BoundTester, ComponentConte
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.equinox.ds.tests.tbc.BoundTester#getBoundService(int)
 	 */
 	@Override
@@ -112,7 +112,7 @@ public class StaticComp implements DSEventsProvider, BoundTester, ComponentConte
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.equinox.ds.tests.tbc.ComponentContextProvider#getComponentContext
 	 * ()
