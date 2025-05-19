@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     Cognos Incorporated - initial API and implementation
  *     IBM Corporation - bug fixes and enhancements
@@ -33,7 +33,7 @@ import org.osgi.framework.Constants;
  * returning the URLs of the jar files contained on the Bundle-ClassPath. Other
  * than jar file tld resources this classloader is not used for loading classes
  * which should be done by the other contained class loaders.
- * 
+ *
  * The rest of the ClassLoader is as follows: 1) Thread-ContextClassLoader (top
  * - parent) -- see ContextFinder 2) Jasper Bundle 3) The Bundle referenced at
  * JSPServlet creation

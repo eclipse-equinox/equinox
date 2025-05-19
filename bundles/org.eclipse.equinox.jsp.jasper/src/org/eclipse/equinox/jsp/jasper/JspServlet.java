@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     Cognos Incorporated - initial API and implementation
  *     IBM Corporation - bug fixes and enhancements
@@ -77,7 +77,7 @@ import org.osgi.framework.Bundle;
  * additional resource lookups in the bundle the JSPServlet is behaviourally
  * consistent with the JSP 2.0 specification and regular Jasper operation.
  * </p>
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 
