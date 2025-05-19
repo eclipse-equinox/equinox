@@ -356,7 +356,7 @@ public class DSTest {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.equinox.ds.tests.tbc.DSTest.#tearDown()
 	 */
 	public void tearDown() throws Exception {
@@ -3035,7 +3035,7 @@ public class DSTest {
 	/**
 	 * Searches for component with name componentName which provides
 	 * PropertiesProvider. Returns value of its "config.base.data" property.
-	 * 
+	 *
 	 * @param componentName - the name of the component to get data
 	 * @return the value of property "config.base.data", provided by
 	 *         PropertiesProvider.getProperties(). Returned value is -1 when
