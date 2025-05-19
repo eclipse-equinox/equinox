@@ -159,7 +159,7 @@ public class Main {
 			takeDownSplash();
 		}
 
-		//Called reflectively by org.eclipse.core.runtime.internal.adaptor.DefaultStartupMonitor 
+		//Called reflectively by org.eclipse.core.runtime.internal.adaptor.DefaultStartupMonitor
 		public void updateSplash() {
 			if (bridge != null && !splashDown) {
 				bridge.updateSplash();
@@ -351,7 +351,7 @@ public class Main {
 		}
 
 		private static final Comparator<Identifier> MAIN_VERSION = Comparator. //
-				comparingInt(Identifier::major) // 
+				comparingInt(Identifier::major) //
 				.thenComparingInt(Identifier::minor) //
 				.thenComparingInt(Identifier::service);
 		private static final Comparator<Identifier> FULL_VERSION = MAIN_VERSION.thenComparing(Identifier::qualifier);
@@ -476,7 +476,7 @@ public class Main {
 					IntStream.range(0, defaultPath.size()).map(i -> defaultPath.size() - 1 - i).mapToObj(defaultPath::get) //
 							.map(url -> new File(url.getFile()).getParent()));
 		}
-		searchPath = Stream.concat(searchPath, // 
+		searchPath = Stream.concat(searchPath, //
 				Stream.of(getInstallLocation().getFile() + "/plugins/")); //$NON-NLS-1$
 
 		return searchPath.map(dir -> getLibraryFromFragment(fragmentName, dir)) //
