@@ -20,7 +20,7 @@ import org.osgi.service.prefs.BackingStoreException;
  * <p>
  * Usage:
  * </p>
- * 
+ *
  * <pre>
  * class Visitor implements IPreferenceNodeVisitor {
  *    public boolean visit(IEclipsePreferences node) {

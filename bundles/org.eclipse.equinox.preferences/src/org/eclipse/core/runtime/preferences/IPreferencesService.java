@@ -31,7 +31,7 @@ import org.osgi.service.prefs.Preferences;
  * <p>
  * This interface is not intended to be implemented by clients.
  * </p>
- * 
+ *
  * @since 3.0
  * @noextend This interface is not intended to be extended by clients.
  * @noimplement This interface is not intended to be implemented by clients.
@@ -47,7 +47,7 @@ public interface IPreferencesService {
 	 * If any of the individual entries in the node list are <code>null</code> then
 	 * skip over them and move on to the next node in the list.
 	 * </p>
-	 * 
+	 *
 	 * @param key          the preference key
 	 * @param defaultValue the default value
 	 * @param nodes        the list of nodes to search, or <code>null</code>
@@ -104,7 +104,7 @@ public interface IPreferencesService {
 	 * An example of a qualifier for an Eclipse 2.1 preference is the plug-in
 	 * identifier. (e.g. "org.eclipse.core.resources" for "description.autobuild")
 	 * </p>
-	 * 
+	 *
 	 * @param qualifier    a namespace qualifier for the preference
 	 * @param key          the name of the preference (optionally including its
 	 *                     path)
@@ -168,7 +168,7 @@ public interface IPreferencesService {
 	 * An example of a qualifier for an Eclipse 2.1 preference is the plug-in
 	 * identifier. (e.g. "org.eclipse.core.resources" for "description.autobuild")
 	 * </p>
-	 * 
+	 *
 	 * @param qualifier    a namespace qualifier for the preference
 	 * @param key          the name of the preference (optionally including its
 	 *                     path)
@@ -232,7 +232,7 @@ public interface IPreferencesService {
 	 * An example of a qualifier for an Eclipse 2.1 preference is the plug-in
 	 * identifier. (e.g. "org.eclipse.core.resources" for "description.autobuild")
 	 * </p>
-	 * 
+	 *
 	 * @param qualifier    a namespace qualifier for the preference
 	 * @param key          the name of the preference (optionally including its
 	 *                     path)
@@ -296,7 +296,7 @@ public interface IPreferencesService {
 	 * An example of a qualifier for an Eclipse 2.1 preference is the plug-in
 	 * identifier. (e.g. "org.eclipse.core.resources" for "description.autobuild")
 	 * </p>
-	 * 
+	 *
 	 * @param qualifier    a namespace qualifier for the preference
 	 * @param key          the name of the preference (optionally including its
 	 *                     path)
@@ -360,7 +360,7 @@ public interface IPreferencesService {
 	 * An example of a qualifier for an Eclipse 2.1 preference is the plug-in
 	 * identifier. (e.g. "org.eclipse.core.resources" for "description.autobuild")
 	 * </p>
-	 * 
+	 *
 	 * @param qualifier    a namespace qualifier for the preference
 	 * @param key          the name of the preference (optionally including its
 	 *                     path)
@@ -424,7 +424,7 @@ public interface IPreferencesService {
 	 * An example of a qualifier for an Eclipse 2.1 preference is the plug-in
 	 * identifier. (e.g. "org.eclipse.core.resources" for "description.autobuild")
 	 * </p>
-	 * 
+	 *
 	 * @param qualifier    a namespace qualifier for the preference
 	 * @param key          the name of the preference (optionally including its
 	 *                     path)
@@ -488,7 +488,7 @@ public interface IPreferencesService {
 	 * An example of a qualifier for an Eclipse 2.1 preference is the plug-in
 	 * identifier. (e.g. "org.eclipse.core.resources" for "description.autobuild")
 	 * </p>
-	 * 
+	 *
 	 * @param qualifier    a namespace qualifier for the preference
 	 * @param key          the name of the preference (optionally including its
 	 *                     path)
@@ -524,7 +524,7 @@ public interface IPreferencesService {
 	 * excludes list as a basic String compare is done. The basic algorithm is
 	 * similar to the following:
 	 * </p>
-	 * 
+	 *
 	 * <pre>
 	 * String fullPath = node.absolutePath() + '/' + key;
 	 * if (!fullPath.startsWith(excludesList[i]))
@@ -535,7 +535,7 @@ public interface IPreferencesService {
 	 * by the by {@link #importPreferences(InputStream)} or
 	 * {@link #readPreferences(InputStream)} methods.
 	 * </p>
-	 * 
+	 *
 	 * @param node         the node to treat as the root of the export
 	 * @param output       the stream to write to
 	 * @param excludesList a list of path prefixes to exclude from the export, or
@@ -563,7 +563,7 @@ public interface IPreferencesService {
 	 * This method is equivalent to calling
 	 * <code>applyPreferences(readPreferences(input));</code>.
 	 * </p>
-	 * 
+	 *
 	 * @param input the stream to load the preferences from
 	 * @return a status object describing success or detailing failure reasons
 	 * @throws CoreException            if there are problems importing the
@@ -605,7 +605,7 @@ public interface IPreferencesService {
 	 * It is assumed the contents of the input stream have been written by
 	 * {@link #exportPreferences(IEclipsePreferences, OutputStream, String[])}.
 	 * </p>
-	 * 
+	 *
 	 * @param input the input stream to read from
 	 * @return the node hierarchy representing the stream contents
 	 * @throws IllegalArgumentException if the given stream is null
@@ -628,7 +628,7 @@ public interface IPreferencesService {
 	 * returned. Clients should call {@link #getLookupOrder(String, String)} if they
 	 * desire this behavior.
 	 * </p>
-	 * 
+	 *
 	 * @param qualifier the namespace qualifier for the preference
 	 * @param key       the preference name or <code>null</code>
 	 * @return the scope order or <code>null</code>
@@ -647,7 +647,7 @@ public interface IPreferencesService {
 	 * the default-default order as defined by the platform if no order has been
 	 * set.
 	 * </p>
-	 * 
+	 *
 	 * @param qualifier the namespace qualifier for the preference
 	 * @param key       the preference name or <code>null</code>
 	 * @return the scope order
@@ -669,7 +669,7 @@ public interface IPreferencesService {
 	 * Note that the default lookup order is not persisted across platform
 	 * invocations.
 	 * </p>
-	 * 
+	 *
 	 * @param qualifier the namespace qualifier for the preference
 	 * @param key       the preference name or <code>null</code>
 	 * @param order     the lookup order or <code>null</code>

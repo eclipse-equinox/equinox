@@ -49,7 +49,7 @@ public final class PreferenceFilterEntry {
 	 * expression with an asterisk at the end. If matchType is <code>null</code>,
 	 * the key must be an exact match.
 	 * </p>
-	 * 
+	 *
 	 * @param key       the name of the preference key
 	 * @param matchType specifies key match type, may be <code>null</code> to
 	 *                  indicate that exact match is required
@@ -73,7 +73,7 @@ public final class PreferenceFilterEntry {
 	/**
 	 * Return the match type specified for this filter. May return <code>null</code>
 	 * to indicate that exact match is used.
-	 * 
+	 *
 	 * @return matchType the match type, might be <code>null</code> indicating that
 	 *         exact match is used
 	 * @since 3.3

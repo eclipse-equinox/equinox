@@ -19,7 +19,7 @@ package org.eclipse.core.runtime.preferences;
  * <p>
  * Clients may implement this interface.
  * </p>
- * 
+ *
  * @since 3.0
  */
 public interface IScope {
@@ -34,7 +34,7 @@ public interface IScope {
 	 * list of the parent yet, and therefore might not be able to be referenced
 	 * through navigation from the root node.
 	 * </p>
-	 * 
+	 *
 	 * @param parent the node's parent
 	 * @param name   the name of the node
 	 * @return the new node

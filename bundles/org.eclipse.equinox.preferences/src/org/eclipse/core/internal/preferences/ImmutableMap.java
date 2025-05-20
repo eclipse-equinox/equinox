@@ -209,7 +209,7 @@ public abstract class ImmutableMap implements Cloneable {
 	/**
 	 * Returns the value associated with this key in the map, or <code>null</code>
 	 * if the key is not present in the map.
-	 * 
+	 *
 	 * @return The value associated with this key, or <code>null</code>
 	 */
 	public abstract String get(String key);
@@ -242,14 +242,14 @@ public abstract class ImmutableMap implements Cloneable {
 
 	/**
 	 * Returns a map that is equal to this one, except without the given key.
-	 * 
+	 *
 	 * @return A map with the given key removed
 	 */
 	public abstract ImmutableMap removeKey(String key);
 
 	/**
 	 * Returns the number of keys in this map.
-	 * 
+	 *
 	 * @return the number of keys in this map.
 	 */
 	public abstract int size();

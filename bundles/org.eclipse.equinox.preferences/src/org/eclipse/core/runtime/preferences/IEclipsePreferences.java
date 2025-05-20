@@ -73,7 +73,7 @@ public interface IEclipsePreferences extends Preferences {
 		 * supplying its implementation being un-installed. In this case the only method
 		 * which can safely be called on the child is #name().
 		 * </p>
-		 * 
+		 *
 		 * @return the child node
 		 */
 		public Preferences getChild() {
@@ -283,7 +283,7 @@ public interface IEclipsePreferences extends Preferences {
 	 * When this node is removed, its associated preference and node change
 	 * listeners should be removed as well.
 	 * </p>
-	 * 
+	 *
 	 * @throws BackingStoreException if there was a problem removing this node
 	 * @see org.osgi.service.prefs.Preferences#removeNode()
 	 * @see NodeChangeEvent
@@ -302,7 +302,7 @@ public interface IEclipsePreferences extends Preferences {
 	 * {@link NodeChangeEvent} must be sent to listeners who are registered at this
 	 * node.
 	 * </p>
-	 * 
+	 *
 	 * @param path the path of the node
 	 * @return the node
 	 * @see org.osgi.service.prefs.Preferences#node(String)

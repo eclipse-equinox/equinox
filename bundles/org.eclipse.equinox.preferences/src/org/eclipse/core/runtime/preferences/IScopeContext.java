@@ -81,7 +81,7 @@ public interface IScopeContext {
 	 * returns the preference node in the instance scope where the preferences for
 	 * "org.eclipse.core.resources" are stored.
 	 * </p>
-	 * 
+	 *
 	 * @param qualifier a qualifier for the preference name
 	 * @return the node containing the plug-in preferences or <code>null</code>
 	 * @see IPreferencesService
@@ -96,7 +96,7 @@ public interface IScopeContext {
 	 * Implementors may return <code>null</code> if the location is not known, is
 	 * unavailable, or is not applicable to this scope.
 	 * </p>
-	 * 
+	 *
 	 * @return a writable location in the file system or <code>null</code>
 	 */
 	public IPath getLocation();
