@@ -35,7 +35,7 @@ public abstract class AbstractPreferenceStorage {
 	 * The table keys consist of an optional child node path and separator, followed
 	 * by the property key. The table values are the values of the properties.
 	 * </p>
-	 * 
+	 *
 	 * <pre>
 	 *     [childNodePath/]propertyKey=propertyValue
 	 * </pre>
@@ -44,7 +44,7 @@ public abstract class AbstractPreferenceStorage {
 	 * Properties object are always interpreted as relative to the node specified by
 	 * nodePath.
 	 * </p>
-	 * 
+	 *
 	 * @param nodePath the absolute path of the preference node
 	 * @return a <code>java.util.Properties</code> object or <code>null</code>
 	 * @throws BackingStoreException if there was a problem loading the properties

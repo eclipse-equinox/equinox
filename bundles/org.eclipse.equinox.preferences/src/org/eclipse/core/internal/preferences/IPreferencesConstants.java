@@ -15,7 +15,7 @@ package org.eclipse.core.internal.preferences;
 
 /**
  * Container for the constants used by this plugin.
- * 
+ *
  * @since org.eclipse.equinox.preferences 1.0
  */
 public interface IPreferencesConstants {

@@ -35,7 +35,7 @@ import org.eclipse.core.runtime.IPath;
  * <p>
  * This class is not intended to be subclassed. This class may be instantiated.
  * </p>
- * 
+ *
  * @since 3.3
  */
 public final class BundleDefaultsScope extends AbstractScope {
@@ -56,7 +56,7 @@ public final class BundleDefaultsScope extends AbstractScope {
 
 	/**
 	 * Create and return a new default scope instance.
-	 * 
+	 *
 	 * @deprecated use <code>BundleDefaultsScope.INSTANCE</code> instead
 	 */
 	@Deprecated

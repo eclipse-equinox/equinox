@@ -66,7 +66,7 @@ public interface IPreferenceFilter {
 	 * <p>
 	 * For example:
 	 * </p>
-	 * 
+	 *
 	 * <pre>
 	 * "org.eclipse.core.resources" -&gt; null
 	 * "org.eclipse.ui" -&gt; new PreferenceFilterEntry[] {
