@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -51,7 +51,7 @@ public class LogStreamProviderImpl implements LogStreamProvider {
 	 * Buffered with a buffer large enough to contain the history, if included. Have
 	 * the QueuePolicyOption.DISCARD_OLDEST queue policy option. Use a shared
 	 * executor. Have a parallelism of one. (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.osgi.service.log.stream.LogStreamProvider#createStream(org.osgi.service.
 	 * log.stream.LogStreamProvider.Options[])
