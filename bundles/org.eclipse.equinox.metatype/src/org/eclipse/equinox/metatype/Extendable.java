@@ -17,11 +17,11 @@ import java.util.Set;
  * An interface marking an object as possibly having extension attributes. An
  * attribute is a property that describes the object. An extension attribute is
  * a custom property added by a third party.
- * 
+ *
  * The use case for this interface was to expose third party attributes included
  * in the metadata XML on elements that support {@code <anyAttribute/>}
  * according to the metatype schema, but it is not strictly limited to this use.
- * 
+ *
  * @since 1.2
  */
 public interface Extendable {
@@ -30,7 +30,7 @@ public interface Extendable {
 	 * specified {@link #getExtensionUris() URI}. The map key is the attribute name,
 	 * and the map value is the attribute value. If the specified URI has no
 	 * extension attributes, the map will be {@code null}.
-	 * 
+	 *
 	 * @param uri - The URI for which extension attributes are desired.
 	 * @return A map containing the extension attributes for the specified URI, or
 	 *         {@code null} if there are none.
@@ -43,7 +43,7 @@ public interface Extendable {
 	 * {@link #getExtensionAttributes(String) extension attributes} exist. It is
 	 * guaranteed that there is at least one extension attribute for each URI in the
 	 * set.
-	 * 
+	 *
 	 * @return A set containing the URIs for which extension attributes exist.
 	 * @see #getExtensionAttributes(String)
 	 */

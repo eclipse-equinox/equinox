@@ -52,7 +52,7 @@ class Icon implements Cloneable {
 
 	/**
 	 * returns the size specified when the icon was created
-	 * 
+	 *
 	 * @return size or Integer.MIN_VALUE if no size was specified
 	 */
 	Integer getIconSize() {

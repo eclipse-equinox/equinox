@@ -52,7 +52,7 @@ public class MetaTypeInformationImpl extends MetaTypeProviderImpl implements Equ
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.osgi.service.metatype.MetaTypeInformation#getPids()
 	 */
 	@Override
@@ -66,7 +66,7 @@ public class MetaTypeInformationImpl extends MetaTypeProviderImpl implements Equ
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.osgi.service.metatype.MetaTypeInformation#getFactoryPids()
 	 */
 	@Override
@@ -79,7 +79,7 @@ public class MetaTypeInformationImpl extends MetaTypeProviderImpl implements Equ
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.osgi.service.metatype.MetaTypeInformation#getBundle()
 	 */
 	@Override

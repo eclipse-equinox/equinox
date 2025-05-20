@@ -32,12 +32,12 @@ public class Activator implements BundleActivator {
 	/*
 	 * The following filter guarantees only services meeting the following criteria
 	 * will be tracked.
-	 * 
+	 *
 	 * (1) A ManagedService or ManagedServiceFactory registered with a SERVICE_PID
 	 * property. May also be registered as a MetaTypeProvider. (2) A
 	 * MetaTypeProvider registered with a METATYPE_PID or METATYPE_FACTORY_PID
 	 * property.
-	 * 
+	 *
 	 * Note that it's still necessary to inspect a ManagedService or
 	 * ManagedServiceFactory to ensure it also implements MetaTypeProvider.
 	 */

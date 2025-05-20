@@ -84,9 +84,9 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 	 * <p>
 	 * - Obtain a SAX parser from the XML Parser Service:
 	 * <p>
-	 * 
+	 *
 	 * <pre></pre>
-	 * 
+	 *
 	 * The parser may be SAX 1 (eXML) or SAX 2 (XML4J). It should attempt to use a
 	 * SAX2 parser by instantiating an XMLReader and extending DefaultHandler BUT if
 	 * that fails it should fall back to instantiating a SAX1 Parser and extending
@@ -96,7 +96,7 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 	 * <p>
 	 * - Handle the callbacks from the parser and build the appropriate MetaType
 	 * objects - ObjectClassDefinitions & AttributeDefinitions
-	 * 
+	 *
 	 * @param bundle        The bundle object for which the metadata should be read
 	 * @param parserFactory The bundle object for which the metadata should be read
 	 * @return void
@@ -134,7 +134,7 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.osgi.service.metatype.MetaTypeProvider#getObjectClassDefinition(java.lang
 	 * .String, java.lang.String)
@@ -185,7 +185,7 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.osgi.service.metatype.MetaTypeProvider#getLocales()
 	 */
 	@Override
