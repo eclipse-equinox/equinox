@@ -94,7 +94,7 @@ public class EclipsePreferencesTest {
 
 	/**
 	 * Concurrent access to listener collection should not lead to exceptions
-	 * 
+	 *
 	 * @see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=444188">bug
 	 *      444188</a>
 	 */
@@ -117,7 +117,7 @@ public class EclipsePreferencesTest {
 
 	/**
 	 * Concurrent access to listener collection should not lead to exceptions
-	 * 
+	 *
 	 * @see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=444188">bug
 	 *      444188</a>
 	 */
