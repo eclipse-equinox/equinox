@@ -28,18 +28,18 @@ import org.osgi.framework.*;
  * following wires using Wire Admin or similar services, so this is why regions
  * are only weakly isolated from each other. <br>
  * <br>
- * 
+ *
  * <strong>Concurrent Semantics</strong><br>
- * 
+ *
  * Implementations must be thread safe.
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface Region {
 
 	/**
 	 * Returns the name of the region.
-	 * 
+	 *
 	 * @return the region name
 	 */
 	String getName();
@@ -74,7 +74,7 @@ public interface Region {
 	 * <p>
 	 * This is useful when manipulating offline resolver states and bundle
 	 * descriptions which do not correspond to bundles.
-	 * 
+	 *
 	 * @param bundleId the bundle id to be associated with this region
 	 * @throws BundleException if the bundle cannot be associated with the region
 	 */
@@ -84,7 +84,7 @@ public interface Region {
 	 * Installs a bundle and associates the bundle with this region. The bundle's
 	 * location will have the region name appended to the given location to ensure
 	 * the location is unique across regions.
-	 * 
+	 *
 	 * @param location the bundle location string
 	 * @param input    a stream of the bundle's contents or <code>null</code>
 	 * @return the installed Bundle
@@ -97,7 +97,7 @@ public interface Region {
 	 * Installs a bundle and associates the bundle with this region. The bundle's
 	 * location will have the region name appended to the given location to ensure
 	 * the location is unique across regions.
-	 * 
+	 *
 	 * @param location the bundle location string
 	 * @return the installed Bundle
 	 * @throws BundleException if the install fails
@@ -109,7 +109,7 @@ public interface Region {
 	 * Installs a bundle and associates the bundle with this region. The bundle's
 	 * location will be used as is. The caller of this method is responsible for
 	 * ensuring the location is unique across regions.
-	 * 
+	 *
 	 * @param location the bundle location string
 	 * @param input    a stream of the bundle's contents or <code>null</code>
 	 * @return the installed Bundle
@@ -119,9 +119,9 @@ public interface Region {
 	Bundle installBundleAtLocation(String location, InputStream input) throws BundleException;
 
 	/**
-	 * 
+	 *
 	 * Gets the bundle ids of the bundles associated with this region.
-	 * 
+	 *
 	 * @return a set of bundle ids
 	 */
 	Set<Long> getBundleIds();
@@ -129,7 +129,7 @@ public interface Region {
 	/**
 	 * Returns <code>true</code> if and only if the given bundle belongs to this
 	 * region.
-	 * 
+	 *
 	 * @param bundle a {@link Bundle}
 	 * @return <code>true</code> if the given bundle belongs to this region and
 	 *         <code>false</code> otherwise
@@ -139,7 +139,7 @@ public interface Region {
 	/**
 	 * Returns <code>true</code> if and only if a bundle with the given bundle id
 	 * belongs to this region.
-	 * 
+	 *
 	 * @param bundleId a bundle id
 	 * @return <code>true</code> if a bundle with the given bundle id belongs to
 	 *         this region and <code>false</code> otherwise
@@ -148,7 +148,7 @@ public interface Region {
 
 	/**
 	 * Get the bundle in this region with the given symbolic name and version.
-	 * 
+	 *
 	 * @return the bundle or <code>null</code> if there is no such bundle
 	 */
 	Bundle getBundle(String symbolicName, Version version);
@@ -166,7 +166,7 @@ public interface Region {
 	 * <p>
 	 * If the given source region is already connected to the given tail region,
 	 * then BundleException with exception type UNSUPPORTED_OPERATION is thrown.
-	 * 
+	 *
 	 * @param headRegion the region to connect this region to
 	 * @param filter     a {@link RegionFilter} which controls what is visible
 	 *                   across the connection
@@ -177,7 +177,7 @@ public interface Region {
 	/**
 	 * Removes the given bundle from this region. If the given bundle does not
 	 * belong to this region, this is not an error and there is no effect.
-	 * 
+	 *
 	 * @param bundle the bundle to be removed
 	 */
 	void removeBundle(Bundle bundle);
@@ -185,7 +185,7 @@ public interface Region {
 	/**
 	 * Removes the given bundle id from this region. If the given bundle id is not
 	 * associated with this region, this is not an error and there is no effect.
-	 * 
+	 *
 	 * @param bundleId the bundle id to be removed
 	 */
 	void removeBundle(long bundleId);
@@ -193,7 +193,7 @@ public interface Region {
 	/**
 	 * Gets a {@link Set} containing a snapshot of the {@link FilteredRegion
 	 * FilteredRegions} attached to this tail region.
-	 * 
+	 *
 	 * @return a {@link Set} of {@link FilteredRegion FilteredRegions} of head
 	 *         regions and region filters
 	 */
@@ -201,7 +201,7 @@ public interface Region {
 
 	/**
 	 * Visit the subgraph connected to this region.
-	 * 
+	 *
 	 * @param visitor a {@link RegionDigraphVisitor} to be called as the subgraph is
 	 *                navigated
 	 */
@@ -210,7 +210,7 @@ public interface Region {
 	/**
 	 * Gets the {@link RegionDigraph} this region belongs to. This method must never
 	 * return null, even when a region is removed from a digraph.
-	 * 
+	 *
 	 * @return the digraph this region belongs to
 	 */
 	RegionDigraph getRegionDigraph();

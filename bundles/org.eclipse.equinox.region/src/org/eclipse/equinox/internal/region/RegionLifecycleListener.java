@@ -22,7 +22,7 @@ import org.eclipse.equinox.region.Region;
  * <p>
  * Note that this is an internal interface and is not intended for external use.
  * </p>
- * 
+ *
  * <strong>Concurrent Semantics</strong><br />
  * Implementations of this interface must be thread safe.
  */
@@ -30,14 +30,14 @@ public interface RegionLifecycleListener {
 
 	/**
 	 * Called after the given region is added to the digraph.
-	 * 
+	 *
 	 * @param region the region which has been added
 	 */
 	void regionAdded(Region region);
 
 	/**
 	 * Called before the given region is removed from the digraph.
-	 * 
+	 *
 	 * @param region the region which is about to be removed
 	 */
 	void regionRemoving(Region region);

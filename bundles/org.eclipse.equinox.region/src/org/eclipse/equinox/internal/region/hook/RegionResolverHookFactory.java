@@ -26,7 +26,7 @@ import org.osgi.framework.wiring.BundleRevision;
  * <p>
  * <strong>Concurrent Semantics</strong>
  * </p>
- * 
+ *
  * Thread safe.
  */
 public final class RegionResolverHookFactory implements ResolverHookFactory {

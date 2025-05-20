@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -19,13 +19,13 @@ import java.io.*;
 /**
  * A region digraph persistence is used to persist the state of a
  * {@link RegionDigraph}.
- * 
+ *
  * <p>
  * <strong>Concurrent Semantics</strong>
  * </p>
- * 
+ *
  * Implementations of this interface must be thread safe.
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface RegionDigraphPersistence {
@@ -40,7 +40,7 @@ public interface RegionDigraphPersistence {
 	 * behavior of the bundles installed in the running framework.
 	 * </p>
 	 * The specified stream remains open after this method returns.
-	 * 
+	 *
 	 * @param input an input stream to read a digraph from.
 	 * @return the new digraph
 	 * @throws IOException              if error occurs reading the digraph.
@@ -56,7 +56,7 @@ public interface RegionDigraphPersistence {
 	 * After the digraph has been written, the output stream is flushed. The output
 	 * stream remains open after this method returns.
 	 * </p>
-	 * 
+	 *
 	 * @param digraph a digraph to be written.
 	 * @param output  an output stream to write a digraph to.
 	 * @throws IOException if error occurs writing the digraph.
