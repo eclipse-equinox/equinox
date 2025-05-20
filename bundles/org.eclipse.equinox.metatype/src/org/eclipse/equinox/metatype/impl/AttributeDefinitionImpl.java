@@ -93,7 +93,7 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.osgi.service.metatype.AttributeDefinition#getName()
 	 */
 	@Override
@@ -103,7 +103,7 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.osgi.service.metatype.AttributeDefinition#getID()
 	 */
 	@Override
@@ -113,7 +113,7 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.osgi.service.metatype.AttributeDefinition#getDescription()
 	 */
 	@Override
@@ -123,7 +123,7 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.osgi.service.metatype.AttributeDefinition#getCardinality()
 	 */
 	@Override
@@ -133,7 +133,7 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.osgi.service.metatype.AttributeDefinition#getType()
 	 */
 	@Override
@@ -150,7 +150,7 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.osgi.service.metatype.AttributeDefinition#getOptionLabels()
 	 */
 	@Override
@@ -172,7 +172,7 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.osgi.service.metatype.AttributeDefinition#getOptionValues()
 	 */
 	@Override
@@ -223,7 +223,7 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.osgi.service.metatype.AttributeDefinition#getDefaultValue()
 	 */
 	@Override
@@ -268,10 +268,10 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 	 * the attribute definition's type. (3) The following relation must hold: min <=
 	 * value <= max, if either min or max was specified. (4) If options were
 	 * specified, the value must be equal to one of them.
-	 * 
+	 *
 	 * Note this method will never return null to indicate there's no validation
 	 * present. The type compatibility check can always be performed.
-	 * 
+	 *
 	 * @see org.osgi.service.metatype.AttributeDefinition#validate(java.lang.String)
 	 */
 	@Override

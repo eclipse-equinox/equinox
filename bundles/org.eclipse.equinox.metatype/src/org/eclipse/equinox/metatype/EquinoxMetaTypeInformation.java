@@ -15,7 +15,7 @@ import org.osgi.service.metatype.MetaTypeInformation;
 /**
  * A {@link MetaTypeInformation} that provides {@link Extendable extendable}
  * versions of {@link EquinoxObjectClassDefinition object class definitions}.
- * 
+ *
  * @since 1.2
  */
 public interface EquinoxMetaTypeInformation extends MetaTypeInformation {

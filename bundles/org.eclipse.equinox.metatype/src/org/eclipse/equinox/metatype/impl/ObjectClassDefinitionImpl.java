@@ -85,7 +85,7 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Eq
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.osgi.service.metatype.ObjectClassDefinition#getName()
 	 */
 	@Override
@@ -95,7 +95,7 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Eq
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.osgi.service.metatype.ObjectClassDefinition#getID()
 	 */
 	@Override
@@ -105,7 +105,7 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Eq
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.osgi.service.metatype.ObjectClassDefinition#getDescription()
 	 */
 	@Override
@@ -115,7 +115,7 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Eq
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.osgi.service.metatype.ObjectClassDefinition#getAttributeDefinitions(int)
 	 */
@@ -162,7 +162,7 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Eq
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.osgi.service.metatype.ObjectClassDefinition#getIcon(int)
 	 */
 	@Override

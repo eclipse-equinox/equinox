@@ -51,7 +51,7 @@ public class MetaTypeServiceImpl implements EquinoxMetaTypeService, SynchronousB
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.osgi.service.metatype.MetaTypeService#getMetaTypeInformation(org.osgi.
 	 * framework.Bundle)
@@ -127,7 +127,7 @@ public class MetaTypeServiceImpl implements EquinoxMetaTypeService, SynchronousB
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.osgi.framework.BundleListener#bundleChanged(org.osgi.framework.
 	 * BundleEvent)
 	 */

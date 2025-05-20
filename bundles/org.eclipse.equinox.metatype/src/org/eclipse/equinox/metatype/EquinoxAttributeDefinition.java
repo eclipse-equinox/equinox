@@ -22,7 +22,7 @@ import org.osgi.service.metatype.AttributeDefinition;
  * specified as part of the &lt;AD/&gt; element with namespaces other than the
  * metatype namespace as extension attributes.
  * </p>
- * 
+ *
  * @since 1.2
  * @noimplement This interface is not intended to be implemented by clients.
  */
@@ -30,7 +30,7 @@ public interface EquinoxAttributeDefinition extends AttributeDefinition, Extenda
 	/**
 	 * Get the maximum value this attribute may hold as specified by the optional
 	 * "max" XML attribute of the &lt;AD&gt; element.
-	 * 
+	 *
 	 * @return The maximum value this attribute may hold, or <code>null</code> if
 	 *         unspecified.
 	 * @since 1.3
@@ -40,7 +40,7 @@ public interface EquinoxAttributeDefinition extends AttributeDefinition, Extenda
 	/**
 	 * Get the minimum value this attribute may hold as specified by the optional
 	 * "min" XML attribute of the &lt;AD&gt; element.
-	 * 
+	 *
 	 * @return The minimum value this attribute may hold, or <code>null</code> if
 	 *         unspecified.
 	 * @since 1.3

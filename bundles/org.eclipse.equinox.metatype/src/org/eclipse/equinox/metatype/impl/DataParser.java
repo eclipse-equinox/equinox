@@ -794,7 +794,7 @@ public class DataParser {
 
 	/**
 	 * Handler for the Attribute element.
-	 * 
+	 *
 	 * This Handler is only used by RFC94.
 	 */
 	private class AttributeHandler extends AbstractHandler {
