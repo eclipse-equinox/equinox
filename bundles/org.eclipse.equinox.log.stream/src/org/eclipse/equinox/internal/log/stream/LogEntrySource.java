@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -52,7 +52,7 @@ public class LogEntrySource implements PushEventSource<LogEntry> {
 	 * events. It returns an AutoCloseable which can be used to close the event
 	 * stream. If the close method is called on this object then the stream is
 	 * terminated by sending a close event. (non-Javadoc)
-	 * 
+	 *
 	 * @see org.osgi.util.pushstream.PushEventSource#open(org.osgi.util.pushstream.
 	 * PushEventConsumer)
 	 */
@@ -121,7 +121,7 @@ public class LogEntrySource implements PushEventSource<LogEntry> {
 		 * further events for the requested number of milliseconds. A return value of -1
 		 * indicates that no further events should be sent and that the stream can be
 		 * closed.
-		 * 
+		 *
 		 * @see org.osgi.util.pushstream.PushEventConsumer<T>
 		 */
 		try {

@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -26,9 +26,9 @@ import org.osgi.service.log.stream.LogStreamProvider;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-/* LogStreamManager is used to start and stop the bundle and keeps the track of the logs using the 
- * ServiceTrackerCustomizer<LogReaderService, AtomicReference<LogReaderService>> which listens to 
- * the incoming logs using the LogListener. It is also responsible to provide service tracker 
+/* LogStreamManager is used to start and stop the bundle and keeps the track of the logs using the
+ * ServiceTrackerCustomizer<LogReaderService, AtomicReference<LogReaderService>> which listens to
+ * the incoming logs using the LogListener. It is also responsible to provide service tracker
  * and each log entry to the LogStreamProviderFactory.
  */
 public class LogStreamManager implements BundleActivator,
@@ -41,7 +41,7 @@ public class LogStreamManager implements BundleActivator,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
 	 */
@@ -56,7 +56,7 @@ public class LogStreamManager implements BundleActivator,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
 	 */
@@ -70,7 +70,7 @@ public class LogStreamManager implements BundleActivator,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.
 	 * framework.ServiceReference)
 	 */
@@ -84,7 +84,7 @@ public class LogStreamManager implements BundleActivator,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.
 	 * framework.ServiceReference, java.lang.Object)
 	 */
@@ -132,7 +132,7 @@ public class LogStreamManager implements BundleActivator,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.
 	 * framework.ServiceReference, java.lang.Object)
 	 */
@@ -170,7 +170,7 @@ public class LogStreamManager implements BundleActivator,
 	/*
 	 * It is used to post each log entry to the LogStreamProviderFactory
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.osgi.service.log.LogListener#logged(org.osgi.service.log.LogEntry)
 	 */
 
