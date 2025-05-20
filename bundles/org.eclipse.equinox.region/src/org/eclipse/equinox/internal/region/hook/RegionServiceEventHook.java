@@ -28,7 +28,7 @@ import org.osgi.framework.hooks.service.EventHook;
  * the same region. This is necessary to optimize the case where many bundles
  * with service listeners are contained in the same region.
  * </p>
- * 
+ *
  * <strong>Concurrent Semantics</strong><br />
  * Thread safe.
  */

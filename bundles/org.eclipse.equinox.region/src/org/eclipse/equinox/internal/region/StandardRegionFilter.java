@@ -80,7 +80,7 @@ public final class StandardRegionFilter implements RegionFilter {
 
 	/**
 	 * Determines whether this filter allows the bundle with the given attributes
-	 * 
+	 *
 	 * @param bundleAttributes the bundle attributes
 	 * @return <code>true</code> if the bundle is allowed and
 	 *         <code>false</code>otherwise

@@ -22,7 +22,7 @@ import org.osgi.framework.BundleException;
 /**
  * This internal interface is used to track which bundles belong to which
  * regions.
- * 
+ *
  * <strong>Concurrent Semantics</strong><br />
  * Implementations must be thread safe.
  */
@@ -36,7 +36,7 @@ public interface BundleIdToRegionMapping {
 	 * <p>
 	 * If the given region does not belong to a {@link RegionDigraph} an
 	 * {@link IllegalStateException} is thrown.
-	 * 
+	 *
 	 * @param bundleId the bundle id to be associated
 	 * @param region   the {@link Region} with which the bundle id is to be
 	 *                 associated
@@ -49,7 +49,7 @@ public interface BundleIdToRegionMapping {
 	 * Dissociates the given bundle id from the given region. If the given region
 	 * does not belong to a {@link RegionDigraph} an {@link IllegalStateException}
 	 * is thrown.
-	 * 
+	 *
 	 * @param bundleId the bundle id to be dissociated
 	 * @param region   the {@link Region} from which the bundle id is to be
 	 *                 dissociated
@@ -58,7 +58,7 @@ public interface BundleIdToRegionMapping {
 
 	/**
 	 * Dissociates any bundle ids which may be associated with the given region.
-	 * 
+	 *
 	 * @param region the {@link Region} to be dissociated
 	 */
 	void dissociateRegion(Region region);
@@ -67,7 +67,7 @@ public interface BundleIdToRegionMapping {
 	 * Returns the {@link Region} associated with the given bundle id or
 	 * <code>null</code> if the given bundle id is not associated with a region
 	 * associated with a {@link RegionDigraph}.
-	 * 
+	 *
 	 * @param bundleId the bundle id whose region is required
 	 * @return the {@link Region} associated with the given bundle id or or
 	 *         <code>null</code> if the given bundle id is not associated with a
@@ -79,7 +79,7 @@ public interface BundleIdToRegionMapping {
 	 * Checks the association of the given bundle id with the given region and
 	 * returns <code>true</code> if and only if the given bundle id is associated
 	 * with the given region
-	 * 
+	 *
 	 * @param bundleId the bundle id to be checked
 	 * @param region   the {@link Region} to be checked
 	 * @return <code>true</code> if and only if the given bundle id is associated
@@ -90,7 +90,7 @@ public interface BundleIdToRegionMapping {
 	/**
 	 * Returns a set of bundle ids associated with the given region. Never returns
 	 * <code>null</code>.
-	 * 
+	 *
 	 * @param region the {@link Region} whose bundle ids are required
 	 * @return the {@link Set} of bundle ids associated with the given region
 	 */

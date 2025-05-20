@@ -20,7 +20,7 @@ import org.eclipse.equinox.region.Region;
 /**
  * A {@link ManageableRegion} is a JMX representation of a {@link Region}.
  * <p>
- * 
+ *
  * <strong>Concurrent Semantics</strong>
  * </p>
  * Thread safe.
@@ -30,21 +30,21 @@ public interface ManageableRegion {
 
 	/**
 	 * Returns the region name.
-	 * 
+	 *
 	 * @return the region name
 	 */
 	String getName();
 
 	/**
 	 * Returns the {@link ManageableRegion}s that this region depends upon.
-	 * 
+	 *
 	 * @return an array of {@link ManageableRegion}s
 	 */
 	ManageableRegion[] getDependencies();
 
 	/**
 	 * Returns the bundle ids belonging to this region.
-	 * 
+	 *
 	 * @return an array of bundle ids
 	 */
 	long[] getBundleIds();

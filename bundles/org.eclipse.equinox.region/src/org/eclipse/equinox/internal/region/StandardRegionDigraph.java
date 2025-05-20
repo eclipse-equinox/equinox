@@ -29,7 +29,7 @@ import org.osgi.framework.hooks.resolver.ResolverHookFactory;
  * <p>
  * <strong>Concurrent Semantics</strong>
  * </p>
- * 
+ *
  * Thread safe.
  */
 public final class StandardRegionDigraph implements BundleIdToRegionMapping, RegionDigraph {
@@ -435,7 +435,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 
 	/**
 	 * Returns a snapshot of filtered regions
-	 * 
+	 *
 	 * @return a snapshot of filtered regions
 	 */
 	Map<Region, Set<FilteredRegion>> getFilteredRegions() {

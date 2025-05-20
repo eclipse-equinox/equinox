@@ -25,7 +25,7 @@ import java.util.Set;
  * {@link SubgraphTraverser} is a utility for traversing a subgraph of a
  * {@link RegionDigraph} calling a {@link RegionDigraphVisitor} on the way.
  * <p />
- * 
+ *
  * <strong>Concurrent Semantics</strong><br />
  * Thread safe.
  */

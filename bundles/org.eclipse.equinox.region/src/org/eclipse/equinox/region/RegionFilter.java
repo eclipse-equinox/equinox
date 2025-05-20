@@ -29,30 +29,30 @@ import org.osgi.framework.wiring.BundleRevision;
  * <p>
  * <strong>Concurrent Semantics</strong>
  * </p>
- * 
+ *
  * Implementations must be thread safe.
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface RegionFilter {
 
 	/**
 	 * Name space for sharing package capabilities.
-	 * 
+	 *
 	 * @see BundleRevision#PACKAGE_NAMESPACE
 	 */
 	public static final String VISIBLE_PACKAGE_NAMESPACE = BundleRevision.PACKAGE_NAMESPACE;
 
 	/**
 	 * Name space for sharing bundle capabilities for require bundle constraints.
-	 * 
+	 *
 	 * @see BundleRevision#BUNDLE_NAMESPACE
 	 */
 	public static final String VISIBLE_REQUIRE_NAMESPACE = BundleRevision.BUNDLE_NAMESPACE;
 
 	/**
 	 * Name space for sharing host capabilities.
-	 * 
+	 *
 	 * @see BundleRevision#HOST_NAMESPACE
 	 */
 	public static final String VISIBLE_HOST_NAMESPACE = BundleRevision.HOST_NAMESPACE;
@@ -60,7 +60,7 @@ public interface RegionFilter {
 	/**
 	 * Name space for sharing services. The filters specified in this name space
 	 * will be used to match {@link ServiceReference services}.
-	 * 
+	 *
 	 * @deprecated use the {@link RegionFilter#VISIBLE_OSGI_SERVICE_NAMESPACE
 	 *             osgi.service} namespace instead.
 	 */
@@ -119,7 +119,7 @@ public interface RegionFilter {
 	 * Determines whether this filter allows the given bundle. A Bundle is allowed
 	 * if it successfully matches one or more filters specified using the
 	 * {@link RegionFilter#VISIBLE_BUNDLE_NAMESPACE} name space.
-	 * 
+	 *
 	 * @param bundle the bundle
 	 * @return <code>true</code> if the bundle is allowed and
 	 *         <code>false</code>otherwise
@@ -130,7 +130,7 @@ public interface RegionFilter {
 	 * Determines whether this filter allows the given bundle. A Bundle is allowed
 	 * if it successfully matches one or more filters specified using the
 	 * {@link RegionFilter#VISIBLE_BUNDLE_NAMESPACE} name space.
-	 * 
+	 *
 	 * @param bundle the bundle revision
 	 * @return <code>true</code> if the bundle is allowed and
 	 *         <code>false</code>otherwise
@@ -142,7 +142,7 @@ public interface RegionFilter {
 	 * is allowed if its service properties successfully matches one or more filters
 	 * specified using the {@link RegionFilter#VISIBLE_OSGI_SERVICE_NAMESPACE} name
 	 * space.
-	 * 
+	 *
 	 * @param service the service reference of the service
 	 * @return <code>true</code> if the service is allowed and
 	 *         <code>false</code>otherwise
@@ -159,7 +159,7 @@ public interface RegionFilter {
 	 * osgi.wiring.bundle} may be used. Any other generic capability
 	 * {@link RegionFilterBuilder#allow(String, String) name spaces} can also be
 	 * allowed by the region filter.
-	 * 
+	 *
 	 * @param capability the bundle capability
 	 * @return <code>true</code> if the capability is allowed and
 	 *         <code>false</code>otherwise
@@ -175,7 +175,7 @@ public interface RegionFilter {
 	 * {@link #VISIBLE_OSGI_SERVICE_NAMESPACE}. Any other generic capability
 	 * {@link RegionFilterBuilder#allow(String, String) name spaces} can also be
 	 * allowed by the region filter.
-	 * 
+	 *
 	 * @param namespace  the name space
 	 * @param attributes the attributes to check if they are allowed
 	 * @return <code>true</code> if the name space and attributes are allowed and
@@ -188,7 +188,7 @@ public interface RegionFilter {
 	 * The may key is the name space and the value is a collection of filters for
 	 * the name space. The returned map is a snapshot of the sharing policy. Changes
 	 * made to the returned map have no affect on this region filter.
-	 * 
+	 *
 	 * @return a map containing the sharing policy used by this region filter
 	 */
 	public Map<String, Collection<String>> getSharingPolicy();

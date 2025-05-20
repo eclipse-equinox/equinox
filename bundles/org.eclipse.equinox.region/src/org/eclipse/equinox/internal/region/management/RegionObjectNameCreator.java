@@ -22,7 +22,7 @@ import org.eclipse.equinox.region.management.ManageableRegion;
  * {@link RegionObjectNameCreator} is responsible for creating
  * {@link ObjectName}s for {@link ManageableRegion}s.
  * <p />
- * 
+ *
  * <strong>Concurrent Semantics</strong><br />
  * Thread safe.
  */

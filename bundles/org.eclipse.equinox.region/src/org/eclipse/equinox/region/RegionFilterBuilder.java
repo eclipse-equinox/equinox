@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -28,16 +28,16 @@ import org.osgi.framework.InvalidSyntaxException;
  * osgi.wiring.package} or a user defined value.
  * </p>
  * <strong>Concurrent Semantics</strong><br />
- * 
+ *
  * Implementations of this interface must be thread safe.
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface RegionFilterBuilder {
 
 	/**
 	 * Allow capabilities with the given name space matching the given filter.
-	 * 
+	 *
 	 * @param namespace the name space of the capabilities to be allowed
 	 * @param filter    the filter matching the capabilities to be allowed
 	 * @return this builder (for method chaining)
@@ -46,7 +46,7 @@ public interface RegionFilterBuilder {
 
 	/**
 	 * Allow all capabilities with the given name space.
-	 * 
+	 *
 	 * @param namespace the name space of the capabilities to be allowed
 	 * @return this builder (for method chaining)
 	 */
@@ -54,7 +54,7 @@ public interface RegionFilterBuilder {
 
 	/**
 	 * Build a {@link RegionFilter} from the current state of this builder.
-	 * 
+	 *
 	 * @return the {@link RegionFilter} built
 	 */
 	RegionFilter build();

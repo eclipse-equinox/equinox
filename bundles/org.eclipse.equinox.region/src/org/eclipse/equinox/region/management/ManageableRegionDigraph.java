@@ -30,14 +30,14 @@ public interface ManageableRegionDigraph {
 
 	/**
 	 * Gets the {@link ManageableRegion}s in the digraph.
-	 * 
+	 *
 	 * @return an array of {@link ManageableRegion}s
 	 */
 	ManageableRegion[] getRegions();
 
 	/**
 	 * Gets the {@link ManageableRegion} with the given name.
-	 * 
+	 *
 	 * @param regionName the region name
 	 * @return a {@link ManageableRegion} or <code>null</code> if there is no region
 	 *         with the given name

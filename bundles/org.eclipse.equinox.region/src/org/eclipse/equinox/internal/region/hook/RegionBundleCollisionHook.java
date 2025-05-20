@@ -23,7 +23,7 @@ import org.osgi.framework.hooks.bundle.CollisionHook;
 /**
  * {@link RegionBundleCollisionHook} manages the collision policy of duplicate
  * bundles.
- * 
+ *
  * <strong>Concurrent Semantics</strong><br />
  * Thread safe.
  */
