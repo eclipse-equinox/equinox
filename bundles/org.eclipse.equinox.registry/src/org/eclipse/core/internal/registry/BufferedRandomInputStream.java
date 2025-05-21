@@ -147,7 +147,7 @@ public class BufferedRandomInputStream extends InputStream {
 
 	/**
 	 * Supplies functionality of the {@link java.io.RandomAccessFile#length()}.
-	 * 
+	 *
 	 * @return file length
 	 */
 	public long length() throws IOException {
