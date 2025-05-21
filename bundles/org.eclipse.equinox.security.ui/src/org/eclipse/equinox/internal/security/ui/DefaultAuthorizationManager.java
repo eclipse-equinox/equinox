@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -19,7 +19,7 @@ import org.eclipse.equinox.internal.provisional.security.ui.AuthorizationManager
 import org.eclipse.osgi.internal.provisional.service.security.AuthorizationStatus;
 import org.eclipse.ui.IWorkbenchWindow;
 
-// 1. if there are disabled bundles, and if so, which ones, why, and whether they are fatal or warn 
+// 1. if there are disabled bundles, and if so, which ones, why, and whether they are fatal or warn
 // 2. when bundles are disabled, why and whether they are fatal or warn
 // 3. when bundles are enabled
 public class DefaultAuthorizationManager extends AuthorizationManager {

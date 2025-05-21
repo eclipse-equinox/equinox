@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -34,7 +34,7 @@ public abstract class SecurityContributionItemFactory {
 
 	/**
 	 * Creates a new contribution item factory with the given id.
-	 * 
+	 *
 	 * @param contributionItemId the id of contribution items created by this
 	 *                           factory
 	 */
@@ -44,7 +44,7 @@ public abstract class SecurityContributionItemFactory {
 
 	/**
 	 * Returns the id of this contribution item factory.
-	 * 
+	 *
 	 * @return the id of contribution items created by this factory
 	 */
 	public String getId() {

@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -96,8 +96,8 @@ public class TabContents implements ISecurePreferencesSelection, IDeleteListener
 			validateSave(); // save could fail so re-check
 		}));
 
-		/* Removed for the time being. In future modify/show/export operations could be 
-		 * re-introduced with some special access token required to be entered by the user 
+		/* Removed for the time being. In future modify/show/export operations could be
+		 * re-introduced with some special access token required to be entered by the user
 		 * @formatter:off
 		Button buttonExport = new Button(buttonBar, SWT.CENTER);
 		buttonExport.setText(SecUIMessages.exportButton);

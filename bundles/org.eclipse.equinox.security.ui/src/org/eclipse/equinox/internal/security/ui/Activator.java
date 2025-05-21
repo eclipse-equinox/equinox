@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -190,7 +190,7 @@ public class Activator extends AbstractUIPlugin {
 
 	/**
 	 * Get the workbench image with the given path relative to ICON_PATH.
-	 * 
+	 *
 	 * @return ImageDescriptor
 	 */
 	public static ImageDescriptor getImageDescriptor(String relativePath) {
@@ -199,7 +199,7 @@ public class Activator extends AbstractUIPlugin {
 
 	/**
 	 * Logs a message.
-	 * 
+	 *
 	 * @param severity  Either IStatus.INFO, IStatus.WARNING or IStatus.ERROR.
 	 * @param key       The key of the translated message in the resource bundle.
 	 * @param args      The arguments to pass to <code>MessageFormat.format</code>

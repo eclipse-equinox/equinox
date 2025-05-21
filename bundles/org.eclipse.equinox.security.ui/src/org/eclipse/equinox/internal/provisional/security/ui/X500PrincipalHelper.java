@@ -1,6 +1,6 @@
 /*******************************************************************************
  * Copyright (c) 2008, 2017  Jay Rosenthal and others.
- * 
+ *
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -8,7 +8,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     Jay Rosenthal - initial API and implementation
  *******************************************************************************/
@@ -62,7 +62,7 @@ public class X500PrincipalHelper {
 
 	/**
 	 * Set the X500Principal name object to be parsed.
-	 * 
+	 *
 	 * @param principal - X500Principal
 	 */
 	public void setPrincipal(X500Principal principal) {
@@ -73,7 +73,7 @@ public class X500PrincipalHelper {
 	 * Gets the most significant common name (CN) attribute from the given
 	 * X500Principal object. For names that contains multiple attributes of this
 	 * type. The first (most significant) one will be returned
-	 * 
+	 *
 	 * @return the Most significant common name attribute.
 	 */
 	public String getCN() {
@@ -84,7 +84,7 @@ public class X500PrincipalHelper {
 	 * Gets the most significant Organizational Unit (OU) attribute from the given
 	 * X500Principal object. For names that contains multiple attributes of this
 	 * type. The first (most significant) one will be returned
-	 * 
+	 *
 	 * @return the Most significant OU attribute.
 	 */
 
@@ -97,7 +97,7 @@ public class X500PrincipalHelper {
 	 * Gets the most significant Organization (O) attribute from the given
 	 * X500Principal object. For names that contains multiple attributes of this
 	 * type. The first (most significant) one will be returned
-	 * 
+	 *
 	 * @return the Most significant O attribute.
 	 */
 
@@ -108,7 +108,7 @@ public class X500PrincipalHelper {
 
 	/**
 	 * Gets the Country (C) attribute from the given X500Principal object.
-	 * 
+	 *
 	 * @return the C attribute.
 	 */
 	public String getC() {
@@ -117,7 +117,7 @@ public class X500PrincipalHelper {
 
 	/**
 	 * Gets the Locale (L) attribute from the given X500Principal object.
-	 * 
+	 *
 	 * @return the L attribute.
 	 */
 	public String getL() {
@@ -126,7 +126,7 @@ public class X500PrincipalHelper {
 
 	/**
 	 * Gets the State (ST) attribute from the given X500Principal object.
-	 * 
+	 *
 	 * @return the ST attribute.
 	 */
 	public String getST() {
@@ -135,7 +135,7 @@ public class X500PrincipalHelper {
 
 	/**
 	 * Gets the Street (STREET) attribute from the given X500Principal object.
-	 * 
+	 *
 	 * @return the STREET attribute.
 	 */
 	public String getSTREET() {
@@ -145,7 +145,7 @@ public class X500PrincipalHelper {
 	/**
 	 * Gets the Email Address (EMAILADDRESS) attribute from the given X500Principal
 	 * object.
-	 * 
+	 *
 	 * @return the EMAILADDRESS attribute.
 	 */
 	public String getEMAILDDRESS() {
@@ -158,10 +158,10 @@ public class X500PrincipalHelper {
 
 	/**
 	 * Derived From: org.eclipse.osgi.internal.verifier - DNChainMatching.java
-	 * 
+	 *
 	 * Takes a distinguished name in canonical form and fills in the rdnArray with
 	 * the extracted RDNs.
-	 * 
+	 *
 	 * @param dn the distinguished name in canonical form.
 	 * @throws IllegalArgumentException if a formatting error is found.
 	 */
@@ -212,7 +212,7 @@ public class X500PrincipalHelper {
 	/**
 	 * Returns an ArrayList containing all the values for the given attribute
 	 * identifier.
-	 * 
+	 *
 	 * @param attributeID String containing the X500 name attribute whose values are
 	 *                    to be returned
 	 * @return ArrayList containing the string values of the requested attribute.

@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *      IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -15,7 +15,7 @@ package org.eclipse.equinox.internal.security.ui;
 
 /**
  * Used by the X509CertificateAttributeContentProvider.
- * 
+ *
  * Objects of this class contain a decomposition of an attribute in an X509
  * certificate so it can be displayed in the UI.
  */

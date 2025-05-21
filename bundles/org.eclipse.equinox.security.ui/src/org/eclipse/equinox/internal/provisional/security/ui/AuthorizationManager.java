@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -29,7 +29,7 @@ public abstract class AuthorizationManager {
 
 	/**
 	 * Query whether the authorization system is enabled for the system.
-	 * 
+	 *
 	 * @return <code>true</code> if and only if authorization is enabled
 	 */
 	abstract public boolean isEnabled();
@@ -38,7 +38,7 @@ public abstract class AuthorizationManager {
 	 * Returns true when the system is in need of attention from the end user. This
 	 * means that some unauthorized content has been encountered, and the user has
 	 * not yet inspected the situation.
-	 * 
+	 *
 	 * @return <code>true</code> if user attention is required
 	 */
 	abstract public boolean needsAttention();
@@ -54,7 +54,7 @@ public abstract class AuthorizationManager {
 	/**
 	 * Open the authorization manager user interface so that the end user can view
 	 * and edit the system's authorization state.
-	 * 
+	 *
 	 * @param workbenchWindow the workbench window
 	 */
 	abstract public void displayManager(IWorkbenchWindow workbenchWindow);
