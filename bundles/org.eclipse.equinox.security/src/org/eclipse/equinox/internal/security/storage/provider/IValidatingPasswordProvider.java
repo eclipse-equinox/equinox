@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
@@ -17,7 +17,7 @@ public interface IValidatingPasswordProvider {
 
 	/**
 	 * Return if password provider is valid for current system
-	 * 
+	 *
 	 * @return true if valid, false otherwise
 	 */
 	public boolean isValid();

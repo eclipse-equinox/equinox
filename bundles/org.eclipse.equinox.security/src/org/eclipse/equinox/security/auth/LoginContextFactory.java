@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -23,7 +23,7 @@ import org.eclipse.equinox.internal.security.auth.SecureContext;
  * <p>
  * This class is not intended to be instantiated or extended by clients.
  * </p>
- * 
+ *
  * @noinstantiate This class is not intended to be instantiated by clients.
  */
 final public class LoginContextFactory {
@@ -37,7 +37,7 @@ final public class LoginContextFactory {
 	 * configuration, the initialization will fail unless this context created
 	 * first, prior to any calls to {@link #createContext(String)}.
 	 * </p>
-	 * 
+	 *
 	 * @param configName the name of login configuration to use
 	 * @param configFile points to the standard JAAS configuration file
 	 * @return new security context
@@ -55,7 +55,7 @@ final public class LoginContextFactory {
 	 * configuration, the initialization will fail unless this context created
 	 * first, prior to any calls to {@link #createContext(String)}.
 	 * </p>
-	 * 
+	 *
 	 * @param configName the name of login configuration to use
 	 * @param configFile points to the standard JAAS configuration file
 	 * @param handler    optional callback handler, might be <code>null</code>
@@ -68,7 +68,7 @@ final public class LoginContextFactory {
 	/**
 	 * Creates application-specific security context. The security context then can
 	 * be used to perform login, logout, and obtain Subject information.
-	 * 
+	 *
 	 * @param configName the name of login configuration to use
 	 * @return new security context
 	 */

@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -26,7 +26,7 @@ import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
-//XXX add validation on module IDs - AZaz09 and dots, absolutely no tabs 
+//XXX add validation on module IDs - AZaz09 and dots, absolutely no tabs
 // XXX reserved name DEFAULT_PASSWORD_ID
 
 /**

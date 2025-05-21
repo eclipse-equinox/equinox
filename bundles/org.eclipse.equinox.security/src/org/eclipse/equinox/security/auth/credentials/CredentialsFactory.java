@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -26,7 +26,7 @@ import org.eclipse.equinox.internal.security.credentials.EquinoxPublicCredential
  * <p>
  * This class is not intended to be instantiated or extended by clients.
  * </p>
- * 
+ *
  * @noinstantiate This class is not intended to be instantiated by clients.
  */
 final public class CredentialsFactory {
@@ -34,7 +34,7 @@ final public class CredentialsFactory {
 	/**
 	 * Login modules can use this method to create new public credentials as a
 	 * result of the login process.
-	 * 
+	 *
 	 * @see Subject#getPublicCredentials()
 	 * @param name        user's name
 	 * @param primaryRole user's primary role, <code>null</code> if not available
@@ -50,7 +50,7 @@ final public class CredentialsFactory {
 	/**
 	 * Login modules can use this method to create new public credentials as a
 	 * result of the login process.
-	 * 
+	 *
 	 * @see Subject#getPublicCredentials()
 	 * @param name       user's name
 	 * @param roles      user's roles, <code>null</code> if not available
@@ -65,7 +65,7 @@ final public class CredentialsFactory {
 
 	/**
 	 * Login modules can use this method to create new private credentials.
-	 * 
+	 *
 	 * @see Subject#getPrivateCredentials()
 	 * @param privateKey the private key to be stored in this credential
 	 * @param providerID the ID of the creator of this private credential; if

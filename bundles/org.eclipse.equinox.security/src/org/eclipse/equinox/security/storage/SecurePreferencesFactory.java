@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -25,7 +25,7 @@ import org.eclipse.equinox.security.storage.provider.IProviderHints;
  * <p>
  * This class is not intended to be instantiated or extended by clients.
  * </p>
- * 
+ *
  * @noinstantiate This class is not intended to be instantiated by clients.
  */
 final public class SecurePreferencesFactory {
@@ -47,7 +47,7 @@ final public class SecurePreferencesFactory {
 	 * <li>if it fails, preferences will use configuration location of the current
 	 * Eclipse instance.</li>
 	 * </ol>
-	 * 
+	 *
 	 * @return default instance of secure preferences, <code>null</code> if
 	 *         application was unable to create secure preferences using default
 	 *         location
@@ -69,7 +69,7 @@ final public class SecurePreferencesFactory {
 	 * Similarly to the rest of the Equinox, URLs passed as an argument must not be
 	 * encoded, meaning that spaces should stay as spaces, not as &quot;%x20&quot;.
 	 * </p>
-	 * 
+	 *
 	 * @param location URL pointing to the location of secure storage. At present
 	 *                 only file URLs are supported. Pass <code>null</code> to use
 	 *                 default location

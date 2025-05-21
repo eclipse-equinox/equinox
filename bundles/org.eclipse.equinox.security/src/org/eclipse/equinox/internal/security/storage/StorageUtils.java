@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -22,13 +22,13 @@ import org.eclipse.equinox.internal.security.auth.nls.SecAuthMessages;
 
 /**
  * PLEASE READ BEFORE CHANGING THIS FILE
- * 
+ *
  * At present most of the methods expect only file URLs. The API methods take
  * URLs for possible future expansion, and there is some code below that would
  * work with some other URL types, but the only supported URL types at this time
  * are file URLs. Also note that URL paths should not be encoded (spaces should
  * be spaces, not "%x20").
- * 
+ *
  * On encoding: Java documentation recommends using File.toURI().toURL().
  * However, in this process non-alphanumeric characters (including spaces) get
  * encoded and can not be used with the rest of Eclipse methods that expect
@@ -130,7 +130,7 @@ public class StorageUtils {
 	/**
 	 * The new String(byte[]) method uses default system encoding which might not
 	 * properly process non-ASCII characters.
-	 * 
+	 *
 	 * Pairing {@link #getBytes(String)} and {@link #getString(byte[])} methods
 	 * allows round trip of non-ASCII characters.
 	 */

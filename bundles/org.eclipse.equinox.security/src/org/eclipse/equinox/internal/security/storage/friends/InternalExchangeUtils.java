@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -48,7 +48,7 @@ public class InternalExchangeUtils {
 	 * Gathers list of available password providers. Note: this method does not try
 	 * to instantiate providers, hence, providers listed as available by this method
 	 * might fail on instantiation and not be available for the actual use.
-	 * 
+	 *
 	 * @return available password providers as described in extensions
 	 */
 	static public List<PasswordProviderDescription> passwordProvidersFind() {
@@ -66,7 +66,7 @@ public class InternalExchangeUtils {
 	 * method does not try to instantiate providers, hence, providers listed as
 	 * available by this method might fail on instantiation and not be available for
 	 * the actual use.
-	 * 
+	 *
 	 * @return available password providers as described in extensions
 	 */
 	static public List<PasswordProviderDescription> passwordProvidersFind(String id) {
@@ -92,7 +92,7 @@ public class InternalExchangeUtils {
 
 	/**
 	 * Returns location of default storage
-	 * 
+	 *
 	 * @return location of the default storage, might be null
 	 */
 	static public URL defaultStorageLocation() {

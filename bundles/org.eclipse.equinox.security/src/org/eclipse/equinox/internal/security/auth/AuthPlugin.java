@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -164,11 +164,11 @@ public class AuthPlugin implements BundleActivator {
 	/**
 	 * At present the logging for bundles positioned below org.eclipse.core.runtime
 	 * in the bundle dependency stack is really sub-optimal.
-	 * 
+	 *
 	 * In particular, logging with RuntimeLog on shutdown doesn't work as Platform
 	 * shuts down (removing listeners from RuntimeLog) before this bundle shuts
 	 * down.
-	 * 
+	 *
 	 * As such, until there is improved logging, the errors that occur on shutdown
 	 * should use this method. However, errors occuring during normal operations
 	 * should use RuntimeLog as otherwise the Error View is not getting updated.
