@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -32,7 +32,7 @@ import org.eclipse.equinox.internal.security.auth.ext.loader.ExtLoginModuleLoade
  * <p>
  * This class should not be extended or instantiated directly.
  * </p>
- * 
+ *
  * @noinstantiate This class is not intended to be instantiated by clients.
  */
 final public class ExtensionLoginModule implements LoginModule {

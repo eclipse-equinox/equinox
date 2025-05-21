@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -22,7 +22,7 @@ import javax.security.auth.login.LoginException;
  * <p>
  * This interface is not intended to be implemented or extended by clients.
  * </p>
- * 
+ *
  * @see ILoginContextListener
  * @noimplement This interface is not intended to be implemented by clients.
  */
@@ -30,7 +30,7 @@ public interface ILoginContextListener {
 
 	/**
 	 * This method is called before login starts.
-	 * 
+	 *
 	 * @param subject the subject being authenticated, might be <code>null</code> if
 	 *                there is no subject associated the context at this time
 	 */
@@ -39,7 +39,7 @@ public interface ILoginContextListener {
 	/**
 	 * This method is called after login sequence is finished. If login exception is
 	 * not null, the login failed.
-	 * 
+	 *
 	 * @param subject        the subject being authenticated, might be
 	 *                       <code>null</code> if there is no subject associated the
 	 *                       context at this time
@@ -50,7 +50,7 @@ public interface ILoginContextListener {
 
 	/**
 	 * This method is called before logout starts.
-	 * 
+	 *
 	 * @param subject the authenticated subject, might be <code>null</code> if there
 	 *                is no subject associated the context at this time
 	 */
@@ -59,7 +59,7 @@ public interface ILoginContextListener {
 	/**
 	 * This method is called after logout sequence finishes. If logout exception is
 	 * not null, the logout failed.
-	 * 
+	 *
 	 * @param subject         the authenticated subject, might be <code>null</code>
 	 *                        if there is no subject associated the context at this
 	 *                        time

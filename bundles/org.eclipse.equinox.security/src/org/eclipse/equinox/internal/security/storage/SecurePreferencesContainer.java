@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -22,53 +22,53 @@ import org.eclipse.equinox.security.storage.provider.IPreferencesContainer;
 /**
  * NOTE NOTE NOTE: this Javadoc is implementation details - this is not an API
  * but a few notes on implementation design.
- * 
+ *
  * For a URL we get one secure preference tree that contains data. The top node
  * of that tree has a "root" type, it has special properties - the location,
  * status, and knowledge as to how persist the tree.
- * 
+ *
  * On the user side - let's say we have the following preferences open via
  * factory:
- * 
+ *
  * <pre>
  * UserPreferences1 (Options1, URL1)
  * UserPreferences2 (Options2, URL1)
  * UserPreferences3 (Options3, URL2)
  * UserPreferences4 (Options4, URL2)
  * </pre>
- * 
+ *
  * When we'll have 2 actual "back end" secure preferences tree with data:
- * 
+ *
  * <pre>
  * {@code
- * [UserPreferences1] -> [Options1] + 
+ * [UserPreferences1] -> [Options1] +
  *                                    \
  *                                     [secure preferences1]   <- 1 : 1 -> URL1
  *                                    /
- * [UserPreferences2] -> [Options2] + 
- * 
- * [UserPreferences3] -> [Options3] + 
+ * [UserPreferences2] -> [Options2] +
+ *
+ * [UserPreferences3] -> [Options3] +
  *                                    \
  *                                     [secure preferences2]   <- 1 : 1 -> URL2
  *                                    /
  * [UserPreferences4] -> [Options4] +
  * }
  * </pre>
- * 
+ *
  * The user-facing nodes are actually a (node + options for this container).
  * User-facing nodes are called wrappers as they primarily wrap secure
  * preferences nodes.
- * 
+ *
  * Containers are used to combine all wrappers created for the set of options.
  * This way users don't have to specify options on each get...() / put...()
  * method.
- * 
+ *
  * Additionally, containers cache wrappers so that navigation on preferences
  * tree won't create new wrappers every time process navigates from one node on
  * the tree to another.
- * 
+ *
  * Password provider modules:
- * 
+ *
  * Note that only a single instance of each password provider is ever created.
  * However, those instances are passed options as arguments.
  */

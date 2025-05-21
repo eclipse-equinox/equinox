@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -35,7 +35,7 @@ import java.io.IOException;
  * store password for the CVS repository located on eclipse.org we could use the
  * following code:
  * </p>
- * 
+ *
  * <pre>
  * ISecurePreferences root = SecurePreferencesFactory.getDefault();
  * ISecurePreferences node = root.node("cvs/eclipse.org");
@@ -82,7 +82,7 @@ import java.io.IOException;
  * <p>
  * This interface is not intended to be implemented or extended by clients.
  * </p>
- * 
+ *
  * @noextend This interface is not intended to be extended by clients.
  * @noimplement This interface is not intended to be implemented by clients.
  */
@@ -90,7 +90,7 @@ public interface ISecurePreferences {
 
 	/**
 	 * Stores a value associated with the key in this node.
-	 * 
+	 *
 	 * @param key     key with which the value is going to be associated
 	 * @param value   value to store
 	 * @param encrypt <code>true</code> if value is to be encrypted,
@@ -105,7 +105,7 @@ public interface ISecurePreferences {
 	/**
 	 * Retrieves a value associated with the key in this node. If the value was
 	 * encrypted, it is decrypted.
-	 * 
+	 *
 	 * @param key key with this the value is associated
 	 * @param def default value to return if the key is not associated with any
 	 *            value
@@ -119,7 +119,7 @@ public interface ISecurePreferences {
 
 	/**
 	 * Removes value associated with the key.
-	 * 
+	 *
 	 * @param key key with which a value is associated
 	 * @throws IllegalStateException if this node (or an ancestor) has been removed
 	 *                               with the {@link #removeNode()} method.
@@ -128,7 +128,7 @@ public interface ISecurePreferences {
 
 	/**
 	 * Removes all values from this node.
-	 * 
+	 *
 	 * @throws IllegalStateException if this node (or an ancestor) has been removed
 	 *                               with the {@link #removeNode()} method.
 	 */
@@ -136,7 +136,7 @@ public interface ISecurePreferences {
 
 	/**
 	 * Returns keys that have associated values.
-	 * 
+	 *
 	 * @return keys that have associated values
 	 * @throws IllegalStateException if this node (or an ancestor) has been removed
 	 *                               with the {@link #removeNode()} method.
@@ -145,7 +145,7 @@ public interface ISecurePreferences {
 
 	/**
 	 * Returns names of children nodes
-	 * 
+	 *
 	 * @return names of children nodes
 	 * @throws IllegalStateException if this node (or an ancestor) has been removed
 	 *                               with the {@link #removeNode()} method.
@@ -154,7 +154,7 @@ public interface ISecurePreferences {
 
 	/**
 	 * Returns parent of this node
-	 * 
+	 *
 	 * @return parent of this node
 	 * @throws IllegalStateException if this node (or an ancestor) has been removed
 	 *                               with the {@link #removeNode()} method.
@@ -174,7 +174,7 @@ public interface ISecurePreferences {
 	 * <li>can not contain two or more consecutive forward slashes;</li>
 	 * <li>can not end with a trailing forward slash.</li>
 	 * </ul>
-	 * 
+	 *
 	 * @see org.osgi.service.prefs.Preferences
 	 * @see org.osgi.service.prefs.Preferences#node(String)
 	 * @param pathName absolute or relative path to the node
@@ -194,7 +194,7 @@ public interface ISecurePreferences {
 	 * thrown by this method. See {@link #node(String)} for the description of what
 	 * is considered to be a valid path.
 	 * </p>
-	 * 
+	 *
 	 * @see org.osgi.service.prefs.Preferences
 	 * @see org.osgi.service.prefs.Preferences#node(String)
 	 * @param pathName absolute or relative path to the node
@@ -209,7 +209,7 @@ public interface ISecurePreferences {
 
 	/**
 	 * Removes this node from the tree of secure preferences.
-	 * 
+	 *
 	 * @throws IllegalStateException if this node (or an ancestor) has been removed
 	 *                               with the {@link #removeNode()} method.
 	 */
@@ -217,7 +217,7 @@ public interface ISecurePreferences {
 
 	/**
 	 * Returns name of this node.
-	 * 
+	 *
 	 * @return name of this node
 	 * @throws IllegalStateException if this node (or an ancestor) has been removed
 	 *                               with the {@link #removeNode()} method.
@@ -226,7 +226,7 @@ public interface ISecurePreferences {
 
 	/**
 	 * Returns absolute path to this node.
-	 * 
+	 *
 	 * @return absolute path to this node
 	 * @throws IllegalStateException if this node (or an ancestor) has been removed
 	 *                               with the {@link #removeNode()} method.
@@ -236,14 +236,14 @@ public interface ISecurePreferences {
 	/**
 	 * Saves the tree of secure preferences to the persistent storage. This method
 	 * can be called on any node in the secure preference tree.
-	 * 
+	 *
 	 * @throws IOException if error occurred while saving secure preferences
 	 */
 	public void flush() throws IOException;
 
 	/**
 	 * Stores a value associated with the key in this node.
-	 * 
+	 *
 	 * @param key     key with which the value is going to be associated
 	 * @param value   value to store
 	 * @param encrypt <code>true</code> if value is to be encrypted,
@@ -258,7 +258,7 @@ public interface ISecurePreferences {
 	/**
 	 * Retrieves a value associated with the key in this node. If the value was
 	 * encrypted, it is decrypted.
-	 * 
+	 *
 	 * @param key key with this the value is associated
 	 * @param def default value to return if the key is not associated with any
 	 *            value
@@ -272,7 +272,7 @@ public interface ISecurePreferences {
 
 	/**
 	 * Stores a value associated with the key in this node.
-	 * 
+	 *
 	 * @param key     key with which the value is going to be associated
 	 * @param value   value to store
 	 * @param encrypt <code>true</code> if value is to be encrypted,
@@ -287,7 +287,7 @@ public interface ISecurePreferences {
 	/**
 	 * Retrieves a value associated with the key in this node. If the value was
 	 * encrypted, it is decrypted.
-	 * 
+	 *
 	 * @param key key with this the value is associated
 	 * @param def default value to return if the key is not associated with any
 	 *            value
@@ -301,7 +301,7 @@ public interface ISecurePreferences {
 
 	/**
 	 * Stores a value associated with the key in this node.
-	 * 
+	 *
 	 * @param key     key with which the value is going to be associated
 	 * @param value   value to store
 	 * @param encrypt <code>true</code> if value is to be encrypted,
@@ -316,7 +316,7 @@ public interface ISecurePreferences {
 	/**
 	 * Retrieves a value associated with the key in this node. If the value was
 	 * encrypted, it is decrypted.
-	 * 
+	 *
 	 * @param key key with this the value is associated
 	 * @param def default value to return if the key is not associated with any
 	 *            value
@@ -330,7 +330,7 @@ public interface ISecurePreferences {
 
 	/**
 	 * Stores a value associated with the key in this node.
-	 * 
+	 *
 	 * @param key     key with which the value is going to be associated
 	 * @param value   value to store
 	 * @param encrypt <code>true</code> if value is to be encrypted,
@@ -345,7 +345,7 @@ public interface ISecurePreferences {
 	/**
 	 * Retrieves a value associated with the key in this node. If the value was
 	 * encrypted, it is decrypted.
-	 * 
+	 *
 	 * @param key key with this the value is associated
 	 * @param def default value to return if the key is not associated with any
 	 *            value
@@ -359,7 +359,7 @@ public interface ISecurePreferences {
 
 	/**
 	 * Stores a value associated with the key in this node.
-	 * 
+	 *
 	 * @param key     key with which the value is going to be associated
 	 * @param value   value to store
 	 * @param encrypt <code>true</code> if value is to be encrypted,
@@ -374,7 +374,7 @@ public interface ISecurePreferences {
 	/**
 	 * Retrieves a value associated with the key in this node. If the value was
 	 * encrypted, it is decrypted.
-	 * 
+	 *
 	 * @param key key with this the value is associated
 	 * @param def default value to return if the key is not associated with any
 	 *            value
@@ -388,7 +388,7 @@ public interface ISecurePreferences {
 
 	/**
 	 * Stores a value associated with the key in this node.
-	 * 
+	 *
 	 * @param key     key with which the value is going to be associated
 	 * @param value   value to store
 	 * @param encrypt <code>true</code> if value is to be encrypted,
@@ -403,7 +403,7 @@ public interface ISecurePreferences {
 	/**
 	 * Retrieves a value associated with the key in this node. If the value was
 	 * encrypted, it is decrypted.
-	 * 
+	 *
 	 * @param key key with this the value is associated
 	 * @param def default value to return if the key is not associated with any
 	 *            value
@@ -417,7 +417,7 @@ public interface ISecurePreferences {
 
 	/**
 	 * Specifies if value associated with the key is encrypted.
-	 * 
+	 *
 	 * @param key key with which a value is associated
 	 * @return <code>true</code> if value is encrypted, <code>false</code> otherwise
 	 * @throws StorageException      if stored data is invalid

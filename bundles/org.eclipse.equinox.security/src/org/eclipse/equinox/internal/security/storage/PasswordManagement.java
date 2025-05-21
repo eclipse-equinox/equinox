@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -149,7 +149,7 @@ public class PasswordManagement {
 	 * string - characters from alternating ends of the string are taken to form
 	 * "mashed up" recovery password - the secure digest of the "mashed up" string
 	 * is created
-	 * 
+	 *
 	 * This procedure should improve quality of the recovery password - even if
 	 * answers are dictionary words, digested "mashed up" password should be of a
 	 * reasonable good quality

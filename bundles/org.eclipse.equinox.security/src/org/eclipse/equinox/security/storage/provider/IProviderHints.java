@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -37,7 +37,7 @@ import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
  * <p>
  * This interface is not intended to be implemented or extended by clients.
  * </p>
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
  * @noextend This interface is not intended to be extended by clients.
  */

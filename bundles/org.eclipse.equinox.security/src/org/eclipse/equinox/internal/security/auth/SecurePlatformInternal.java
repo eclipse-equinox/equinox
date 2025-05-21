@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -54,7 +54,7 @@ public class SecurePlatformInternal {
 	 * merged into one file. Hence, aside from implementation details, no priority
 	 * information is specified by the order of config files. In this implementation
 	 * we add customer's config file to the end of the list.
-	 * 
+	 *
 	 * This method substitutes default login configuration: Configuration Inquiries
 	 * -> ConfigurationFederator -> 1) Extension Point supplied config providers; 2)
 	 * default Java config provider ("login.configuration.provider")

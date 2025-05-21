@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -53,7 +53,7 @@ public abstract class PasswordProvider {
 	/**
 	 * This method should return the password used to encrypt entries in the secure
 	 * preferences.
-	 * 
+	 *
 	 * @param container    container of the secure preferences
 	 * @param passwordType the collection of bits that describes password type
 	 *                     requested. See {@link #CREATE_NEW_PASSWORD} and
@@ -68,7 +68,7 @@ public abstract class PasswordProvider {
 	/**
 	 * The framework might call this method if it suspects that the password is
 	 * invalid (for instance, due to a failed data decryption).
-	 * 
+	 *
 	 * @param e         exception that occurred in the secure preferences processing
 	 * @param container container of the secure preferences
 	 * @return <code>true</code> if a different password might be provided;

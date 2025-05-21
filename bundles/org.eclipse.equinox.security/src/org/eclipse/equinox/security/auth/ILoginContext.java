@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -24,14 +24,14 @@ import javax.security.auth.login.LoginException;
  * <p>
  * This interface is not intended to be implemented by clients.
  * </p>
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface ILoginContext {
 
 	/**
 	 * Call this method to perform a login.
-	 * 
+	 *
 	 * @see LoginContext#login()
 	 * @throws LoginException if the authentication fails.
 	 */
@@ -39,7 +39,7 @@ public interface ILoginContext {
 
 	/**
 	 * Call this method to perform a logout.
-	 * 
+	 *
 	 * @see LoginContext#logout()
 	 * @throws LoginException if the logout fails.
 	 */
@@ -48,7 +48,7 @@ public interface ILoginContext {
 	/**
 	 * Retrieves the current Subject. Calling this method will force a login to
 	 * occur if the user is not already logged in.
-	 * 
+	 *
 	 * @see LoginContext#getSubject()
 	 * @return the Subject
 	 */
@@ -56,7 +56,7 @@ public interface ILoginContext {
 
 	/**
 	 * Adds listener to be notified on security-related events.
-	 * 
+	 *
 	 * @param listener the listener to be registered
 	 * @see ILoginContextListener
 	 */
@@ -65,7 +65,7 @@ public interface ILoginContext {
 	/**
 	 * Removes listener previously registered to receive notifications on
 	 * security-related events.
-	 * 
+	 *
 	 * @param listener the listener to be unregistered
 	 * @see ILoginContextListener
 	 */
@@ -77,7 +77,7 @@ public interface ILoginContext {
 	 * Using the LoginContext directly will bypass some of the processing offered by
 	 * this interface and should be used only when other methods are not sufficient.
 	 * </p>
-	 * 
+	 *
 	 * @return the underlying JAAS LoginContext
 	 * @throws LoginException if exception was encountered while creating
 	 *                        LoginContext

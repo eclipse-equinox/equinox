@@ -172,12 +172,12 @@ public class SecurePreferencesMapper {
 		if (arg == null || arg.isEmpty()) {
 			return options;
 		}
-		
+
 		String path = arg;
 		if (path.startsWith('@' + USER_HOME)) {
 			path = System.getProperty(USER_HOME, "") + path.substring(USER_HOME.length() + 1); //$NON-NLS-1$
 		}
-		
+
 		Path file = Path.of(path);
 		if (!Files.isReadable(file)) {
 			String msg = NLS.bind(SecAuthMessages.unableToReadPswdFile, arg);
