@@ -83,6 +83,16 @@ static const char* jvmLibs[] = { "libjvm.dylib", "libjvm.jnilib", "libjvm.so", N
 /* Define the window system arguments for the various Java VMs. */
 static char*  argVM_JAVA[] = { "-XstartOnFirstThread", NULL };
 
+@interface AppDelegate : NSObject <NSApplicationDelegate>
+- (BOOL)applicationSupportsSecureRestorableState:(NSApplication *)app;
+@end
+
+@implementation AppDelegate
+- (BOOL)applicationSupportsSecureRestorableState:(NSApplication *)app {
+    return YES;
+}
+@end
+
 static NSWindow* window = nil;
 @interface KeyWindow : NSWindow { }
 - (BOOL)canBecomeKeyWindow;
@@ -106,7 +116,7 @@ static NSWindow* window = nil;
 
 	int result = ENOENT;
 	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
-	[NSApplication sharedApplication];
+	[[NSApplication sharedApplication] setDelegate: [[AppDelegate alloc] init]];
 	NSImage* image = [[NSImage alloc] initByReferencingFile: featureImage];
 	[featureImage release];
 	if (image != NULL) {
