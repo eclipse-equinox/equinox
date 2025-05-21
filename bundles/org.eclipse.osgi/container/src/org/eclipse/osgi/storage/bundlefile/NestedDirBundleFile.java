@@ -68,8 +68,9 @@ public class NestedDirBundleFile extends BundleFile {
 	}
 
 	private boolean filterPath(String path) {
-		if (path.length() > 0 && path.charAt(0) == '/')
+		if (path.length() > 0 && path.charAt(0) == '/') {
 			path = path.substring(1);
+		}
 		for (String prefix : filterPrefixes) {
 			if (path.startsWith(prefix)) {
 				return true;
@@ -98,8 +99,9 @@ public class NestedDirBundleFile extends BundleFile {
 
 	@Override
 	public boolean containsDir(String dir) {
-		if (dir == null)
+		if (dir == null) {
 			return false;
+		}
 		if (filterPath(dir)) {
 			return false;
 		}
@@ -107,8 +109,9 @@ public class NestedDirBundleFile extends BundleFile {
 	}
 
 	private String prependNestedDir(String path) {
-		if (path.length() > 0 && path.charAt(0) == '/')
+		if (path.length() > 0 && path.charAt(0) == '/') {
 			path = path.substring(1);
+		}
 		return new StringBuilder(nestedDirName).append(path).toString();
 	}
 
@@ -119,8 +122,9 @@ public class NestedDirBundleFile extends BundleFile {
 		}
 		final Enumeration<String> basePaths = baseBundleFile.getEntryPaths(prependNestedDir(path), recurse);
 		final int cpLength = nestedDirName.length();
-		if (basePaths == null)
+		if (basePaths == null) {
 			return null;
+		}
 		return new Enumeration<String>() {
 
 			@Override

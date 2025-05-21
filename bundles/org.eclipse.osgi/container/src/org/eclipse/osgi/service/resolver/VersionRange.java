@@ -105,6 +105,7 @@ public class VersionRange extends org.osgi.framework.VersionRange {
 	 * @return the maximum Version of this VersionRange
 	 * @deprecated use {@link org.osgi.framework.VersionRange#getRight()}
 	 */
+	@Deprecated
 	public Version getMaximum() {
 		Version right = getRight();
 		return right == null ? versionMax : right;
@@ -131,8 +132,9 @@ public class VersionRange extends org.osgi.framework.VersionRange {
 	 *         otherwise
 	 */
 	public boolean isIncluded(Version version) {
-		if (version == null)
+		if (version == null) {
 			version = Version.emptyVersion;
+		}
 		return includes(version);
 	}
 }

@@ -54,8 +54,9 @@ public class ModuleRequirement implements BundleRequirement {
 
 	@Override
 	public boolean matches(BundleCapability capability) {
-		if (!namespace.equals(capability.getNamespace()))
+		if (!namespace.equals(capability.getNamespace())) {
 			return false;
+		}
 		String filterSpec = directives.get(Namespace.REQUIREMENT_FILTER_DIRECTIVE);
 		FilterImpl f = null;
 		if (filterSpec != null) {
