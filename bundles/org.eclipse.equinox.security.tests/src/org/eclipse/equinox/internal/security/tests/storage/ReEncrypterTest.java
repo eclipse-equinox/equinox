@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -130,7 +130,7 @@ public class ReEncrypterTest extends StorageAbstractTest {
 	/**
 	 * Dynamically installs a bundle that should contribute an Extension to the
 	 * org.eclipse.equinox.security.secureStorage Extension Point.
-	 * 
+	 *
 	 * Copied from DynamicPreferencesTest.
 	 */
 	protected Bundle installBundle(String bundlePath) throws MalformedURLException, BundleException, IOException {
