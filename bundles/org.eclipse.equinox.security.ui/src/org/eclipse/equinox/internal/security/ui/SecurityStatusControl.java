@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -27,12 +27,12 @@ import org.eclipse.ui.IWorkbenchWindow;
 /**
  * This contribution item is used to create a visual cue that informs the user
  * of bundles disabled in the system for signature validation reasons.
- * 
+ *
  * It has the following functions: - Two levels of severity, represented by two
  * distinct graphical icons - Visual notification when new user attention is
  * required (e.g. throbbing) - An informational message when the user hovers
  * over the icon - A right-click menu for contributing security related actions
- * 
+ *
  * @since 3.4
  */
 public class SecurityStatusControl extends ControlContribution {
@@ -52,7 +52,7 @@ public class SecurityStatusControl extends ControlContribution {
 
 	/**
 	 * Creates the contribution item.
-	 * 
+	 *
 	 * @param window the window
 	 */
 	public SecurityStatusControl(IWorkbenchWindow window) {
@@ -61,7 +61,7 @@ public class SecurityStatusControl extends ControlContribution {
 
 	/**
 	 * Creates the contribution item.
-	 * 
+	 *
 	 * @param window the window
 	 * @param id     the id
 	 */
