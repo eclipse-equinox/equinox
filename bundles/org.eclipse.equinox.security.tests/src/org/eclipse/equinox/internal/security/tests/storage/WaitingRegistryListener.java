@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -20,7 +20,7 @@ import org.eclipse.core.runtime.*;
 /**
  * Allows test cases to wait for the extension registry notifications. This
  * listener checks navigability to related elements from extensions.
- * 
+ *
  * @since 3.4 Copied from runtime tests
  */
 public class WaitingRegistryListener extends org.junit.Assert implements IRegistryEventListener {
