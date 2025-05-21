@@ -21,7 +21,7 @@ package org.eclipse.core.runtime;
  * <p>
  * This interface is not intended to be implemented by clients.
  * </p>
- * 
+ *
  * @since 3.0
  * @see IExtensionRegistry
  * @see IRegistryChangeListener
