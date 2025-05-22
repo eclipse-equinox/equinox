@@ -3381,4 +3381,86 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertEquals("Unexpected bundle count", 0, testContext.getBundles().length);
 	}
 
+	@Test
+	public void testBannedWeavingHookBundle() throws Exception {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); // $NON-NLS-1$
+		Map<String, Object> configuration = new HashMap<>();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		configuration.put(EquinoxConfiguration.PROP_BANNED_WEAVING_HOOK_BUNDLES,
+				"weavingB1:weavingB2@[2.0,3.0):weavingB3@[1.0,2.0)");
+		Equinox equinox = new Equinox(configuration);
+		equinox.start();
+
+		BundleContext systemContext = equinox.getBundleContext();
+		assertNotNull("System context is null", systemContext); //$NON-NLS-1$
+
+		Map<String, String> testHeaders = new HashMap<>();
+		testHeaders.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		testHeaders.put(Constants.BUNDLE_SYMBOLICNAME, "weavingB1");
+		testHeaders.put(Constants.BUNDLE_VERSION, "2.0.0");
+		File b1File = createBundle(config, testHeaders.get(Constants.BUNDLE_SYMBOLICNAME), testHeaders);
+		Bundle b1 = systemContext.installBundle("reference:file:///" + b1File.getAbsolutePath()); //$NON-NLS-1$ )
+		b1.start();
+
+		testHeaders.put(Constants.BUNDLE_SYMBOLICNAME, "weavingB2");
+		File b2File = createBundle(config, testHeaders.get(Constants.BUNDLE_SYMBOLICNAME), testHeaders);
+		Bundle b2 = systemContext.installBundle("reference:file:///" + b2File.getAbsolutePath()); //$NON-NLS-1$ )
+		b2.start();
+
+		testHeaders.put(Constants.BUNDLE_SYMBOLICNAME, "weavingB3");
+		File b3File = createBundle(config, testHeaders.get(Constants.BUNDLE_SYMBOLICNAME), testHeaders);
+		Bundle b3 = systemContext.installBundle("reference:file:///" + b3File.getAbsolutePath()); //$NON-NLS-1$ )
+		b3.start();
+
+		testHeaders.put(Constants.BUNDLE_SYMBOLICNAME, "weavingB4");
+		File b4File = createBundle(config, testHeaders.get(Constants.BUNDLE_SYMBOLICNAME), testHeaders);
+		Bundle b4 = systemContext.installBundle("reference:file:///" + b4File.getAbsolutePath()); //$NON-NLS-1$ )
+		b4.start();
+
+		AtomicInteger b1Called = new AtomicInteger();
+		b1.getBundleContext().registerService(WeavingHook.class, (w) -> {
+			b1Called.incrementAndGet();
+		}, null);
+
+		AtomicInteger b2Called = new AtomicInteger();
+		b2.getBundleContext().registerService(WeavingHook.class, (w) -> {
+			b2Called.incrementAndGet();
+		}, null);
+
+		AtomicInteger b3Called = new AtomicInteger();
+		b3.getBundleContext().registerService(WeavingHook.class, (w) -> {
+			b3Called.incrementAndGet();
+		}, null);
+
+		AtomicInteger b4Called = new AtomicInteger();
+		b4.getBundleContext().registerService(WeavingHook.class, (w) -> {
+			b4Called.incrementAndGet();
+		}, null);
+
+		List<FrameworkEvent> errors = new ArrayList<>();
+		systemContext.addFrameworkListener(e -> {
+			if (e.getType() == FrameworkEvent.ERROR) {
+				errors.add(e);
+			}
+		});
+
+		Bundle testBundle = systemContext.installBundle(installer.getBundleLocation("substitutes.a"));
+		testBundle.loadClass("substitutes.x.Ax");
+		testBundle.update();
+		testBundle.loadClass("substitutes.x.Ax");
+
+		assertEquals("weavingB1 should not be called", 0, b1Called.get());
+		assertEquals("weavingB2 should not be called", 0, b2Called.get());
+		assertEquals("weavingB3 should be called", 2, b3Called.get());
+		assertEquals("weavingB4 should be called", 2, b4Called.get());
+
+		stop(equinox);
+
+		// should only be one error per banned hook (2 in total)
+		assertEquals("Wrong number of errors", 2, errors.size());
+		// first one should be from b1
+		assertEquals("Wrong error bundle.", b1, errors.get(0).getBundle());
+		// second one should be from b2
+		assertEquals("Wrong error bundle.", b2, errors.get(1).getBundle());
+	}
 }
