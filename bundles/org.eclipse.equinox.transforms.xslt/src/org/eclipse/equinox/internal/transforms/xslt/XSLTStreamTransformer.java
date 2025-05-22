@@ -102,7 +102,7 @@ public class XSLTStreamTransformer {
 
 	/**
 	 * Create a new instance of this transformer.
-	 * 
+	 *
 	 * @param logTracker the log service
 	 */
 	public XSLTStreamTransformer(ServiceTracker<FrameworkLog, FrameworkLog> logTracker) {
@@ -111,7 +111,7 @@ public class XSLTStreamTransformer {
 
 	/**
 	 * Implements the StreamTransformer.getInput(InputStream, URL) method.
-	 * 
+	 *
 	 * @param inputStream    the original stream
 	 * @param transformerUrl the transformer URL. This should be an URL pointing to
 	 *                       an XSLT transform.
@@ -136,7 +136,7 @@ public class XSLTStreamTransformer {
 	/**
 	 * Get a cached template for the provided XSLT template URL. If the cached entry
 	 * for this URL does not exist it will be created.
-	 * 
+	 *
 	 * @param transformerURL the XSLT template URL.
 	 * @return the template
 	 */
