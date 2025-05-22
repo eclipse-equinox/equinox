@@ -40,7 +40,7 @@ public class TransformerList extends ServiceTracker<Object, Object> {
 
 	/**
 	 * Create a new instance of this list.
-	 * 
+	 *
 	 * @param context the context to track
 	 * @throws InvalidSyntaxException thrown if there's an issue listening for
 	 *                                changes to the given transformer type
@@ -56,7 +56,7 @@ public class TransformerList extends ServiceTracker<Object, Object> {
 	/**
 	 * Return the transformer of the given type being monitored by this list. If the
 	 * list is stale it will first be rebuilt.
-	 * 
+	 *
 	 * @param type the type of transformer
 	 * @return the transformer or null if no transformer of the given type is
 	 *         available.
