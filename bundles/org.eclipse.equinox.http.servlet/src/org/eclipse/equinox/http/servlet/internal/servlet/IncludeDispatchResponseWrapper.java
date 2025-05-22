@@ -97,7 +97,6 @@ public class IncludeDispatchResponseWrapper extends HttpServletResponseWrapper {
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
 	public void setStatus(int sc, String sm) {
 		return;
 	}
