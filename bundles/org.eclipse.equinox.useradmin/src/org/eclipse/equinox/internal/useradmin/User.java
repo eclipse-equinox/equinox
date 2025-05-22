@@ -104,10 +104,9 @@ public class User extends Role implements org.osgi.service.useradmin.User {
 					return (true);
 				}
 			} else if (value instanceof byte[] valueArray) {
-				if (!(checkValue instanceof byte[])) {
+				if (!(checkValue instanceof byte[] checkValueArray)) {
 					return (false);
 				}
-				byte[] checkValueArray = (byte[]) checkValue;
 				int length = valueArray.length;
 				if (length != checkValueArray.length) {
 					return (false);
