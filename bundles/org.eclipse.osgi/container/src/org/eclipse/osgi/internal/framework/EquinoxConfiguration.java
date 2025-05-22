@@ -68,6 +68,7 @@ import org.eclipse.osgi.service.environment.EnvironmentInfo;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Version;
+import org.osgi.framework.VersionRange;
 import org.osgi.framework.wiring.BundleRevision;
 
 /**
@@ -258,6 +259,9 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	public static final String PROP_GOSH_ARGS = "gosh.args"; //$NON-NLS-1$
 
 	public static final String PROP_SECURE_UUID = "equinox.uuid.secure"; //$NON-NLS-1$
+
+	public static final String PROP_BANNED_WEAVING_HOOK_BUNDLES = "equinox.banned.weaving.hook.bundles"; //$NON-NLS-1$
+	public final Map<String, VersionRange> BANNED_WEAVING_HOOK_BUNDLES;
 
 	public final static String SIGNED_BUNDLE_SUPPORT = "osgi.support.signature.verify"; //$NON-NLS-1$
 	public final static String SIGNED_CONTENT_SUPPORT = "osgi.signedcontent.support"; //$NON-NLS-1$
@@ -676,6 +680,29 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		runtimeVerifySignedBundles = (supportSignedBundles & SIGNED_CONTENT_VERIFY_RUNTIME) != 0;
 
 		THROW_ISE_UNREGISTER = "true".equals(getConfiguration(PROP_THROW_ISE_UNREGISTER)); //$NON-NLS-1$
+
+		BANNED_WEAVING_HOOK_BUNDLES = getBannedWeavingHookBundles(getConfiguration(PROP_BANNED_WEAVING_HOOK_BUNDLES));
+	}
+
+	private static Map<String, VersionRange> getBannedWeavingHookBundles(String bannedProp) {
+		if (bannedProp == null) {
+			return Collections.emptyMap();
+		}
+		Map<String, VersionRange> result = new HashMap<>();
+		for (String bannedBundle : bannedProp.split(":")) { //$NON-NLS-1$
+			int atIndex = bannedBundle.indexOf('@');
+			VersionRange range = null;
+			if (atIndex >= 0) {
+				try {
+					range = new VersionRange(bannedBundle.substring(atIndex + 1));
+				} catch (IllegalArgumentException e) {
+					// ignore
+				}
+				bannedBundle = bannedBundle.substring(0, atIndex);
+			}
+			result.put(bannedBundle, range);
+		}
+		return Collections.unmodifiableMap(result);
 	}
 
 	private static int getSupportSignedBundles(EquinoxConfiguration config) {

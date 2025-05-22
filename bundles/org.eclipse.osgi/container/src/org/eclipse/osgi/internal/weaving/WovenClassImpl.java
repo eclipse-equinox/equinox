@@ -27,17 +27,20 @@ import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.eclipse.osgi.internal.loader.classpath.ClasspathEntry;
 import org.eclipse.osgi.internal.permadmin.BundlePermissions;
 import org.eclipse.osgi.internal.serviceregistry.HookContext;
+import org.eclipse.osgi.internal.serviceregistry.ServiceRegistrationImpl;
 import org.eclipse.osgi.internal.serviceregistry.ServiceRegistry;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.eclipse.osgi.storage.StorageUtil;
 import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.AdminPermission;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.PackagePermission;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.VersionRange;
 import org.osgi.framework.hooks.weaving.WeavingException;
 import org.osgi.framework.hooks.weaving.WeavingHook;
 import org.osgi.framework.hooks.weaving.WovenClass;
@@ -55,6 +58,7 @@ public final class WovenClassImpl implements WovenClass, HookContext<WeavingHook
 	private final BundleLoader loader;
 	final ServiceRegistry registry;
 	private final Map<ServiceRegistration<?>, Boolean> deniedHooks;
+	private final Map<String, VersionRange> bannedHooks;
 	private byte[] validBytes;
 	private byte[] resultBytes;
 	private byte hookFlags = 0;
@@ -65,7 +69,8 @@ public final class WovenClassImpl implements WovenClass, HookContext<WeavingHook
 	final EquinoxContainer container;
 
 	public WovenClassImpl(String className, byte[] bytes, BundleEntry entry, ClasspathEntry classpathEntry,
-			BundleLoader loader, EquinoxContainer container, Map<ServiceRegistration<?>, Boolean> deniedHooks) {
+			BundleLoader loader, EquinoxContainer container, Map<ServiceRegistration<?>, Boolean> deniedHooks,
+			Map<String, VersionRange> bannedHooks) {
 		super();
 		this.className = className;
 		this.validBytes = this.resultBytes = bytes;
@@ -76,6 +81,7 @@ public final class WovenClassImpl implements WovenClass, HookContext<WeavingHook
 		this.registry = container.getServiceRegistry();
 		this.container = container;
 		this.deniedHooks = deniedHooks;
+		this.bannedHooks = bannedHooks;
 		setState(TRANSFORMING);
 	}
 
@@ -200,7 +206,20 @@ public final class WovenClassImpl implements WovenClass, HookContext<WeavingHook
 
 	@Override
 	public boolean skipRegistration(ServiceRegistration<?> hookRegistration) {
-		return deniedHooks.containsKey(hookRegistration);
+		if (deniedHooks.containsKey(hookRegistration)) {
+			return true;
+		}
+		Bundle b = ((ServiceRegistrationImpl<?>) hookRegistration).getRegisteringBundle();
+		if (bannedHooks.containsKey(b.getSymbolicName())) {
+			VersionRange range = bannedHooks.get(b.getSymbolicName());
+			if (range == null || range.includes(b.getVersion())) {
+				container.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, b,
+						new RuntimeException("Hook is banned: " + hookRegistration.toString())); //$NON-NLS-1$
+				deniedHooks.put(hookRegistration, Boolean.TRUE);
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private boolean validBytes(byte[] checkBytes) {
