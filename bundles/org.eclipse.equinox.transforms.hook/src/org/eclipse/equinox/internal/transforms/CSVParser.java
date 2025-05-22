@@ -35,11 +35,11 @@ public class CSVParser {
 	/**
 	 * Parse the given url as a CSV file containing transform tuples. The tuples
 	 * have the form:
-	 * 
+	 *
 	 * <pre>
 	 * bundleRegex,pathRegex,transformerResource
 	 * </pre>
-	 * 
+	 *
 	 * @param transformMapURL the map url
 	 * @return an array of tuples derived from the contents of the file
 	 * @throws IOException thrown if there are issues parsing the file

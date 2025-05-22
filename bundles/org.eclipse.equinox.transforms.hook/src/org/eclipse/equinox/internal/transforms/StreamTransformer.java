@@ -28,7 +28,7 @@ import java.net.URL;
 public abstract class StreamTransformer {
 	/**
 	 * Provided a transformed version of the provided input stream.
-	 * 
+	 *
 	 * @param inputStream    the original stream
 	 * @param transformerUrl an url that may be used by the transformer in
 	 *                       determining the proper transform to invoke.

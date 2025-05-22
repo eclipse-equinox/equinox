@@ -35,7 +35,7 @@ public class ProxyStreamTransformer extends StreamTransformer {
 
 	/**
 	 * Create a new proxy transformer based on the given object.
-	 * 
+	 *
 	 * @param object the object to proxy
 	 * @throws SecurityException     thrown if there is an issue utilizing the
 	 *                               reflection methods
@@ -69,7 +69,7 @@ public class ProxyStreamTransformer extends StreamTransformer {
 
 	/**
 	 * Get the object that is being proxied.
-	 * 
+	 *
 	 * @return the object. Never <code>null</code>.
 	 */
 	public Object getTransformer() {

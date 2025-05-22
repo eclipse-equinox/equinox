@@ -56,7 +56,7 @@ public class TransformInstanceListData extends ServiceTracker<URL, URL> {
 	/**
 	 * Create a new transform list bound to the given context. If new transforms are
 	 * registered against the given context the contents of this list will change.
-	 * 
+	 *
 	 * @param context     the bundle context
 	 * @throws InvalidSyntaxException thrown if there's an issue listening for
 	 *                                changes to the given transformer type
@@ -73,7 +73,7 @@ public class TransformInstanceListData extends ServiceTracker<URL, URL> {
 	/**
 	 * Return the transforms types currently held by this list. If a change has been
 	 * detected since the last request this list will be rebuilt.
-	 * 
+	 *
 	 * @return the transforms types currently held by this list
 	 */
 	public synchronized String[] getTransformTypes() {
@@ -90,7 +90,7 @@ public class TransformInstanceListData extends ServiceTracker<URL, URL> {
 	/**
 	 * Return the transforms of a particular type currently held by this list. If a
 	 * change has been detected since the last request this list will be rebuilt.
-	 * 
+	 *
 	 * @return the transforms currently held by this list
 	 */
 	public synchronized TransformTuple[] getTransformsFor(String type) {
@@ -105,7 +105,7 @@ public class TransformInstanceListData extends ServiceTracker<URL, URL> {
 	 * Return whether or not there are any transforms who's bundle pattern matches
 	 * the ID of the provided bundle. Only transforms with a present transform
 	 * handler are considered during the invocation of this method.
-	 * 
+	 *
 	 * @param bundle the bundle to test
 	 * @return the presence of associated transforms.
 	 */
