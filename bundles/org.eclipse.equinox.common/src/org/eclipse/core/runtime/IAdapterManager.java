@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Sergey Prigogin (Google) - use parameterized types (bug 442021)
@@ -34,7 +34,7 @@ package org.eclipse.core.runtime;
  * The following code snippet shows how one might register an adapter of type
  * <code>com.example.acme.Sticky</code> on resources in the workspace.
  * </p>
- * 
+ *
  * <pre>
  *  IAdapterFactory pr = new IAdapterFactory() {
  *  	{@literal @}Override
@@ -60,14 +60,14 @@ package org.eclipse.core.runtime;
  *  }
  *  Platform.getAdapterManager().registerAdapters(pr, IResource.class);
  *   </pre>
- * 
+ *
  * <p>
  * This interface can be used without OSGi running.
  * </p>
  * <p>
  * This interface is not intended to be implemented by clients.
  * </p>
- * 
+ *
  * @see IAdaptable
  * @see IAdapterFactory
  * @noextend This interface is not intended to be extended by clients.
@@ -78,7 +78,7 @@ public interface IAdapterManager {
 	/**
 	 * This value can be returned to indicate that no applicable adapter factory was
 	 * found.
-	 * 
+	 *
 	 * @since org.eclipse.equinox.common 3.3
 	 */
 	public static final int NONE = 0;
@@ -86,14 +86,14 @@ public interface IAdapterManager {
 	/**
 	 * This value can be returned to indicate that an adapter factory was found, but
 	 * has not been loaded.
-	 * 
+	 *
 	 * @since org.eclipse.equinox.common 3.3
 	 */
 	public static final int NOT_LOADED = 1;
 
 	/**
 	 * This value can be returned to indicate that an adapter factory is loaded.
-	 * 
+	 *
 	 * @since org.eclipse.equinox.common 3.3
 	 */
 	public static final int LOADED = 2;
@@ -110,7 +110,7 @@ public interface IAdapterManager {
 	 * factory itself returns <code>null</code>, then <code>getAdapter</code> will
 	 * still return <code>null</code>.
 	 * </p>
-	 * 
+	 *
 	 * @param adaptableClass the adaptable class being queried
 	 * @return an array of type names that can be obtained by converting
 	 *         <code>adaptableClass</code> via this manager. An empty array is
@@ -131,7 +131,7 @@ public interface IAdapterManager {
 	 * returned by <code>getInterfaces</code> (in the example, X's superinterfaces
 	 * then Y's superinterfaces)</li>
 	 * </ul>
-	 * 
+	 *
 	 * @param clazz the class for which to return the class order.
 	 * @return the class search order for the given class. The returned search order
 	 *         will minimally contain the target class.
@@ -151,7 +151,7 @@ public interface IAdapterManager {
 	 * {@link Adapters#adapt(Object, Class, boolean)} rather than calling this
 	 * method directly since doing so will also detect interfaces supplied by the
 	 * {@link IAdaptable} interface
-	 * 
+	 *
 	 * @param adaptable   the adaptable object being queried (usually an instance of
 	 *                    <code>IAdaptable</code>)
 	 * @param adapterType the type of adapter to look up
@@ -175,7 +175,7 @@ public interface IAdapterManager {
 	 * {@link Adapters#adapt(Object, Class, boolean)} rather than calling this
 	 * method directly since doing so will also detect interfaces supplied by the
 	 * {@link IAdaptable} interface
-	 * 
+	 *
 	 * @param adaptable       the adaptable object being queried (usually an
 	 *                        instance of <code>IAdaptable</code>)
 	 * @param adapterTypeName the fully qualified name of the type of adapter to
@@ -197,7 +197,7 @@ public interface IAdapterManager {
 	 * return a non-null result. If the factory's plug-in has not yet been loaded,
 	 * or if the factory itself returns <code>null</code>, then
 	 * <code>getAdapter</code> will still return <code>null</code>.
-	 * 
+	 *
 	 * @param adaptable       the adaptable object being queried (usually an
 	 *                        instance of <code>IAdaptable</code>)
 	 * @param adapterTypeName the fully qualified class name of an adapter to look
@@ -223,7 +223,7 @@ public interface IAdapterManager {
 	 * <li>{@link org.eclipse.core.runtime.IAdapterManager#LOADED} if an adapter
 	 * factory was found, and it is loaded.</li>
 	 * </ul>
-	 * 
+	 *
 	 * @param adaptable       the adaptable object being queried (usually an
 	 *                        instance of <code>IAdaptable</code>)
 	 * @param adapterTypeName the fully qualified class name of an adapter to look
@@ -247,7 +247,7 @@ public interface IAdapterManager {
 	 * {@link Adapters#adapt(Object, Class, boolean)} rather than calling this
 	 * method directly since doing so will also detect interfaces supplied by the
 	 * {@link IAdaptable} interface.
-	 * 
+	 *
 	 * @param adaptable       the adaptable object being queried (usually an
 	 *                        instance of <code>IAdaptable</code>)
 	 * @param adapterTypeName the fully qualified name of the type of adapter to
@@ -267,7 +267,7 @@ public interface IAdapterManager {
 	 * interface, the adapters are available to all classes that directly or
 	 * indirectly implement that interface.
 	 * </p>
-	 * 
+	 *
 	 * @param factory   the adapter factory
 	 * @param adaptable the type being extended
 	 * @see #unregisterAdapters(IAdapterFactory)
@@ -281,7 +281,7 @@ public interface IAdapterManager {
 	 * <code>unregisterAdapters(IAdapterFactory,Class)</code> on all classes against
 	 * which it had been explicitly registered. Does nothing if the given factory is
 	 * not currently registered.
-	 * 
+	 *
 	 * @param factory the adapter factory to remove
 	 * @see #registerAdapters(IAdapterFactory, Class)
 	 */
@@ -291,7 +291,7 @@ public interface IAdapterManager {
 	 * Removes the given adapter factory from the list of factories registered as
 	 * extending the given class. Does nothing if the given factory and type
 	 * combination is not registered.
-	 * 
+	 *
 	 * @param factory   the adapter factory to remove
 	 * @param adaptable one of the types against which the given factory is
 	 *                  registered

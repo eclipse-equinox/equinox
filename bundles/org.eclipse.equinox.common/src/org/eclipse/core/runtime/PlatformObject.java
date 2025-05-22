@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Sergey Prigogin (Google) - use parameterized types (bug 442021)
@@ -27,10 +27,10 @@ import org.eclipse.core.internal.runtime.AdapterManager;
  * implementation of the {@link IAdapterManager} service. The method would look
  * like:
  * </p>
- * 
+ *
  * <pre>
  *     public &lt;T&gt; T getAdapter(Class&lt;T&gt; adapter) {
- *         IAdapterManager manager = ...;//lookup the IAdapterManager service         
+ *         IAdapterManager manager = ...;//lookup the IAdapterManager service
  *         return manager.getAdapter(this, adapter);
  *     }
  * </pre>

@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -28,7 +28,7 @@ public interface ILogListener extends EventListener {
 	/**
 	 * Notifies this listener that given status has been logged by a plug-in. The
 	 * listener is free to retain or ignore this status.
-	 * 
+	 *
 	 * @param status the status being logged
 	 * @param plugin the plugin of the log which generated this event
 	 */

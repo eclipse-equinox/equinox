@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Patrick Tasse - Add extra constructor to Path class (bug 454959)
@@ -21,13 +21,13 @@ import java.util.Arrays;
  * The standard implementation of the <code>IPath</code> interface. Paths are
  * always maintained in canonicalized form. That is, parent references (i.e.,
  * <code>../../</code>) and duplicate separators are resolved. For example,
- * 
+ *
  * <pre>
  * new Path("/a/b").append("../foo/bar")
  * </pre>
- * 
+ *
  * will yield the path
- * 
+ *
  * <pre>
  *      /a/foo/bar
  * </pre>
@@ -38,7 +38,7 @@ import java.util.Arrays;
  * This class is not intended to be subclassed by clients but may be
  * instantiated.
  * </p>
- * 
+ *
  * @see IPath
  * @noextend This class is not intended to be subclassed by clients.
  */
@@ -69,7 +69,7 @@ public final class Path implements IPath, Cloneable {
 		/**
 		 * We have cycle : Path implements IPath and IPath uses Path object instances in
 		 * interface constants.
-		 * 
+		 *
 		 * Constants and methods below are needed to resolve init order issues between
 		 * IPath and Path classes - depending on which is loaded first, constants
 		 * defined in one of the classes and pointing to other one will see not
@@ -100,7 +100,7 @@ public final class Path implements IPath, Cloneable {
 	 * Instead of referencing this constants it is recommended to use
 	 * {@link IPath#EMPTY} instead.
 	 * </p>
-	 * 
+	 *
 	 * @see IPath#EMPTY
 	 */
 	public static final Path EMPTY = Constants.empty();
@@ -112,7 +112,7 @@ public final class Path implements IPath, Cloneable {
 	 * Instead of referencing this constants it is recommended to use
 	 * {@link IPath#ROOT} instead.
 	 * </p>
-	 * 
+	 *
 	 * @see IPath#ROOT
 	 */
 	public static final Path ROOT = Constants.root();
@@ -215,7 +215,7 @@ public final class Path implements IPath, Cloneable {
 	 * Instead of calling this method it is recommended to call
 	 * {@link IPath#forPosix(String)} instead.
 	 * </p>
-	 * 
+	 *
 	 * @param fullPath the string path
 	 * @return the IPath representing the given POSIX string path
 	 * @see #isValidPosixPath(String)
@@ -238,7 +238,7 @@ public final class Path implements IPath, Cloneable {
 	 * Instead of calling this method it is recommended to call
 	 * {@link IPath#forWindows(String)} instead.
 	 * </p>
-	 * 
+	 *
 	 * @param fullPath the string path
 	 * @return the IPath representing the given Windows string path
 	 * @see #isValidWindowsPath(String)
@@ -360,7 +360,7 @@ public final class Path implements IPath, Cloneable {
 
 	/*
 	 * (Intentionally not included in javadoc)
-	 * 
+	 *
 	 * @see IPath#addFileExtension
 	 */
 	@Override
@@ -377,7 +377,7 @@ public final class Path implements IPath, Cloneable {
 
 	/*
 	 * (Intentionally not included in javadoc)
-	 * 
+	 *
 	 * @see IPath#addTrailingSeparator
 	 */
 	@Override
@@ -395,7 +395,7 @@ public final class Path implements IPath, Cloneable {
 
 	/*
 	 * (Intentionally not included in javadoc)
-	 * 
+	 *
 	 * @see IPath#append(IPath)
 	 */
 	@Override
@@ -432,7 +432,7 @@ public final class Path implements IPath, Cloneable {
 
 	/*
 	 * (Intentionally not included in javadoc)
-	 * 
+	 *
 	 * @see IPath#append(java.lang.String)
 	 */
 	@Override
@@ -466,7 +466,7 @@ public final class Path implements IPath, Cloneable {
 	 * In its canonical form, a path does not have any "." segments, and parent
 	 * references ("..") are collapsed where possible.
 	 * </p>
-	 * 
+	 *
 	 * @return true if the path was modified, and false otherwise.
 	 */
 	private static String[] canonicalize(boolean isAbsolute, String[] segments) {
@@ -732,7 +732,7 @@ public final class Path implements IPath, Cloneable {
 
 	/*
 	 * (Intentionally not included in javadoc)
-	 * 
+	 *
 	 * @see IPath#getDevice
 	 */
 	@Override
@@ -742,7 +742,7 @@ public final class Path implements IPath, Cloneable {
 
 	/*
 	 * (Intentionally not included in javadoc)
-	 * 
+	 *
 	 * @see IPath#getFileExtension
 	 */
 	@Override
@@ -776,7 +776,7 @@ public final class Path implements IPath, Cloneable {
 
 	/*
 	 * (Intentionally not included in javadoc)
-	 * 
+	 *
 	 * @see IPath#hasTrailingSeparator2
 	 */
 	@Override
@@ -834,7 +834,7 @@ public final class Path implements IPath, Cloneable {
 
 	/*
 	 * (Intentionally not included in javadoc)
-	 * 
+	 *
 	 * @see IPath#isAbsolute
 	 */
 	@Override
@@ -845,7 +845,7 @@ public final class Path implements IPath, Cloneable {
 
 	/*
 	 * (Intentionally not included in javadoc)
-	 * 
+	 *
 	 * @see IPath#isEmpty
 	 */
 	@Override
@@ -856,7 +856,7 @@ public final class Path implements IPath, Cloneable {
 
 	/*
 	 * (Intentionally not included in javadoc)
-	 * 
+	 *
 	 * @see IPath#isPrefixOf
 	 */
 	@Override
@@ -888,7 +888,7 @@ public final class Path implements IPath, Cloneable {
 
 	/*
 	 * (Intentionally not included in javadoc)
-	 * 
+	 *
 	 * @see IPath#isRoot
 	 */
 	@Override
@@ -899,7 +899,7 @@ public final class Path implements IPath, Cloneable {
 
 	/*
 	 * (Intentionally not included in javadoc)
-	 * 
+	 *
 	 * @see IPath#isUNC
 	 */
 	@Override
@@ -912,7 +912,7 @@ public final class Path implements IPath, Cloneable {
 
 	/*
 	 * (Intentionally not included in javadoc)
-	 * 
+	 *
 	 * @see IPath#isValidPath(String)
 	 */
 	@Override
@@ -982,7 +982,7 @@ public final class Path implements IPath, Cloneable {
 
 	/*
 	 * (Intentionally not included in javadoc)
-	 * 
+	 *
 	 * @see IPath#isValidSegment(String)
 	 */
 	@Override
@@ -1062,7 +1062,7 @@ public final class Path implements IPath, Cloneable {
 
 	/*
 	 * (Intentionally not included in javadoc)
-	 * 
+	 *
 	 * @see IPath#lastSegment()
 	 */
 	@Override
@@ -1074,7 +1074,7 @@ public final class Path implements IPath, Cloneable {
 
 	/*
 	 * (Intentionally not included in javadoc)
-	 * 
+	 *
 	 * @see IPath#makeAbsolute()
 	 */
 	@Override
@@ -1095,7 +1095,7 @@ public final class Path implements IPath, Cloneable {
 
 	/*
 	 * (Intentionally not included in javadoc)
-	 * 
+	 *
 	 * @see IPath#makeRelative()
 	 */
 	@Override
@@ -1108,7 +1108,7 @@ public final class Path implements IPath, Cloneable {
 
 	/**
 	 * {@inheritDoc}
-	 * 
+	 *
 	 * @since org.eclipse.equinox.common 3.5
 	 */
 	@Override
@@ -1133,7 +1133,7 @@ public final class Path implements IPath, Cloneable {
 
 	/*
 	 * (Intentionally not included in javadoc)
-	 * 
+	 *
 	 * @see IPath#makeUNC(boolean)
 	 */
 	@Override
@@ -1155,7 +1155,7 @@ public final class Path implements IPath, Cloneable {
 
 	/*
 	 * (Intentionally not included in javadoc)
-	 * 
+	 *
 	 * @see IPath#matchingFirstSegments(IPath)
 	 */
 	@Override
@@ -1176,7 +1176,7 @@ public final class Path implements IPath, Cloneable {
 
 	/*
 	 * (Intentionally not included in javadoc)
-	 * 
+	 *
 	 * @see IPath#removeFileExtension()
 	 */
 	@Override
@@ -1192,7 +1192,7 @@ public final class Path implements IPath, Cloneable {
 
 	/*
 	 * (Intentionally not included in javadoc)
-	 * 
+	 *
 	 * @see IPath#removeFirstSegments(int)
 	 */
 	@Override
@@ -1214,7 +1214,7 @@ public final class Path implements IPath, Cloneable {
 
 	/*
 	 * (Intentionally not included in javadoc)
-	 * 
+	 *
 	 * @see IPath#removeLastSegments(int)
 	 */
 	@Override
@@ -1235,7 +1235,7 @@ public final class Path implements IPath, Cloneable {
 
 	/*
 	 * (Intentionally not included in javadoc)
-	 * 
+	 *
 	 * @see IPath#removeTrailingSeparator()
 	 */
 	@Override
@@ -1248,7 +1248,7 @@ public final class Path implements IPath, Cloneable {
 
 	/*
 	 * (Intentionally not included in javadoc)
-	 * 
+	 *
 	 * @see IPath#segment(int)
 	 */
 	@Override
@@ -1266,7 +1266,7 @@ public final class Path implements IPath, Cloneable {
 
 	/*
 	 * (Intentionally not included in javadoc)
-	 * 
+	 *
 	 * @see IPath#segmentCount()
 	 */
 	@Override
@@ -1276,7 +1276,7 @@ public final class Path implements IPath, Cloneable {
 
 	/*
 	 * (Intentionally not included in javadoc)
-	 * 
+	 *
 	 * @see IPath#segments()
 	 */
 	@Override
@@ -1287,7 +1287,7 @@ public final class Path implements IPath, Cloneable {
 
 	/*
 	 * (Intentionally not included in javadoc)
-	 * 
+	 *
 	 * @see IPath#setDevice(String)
 	 */
 	@Override
@@ -1306,7 +1306,7 @@ public final class Path implements IPath, Cloneable {
 
 	/*
 	 * (Intentionally not included in javadoc)
-	 * 
+	 *
 	 * @see IPath#toFile()
 	 */
 	@Override
@@ -1316,7 +1316,7 @@ public final class Path implements IPath, Cloneable {
 
 	/*
 	 * (Intentionally not included in javadoc)
-	 * 
+	 *
 	 * @see IPath#toOSString()
 	 */
 	@Override
@@ -1364,7 +1364,7 @@ public final class Path implements IPath, Cloneable {
 
 	/*
 	 * (Intentionally not included in javadoc)
-	 * 
+	 *
 	 * @see IPath#toPortableString()
 	 */
 	@Override
@@ -1401,7 +1401,7 @@ public final class Path implements IPath, Cloneable {
 
 	/*
 	 * (Intentionally not included in javadoc)
-	 * 
+	 *
 	 * @see IPath#toString()
 	 */
 	@Override
@@ -1446,7 +1446,7 @@ public final class Path implements IPath, Cloneable {
 
 	/*
 	 * (Intentionally not included in javadoc)
-	 * 
+	 *
 	 * @see IPath#uptoSegment(int)
 	 */
 	@Override

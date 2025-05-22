@@ -65,7 +65,7 @@ public class DevClassPathHelper {
 	/**
 	 * Returns the result of converting a list of comma-separated tokens into an
 	 * array
-	 * 
+	 *
 	 * @return the array of string tokens
 	 * @param prop the initial comma-separated string
 	 */
