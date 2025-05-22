@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -32,7 +32,7 @@ import org.osgi.framework.Bundle;
  * property keys that it will use, for example, to display About information.
  * See <code>org.eclipse.ui.branding.IBundleGroupConstants</code>.
  * </p>
- * 
+ *
  * @see IBundleGroupProvider
  * @since 3.0
  */
@@ -41,7 +41,7 @@ public interface IBundleGroup {
 	/**
 	 * Returns the identifier of this bundle group. Bundle groups are uniquely
 	 * identified by the combination of their identifier and their version.
-	 * 
+	 *
 	 * @see #getVersion()
 	 * @return the identifier for this bundle group
 	 */
@@ -49,7 +49,7 @@ public interface IBundleGroup {
 
 	/**
 	 * Returns the human-readable name of this bundle group.
-	 * 
+	 *
 	 * @return the human-readable name
 	 */
 	public String getName();
@@ -59,7 +59,7 @@ public interface IBundleGroup {
 	 * the same format as bundle versions (i.e., major.minor.service.qualifier).
 	 * Bundle groups are uniquely identified by the combination of their identifier
 	 * and their version.
-	 * 
+	 *
 	 * @see #getIdentifier()
 	 * @return the string form of this bundle group's version
 	 */
@@ -67,21 +67,21 @@ public interface IBundleGroup {
 
 	/**
 	 * Returns a text description of this bundle group.
-	 * 
+	 *
 	 * @return text description of this bundle group
 	 */
 	public String getDescription();
 
 	/**
 	 * Returns the name of the provider of this bundle group.
-	 * 
+	 *
 	 * @return the name of the provider or <code>null</code> if none
 	 */
 	public String getProviderName();
 
 	/**
 	 * Returns a list of all bundles supplied by this bundle group.
-	 * 
+	 *
 	 * @return the bundles supplied by this bundle group
 	 */
 	public Bundle[] getBundles();
@@ -89,7 +89,7 @@ public interface IBundleGroup {
 	/**
 	 * Returns the property of this bundle group with the given key.
 	 * <code>null</code> is returned if there is no such key/value pair.
-	 * 
+	 *
 	 * @param key the name of the property to return
 	 * @return the value associated with the given key or <code>null</code> if none
 	 */
