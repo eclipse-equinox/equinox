@@ -29,7 +29,7 @@ public class Pipe {
 
 	/**
 	 * Create a new Pipe based on the provided input stream.
-	 * 
+	 *
 	 * @param original the original stream.
 	 * @throws IOException thrown if there is an issue establishing the pipe.
 	 */
@@ -117,7 +117,7 @@ public class Pipe {
 	/**
 	 * Get the stream that has resulted from piping the original input stream
 	 * through {@link #pipeInput(InputStream, OutputStream)}.
-	 * 
+	 *
 	 * @return the new stream.
 	 */
 	public InputStream getPipedInputStream() {
@@ -128,7 +128,7 @@ public class Pipe {
 	 * Pipe the input stream to the output stream. The default implementation of
 	 * this method does a simple copy operations. Subclasses may elaborate on this
 	 * behavior.
-	 * 
+	 *
 	 * @param original the original stream
 	 * @param result   the result stream
 	 * @throws IOException thrown if there is an issue reading from the input stream
