@@ -111,7 +111,7 @@ pipeline {
 					script {
 						def authorMail = sh(script: 'git log -1 --pretty=format:"%ce" HEAD', returnStdout: true)
 						echo 'HEAD commit author: ' + authorMail
-						def buildBotMail = 'eclipse-releng-bot@eclipse.org'
+						def buildBotMail = 'equinox-bot@eclipse.org'
 						if (buildBotMail.equals(authorMail) && !params.any{ e -> e.key.startsWith('forceNativeBuilds-') && e.value }) {
 							// Prevent endless build-loops due to self triggering because of a previous automated native-build and the associated updates.
 							currentBuild.result = 'ABORTED'
@@ -119,7 +119,7 @@ pipeline {
 						}
 						sh """
 							git config --global user.email '${buildBotMail}'
-							git config --global user.name 'Eclipse Releng Bot'
+							git config --global user.name 'Eclipse Equinox Bot'
 							git remote set-url --push origin git@github.com:eclipse-equinox/equinox.git
 							git fetch --all --tags --quiet
 						"""
