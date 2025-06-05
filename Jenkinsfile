@@ -34,9 +34,9 @@ def runOnNativeBuildAgent(String platform, Closure body) {
 	}
 }
 
-/** Returns the download URL of the JDK against whoose C headers (in the 'include/' folder) and native libaries the natives are compiled.*/
+/** Returns the download URL of the JDK against whose C headers (in the 'include/' folder) and native libraries the natives are compiled.*/
 def getNativeJdkUrl(String os, String arch) { // To update the used JDK version update the URL template below
-	if('win32'.equals(os) && 'aarch64'.equals(arch)) {
+	if ('win32'.equals(os) && 'aarch64'.equals(arch)) {
 		// Temporary workaround until there are official Temurin GA releases for Windows on ARM that can be consumed through JustJ
 		dir("${WORKSPACE}/repackage-win32.aarch64-jdk") {
 			sh """
@@ -88,7 +88,7 @@ def BUILD_NATIVES = []
 
 pipeline {
 	options {
-		skipDefaultCheckout() // Specialiced checkout is performed below
+		skipDefaultCheckout() // Specialized checkout is performed below
 		timestamps()
 		timeout(time: 180, unit: 'MINUTES')
 		buildDiscarder(logRotator(numToKeepStr:'5'))
@@ -105,7 +105,7 @@ pipeline {
 	}
 	stages {
 		stage('Checkout SCM') {
-			steps{
+			steps {
 				dir('equinox') {
 					checkout scm
 					script {
@@ -137,7 +137,7 @@ pipeline {
 			}
 		}
 		stage('Check if native launchers and executables changed') {
-			steps{
+			steps {
 				dir('equinox') {
 					script {
 						def latestTag = getLatestLauncherTag()
@@ -147,7 +147,7 @@ pipeline {
 						if (commonNativesChanged) {
 							BUILD_NATIVES += allWS
 						} else {
-							for(ws in allWS) {
+							for (ws in allWS) {
 								if (params['forceNativeBuilds-' + ws] || isLauncherSourceChanged(latestTag, ws)) {
 									BUILD_NATIVES += ws
 								}
@@ -204,7 +204,7 @@ pipeline {
 									return;
 								}
 								dir("jdk-download-${os}.${arch}") {
-									// Fetch the JDK, which provides the C header-files and shared native libaries, against which the natives are built.
+									// Fetch the JDK, which provides the C header files and shared native libraries against which the native code is built.
 									sh "curl ${getNativeJdkUrl(os, arch)} | tar -xzf - include/ lib/"
 									stash name:"jdk.resources.${os}.${arch}", includes: "include/,lib/"
 									deleteDir()
@@ -362,11 +362,11 @@ pipeline {
 						}
 						sh """
 							echo 'new launcher tag: ${launcherTag}'
-							# Check for the main-branch as late as possible to have as much of the same behaviour as possible
+							# Check for the main-branch as late as possible to have as much of the same behavior as possible
 							if [[ ${isOnMainIshBranch()} == true ]]; then
 								if [[ ${params.skipCommit} != true ]]; then
 									
-									# Don't rebase and just fail in case another commit has been pushed to the master/maintanance branch in the meantime
+									# Don't rebase and just fail in case another commit has been pushed to the master/maintenance branch in the meantime
 									pushd equinox
 									git push origin HEAD:refs/heads/${BRANCH_NAME}
 									git push origin refs/tags/${launcherTag}
