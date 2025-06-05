@@ -27,6 +27,7 @@ import org.eclipse.equinox.plurl.Plurl;
 import org.eclipse.equinox.plurl.PlurlContentHandlerFactory;
 import org.eclipse.equinox.plurl.PlurlStreamHandlerFactory;
 import org.eclipse.equinox.plurl.impl.PlurlImpl;
+import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.debug.FrameworkDebugOptions;
 import org.eclipse.osgi.internal.framework.legacy.PackageAdminImpl;
 import org.eclipse.osgi.internal.framework.legacy.StartLevelImpl;
@@ -83,11 +84,19 @@ public class SystemBundleActivator implements BundleActivator {
 		equinoxContainer.systemStart(bc);
 
 		plurl = new PlurlImpl();
-		plurl.install();
-		plurlStreamHandlerFactory = new URLStreamHandlerFactoryImpl(bc, equinoxContainer);
-		plurlContentHandlerFactory = new ContentHandlerFactoryImpl(bc, equinoxContainer);
-		Plurl.add(plurlStreamHandlerFactory);
-		Plurl.add(plurlContentHandlerFactory);
+		try {
+			plurl.install();
+			URLStreamHandlerFactoryImpl ushf = new URLStreamHandlerFactoryImpl(bc, equinoxContainer);
+			ContentHandlerFactoryImpl chf = new ContentHandlerFactoryImpl(bc, equinoxContainer);
+			Plurl.add(ushf);
+			plurlStreamHandlerFactory = ushf;
+			Plurl.add(chf);
+			plurlContentHandlerFactory = chf;
+		} catch (Exception e) {
+			// Don't fail framework launch if we cannot register with plurl.
+			// Any handler services will get ignored for this framework instance.
+			equinoxContainer.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, e.getMessage(), e);
+		}
 
 		FrameworkDebugOptions dbgOptions = (FrameworkDebugOptions) configuration.getDebugOptions();
 		dbgOptions.start(bc);
@@ -229,8 +238,22 @@ public class SystemBundleActivator implements BundleActivator {
 				.getDebugOptions();
 		dbgOptions.stop(bc);
 
-		Plurl.remove(plurlStreamHandlerFactory);
-		Plurl.remove(plurlContentHandlerFactory);
+		if (plurlStreamHandlerFactory != null) {
+			try {
+				Plurl.remove(plurlStreamHandlerFactory);
+			} catch (Exception e) {
+				bundle.getEquinoxContainer().getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR,
+						e.getMessage(), e);
+			}
+		}
+		if (plurlContentHandlerFactory != null) {
+			try {
+				Plurl.remove(plurlContentHandlerFactory);
+			} catch (Exception e) {
+				bundle.getEquinoxContainer().getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR,
+						e.getMessage(), e);
+			}
+		}
 
 		// unregister services
 		for (ServiceRegistration<?> registration : registrations)
