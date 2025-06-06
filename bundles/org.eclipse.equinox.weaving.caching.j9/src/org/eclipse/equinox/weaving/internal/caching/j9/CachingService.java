@@ -7,10 +7,10 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
- *   David Knibb               initial implementation      
- *   Matthew Webster           Eclipse 3.2 changes     
+ *   David Knibb               initial implementation
+ *   Matthew Webster           Eclipse 3.2 changes
  *   Martin Lippert            extracted caching service factory
  *   Martin Lippert            caching of generated classes
  *******************************************************************************/
@@ -88,7 +88,7 @@ public class CachingService implements ICachingService {
 
 	/**
 	 * Hash the shared class namespace using MD5
-	 * 
+	 *
 	 * @return the MD5 version of the input string
 	 */
 	public String hashNamespace(final String namespace) {
