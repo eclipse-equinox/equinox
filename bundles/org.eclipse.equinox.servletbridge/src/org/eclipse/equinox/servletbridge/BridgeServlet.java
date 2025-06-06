@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     Cognos Incorporated - initial API and implementation
  *     IBM Corporation - bug fixes and enhancements
@@ -258,7 +258,7 @@ public class BridgeServlet extends HttpServlet {
 	 * runtime to register a servlet for which all future servlet calls will be
 	 * delegated. If not null and no delegate is currently registered,
 	 * init(ServletConfig) will be called on the servletDelegate before returning.
-	 * 
+	 *
 	 * @param servletDelegate - the servlet to register for delegation
 	 */
 	public static synchronized void registerServletDelegate(HttpServlet servletDelegate) {
@@ -292,7 +292,7 @@ public class BridgeServlet extends HttpServlet {
 	 * registered delegate destroy() is called on the servletDelegate. destroy()
 	 * will not be called until the delegate is finished servicing any previous
 	 * requests.
-	 * 
+	 *
 	 * @param servletDelegate - the servlet to unregister
 	 */
 	public static synchronized void unregisterServletDelegate(HttpServlet servletDelegate) {

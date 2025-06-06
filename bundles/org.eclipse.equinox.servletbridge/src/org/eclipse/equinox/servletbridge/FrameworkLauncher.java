@@ -568,7 +568,7 @@ public class FrameworkLauncher {
 	 * contents of launch.ini and for a few other properties necessary to launch
 	 * defaults are supplied if not provided. The value '@null' will set the map
 	 * value to null.
-	 * 
+	 *
 	 * @return a map containing the initial properties
 	 */
 	@SuppressWarnings("rawtypes")
@@ -701,7 +701,7 @@ public class FrameworkLauncher {
 	/**
 	 * buildCommandLineArguments parses the commandline config parameter into a set
 	 * of arguments
-	 * 
+	 *
 	 * @return an array of String containing the commandline arguments
 	 */
 	protected String[] buildCommandLineArguments() {
@@ -802,7 +802,7 @@ public class FrameworkLauncher {
 	 * copyResource is a convenience method to recursively copy resources from the
 	 * ServletContext to an installation target. The default behavior will create a
 	 * directory if the resourcepath ends in '/' and a file otherwise.
-	 * 
+	 *
 	 * @param resourcePath - The resource root path
 	 * @param target       - The root location where resources are to be copied
 	 */
@@ -835,7 +835,7 @@ public class FrameworkLauncher {
 
 	/**
 	 * deleteDirectory is a convenience method to recursively delete a directory
-	 * 
+	 *
 	 * @param directory - the directory to delete.
 	 * @return was the delete successful
 	 */
@@ -856,7 +856,7 @@ public class FrameworkLauncher {
 	/**
 	 * Used when to set the ContextClassLoader when the BridgeServlet delegates to a
 	 * Servlet inside the framework
-	 * 
+	 *
 	 * @return a Classloader with the OSGi framework's context class loader.
 	 */
 	public synchronized ClassLoader getFrameworkContextClassLoader() {
@@ -865,7 +865,7 @@ public class FrameworkLauncher {
 
 	/**
 	 * Platfom Directory is where the OSGi software is installed
-	 * 
+	 *
 	 * @return the framework install location
 	 */
 	protected synchronized File getPlatformDirectory() {
@@ -875,7 +875,7 @@ public class FrameworkLauncher {
 	/**
 	 * loadProperties is a convenience method to load properties from a servlet
 	 * context resource
-	 * 
+	 *
 	 * @param resource - The target to read properties from
 	 * @return the properties
 	 */
@@ -912,7 +912,7 @@ public class FrameworkLauncher {
 	 * Searches for the given target directory starting in the "plugins"
 	 * subdirectory of the given location. If one is found then this location is
 	 * returned; otherwise an exception is thrown.
-	 * 
+	 *
 	 * @param target
 	 *
 	 * @return the location where target directory was found
@@ -968,7 +968,7 @@ public class FrameworkLauncher {
 
 	/**
 	 * Compares version strings.
-	 * 
+	 *
 	 * @return result of comparison, as integer; <code><0</code> if left < right;
 	 *         <code>0</code> if left == right; <code>>0</code> if left > right;
 	 */
@@ -996,7 +996,7 @@ public class FrameworkLauncher {
 	 * Do a quick parse of version identifier so its elements can be correctly
 	 * compared. If we are unable to parse the full version, remaining elements are
 	 * initialized with suitable defaults.
-	 * 
+	 *
 	 * @return an array of size 4; first three elements are of type Integer
 	 *         (representing major, minor and service) and the fourth element is of
 	 *         type String (representing qualifier). Note, that returning anything
