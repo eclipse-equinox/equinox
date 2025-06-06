@@ -42,7 +42,7 @@ public class TransformedBundleFile extends BundleFileWrapper {
 	 * Create a wrapped bundle file. Requests into this file will be compared to the
 	 * list of known transformers and transformer templates and if there's a match
 	 * the transformed entity is returned instead of the original.
-	 * 
+	 *
 	 * @param transformerHook the transformer hook
 	 * @param generation      the original data
 	 * @param delegate        the original file
@@ -88,7 +88,7 @@ public class TransformedBundleFile extends BundleFileWrapper {
 	/**
 	 * Return the input stream that results from applying the given transformer URL
 	 * to the provided input stream.
-	 * 
+	 *
 	 * @param inputStream the stream to transform
 	 * @param bundle      the resource representing the transformer
 	 * @return the transformed stream
@@ -129,7 +129,7 @@ public class TransformedBundleFile extends BundleFileWrapper {
 
 	/**
 	 * Return whether the given string matches the given pattern.
-	 * 
+	 *
 	 * @return whether the given string matches the given pattern
 	 */
 	private boolean match(Pattern pattern, String string) {
@@ -196,7 +196,7 @@ public class TransformedBundleFile extends BundleFileWrapper {
 	/**
 	 * Answers whether the resource at the given path or any of its children has a
 	 * transform associated with it.
-	 * 
+	 *
 	 * @return whether the resource at the given path or any of its children has a
 	 *         transform associated with it.
 	 */
@@ -209,12 +209,12 @@ public class TransformedBundleFile extends BundleFileWrapper {
 
 	/**
 	 * Extracts a directory and all sub content to disk
-	 * 
+	 *
 	 * @param dirName the directory name to extract
 	 * @return the File used to extract the content to. A value of <code>null</code>
 	 *         is returned if the directory to extract does not exist or if content
 	 *         extraction is not supported.
-	 * 
+	 *
 	 *         This method is derived from ZipBundleFile#extractDirectory(String).
 	 */
 	protected synchronized File extractDirectory(String dirName) {

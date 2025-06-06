@@ -30,7 +30,7 @@ public class LazyInputStream extends InputStream {
 
 	/**
 	 * Construct a new lazy stream based off the given provider.
-	 * 
+	 *
 	 * @param provider the input stream provider. Must not be <code>null</code>.
 	 */
 	public LazyInputStream(InputStreamProvider provider) {
@@ -146,7 +146,7 @@ public class LazyInputStream extends InputStream {
 	public static interface InputStreamProvider {
 		/**
 		 * Return the input stream.
-		 * 
+		 *
 		 * @return the input stream
 		 * @throws IOException thrown if there is an issue obtaining the stream
 		 */

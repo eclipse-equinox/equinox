@@ -35,7 +35,7 @@ public class TransformedBundleEntry extends BundleEntry {
 	/**
 	 * Create a wrapped bundle entry. Calls to obtain the content of this entry will
 	 * be resolved via the provided input stream rather than the original.
-	 * 
+	 *
 	 * @param bundleFile    the host bundle file
 	 * @param original      the original entry
 	 * @param wrappedStream the override stream
