@@ -4,7 +4,7 @@ Bundle-Name: %bundleName
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Bundle-SymbolicName: org.eclipse.equinox.slf4j
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 1.0.100.qualifier
 Import-Package: org.eclipse.equinox.log;version="[1.1.0,2.0.0)",
  org.osgi.framework;version="[1.10.0,2.0.0)",
  org.osgi.service.log;version="[1.5.0,2.0.0)",
