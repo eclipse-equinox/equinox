@@ -7,10 +7,10 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
- *   David Knibb               initial implementation      
- *   Matthew Webster           Eclipse 3.2 changes     
+ *   David Knibb               initial implementation
+ *   Matthew Webster           Eclipse 3.2 changes
  *   Martin Lippert            extracted caching service factory
  *******************************************************************************/
 
@@ -23,7 +23,7 @@ import org.osgi.framework.Bundle;
 /**
  * Factory implementation to create concrete J9 caching services for individual
  * bundles
- * 
+ *
  * @author martinlippert
  */
 public class CachingServiceFactory implements ICachingServiceFactory {
