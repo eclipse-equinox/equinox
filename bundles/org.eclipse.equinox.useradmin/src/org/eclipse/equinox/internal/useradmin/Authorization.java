@@ -78,7 +78,7 @@ public class Authorization implements org.osgi.service.useradmin.Authorization {
 	/**
 	 * Gets the name of the {@link User} that this Authorization context was created
 	 * for.
-	 * 
+	 *
 	 * @return The name of the {@link User} that this Authorization context was
 	 *         created for, or <code>null</code> if no user was specified when this
 	 *         Authorization context was created.
@@ -93,7 +93,7 @@ public class Authorization implements org.osgi.service.useradmin.Authorization {
 	 * Checks if the role with the specified name is implied by this Authorization
 	 * context.
 	 * <p>
-	 * 
+	 *
 	 * Bundles must define globally unique role names that are associated with the
 	 * privilege of accessing restricted resources or operations. System
 	 * administrators will grant users access to these resources, by creating a
