@@ -122,7 +122,7 @@ public class CachingServiceFactory implements ICachingServiceFactory {
 	/**
 	 * Generates the unique id for the cache of the given bundle (usually the
 	 * symbolic name and the bundle version)
-	 * 
+	 *
 	 * @param bundle The bundle for which a unique cache id should be calculated
 	 * @return The unique id of the cache for the given bundle
 	 */
@@ -144,7 +144,7 @@ public class CachingServiceFactory implements ICachingServiceFactory {
 
 	/**
 	 * Stops individual bundle caching service if the bundle is uninstalled
-	 * 
+	 *
 	 * @param event The event contains the information for which bundle to stop the
 	 *              caching service
 	 */

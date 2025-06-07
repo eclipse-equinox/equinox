@@ -29,7 +29,7 @@ public class Log {
 
 	/**
 	 * Logging debug information.
-	 * 
+	 *
 	 * @param message The tracing message, optional.
 	 */
 	public static void debug(final String message) {
@@ -42,7 +42,7 @@ public class Log {
 
 	/**
 	 * Logging an error.
-	 * 
+	 *
 	 * @param message The error message, optional.
 	 * @param t       The Throwable for this error, optional.
 	 */
@@ -57,7 +57,7 @@ public class Log {
 
 	/**
 	 * Shows debug toggle state.
-	 * 
+	 *
 	 * @return true, if debug is enabled, else false.
 	 */
 	public static boolean isDebugEnabled() {

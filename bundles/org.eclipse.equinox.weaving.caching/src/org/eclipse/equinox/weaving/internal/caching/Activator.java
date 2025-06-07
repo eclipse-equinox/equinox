@@ -84,7 +84,7 @@ public class Activator implements BundleActivator {
 	/**
 	 * Registers a new {@link CachingServiceFactory} instance as OSGi service under
 	 * the interface {@link ICachingService}.
-	 * 
+	 *
 	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
 	 */
 	@Override
@@ -106,7 +106,7 @@ public class Activator implements BundleActivator {
 
 	/**
 	 * Shuts down the {@link CachingServiceFactory}.
-	 * 
+	 *
 	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
 	 */
 	@Override
