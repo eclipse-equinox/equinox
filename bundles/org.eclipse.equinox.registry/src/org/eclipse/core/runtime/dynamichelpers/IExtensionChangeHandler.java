@@ -24,7 +24,7 @@ import org.eclipse.core.runtime.IExtension;
  * <p>
  * This interface is intended to be implemented by clients.
  * </p>
- * 
+ *
  * @since 3.1
  */
 public interface IExtensionChangeHandler {

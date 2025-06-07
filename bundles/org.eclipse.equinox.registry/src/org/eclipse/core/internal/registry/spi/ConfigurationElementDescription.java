@@ -31,35 +31,35 @@ import org.eclipse.core.runtime.IConfigurationElement;
  * <p>
  * This class is not intended to be subclassed.
  * </p>
- * 
+ *
  * @see ConfigurationElementAttribute
  */
 public final class ConfigurationElementDescription {
 
 	/**
 	 * Name of the configuration element.
-	 * 
+	 *
 	 * @see IConfigurationElement#getName()
 	 */
 	private final String name;
 
 	/**
 	 * Attributes of the configuration element.
-	 * 
+	 *
 	 * @see IConfigurationElement#getAttribute(String)
 	 */
 	private final ConfigurationElementAttribute[] attributes;
 
 	/**
 	 * String value to be stored in this configuration element.
-	 * 
+	 *
 	 * @see IConfigurationElement#getValue()
 	 */
 	private final String value;
 
 	/**
 	 * Children of the configuration element.
-	 * 
+	 *
 	 * @see IConfigurationElement#getChildren()
 	 */
 	private final ConfigurationElementDescription[] children;
@@ -106,7 +106,7 @@ public final class ConfigurationElementDescription {
 
 	/**
 	 * Returns children of the configuration element.
-	 * 
+	 *
 	 * @return - children of the extension
 	 * @see IConfigurationElement#getChildren()
 	 */
@@ -116,7 +116,7 @@ public final class ConfigurationElementDescription {
 
 	/**
 	 * Returns name of the configuration element.
-	 * 
+	 *
 	 * @return - extension name
 	 * @see IConfigurationElement#getName()
 	 */
@@ -126,7 +126,7 @@ public final class ConfigurationElementDescription {
 
 	/**
 	 * Returns attributes of the configuration element.
-	 * 
+	 *
 	 * @return - attributes of the extension description
 	 * @see IConfigurationElement#getAttribute(String)
 	 */
@@ -136,7 +136,7 @@ public final class ConfigurationElementDescription {
 
 	/**
 	 * Returns string value stored in the configuration element.
-	 * 
+	 *
 	 * @return - String value to be stored in the element
 	 * @see IConfigurationElement#getValue()
 	 */
