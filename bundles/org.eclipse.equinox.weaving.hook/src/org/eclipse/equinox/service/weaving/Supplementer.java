@@ -7,10 +7,10 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
- *   David Knibb               initial implementation      
- *   Martin Lippert            supplementing mechanism reworked     
+ *   David Knibb               initial implementation
+ *   Martin Lippert            supplementing mechanism reworked
  *   Martin Lippert            fragment handling fixed
  *******************************************************************************/
 
@@ -25,10 +25,10 @@ import org.osgi.framework.Bundle;
 /**
  * A supplementer object is created for every bundle that contains one or many
  * of the supplementer headers in its header.
- * 
+ *
  * The corresponding supplementer object contains the information which headers
  * the bundle defines and which bundles it supplements in the running system.
- * 
+ *
  * @author Martin Lippert
  */
 public class Supplementer {
@@ -47,7 +47,7 @@ public class Supplementer {
 
 	/**
 	 * Creates a supplementer object for the given bundle.
-	 * 
+	 *
 	 * @param bundle             The bundle that defines the supplementer headers
 	 * @param bundleHost         The host bundle of the supplementer bundle, if the
 	 *                           bundle is a fragment, otherwise null
@@ -70,7 +70,7 @@ public class Supplementer {
 
 	/**
 	 * Add a bundle to the list of supplemented bundles
-	 * 
+	 *
 	 * @param supplementedBundle The bundle that is supplemented by this
 	 *                           supplementer
 	 */
@@ -101,7 +101,7 @@ public class Supplementer {
 	/**
 	 * Gives information about which bundles are currently supplemented by this
 	 * supplementer
-	 * 
+	 *
 	 * @return The currently supplemented bundles
 	 */
 	public Bundle[] getSupplementedBundles() {
@@ -111,7 +111,7 @@ public class Supplementer {
 	/**
 	 * Returns the bundle that defines the supplementer headers (this supplementer
 	 * object belongs to)
-	 * 
+	 *
 	 * @return The bundle object this supplementer belongs to
 	 */
 	public Bundle getSupplementerBundle() {
@@ -121,7 +121,7 @@ public class Supplementer {
 	/**
 	 * Returns the host of the supplementer bundle, if it is a fragment, otherwise
 	 * this returns the same as getSupplementerBundle()
-	 * 
+	 *
 	 * @return The host bundle this supplementer belongs to
 	 */
 	public Bundle getSupplementerHost() {
@@ -130,7 +130,7 @@ public class Supplementer {
 
 	/**
 	 * The symbolic name of the supplementer bundle
-	 * 
+	 *
 	 * @return The symbolic name of the supplementer bundle
 	 */
 	public String getSymbolicName() {
@@ -140,7 +140,7 @@ public class Supplementer {
 	/**
 	 * Provides information about whether a given bundle is supplemented by this
 	 * supplementer or not
-	 * 
+	 *
 	 * @param bundle The bundle that might be supplemented by this supplementer
 	 * @return true, if the bundle is supplemented by this supplementer, otherwise
 	 *         false
@@ -152,7 +152,7 @@ public class Supplementer {
 	/**
 	 * Checks if the given export-package header definitions matches the
 	 * supplement-exporter definitions of this supplementer
-	 * 
+	 *
 	 * @param exports The headers to check for matching against this supplementer
 	 * @return true, if this supplementer matches against the given export-package
 	 *         headers
@@ -178,7 +178,7 @@ public class Supplementer {
 	/**
 	 * Checks if the given import-package header definitions matches the
 	 * supplement-importer definitions of this supplementer
-	 * 
+	 *
 	 * @param imports The headers to check for matching against this supplementer
 	 * @return true, if this supplementer matches against the given import-package
 	 *         headers
@@ -204,7 +204,7 @@ public class Supplementer {
 	/**
 	 * Checks if the given bundle symbolic name definition matches the
 	 * supplement-bundle definition of this supplementer
-	 * 
+	 *
 	 * @param symbolicName The symbolic name of the bundle that shoudl be checked
 	 * @return true, if this supplementer matches against the given bundle symbolic
 	 *         name
@@ -227,7 +227,7 @@ public class Supplementer {
 	/**
 	 * Removes the given bundle from the set of supplemented bundles (that are
 	 * supplemented by this supplementer)
-	 * 
+	 *
 	 * @param supplementedBundle The bundle that is no longer supplemented by this
 	 *                           supplementer
 	 */

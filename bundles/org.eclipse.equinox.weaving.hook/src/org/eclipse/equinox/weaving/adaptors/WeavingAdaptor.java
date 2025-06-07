@@ -7,11 +7,11 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
- *   David Knibb               initial implementation      
+ *   David Knibb               initial implementation
  *   Matthew Webster           Eclipse 3.2 changes
- *   Martin Lippert            minor changes and bugfixes     
+ *   Martin Lippert            minor changes and bugfixes
  *   Martin Lippert            caching of generated classes
  *******************************************************************************/
 
