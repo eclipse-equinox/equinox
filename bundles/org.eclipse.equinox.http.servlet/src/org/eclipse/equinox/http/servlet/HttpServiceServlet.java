@@ -23,7 +23,7 @@ import org.eclipse.equinox.http.servlet.internal.servlet.ProxyServlet;
  * an OSGi Http Service implementation. This class is not meant for extending or
  * even using directly and is purely meant for registering in a servlet
  * container.
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class HttpServiceServlet extends ProxyServlet {

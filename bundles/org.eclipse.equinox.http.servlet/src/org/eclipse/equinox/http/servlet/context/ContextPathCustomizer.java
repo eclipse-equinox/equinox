@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
- *    Liferay, Inc. - initial API and implementation and/or initial 
+ *    Liferay, Inc. - initial API and implementation and/or initial
  *                    documentation
  ******************************************************************************/
 
@@ -41,7 +41,7 @@ import org.osgi.service.http.context.ServletContextHelper;
  * pioneering adopters on the understanding that any code that uses this SPI
  * will almost certainly be broken (repeatedly) as the SPI evolves.
  * </p>
- * 
+ *
  * @since 1.2
  */
 public abstract class ContextPathCustomizer {
@@ -51,7 +51,7 @@ public abstract class ContextPathCustomizer {
 	 * service. This method is only called if the supplied whiteboard service does
 	 * not provide the &quot;osgi.http.whiteboard.context.select&quot; service
 	 * property.
-	 * 
+	 *
 	 * @return a service filter that is used to select the default
 	 *         SErvletContextHelper for the specified whiteboard service.
 	 */
@@ -63,7 +63,7 @@ public abstract class ContextPathCustomizer {
 	 * Returns a prefix that is prepended to the context path value specified by the
 	 * supplied helper's &quot;osgi.http.whiteboard.context.path&quot; service
 	 * property.
-	 * 
+	 *
 	 * @param helper the helper for which the context path will be prepended to
 	 * @return the prefix to prepend to the context path
 	 */
