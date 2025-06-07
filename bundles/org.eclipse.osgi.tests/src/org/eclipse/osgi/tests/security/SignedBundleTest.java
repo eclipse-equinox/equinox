@@ -38,7 +38,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 	 * testSignedContent02(); } } , new
 	 * SignedBundleTest("SignedContent positive test: signed jar, 2 trusted signers"
 	 * , "multiply_signed", new String[] {"ca1_leafa", "ca1_leafb"}) {(non-Javadoc)
-	 * 
+	 *
 	 * @see junit.framework.TestCase#runTest() public void runTest() {
 	 * testSignedContent03(); } }};
 	 */
@@ -48,16 +48,16 @@ public class SignedBundleTest extends BaseSecurityTest {
 	 * ('unsigned.jar') yes n/a yes = positive, 1 signer ('signed.jar','ca1_leafa')
 	 * yes yes yes = positive, 2 signers
 	 * ('multiply_signed.jar','ca1_leafa,'ca1_leafb')
-	 * 
+	 *
 	 * //negative = untrusted tests no n/a yes = negative, 1 signer, 1 untrusted
 	 * ('signed.jar') no no yes = negative, 2 signers, 2 untrusted
 	 * ('multiply_signed.jar') yes no yes = negative, 2 signers, 1 untrusted
 	 * ('multiply_signed.jar', 'ca1_leafa')
-	 * 
+	 *
 	 * //negative = validity tests yes n/a no = negative, 1 signer, 1 corrupt
 	 * ('signed_with_corrupt.jar','ca1_leafa') yes yes no = negative, 2 signers, 2
 	 * corrupt
-	 * 
+	 *
 	 * //TODO: OSGi-specific partial signer cases //TODO: TSA tests (w/TSA signer
 	 * trusted, untrusted, etc) //TODO: More? NESTED JARS?
 	 */
@@ -78,10 +78,10 @@ public class SignedBundleTest extends BaseSecurityTest {
 		registerEclipseTrustEngine();
 		/*
 		 * TrustEngine engine = getTrustEngine();
-		 * 
+		 *
 		 * if (supportStore == null) {
 		 * fail("Could not open keystore with test certificates!"); }
-		 * 
+		 *
 		 * // get the certs from the support store and add for (int i = 0; i <
 		 * aliases.length; i++) { Certificate cert =
 		 * supportStore.getCertificate(aliases[i]); engine.addTrustAnchor(cert,
