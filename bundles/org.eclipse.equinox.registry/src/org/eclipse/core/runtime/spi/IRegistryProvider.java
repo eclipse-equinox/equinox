@@ -23,7 +23,7 @@ import org.eclipse.core.runtime.IExtensionRegistry;
  * <p>
  * This interface may be implemented by clients.
  * </p>
- * 
+ *
  * @see org.eclipse.core.runtime.RegistryFactory#getRegistry()
  * @see org.eclipse.core.runtime.RegistryFactory#setDefaultRegistryProvider(IRegistryProvider)
  * @since org.eclipse.equinox.registry 3.2
