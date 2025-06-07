@@ -29,6 +29,7 @@ import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.VersionRange;
 
 public class WeavingHookConfigurator extends ClassLoaderHook {
 	static class WovenClassContext {
@@ -40,6 +41,7 @@ public class WeavingHookConfigurator extends ClassLoaderHook {
 	// cleanup.
 	private final Map<ServiceRegistration<?>, Boolean> deniedHooks = Collections
 			.synchronizedMap(new WeakHashMap<ServiceRegistration<?>, Boolean>());
+	private final Map<String, VersionRange> bannedHooks;
 	// holds the stack of WovenClass objects currently being used to define classes
 	private final ThreadLocal<WovenClassContext> wovenClassContext = new ThreadLocal<>();
 
@@ -47,6 +49,7 @@ public class WeavingHookConfigurator extends ClassLoaderHook {
 
 	public WeavingHookConfigurator(EquinoxContainer container) {
 		this.container = container;
+		this.bannedHooks = container.getConfiguration().BANNED_WEAVING_HOOK_BUNDLES;
 	}
 
 	private ServiceRegistry getRegistry() {
@@ -64,7 +67,7 @@ public class WeavingHookConfigurator extends ClassLoaderHook {
 		BundleLoader loader = classLoader.getBundleLoader();
 		// create a woven class object and add it to the thread local stack
 		WovenClassImpl wovenClass = new WovenClassImpl(name, classbytes, entry, classpathEntry, loader, container,
-				deniedHooks);
+				deniedHooks, bannedHooks);
 		WovenClassContext context = wovenClassContext.get();
 		if (context == null) {
 			context = new WovenClassContext();
