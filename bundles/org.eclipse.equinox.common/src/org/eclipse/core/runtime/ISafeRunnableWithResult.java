@@ -25,10 +25,10 @@ package org.eclipse.core.runtime;
  * <p>
  * Clients may implement this interface.
  * </p>
- * 
+ *
  * @param <T> the type of the result
  * @see SafeRunner#run(ISafeRunnableWithResult)
- * 
+ *
  * @since 3.11
  */
 @FunctionalInterface
@@ -42,7 +42,7 @@ public interface ISafeRunnableWithResult<T> extends ISafeRunnable {
 	 * Runs this runnable and returns the result. Any exceptions thrown from this
 	 * method will be logged by the caller and passed to this runnable's
 	 * {@link #handleException} method.
-	 * 
+	 *
 	 * @return the result
 	 *
 	 * @exception Exception if a problem occurred while running this method

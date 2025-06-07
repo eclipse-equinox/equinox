@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     Alex Blewitt - initial API and implementation
  *     Alexander Fedorov (ArSysOp) - documentation improvements
@@ -53,7 +53,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * <p>
  * Single invocation example:
  * </p>
- * 
+ *
  * <pre>
  * ServiceCaller.callOnce(MyClass.class, ILog.class, (logger) -&gt; logger.info("All systems go!"));
  * </pre>
@@ -68,7 +68,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * This allows boilerplate code to be reduced at call sites, which would
  * otherwise have to do something like:
  * </p>
- * 
+ *
  * <pre>
  * Bundle bundle = FrameworkUtil.getBundle(BadExample.class);
  * BundleContext context = bundle == null ? null : bundle.getBundleContext();
@@ -89,10 +89,10 @@ import org.osgi.util.tracker.ServiceTracker;
  * lazy instantiation of the service instance. For example, if logging is used
  * more often then something like the following could be used:
  * </p>
- * 
+ *
  * <pre>
  * static final ServiceCaller&lt;ILog&gt; log = new ServiceCaller(MyClass.class, ILog.class);
- * 
+ *
  * static void info(String msg) {
  * 	log.call(logger -&gt; logger.info(msg));
  * }
@@ -102,7 +102,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * advanced cases should use other mechanisms such as the {@link ServiceTracker}
  * or declarative services.
  * </p>
- * 
+ *
  * @param <S> the service type for this caller
  * @since 3.13
  */
@@ -120,7 +120,7 @@ public class ServiceCaller<S> {
 	 * the consumer throws a checked exception, it can be propagated using a
 	 * <em>sneakyThrow</em> inside a try/catch block:
 	 * </p>
-	 * 
+	 *
 	 * <pre>
 	 * callOnce(MyClass.class, Callable.class, (callable) -&gt; {
 	 *   try {
@@ -135,7 +135,7 @@ public class ServiceCaller<S> {
 	 *   throw (E) e;
 	 * }
 	 * </pre>
-	 * 
+	 *
 	 * @param caller      a class from the bundle that will use service
 	 * @param serviceType the OSGi service type to look up
 	 * @param consumer    the consumer of the OSGi service
@@ -152,7 +152,7 @@ public class ServiceCaller<S> {
 
 	/**
 	 * As {@link #callOnce(Class, Class, Consumer)} with an additional OSGi filter.
-	 * 
+	 *
 	 * @param caller      a class from the bundle that will use service
 	 * @param serviceType the OSGi service type to look up
 	 * @param consumer    the consumer of the OSGi service
@@ -290,7 +290,7 @@ public class ServiceCaller<S> {
 	/**
 	 * Creates a {@code ServiceCaller} instance for invoking an OSGi service many
 	 * times with a consumer function.
-	 * 
+	 *
 	 * @param caller      a class from the bundle that will consume the service
 	 * @param serviceType the OSGi service type to look up
 	 * @throws NullPointerException  if any of the parameters are {@code null}
@@ -304,7 +304,7 @@ public class ServiceCaller<S> {
 	/**
 	 * Creates a {@code ServiceCaller} instance for invoking an OSGi service many
 	 * times with a consumer function.
-	 * 
+	 *
 	 * @param caller      a class from the bundle that will consume the service
 	 * @param serviceType the OSGi service type to look up
 	 * @param filter      the service filter used to look up the service. May be
@@ -350,10 +350,10 @@ public class ServiceCaller<S> {
 	 * <li>The caller bundle is stopped.</li>
 	 * <li>The service rankings have changed.</li>
 	 * </ul>
-	 * 
+	 *
 	 * After one of these conditions occur subsequent calls to this method will try
 	 * to acquire the another service instance.
-	 * 
+	 *
 	 * @param consumer the consumer of the OSGi service
 	 * @return true if the OSGi service was located and called successfully, false
 	 *         otherwise
@@ -367,7 +367,7 @@ public class ServiceCaller<S> {
 
 	/**
 	 * Return the currently available service.
-	 * 
+	 *
 	 * @return the currently available service or empty if the service cannot be
 	 *         found.
 	 */
