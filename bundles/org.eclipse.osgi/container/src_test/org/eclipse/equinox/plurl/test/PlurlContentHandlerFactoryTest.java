@@ -16,12 +16,6 @@ package org.eclipse.equinox.plurl.test;
 import static org.eclipse.equinox.plurl.test.PlurlStreamHandlerFactoryTest.checkProtocol;
 import static org.eclipse.equinox.plurl.test.PlurlTestHandlers.createTestContentHandlerFactory;
 import static org.eclipse.equinox.plurl.test.PlurlTestHandlers.createTestURLStreamHandlerFactory;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeThat;
-
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
@@ -30,8 +24,6 @@ import org.eclipse.equinox.plurl.test.PlurlStreamHandlerFactoryTest.TesterClass;
 import org.eclipse.equinox.plurl.test.PlurlTestHandlers.TestContentHandlerFactory;
 import org.eclipse.equinox.plurl.test.PlurlTestHandlers.TestFactoryType;
 import org.eclipse.equinox.plurl.test.PlurlTestHandlers.TestURLStreamHandlerFactory;
-import org.junit.After;
-import org.junit.Test;
 
 @SuppressWarnings("nls")
 public class PlurlContentHandlerFactoryTest
