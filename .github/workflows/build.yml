@@ -39,12 +39,12 @@ jobs:
       with:
         java-version: |
           8
-          21
           17
+          21
         mvn-toolchain-id: |
           JavaSE-1.8
-          JavaSE-21
           JavaSE-17
+          JavaSE-21
         distribution: 'temurin'
         cache: maven
     - name: Set up Maven
@@ -90,15 +90,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - name: Set up JDK 17
+    - name: Set up JDK
       uses: actions/setup-java@v4
       with:
         java-version: |
           8
           17
+          21
         mvn-toolchain-id: |
           JavaSE-1.8
           JavaSE-17
+          JavaSE-21
         distribution: 'temurin'
         cache: maven
     - name: Set up Maven
