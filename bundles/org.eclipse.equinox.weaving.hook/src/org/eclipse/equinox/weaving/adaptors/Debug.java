@@ -7,9 +7,9 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
- *   Matthew Webster           initial implementation      
+ *   Matthew Webster           initial implementation
  *******************************************************************************/
 
 package org.eclipse.equinox.weaving.adaptors;

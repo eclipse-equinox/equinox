@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *   David Knibb               initial implementation
  *   Matthew Webster           Eclipse 3.2 changes
@@ -24,7 +24,7 @@ import java.util.Map;
  * The IWeavingService is the interface for weavers for individual bundles. This
  * weaver is used by the core equinox aspects runtime to weave bytecodes when a
  * class is loaded and not read from cache.
- * 
+ *
  * @author Martin Lippert
  */
 public interface IWeavingService {
@@ -32,14 +32,14 @@ public interface IWeavingService {
 	/**
 	 * Flush all generated classes from the weaving service so that memory kept by
 	 * the weaving service for additional classes can be freed.
-	 * 
+	 *
 	 * @param loader The class loader the weaving service belongs to
 	 */
 	public void flushGeneratedClasses(ClassLoader loader);
 
 	/**
 	 * Has the weaving service generated new classes on the fly for the given class?
-	 * 
+	 *
 	 * @param loader    The class loader of the woven class
 	 * @param className The name of the woven class
 	 * @return true, if the weaving service has generated additional classes for the
@@ -52,7 +52,7 @@ public interface IWeavingService {
 	 * Implementations of this method should remove those classes from internal
 	 * lists (to free memory). This means also that calling this method a second
 	 * time will return an emptry map.
-	 * 
+	 *
 	 * @param className The name of the class for which additional classes were
 	 *                  generated
 	 * @return The generated classes (key: generated class name, value: generated
@@ -67,7 +67,7 @@ public interface IWeavingService {
 	 * key to feed the caching service. This means, the weaver should return
 	 * different keys for different set of aspects (including versions),
 	 * respectively when the cache should switch its context.
-	 * 
+	 *
 	 * @return A unique key to define the set of aspects that are woven into the
 	 *         bundle to which this weaver belongs
 	 */
@@ -76,7 +76,7 @@ public interface IWeavingService {
 	/**
 	 * This method is called for each class which is loaded into the JVM and not
 	 * read from cache to do the actual weaving, if necessary.
-	 * 
+	 *
 	 * @param name       The fully qualified name of the class to be loaded
 	 * @param classbytes The original unmodified bytecode of the class read by the
 	 *                   standard OSGi classloading mechanism

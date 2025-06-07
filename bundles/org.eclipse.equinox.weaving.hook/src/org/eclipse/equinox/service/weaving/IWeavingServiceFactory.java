@@ -7,9 +7,9 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
- *   Martin Lippert               initial implementation      
+ *   Martin Lippert               initial implementation
  *******************************************************************************/
 
 package org.eclipse.equinox.service.weaving;
@@ -22,7 +22,7 @@ import org.osgi.framework.wiring.BundleRevision;
  * like to contribute a concrete weaving mechanism. Bundles should implement
  * this interface and register an implementation as an OSGi service under this
  * interface.
- * 
+ *
  * @author Martin Lippert
  */
 public interface IWeavingServiceFactory {
@@ -31,7 +31,7 @@ public interface IWeavingServiceFactory {
 	 * Create a concrete weaving implementation for the given bundle. This is called
 	 * by the basic equinox aspects weaving hook mechanism lazily when the
 	 * classloader for the bundle is created.
-	 * 
+	 *
 	 * @param loader               The classloader of the bundle for which to create
 	 *                             a weaver
 	 * @param bundle               The bundle for which to create the weaver
