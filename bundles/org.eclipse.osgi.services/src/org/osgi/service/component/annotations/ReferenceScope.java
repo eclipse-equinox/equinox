@@ -18,7 +18,7 @@ package org.osgi.service.component.annotations;
 
 /**
  * Reference scope for the {@link Reference} annotation.
- * 
+ *
  * @author $Id$
  * @since 1.3
  */

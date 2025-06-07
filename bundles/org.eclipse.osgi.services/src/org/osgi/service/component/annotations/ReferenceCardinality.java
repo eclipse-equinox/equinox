@@ -18,11 +18,11 @@ package org.osgi.service.component.annotations;
 
 /**
  * Cardinality for the {@link Reference} annotation.
- * 
+ *
  * <p>
  * Specifies if the reference is optional and if the component implementation
  * support a single bound service or multiple bound services.
- * 
+ *
  * @author $Id$
  */
 public enum ReferenceCardinality {
