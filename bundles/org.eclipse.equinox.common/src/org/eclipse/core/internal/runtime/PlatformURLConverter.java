@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -24,7 +24,7 @@ import org.eclipse.osgi.service.urlconversion.URLConverter;
 /**
  * Class which implements the URLConverter service. Manages conversion of a
  * platform: URL to one with a more well known protocol.
- * 
+ *
  * @since 3.2
  */
 public class PlatformURLConverter implements URLConverter {
