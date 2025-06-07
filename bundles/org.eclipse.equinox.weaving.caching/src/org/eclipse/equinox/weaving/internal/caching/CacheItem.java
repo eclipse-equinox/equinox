@@ -35,7 +35,7 @@ public class CacheItem {
 
 	/**
 	 * Create a new item to be cached
-	 * 
+	 *
 	 * @param cachedBytes The bytes to be written to the cache
 	 * @param directory   The directory to where the bytes should be stored
 	 * @param name        The name of the file to store the bytes in
@@ -46,7 +46,7 @@ public class CacheItem {
 
 	/**
 	 * Create a new item to be cached
-	 * 
+	 *
 	 * @param cachedBytes      The bytes to be written to the cache
 	 * @param directory        The directory to where the bytes should be stored
 	 * @param name             The name of the file to store the bytes in
