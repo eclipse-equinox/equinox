@@ -32,7 +32,7 @@ Import-Package: javax.security.auth;resolution:=optional,
  org.osgi.service.cm;version="[1.4,2.0)";resolution:=optional,
  org.osgi.util.tracker;version="[1.5.0,2)"
 Export-Package: org.eclipse.equinox.console.internal.ssh;x-internal:=true,
- org.eclipse.equinox.console.jaas,
+ org.eclipse.equinox.console.jaas;uses:="javax.security.auth.callback,javax.security.auth,javax.security.auth.spi",
  org.eclipse.equinox.console.ssh;x-internal:=true,
  org.eclipse.equinox.console.storage;x-internal:=true
 Automatic-Module-Name: org.eclipse.equinox.console.ssh
