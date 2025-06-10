@@ -14,5 +14,6 @@ jobs:
       author: Eclipse Equinox Bot <equinox-bot@eclipse.org>
       do-quickfix: false
       do-cleanups: true
+      do-manifest: true
     secrets:
       token: ${{ secrets.EQUINOX_BOT_PAT }}
