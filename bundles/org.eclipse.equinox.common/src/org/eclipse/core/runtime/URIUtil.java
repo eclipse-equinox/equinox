@@ -15,6 +15,8 @@ package org.eclipse.core.runtime;
 
 import java.io.File;
 import java.net.*;
+import java.nio.file.Path;
+import java.util.Objects;
 
 /**
  * A utility class for manipulating URIs. This class works around some of the
@@ -102,7 +104,7 @@ public final class URIUtil {
 		String ssp = base.getSchemeSpecificPart();
 		if (ssp.endsWith("/")) { //$NON-NLS-1$
 			ssp += extension;
-		} else { //$NON-NLS-1$
+		} else {
 			ssp = ssp + "/" + extension; //$NON-NLS-1$
 		}
 		return new URI(base.getScheme(), ssp, base.getFragment());
@@ -139,6 +141,31 @@ public final class URIUtil {
 	}
 
 	/**
+	 * Returns an {@link URI} parsed from the given string.
+	 * <p>
+	 * This is a more robust variant of {@link URI#create(String)} that can
+	 * additionally also parse URI/URL specifications that are not properly encoded.
+	 * </p>
+	 * 
+	 * @param spec the string to be parsed into a URI
+	 * @return the URI
+	 * @throws IllegalArgumentException If the given string violates RFC 2396
+	 * @since 3.21
+	 */
+	public static URI createURI(String spec) {
+		try {
+			return new URI(Objects.requireNonNull(spec));
+		} catch (URISyntaxException e) {
+			try {
+				return fromString(spec);
+			} catch (URISyntaxException e2) {
+				// Throw first exception to encourage use of proper syntax in the first place
+				throw new IllegalArgumentException(e.getMessage(), e);
+			}
+		}
+	}
+
+	/**
 	 * Returns a URI corresponding to the given unencoded string. This method will
 	 * take care of encoding any characters that must be encoded according to the
 	 * URI specification. This method must not be called with a string that already
@@ -148,7 +175,9 @@ public final class URIUtil {
 	 * @param uriString An unencoded URI string
 	 * @return A URI corresponding to the given string
 	 * @throws URISyntaxException If the string cannot be formed into a valid URI
+	 * @deprecated Instead use {@link #createURI(String)} which is more robust
 	 */
+	@Deprecated(since = "2025-06")
 	public static URI fromString(String uriString) throws URISyntaxException {
 		int colon = uriString.indexOf(':');
 		int hash = uriString.lastIndexOf('#');
@@ -278,7 +307,9 @@ public final class URIUtil {
 	 * 
 	 * @param uri The URI to return the file for
 	 * @return The local file corresponding to the given URI, or <code>null</code>
+	 * @deprecated Instead use {@link Path#of(URI)}
 	 */
+	@Deprecated(since = "2025-06")
 	public static File toFile(URI uri) {
 		if (!isFileURI(uri)) {
 			return null;
@@ -327,6 +358,8 @@ public final class URIUtil {
 	 * @return A URI representing the given URL
 	 */
 	public static URI toURI(URL url) throws URISyntaxException {
+		// TODO: this does not handle properly encoded URLs. Create robust alternative
+		// or make it capable of handling encoded URLs too?
 		// URL behaves differently across platforms so for file: URLs we parse from
 		// string form
 		if (SCHEME_FILE.equals(url.getProtocol())) {
@@ -441,10 +474,9 @@ public final class URIUtil {
 	/**
 	 * Returns a URI as a URL.
 	 * 
-	 * <p>
-	 * Better use {@link URI#toURL()} instead.
-	 * </p>
+	 * @deprecated Instead use {@link URI#toURL()}
 	 */
+	@Deprecated(since = "2025-06")
 	public static URL toURL(URI uri) throws MalformedURLException {
 		return new URL(uri.toString());
 	}
@@ -456,7 +488,10 @@ public final class URIUtil {
 	 * 
 	 * @param uri The URI to convert to string format
 	 * @return An unencoded string representation of the URI
+	 * @deprecated Creating unencoded URI (specifications) should generally be
+	 *             avoided.
 	 */
+	@Deprecated(since = "2025-06")
 	public static String toUnencodedString(URI uri) {
 		StringBuilder result = new StringBuilder();
 		String scheme = uri.getScheme();
