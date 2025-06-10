@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Christoph Laeubrich 	- [Bug 565924] join with IProgressMonitorWithBlocking, add null aware helper methods
@@ -76,7 +76,7 @@ package org.eclipse.core.runtime;
  * <li>Will pass in a monitor that ignores the name argument to
  * {@link #beginTask} unless the JavaDoc for the callee states otherwise.
  * </ul>
- * 
+ *
  * <p>
  * The responsibilities described above were introduced in Eclipse 4.7 (Oxygen).
  * Prior to Eclipse 4.7, it was common practice for the callee to invoke
@@ -108,7 +108,7 @@ public interface IProgressMonitor {
 	/**
 	 * Notifies that the main task is beginning. This must only be called once on a
 	 * given progress monitor instance.
-	 * 
+	 *
 	 * @param name      the name (or description) of the main task
 	 * @param totalWork the total number of work units into which the main task is
 	 *                  been subdivided. If the value is <code>UNKNOWN</code> the
@@ -127,7 +127,7 @@ public interface IProgressMonitor {
 	/**
 	 * Internal method to handle scaling correctly. This method must not be called
 	 * by a client. Clients should always use the method <code>worked(int)</code>.
-	 * 
+	 *
 	 * @param work the amount of work done
 	 */
 	public void internalWorked(double work);
@@ -144,7 +144,7 @@ public interface IProgressMonitor {
 
 	/**
 	 * Sets the cancel state to the given value.
-	 * 
+	 *
 	 * @param value <code>true</code> indicates that cancelation has been requested
 	 *              (but not necessarily acknowledged); <code>false</code> clears
 	 *              this flag
@@ -189,7 +189,7 @@ public interface IProgressMonitor {
 	 * blocking the caller. If this blocking job is not known, this method will
 	 * return a plain informational <code>IStatus</code> object.
 	 * </p>
-	 * 
+	 *
 	 * @param reason an optional status object whose message describes the reason
 	 *               why this operation is blocked, or <code>null</code> if this
 	 *               information is not available.
@@ -204,7 +204,7 @@ public interface IProgressMonitor {
 	 * Clears the blocked state of the running operation. If a running operation
 	 * ever calls <code>setBlocked</code>, it must eventually call
 	 * <code>clearBlocked</code> before the operation completes.
-	 * 
+	 *
 	 * @see #setBlocked(IStatus)
 	 * @since 3.13
 	 */
@@ -220,10 +220,10 @@ public interface IProgressMonitor {
 	 * therefore only be used by one thread at once. To account for this, if sliced
 	 * instances are passed to another thread, only sliced instances should be used
 	 * like in this example:
-	 * 
+	 *
 	 * <pre>
 	 * IProgressMonitor monitor = ...
-	 * 
+	 *
 	 * processAsync(monitor.slice(70));
 	 * monitor = monitor.slice(30); // get a local slice so we can use the monitor
 	 * 								// without interference with the async processing
@@ -231,16 +231,16 @@ public interface IProgressMonitor {
 	 * ...
 	 * monitor.worked(1);           // this is now safe to be called further on
 	 * ...
-	 * monitor.done();				// mark our part as done, 
+	 * monitor.done();				// mark our part as done,
 	 * 								// the other slice will be finished by processAsync(...)
 	 * 								// ... and the original monitor by the caller of this method
-	 * 
+	 *
 	 * </pre>
-	 * 
+	 *
 	 * The caller of this method (or the Thread that gets this instance passed) is
 	 * responsible to make sure that {@link #done()} is called once the monitor is
 	 * no longer needed.
-	 * 
+	 *
 	 * @param work the amount of work for this {@link IProgressMonitor} to slice
 	 * @return a {@link IProgressMonitor} slice for the given amount, the default
 	 *         implementation suppress any strings passed to
@@ -256,7 +256,7 @@ public interface IProgressMonitor {
 	/**
 	 * Calls {@link #done()} on the given monitor if is non-null. If the given
 	 * monitor is null, this is a no-op.
-	 * 
+	 *
 	 * @param monitor the monitor to make done, might be <code>null</code>
 	 * @since 3.14
 	 */
@@ -270,7 +270,7 @@ public interface IProgressMonitor {
 	 * Returns a <code>null</code> safe access to the given monitor, for example in
 	 * cases where a monitor is passed to a function the implementation can call
 	 * this method to get a guaranteed non-null monitor reference
-	 * 
+	 *
 	 * @param monitor the monitor to check
 	 * @return the passed monitor instance or {@link NullProgressMonitor} if monitor
 	 *         was <code>null</code>

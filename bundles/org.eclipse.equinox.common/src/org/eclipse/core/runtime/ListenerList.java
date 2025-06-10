@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Mikael Barbero (Eclipse Foundation) - Bug 509234
@@ -37,7 +37,7 @@ import java.util.stream.StreamSupport;
  * for notifying all registered listeners of say,
  * <code>FooListener#eventHappened(Event)</code>, is:
  * </p>
- * 
+ *
  * <pre>
  * ListenerList&lt;FooListener&gt; fooListeners = new ListenerList&lt;&gt;();
  * //...
@@ -53,7 +53,7 @@ import java.util.stream.StreamSupport;
  * <p>
  * This class can be used without OSGi running.
  * </p>
- * 
+ *
  * @param <E> the type of listeners in this list
  * @since org.eclipse.equinox.common 3.2
  */
@@ -98,7 +98,7 @@ public class ListenerList<E> implements Iterable<E> {
 
 	/**
 	 * Creates a listener list using the provided comparison mode.
-	 * 
+	 *
 	 * @param mode The mode used to determine if listeners are the
 	 *             <a href="ListenerList.html#same">same</a>.
 	 */
@@ -112,7 +112,7 @@ public class ListenerList<E> implements Iterable<E> {
 	/**
 	 * Adds a listener to this list. This method has no effect if the
 	 * <a href="ListenerList.html#same">same</a> listener is already registered.
-	 * 
+	 *
 	 * @param listener the non-<code>null</code> listener to add
 	 */
 	public synchronized void add(E listener) {
@@ -163,7 +163,7 @@ public class ListenerList<E> implements Iterable<E> {
 	 * is unaffected by subsequent adds or removes. Use this method when notifying
 	 * listeners, so that any modifications to the listener list during the
 	 * notification will have no effect on the notification itself.
-	 * 
+	 *
 	 * @return an iterator
 	 * @since org.eclipse.equinox.common 3.8
 	 */
@@ -264,7 +264,7 @@ public class ListenerList<E> implements Iterable<E> {
 	 * <p>
 	 * The spliterator reports Spliterator.SIZED, Spliterator.SUBSIZED,
 	 * Spliterator.ORDERED, and Spliterator.IMMUTABLE
-	 * 
+	 *
 	 * @return a spliterator for listeners
 	 * @since org.eclipse.equinox.common 3.9
 	 */
@@ -276,7 +276,7 @@ public class ListenerList<E> implements Iterable<E> {
 
 	/**
 	 * Returns a sequential {@code Stream} over the registered listeners.
-	 * 
+	 *
 	 * @return a sequential {@code Stream} over the registered listeners.
 	 * @since org.eclipse.equinox.common 3.9
 	 */
@@ -286,7 +286,7 @@ public class ListenerList<E> implements Iterable<E> {
 
 	/**
 	 * Returns a parallel {@code Stream} over the registered listeners.
-	 * 
+	 *
 	 * @return a parallel {@code Stream} over the registered listeners.
 	 * @since org.eclipse.equinox.common 3.9
 	 */

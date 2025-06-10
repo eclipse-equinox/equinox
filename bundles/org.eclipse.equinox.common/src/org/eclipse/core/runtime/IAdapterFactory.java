@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Sergey Prigogin (Google) - use parameterized types (bug 442021)
@@ -27,7 +27,7 @@ import java.util.Arrays;
  * <p>
  * Clients may implement this interface.
  * </p>
- * 
+ *
  * @see IAdapterManager
  * @see IAdaptable
  * @see AdapterTypes
@@ -38,7 +38,7 @@ public interface IAdapterFactory {
 	 * Service property to use when registering a factory as OSGi-service to declare
 	 * the adaptable class type, this is a multi-string-property, if more than one
 	 * is given the factory will be register multiple times
-	 * 
+	 *
 	 * @since 3.14
 	 */
 	static final String SERVICE_PROPERTY_ADAPTABLE_CLASS = "adaptableClass"; //$NON-NLS-1$
@@ -47,7 +47,7 @@ public interface IAdapterFactory {
 	 * Optional service property to use when registering a factory as OSGi-service
 	 * to declare the possible adapter types. If the property is given, the service
 	 * is only queried when actually required, this is a multi-string-property.
-	 * 
+	 *
 	 * @since 3.14
 	 */
 	static final String SERVICE_PROPERTY_ADAPTER_NAMES = "adapterNames"; //$NON-NLS-1$

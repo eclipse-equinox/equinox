@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -42,7 +42,7 @@ public final class QualifiedName {
 	 * <p>
 	 * Clients may instantiate.
 	 * </p>
-	 * 
+	 *
 	 * @param qualifier the qualifier string, or <code>null</code>
 	 * @param localName the local name string
 	 */
@@ -104,7 +104,7 @@ public final class QualifiedName {
 	/*
 	 * (Intentionally omitted from javadoc) Implements the method
 	 * <code>Object.hashCode</code>.
-	 * 
+	 *
 	 * Returns the hash code for this qualified name.
 	 */
 	@Override

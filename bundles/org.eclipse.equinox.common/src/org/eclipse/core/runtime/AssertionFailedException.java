@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -22,7 +22,7 @@ package org.eclipse.core.runtime;
  * <p>
  * This class is not intended to be instantiated or sub-classed by clients.
  * </p>
- * 
+ *
  * @see Assert
  * @since org.eclipse.equinox.common 3.2
  * @noextend This class is not intended to be subclassed by clients.
@@ -37,7 +37,7 @@ public class AssertionFailedException extends RuntimeException {
 
 	/**
 	 * Constructs a new exception with the given message.
-	 * 
+	 *
 	 * @param detail the message
 	 */
 	public AssertionFailedException(String detail) {

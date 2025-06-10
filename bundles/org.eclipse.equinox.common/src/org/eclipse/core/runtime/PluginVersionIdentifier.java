@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Sergey Prigogin (Google) - use parameterized types (bug 442021)
@@ -56,7 +56,7 @@ import org.osgi.framework.Version;
  * <p>
  * Clients may instantiate; not intended to be subclassed by clients.
  * </p>
- * 
+ *
  * @see java.lang.String#compareTo(java.lang.String)
  * @deprecated clients should use {@link org.osgi.framework.Version} instead
  */
@@ -69,7 +69,7 @@ public final class PluginVersionIdentifier {
 
 	/**
 	 * Creates a plug-in version identifier from its components.
-	 * 
+	 *
 	 * @param major   major component of the version identifier
 	 * @param minor   minor component of the version identifier
 	 * @param service service update component of the version identifier
@@ -80,7 +80,7 @@ public final class PluginVersionIdentifier {
 
 	/**
 	 * Creates a plug-in version identifier from its components.
-	 * 
+	 *
 	 * @param major     major component of the version identifier
 	 * @param minor     minor component of the version identifier
 	 * @param service   service update component of the version identifier
@@ -119,7 +119,7 @@ public final class PluginVersionIdentifier {
 	 * <li><code>1.9</code> (interpreted as <code>1.9.0</code>)</li>
 	 * <li><code>3</code> (interpreted as <code>3.0.0</code>)</li>
 	 * </ul>
-	 * 
+	 *
 	 * @param versionId string representation of the version identifier. Qualifier
 	 *                  characters that are not a letter or a digit are replaced.
 	 */
@@ -131,7 +131,7 @@ public final class PluginVersionIdentifier {
 
 	/**
 	 * Validates the given string as a plug-in version identifier.
-	 * 
+	 *
 	 * @param version the string to validate
 	 * @return a status object with code <code>IStatus.OK</code> if the given string
 	 *         is valid as a plug-in version identifier, otherwise a status object
@@ -386,7 +386,7 @@ public final class PluginVersionIdentifier {
 	 * argument. If the service levels are equal, the two version identifiers are
 	 * considered to be equivalent if this qualifier is greater or equal to the
 	 * qualifier of the argument (using lexicographic string comparison).
-	 * 
+	 *
 	 * </p>
 	 *
 	 * @param id the other version identifier
