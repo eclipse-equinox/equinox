@@ -24,7 +24,7 @@ public class TextProcessorSessionTest extends ConfigurationSessionTestSuite {
 
 	/**
 	 * Create a session test for the given class.
-	 * 
+	 *
 	 * @param pluginId tests plugin id
 	 * @param clazz    the test class to run
 	 * @param language the language to run the tests under (the -nl parameter value)
@@ -37,7 +37,7 @@ public class TextProcessorSessionTest extends ConfigurationSessionTestSuite {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.core.tests.session.SessionTestSuite#newSetup()
 	 */
 	@Override

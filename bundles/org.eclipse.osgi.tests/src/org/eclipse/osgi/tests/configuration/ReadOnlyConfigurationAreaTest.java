@@ -53,7 +53,7 @@ public class ReadOnlyConfigurationAreaTest extends TestCase {
 
 	/**
 	 * Takes a snapshot of the file system.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	public void test1stSession() throws IOException {
