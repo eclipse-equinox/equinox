@@ -89,6 +89,12 @@
 						<target>
 							<file>../../releng/tcks.target</file>
 						</target>
+						<!-- 
+							The TCKs require Java 17 due to the security manager tests that is gone in Java 21
+							Since security is optional it is not a general problem for Equinox, users can just not use the
+							security feature for Java > 17
+						-->
+						<executionEnvironment>JavaSE-17</executionEnvironment>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -105,6 +111,7 @@
 								<bundles>
 									${tck.artifact}
 								</bundles>
+								<useJDK>BREE</useJDK>
 								<skipTests>${tck.skip}</skipTests>
 								<tester>${tck.tester}</tester>
 								<engine>${tck.engine}</engine>
