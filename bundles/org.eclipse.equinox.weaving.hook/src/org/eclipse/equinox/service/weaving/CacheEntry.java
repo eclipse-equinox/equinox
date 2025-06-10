@@ -7,9 +7,9 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
- *   Martin Lippert              initial implementation      
+ *   Martin Lippert              initial implementation
  *******************************************************************************/
 
 package org.eclipse.equinox.service.weaving;
@@ -17,13 +17,13 @@ package org.eclipse.equinox.service.weaving;
 /**
  * A CacheEntry represents an item that is read (or should have been read) from
  * the cache.
- * 
+ *
  * A cache entry is the primary communication item between the basic hook
  * mechanism and the cache implementation. The cache can tell the hook to skip
  * any weaving for the class (in the case the cache knows that the class don't
  * need any weaving, e.g. no aspects affect this class) or to use the bytes that
  * are read from the cache to define the class in the VM.
- * 
+ *
  * @author Martin Lippert
  */
 public class CacheEntry {
@@ -36,7 +36,7 @@ public class CacheEntry {
 	 * Creates a new cache entry. This item can tell the basic hook mechanism to use
 	 * the given cached bytes for the class definition or if the original class
 	 * bytes needs weaving or not
-	 * 
+	 *
 	 * @param dontWeave   A flag that indicates whether this item needs to be woven
 	 *                    or not
 	 * @param cachedBytes The bytes for the class read from the cache
@@ -48,7 +48,7 @@ public class CacheEntry {
 
 	/**
 	 * Tell the hook mechanism to weave a class or not to weave a class
-	 * 
+	 *
 	 * @return true, if the class doesn't need any weaving, otherwise false
 	 */
 	public boolean dontWeave() {
@@ -58,7 +58,7 @@ public class CacheEntry {
 	/**
 	 * Returns the bytes that are read from the cache. These bytes should be used
 	 * for defining the class instead of the original ones.
-	 * 
+	 *
 	 * @return The cached bytes for the class
 	 */
 	public byte[] getCachedBytes() {

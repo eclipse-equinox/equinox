@@ -7,9 +7,9 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
- *   Martin Lippert               initial implementation      
+ *   Martin Lippert               initial implementation
  *******************************************************************************/
 
 package org.eclipse.equinox.service.weaving;
@@ -21,7 +21,7 @@ import org.osgi.framework.Bundle;
  * like to contribute a concrete caching implementation. Bundles should
  * implement this interface and register an implementation as an OSGi service
  * under this interface.
- * 
+ *
  * @author Martin Lippert
  */
 public interface ICachingServiceFactory {
@@ -30,7 +30,7 @@ public interface ICachingServiceFactory {
 	 * Create concrete caching service for the given bundle. The caching service is
 	 * then responsible to cache woven bytecode and retrieve those bytecodes from
 	 * the cache.
-	 * 
+	 *
 	 * @param classLoader The classloader if the given bundle
 	 * @param bundle      The bundle the caching service should be created for
 	 * @param key         A fingerprint that is created by the concrete weavers to

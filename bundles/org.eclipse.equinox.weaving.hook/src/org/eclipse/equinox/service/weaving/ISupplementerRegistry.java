@@ -7,9 +7,9 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
- *   Martin Lippert            initial implementation     
+ *   Martin Lippert            initial implementation
  *******************************************************************************/
 
 package org.eclipse.equinox.service.weaving;
@@ -40,7 +40,7 @@ public interface ISupplementerRegistry {
 
 	/**
 	 * Refreshes the given bundles
-	 * 
+	 *
 	 * @param bundles The bundles to refresh
 	 */
 	public void refreshBundles(final Bundle[] bundles);

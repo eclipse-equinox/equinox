@@ -7,11 +7,11 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
- *   David Knibb               initial implementation      
+ *   David Knibb               initial implementation
  *   Matthew Webster           Eclipse 3.2 changes
- *   Martin Lippert            caching optimizations     
+ *   Martin Lippert            caching optimizations
  *   Martin Lippert            caching of generated classes
  *******************************************************************************/
 
@@ -29,7 +29,7 @@ import org.eclipse.osgi.storage.bundlefile.BundleFile;
 /**
  * This is a wrapper for bundle files that allows the weaving runtime to create
  * wrapped instances of bundle entry objects.
- * 
+ *
  * Those bundle entry objects are used to return class bytes from the cache
  * instead of the bundle itself.
  */
@@ -40,7 +40,7 @@ public class WeavingBundleFile extends AbstractWeavingBundleFile {
 
 	/**
 	 * Create a new wrapper for a bundle file
-	 * 
+	 *
 	 * @param adaptorProvider A provider that allows this wrapper to gain access to
 	 *                        the adaptor of this bundle
 	 * @param bundleFile      The wrapped bundle file
