@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Lars Vogel <Lars.Vogel@vogella.com> - Bug 478685, 478864, 479849
@@ -22,7 +22,7 @@ import org.eclipse.osgi.util.NLS;
 
 /**
  * Provides a standard way to request adapters from adaptable objects
- * 
+ *
  * @see IAdaptable
  * @see IAdapterManager
  * @since 3.8
@@ -31,16 +31,16 @@ public class Adapters {
 	/**
 	 * If it is possible to adapt the given object to the given type, this returns
 	 * the adapter. Performs the following checks:
-	 * 
+	 *
 	 * <ol>
 	 * <li>Returns <code>sourceObject</code> if it is an instance of the adapter
 	 * type.</li>
 	 * <li>If sourceObject implements IAdaptable, it is queried for adapters.</li>
 	 * <li>Finally, the adapter manager is consulted for adapters</li>
 	 * </ol>
-	 * 
+	 *
 	 * Otherwise returns null.
-	 * 
+	 *
 	 * @param <T>             class type to adapt to
 	 * @param sourceObject    object to adapt, can be null
 	 * @param adapter         type to adapt to
@@ -102,7 +102,7 @@ public class Adapters {
 	 * Convenience method for calling <code>adapt(Object, Class, true)</code>.
 	 * <p>
 	 * See {@link #adapt(Object, Class, boolean)}.
-	 * 
+	 *
 	 * @param <T>          class type to adapt to
 	 * @param sourceObject object to adapt, can be null
 	 * @param adapter      type to adapt to
@@ -117,7 +117,7 @@ public class Adapters {
 	 * If it is possible to adapt the given object to the given type, this returns
 	 * an optional holding the adapter, in all other cases it returns an empty
 	 * optional.
-	 * 
+	 *
 	 * @param sourceObject object to adapt, if <code>null</code> then
 	 *                     {@link Optional#empty()} is returned
 	 * @param adapter      type to adapt to, must not be <code>null</code>

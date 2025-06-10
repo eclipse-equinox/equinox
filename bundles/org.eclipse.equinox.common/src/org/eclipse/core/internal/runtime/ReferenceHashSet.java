@@ -19,7 +19,7 @@ import java.lang.ref.*;
 /**
  * A hashset whose values can be garbage collected. This API is EXPERIMENTAL and
  * provided as early access.
- * 
+ *
  * @since 3.1
  */
 public class ReferenceHashSet<T> {

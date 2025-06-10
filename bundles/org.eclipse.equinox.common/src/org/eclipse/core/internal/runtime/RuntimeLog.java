@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Julian Chen - fix for bug #92572, jclRM
@@ -20,7 +20,7 @@ import org.eclipse.core.runtime.*;
 
 /**
  * NOT API!!! This log infrastructure was split from the InternalPlatform.
- * 
+ *
  * @since org.eclipse.equinox.common 3.2
  */
 public final class RuntimeLog {
@@ -121,7 +121,7 @@ public final class RuntimeLog {
 
 	/**
 	 * Helps determine if the logging mechanism is ready for logging.
-	 * 
+	 *
 	 * @return true the logging mechanism is ready for logging.
 	 */
 	public static boolean isEmpty() {
@@ -132,7 +132,7 @@ public final class RuntimeLog {
 
 	/**
 	 * Determines if there are any listeners
-	 * 
+	 *
 	 * @return true if there is at least one listener.
 	 */
 	public static boolean hasListeners() {

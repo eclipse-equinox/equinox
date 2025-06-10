@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -26,7 +26,7 @@ import org.eclipse.core.internal.runtime.PrintStackUtil;
  * <p>
  * This class can be used without OSGi running.
  * </p>
- * 
+ *
  * @see IStatus
  */
 public class CoreException extends Exception {
@@ -52,7 +52,7 @@ public class CoreException extends Exception {
 
 	/**
 	 * Returns the cause of this exception, or <code>null</code> if none.
-	 * 
+	 *
 	 * @return the cause for this exception
 	 * @since 3.4
 	 */
@@ -71,13 +71,13 @@ public class CoreException extends Exception {
 	 * <code>CoreException</code>, and use that new status for error reporting or as
 	 * a method return value. For example, instead of:
 	 * </p>
-	 * 
+	 *
 	 * <pre>
 	 * yourPlugin.getLog().log(exception.getStatus());
 	 * </pre>
-	 * 
+	 *
 	 * Use:
-	 * 
+	 *
 	 * <pre>
 	 * IStatus result = new Status(exception.getStatus().getSeverity(), pluginId, message, exception);
 	 * yourPlugin.getLog().log(result);
@@ -101,7 +101,7 @@ public class CoreException extends Exception {
 	/**
 	 * Prints a stack trace out for the exception, and any nested exception that it
 	 * may have embedded in its Status object.
-	 * 
+	 *
 	 * @param output the stream to write to
 	 */
 	@Override
@@ -115,7 +115,7 @@ public class CoreException extends Exception {
 	/**
 	 * Prints a stack trace out for the exception, and any nested exception that it
 	 * may have embedded in its Status object.
-	 * 
+	 *
 	 * @param output the stream to write to
 	 */
 	@Override

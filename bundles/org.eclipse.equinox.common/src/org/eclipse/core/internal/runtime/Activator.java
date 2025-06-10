@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Sergey Prigogin (Google) - use parameterized types (bug 442021)
@@ -37,7 +37,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * The Common runtime plugin class.
- * 
+ *
  * This class can only be used if OSGi plugin is available.
  */
 public class Activator implements BundleActivator {
@@ -153,7 +153,7 @@ public class Activator implements BundleActivator {
 
 	/**
 	 * Return the resolved bundle with the specified symbolic name.
-	 * 
+	 *
 	 * @see PackageAdmin#getBundles(String, String)
 	 */
 	public Bundle getBundle(String symbolicName) {
@@ -217,7 +217,7 @@ public class Activator implements BundleActivator {
 	/**
 	 * Returns the resource bundle responsible for location of the given bundle in
 	 * the given locale. Does not return null.
-	 * 
+	 *
 	 * @throws MissingResourceException If the corresponding resource could not be
 	 *                                  found
 	 */

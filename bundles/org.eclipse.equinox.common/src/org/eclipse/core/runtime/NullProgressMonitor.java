@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -40,7 +40,7 @@ public class NullProgressMonitor implements IProgressMonitor {
 	/**
 	 * This implementation does nothing. Subclasses may override this method to do
 	 * interesting processing when a task begins.
-	 * 
+	 *
 	 * @see IProgressMonitor#beginTask(String, int)
 	 */
 	@Override
@@ -51,7 +51,7 @@ public class NullProgressMonitor implements IProgressMonitor {
 	/**
 	 * This implementation does nothing. Subclasses may override this method to do
 	 * interesting processing when a task is done.
-	 * 
+	 *
 	 * @see IProgressMonitor#done()
 	 */
 	@Override
@@ -61,7 +61,7 @@ public class NullProgressMonitor implements IProgressMonitor {
 
 	/**
 	 * This implementation does nothing. Subclasses may override this method.
-	 * 
+	 *
 	 * @see IProgressMonitor#internalWorked(double)
 	 */
 	@Override
@@ -97,7 +97,7 @@ public class NullProgressMonitor implements IProgressMonitor {
 	/**
 	 * This implementation does nothing. Subclasses may override this method to do
 	 * something with the name of the task.
-	 * 
+	 *
 	 * @see IProgressMonitor#setTaskName(String)
 	 */
 	@Override
@@ -108,7 +108,7 @@ public class NullProgressMonitor implements IProgressMonitor {
 	/**
 	 * This implementation does nothing. Subclasses may override this method to do
 	 * interesting processing when a subtask begins.
-	 * 
+	 *
 	 * @see IProgressMonitor#subTask(String)
 	 */
 	@Override
@@ -119,7 +119,7 @@ public class NullProgressMonitor implements IProgressMonitor {
 	/**
 	 * This implementation does nothing. Subclasses may override this method to do
 	 * interesting processing when some work has been completed.
-	 * 
+	 *
 	 * @see IProgressMonitor#worked(int)
 	 */
 	@Override

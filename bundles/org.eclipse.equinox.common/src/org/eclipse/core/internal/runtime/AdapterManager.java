@@ -7,10 +7,10 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     David Green - fix factories with non-standard class loading (bug 200068) 
+ *     David Green - fix factories with non-standard class loading (bug 200068)
  *     Filip Hrbek - fix thread safety problem described in bug 305863
  *     Sergey Prigogin (Google) - use parameterized types (bug 442021)
  *     Christoph Läubrich - Bug 576660 - AdapterManager should use more modern concurrency primitives
@@ -42,7 +42,7 @@ import org.eclipse.core.runtime.*;
  * then Y's superinterfaces)</li>
  * </ul>
  * </ul>
- * 
+ *
  * @see IAdapterFactory
  * @see IAdapterManager
  */
@@ -131,7 +131,7 @@ public final class AdapterManager implements IAdapterManager {
 	/**
 	 * Queries an {@link IAdapterFactory} for a given type name to return a
 	 * compatible class object
-	 * 
+	 *
 	 * @param adapterFactory the {@link IAdapterFactory} to query for the given
 	 *                       classname, must not be <code>null</code>
 	 * @param typeName       the name of the desired class, must not be
@@ -289,7 +289,7 @@ public final class AdapterManager implements IAdapterManager {
 
 	/**
 	 * Returns an adapter of the given type for the provided adapter.
-	 * 
+	 *
 	 * @param adaptable   the object to adapt
 	 * @param adapterType the type to adapt the object to
 	 * @param force       <code>true</code> if the plug-in providing the factory
@@ -410,7 +410,7 @@ public final class AdapterManager implements IAdapterManager {
 
 	/**
 	 * Try to load the given factory according to the force parameter
-	 * 
+	 *
 	 * @param factory the factory to load
 	 * @param force   if loading should be forced
 	 * @return an {@link Optional} describing the loaded factory

@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Lars.Vogel <Lars.Vogel@vogella.com> - Bug 479914
@@ -18,7 +18,7 @@ package org.eclipse.core.runtime;
  * A progress monitor that uses a given amount of work ticks from a parent
  * monitor. Code that currently uses this utility should be rewritten to use
  * {@link SubMonitor} instead. Consider the following example:
- * 
+ *
  * <pre>
  * void someMethod(IProgressMonitor pm) {
  * 	pm.beginTask("Main Task", 100);
@@ -38,7 +38,7 @@ package org.eclipse.core.runtime;
  * </pre>
  * <p>
  * The above code should be refactored to this:
- * 
+ *
  * <pre>
  * void someMethod(IProgressMonitor pm) {
  * 	SubMonitor subMonitor = SubMonitor.convert(pm, "Main Task", 100);
@@ -71,7 +71,7 @@ package org.eclipse.core.runtime;
  * <p>
  * This class may be instantiated or subclassed by clients.
  * </p>
- * 
+ *
  * @deprecated use {@link SubMonitor} instead
  */
 @Deprecated

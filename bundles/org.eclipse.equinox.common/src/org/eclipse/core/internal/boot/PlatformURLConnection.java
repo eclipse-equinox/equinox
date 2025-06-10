@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Sergey Prigogin (Google) - use parameterized types (bug 442021)
@@ -321,7 +321,7 @@ public abstract class PlatformURLConnection extends URLConnection {
 
 	/*
 	 * to be implemented by subclass
-	 * 
+	 *
 	 * @return URL resolved URL
 	 */
 	protected URL resolve() throws IOException {

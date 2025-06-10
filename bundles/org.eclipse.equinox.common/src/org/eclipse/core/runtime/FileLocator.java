@@ -1,13 +1,13 @@
 /*******************************************************************************
  * Copyright (c) 2006, 2022 IBM Corporation and others.
  *
- * This program and the accompanying materials 
+ * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Sergey Prigogin (Google) - use parameterized types (bug 442021)
@@ -28,7 +28,7 @@ import org.osgi.framework.Bundle;
 /**
  * This class contains a collection of helper methods for finding files in
  * bundles. This class can only be used if the OSGi plugin is available.
- * 
+ *
  * @since org.eclipse.equinox.common 3.2
  * @noinstantiate This class is not intended to be instantiated by clients.
  */
@@ -59,7 +59,7 @@ public final class FileLocator {
 	 * en_CA will return a URL corresponding to the first location about.properties
 	 * is found according to the following order:
 	 * </p>
-	 * 
+	 *
 	 * <pre>
 	 *     plugin root/nl/en/CA/about.properties
 	 *     fragment1 root/nl/en/CA/about.properties
@@ -78,7 +78,7 @@ public final class FileLocator {
 	 * The current environment variable values can be overridden using the override
 	 * map argument or <code>null</code> can be specified if this is not desired.
 	 * </p>
-	 * 
+	 *
 	 * @param bundle   the bundle in which to search
 	 * @param path     file path relative to plug-in installation location
 	 * @param override map of override substitution arguments to be used for any
@@ -115,7 +115,7 @@ public final class FileLocator {
 	 * en_CA will return a URL corresponding to the first location about.properties
 	 * is found according to the following order:
 	 * </p>
-	 * 
+	 *
 	 * <pre>
 	 *     plugin root/nl/en/CA/about.properties
 	 *     fragment1 root/nl/en/CA/about.properties
@@ -130,7 +130,7 @@ public final class FileLocator {
 	 *     fragment2 root/about.properties
 	 *     ...
 	 * </pre>
-	 * 
+	 *
 	 * @see FileLocator#find(Bundle, IPath, Map) for the option to override the
 	 *      current environment variables
 	 *
@@ -149,7 +149,7 @@ public final class FileLocator {
 	 * This method is the same as {@link #find(Bundle, IPath, Map)} except multiple
 	 * entries can be returned if more than one entry matches the path in the host
 	 * and any of its fragments.
-	 * 
+	 *
 	 * @param bundle   the bundle in which to search
 	 * @param path     file path relative to plug-in installation location
 	 * @param override map of override substitution arguments to be used for any
@@ -160,7 +160,7 @@ public final class FileLocator {
 	 *                 substitution argument, the default is used.
 	 * @return an array of entries which match the given path. An empty array is
 	 *         returned if no matches are found.
-	 * 
+	 *
 	 * @since org.eclipse.equinox.common 3.3
 	 */
 	public static URL[] findEntries(Bundle bundle, IPath path, Map<String, String> override) {
@@ -192,7 +192,7 @@ public final class FileLocator {
 	 * the first location about.properties is found according to the following
 	 * order:
 	 * </p>
-	 * 
+	 *
 	 * <pre>
 	 *     plugin root/nl/en/CA/about.properties
 	 *     fragment1 root/nl/en/CA/about.properties
@@ -207,7 +207,7 @@ public final class FileLocator {
 	 *     fragment2 root/about.properties
 	 *     ...
 	 * </pre>
-	 * 
+	 *
 	 * @param url The location of a bundle entry that potentially includes the above
 	 *            environment variables
 	 * @return The URL of the bundle entry matching the input URL, or
@@ -223,12 +223,12 @@ public final class FileLocator {
 	 * This is a convenience method, fully equivalent to
 	 * {@link #findEntries(Bundle, IPath, Map)}, with a value of <code>null</code>
 	 * for the map argument.
-	 * 
+	 *
 	 * @param bundle the bundle in which to search
 	 * @param path   file path relative to plug-in installation location
 	 * @return an array of entries which match the given path. An empty array is
 	 *         returned if no matches are found.
-	 * 
+	 *
 	 * @since org.eclipse.equinox.common 3.3
 	 */
 	public static URL[] findEntries(Bundle bundle, IPath path) {
@@ -266,7 +266,7 @@ public final class FileLocator {
 	 * If the protocol for the given URL is not recognized by this converter, the
 	 * original URL is returned as-is.
 	 * </p>
-	 * 
+	 *
 	 * @param url the original URL
 	 * @return the converted file URL or the original URL passed in if it is not
 	 *         recognized by this converter
@@ -289,7 +289,7 @@ public final class FileLocator {
 	 * If the protocol is not recognized by this converter, then the original URL is
 	 * returned as-is.
 	 * </p>
-	 * 
+	 *
 	 * @param url the original URL
 	 * @return the resolved URL or the original if the protocol is unknown to this
 	 *         converter
@@ -305,11 +305,11 @@ public final class FileLocator {
 	 * Returns a file for the contents of the specified bundle. Depending on how the
 	 * bundle is installed the returned file may be a directory or a jar file
 	 * containing the bundle content.
-	 * 
+	 *
 	 * @param bundle the bundle
 	 * @return a file with the contents of the bundle
 	 * @throws IOException if an error occurs during the resolution
-	 * 
+	 *
 	 * @since org.eclipse.equinox.common 3.4
 	 * @deprecated use {@link #getBundleFileLocation(Bundle)} instead
 	 */
@@ -328,7 +328,7 @@ public final class FileLocator {
 	 * determined the returned {@code Optional} is empty, which is for example
 	 * usually the case for {@code CONNECT} bundles.
 	 * </p>
-	 * 
+	 *
 	 * @param bundle the bundle
 	 * @return the optional file to the location of the bundle's root
 	 * @since 3.16

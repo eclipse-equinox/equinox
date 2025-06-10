@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Sergey Prigogin (Google) - use parameterized types (bug 442021)
@@ -23,7 +23,7 @@ package org.eclipse.core.runtime;
  * managed by type by adapter managers.
  * </p>
  * For example,
- * 
+ *
  * <pre>
  *     IAdaptable a = [some adaptable];
  *     IFoo x = Adapters.getAdapter(a, IFoo.class, true);
@@ -37,7 +37,7 @@ package org.eclipse.core.runtime;
  * Clients may implement this interface, or obtain a default implementation of
  * this interface by subclassing <code>PlatformObject</code>.
  * </p>
- * 
+ *
  * @see IAdapterFactory
  * @see IAdapterManager
  * @see PlatformObject

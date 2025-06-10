@@ -359,7 +359,7 @@ public final class StringMatcher {
 		}
 		return i == segCount;
 	}
-	
+
 	/**
 	 * Similar to {@link #match(String)}, this methods matches a pattern that may
 	 * contain the wildcards '?' or '*' against a text. However, the matching is not
@@ -380,7 +380,7 @@ public final class StringMatcher {
 	 * <p>
 	 * An empty pattern matches only the empty text.
 	 * </p>
-	 * 
+	 *
 	 * @since 3.20
 	 */
 	public boolean matchWords(String text) {

@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Patrick Tasse - Add extra constructor to Path class (bug 454959)
@@ -38,7 +38,7 @@ package org.eclipse.core.runtime;
  * <p>
  * This interface is not intended to be implemented by clients.
  * </p>
- * 
+ *
  * @see Path
  * @noextend This interface is not intended to be extended by clients.
  * @noimplement This interface is not intended to be implemented by clients.
@@ -58,7 +58,7 @@ public interface IPath extends Cloneable {
 	/**
 	 * Constant value containing the empty path with no device on the local file
 	 * system.
-	 * 
+	 *
 	 * @since 3.18
 	 */
 	public static final IPath EMPTY = Path.Constants.empty();
@@ -66,7 +66,7 @@ public interface IPath extends Cloneable {
 	/**
 	 * Constant value containing the root path with no device on the local file
 	 * system.
-	 * 
+	 *
 	 * @since 3.18
 	 */
 	public static final IPath ROOT = Path.Constants.root();
@@ -193,7 +193,7 @@ public interface IPath extends Cloneable {
 	 * separator. The device id of this path is preserved (the one of the given
 	 * string is ignored). Duplicate slashes are removed from the path except at the
 	 * beginning where the path is considered to be UNC.
-	 * 
+	 *
 	 * @param path the string path to concatenate
 	 * @return the new path
 	 * @see #isValidPath(String)
@@ -301,7 +301,7 @@ public interface IPath extends Cloneable {
 	 * An empty path is a prefix of all paths with the same device; a root path is a
 	 * prefix of all absolute paths with the same device.
 	 * </p>
-	 * 
+	 *
 	 * @param anotherPath the other path
 	 * @return <code>true</code> if this path is a prefix of the given path, and
 	 *         <code>false</code> otherwise
@@ -325,7 +325,7 @@ public interface IPath extends Cloneable {
 	 * Returns a boolean value indicating whether or not this path is considered to
 	 * be in UNC form. Return false if this path has a device set or if the first 2
 	 * characters of the path string are not <code>Path.SEPARATOR</code>.
-	 * 
+	 *
 	 * @return boolean indicating if this path is UNC
 	 */
 	public boolean isUNC();
@@ -400,7 +400,7 @@ public interface IPath extends Cloneable {
 	 * is successfully made relative, then appending the returned path to the base
 	 * will always produce a path equal to this path.
 	 * </p>
-	 * 
+	 *
 	 * @param base The base path to make this path relative to
 	 * @return A path relative to the base path, or this path if it could not be
 	 *         made relative to the given base
@@ -415,7 +415,7 @@ public interface IPath extends Cloneable {
 	 * first 2 characters of the path string will be <code>Path.SEPARATOR</code>. If
 	 * not UNC, the first 2 characters of the returned path string will not be
 	 * <code>Path.SEPARATOR</code>.
-	 * 
+	 *
 	 * @param toUNC true if converting to UNC, false otherwise
 	 * @return the new path, either in UNC form or not depending on the boolean
 	 *         parameter
@@ -591,7 +591,7 @@ public interface IPath extends Cloneable {
 	 * <p>
 	 * Example result strings (without and with device id):
 	 * </p>
-	 * 
+	 *
 	 * <pre>
 	 * "/foo/bar.txt"
 	 * "bar.txt"
@@ -606,7 +606,7 @@ public interface IPath extends Cloneable {
 	 * "C:"
 	 * "C:/"
 	 * </pre>
-	 * 
+	 *
 	 * This string is suitable for passing to <code>Path(String)</code>.
 	 *
 	 * @return a string representation of this path

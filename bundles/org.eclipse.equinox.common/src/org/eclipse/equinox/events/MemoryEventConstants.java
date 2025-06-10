@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -34,7 +34,7 @@ package org.eclipse.equinox.events;
  * when to send memory events. This policy must use the Event Admin Service to
  * fire memory events to the registered handlers.
  * </p>
- * 
+ *
  * @since 3.6
  */
 public final class MemoryEventConstants {
