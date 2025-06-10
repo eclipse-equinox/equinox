@@ -4355,7 +4355,7 @@ public class TestModuleContainer extends AbstractTest {
 	 * where one bundle imports a package that has multiple providers, because of
 	 * the uses constraints of that imported packages, maybe some choices are become
 	 * invalid and should be discarded right away.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
