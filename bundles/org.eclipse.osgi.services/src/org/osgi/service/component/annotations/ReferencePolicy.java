@@ -18,7 +18,7 @@ package org.osgi.service.component.annotations;
 
 /**
  * Policy for the {@link Reference} annotation.
- * 
+ *
  * @author $Id$
  */
 public enum ReferencePolicy {

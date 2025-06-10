@@ -23,22 +23,22 @@ import java.lang.annotation.Target;
 
 /**
  * Identify the annotated member as a reference of a Service Component.
- * 
+ *
  * <p>
  * When the annotation is applied to a method, the method is the bind method of
  * the reference. When the annotation is applied to a field, the field will
  * contain the bound service(s) of the reference.
- * 
+ *
  * <p>
  * This annotation is not processed at runtime by Service Component Runtime. It
  * must be processed by tools and used to add a Component Description to the
  * bundle.
- * 
+ *
  * <p>
  * In the generated Component Description for a component, the references must
  * be ordered in ascending lexicographical order (using {@code String.compareTo}
  * ) of the reference {@link #name() name}s.
- * 
+ *
  * @see "The reference element of a Component Description."
  * @author $Id$
  */
@@ -47,12 +47,12 @@ import java.lang.annotation.Target;
 public @interface Reference {
 	/**
 	 * The name of this reference.
-	 * 
+	 *
 	 * <p>
 	 * The name of this reference must be specified when using this annotation
 	 * in the {@link Component#reference()} element since there is no annotated
 	 * member from which the name can be determined.
-	 * 
+	 *
 	 * If not specified, the name of this reference is based upon how this
 	 * annotation is used:
 	 * <ul>
@@ -61,20 +61,20 @@ public @interface Reference {
 	 * the reference. Otherwise, the name of the reference is the method name.</li>
 	 * <li>Annotated field - The name of the reference is the field name.</li>
 	 * </ul>
-	 * 
+	 *
 	 * @see "The name attribute of the reference element of a Component Description."
 	 */
 	String name() default "";
 
 	/**
 	 * The type of the service for this reference.
-	 * 
+	 *
 	 * <p>
 	 * The type of the service for this reference must be specified when using
 	 * this annotation in the {@link Component#reference()} element since there
 	 * is no annotated member from which the type of the service can be
 	 * determined.
-	 * 
+	 *
 	 * <p>
 	 * If not specified, the type of the service for this reference is based
 	 * upon how this annotation is used:
@@ -90,14 +90,14 @@ public @interface Reference {
 	 * generic type of the collection. Otherwise, the type of the service is the
 	 * type of the field.</li>
 	 * </ul>
-	 * 
+	 *
 	 * @see "The interface attribute of the reference element of a Component Description."
 	 */
 	Class<?> service() default Object.class;
 
 	/**
 	 * The cardinality of this reference.
-	 * 
+	 *
 	 * <p>
 	 * If not specified, the cardinality of this reference is based upon how
 	 * this annotation is used:
@@ -112,14 +112,14 @@ public @interface Reference {
 	 * <li>{@link Component#reference()} element - The cardinality is
 	 * {@link ReferenceCardinality#MANDATORY 1..1}.</li>
 	 * </ul>
-	 * 
+	 *
 	 * @see "The cardinality attribute of the reference element of a Component Description."
 	 */
 	ReferenceCardinality cardinality() default ReferenceCardinality.MANDATORY;
 
 	/**
 	 * The policy for this reference.
-	 * 
+	 *
 	 * <p>
 	 * If not specified, the policy of this reference is based upon how this
 	 * annotation is used:
@@ -133,28 +133,28 @@ public @interface Reference {
 	 * <li>{@link Component#reference()} element - The policy is
 	 * {@link ReferencePolicy#STATIC STATIC}.</li>
 	 * </ul>
-	 * 
+	 *
 	 * @see "The policy attribute of the reference element of a Component Description."
 	 */
 	ReferencePolicy policy() default ReferencePolicy.STATIC;
 
 	/**
 	 * The target property for this reference.
-	 * 
+	 *
 	 * <p>
 	 * If not specified, no target property is set.
-	 * 
+	 *
 	 * @see "The target attribute of the reference element of a Component Description."
 	 */
 	String target() default "";
 
 	/**
 	 * The policy option for this reference.
-	 * 
+	 *
 	 * <p>
 	 * If not specified, the {@link ReferencePolicyOption#RELUCTANT RELUCTANT}
 	 * reference policy option is used.
-	 * 
+	 *
 	 * @see "The policy-option attribute of the reference element of a Component Description."
 	 * @since 1.2
 	 */
@@ -162,11 +162,11 @@ public @interface Reference {
 
 	/**
 	 * The reference scope for this reference.
-	 * 
+	 *
 	 * <p>
 	 * If not specified, the {@link ReferenceScope#BUNDLE bundle} reference
 	 * scope is used.
-	 * 
+	 *
 	 * @see "The scope attribute of the reference element of a Component Description."
 	 * @since 1.3
 	 */
@@ -176,11 +176,11 @@ public @interface Reference {
 
 	/**
 	 * The name of the bind method for this reference.
-	 * 
+	 *
 	 * <p>
 	 * If specified and this reference annotates a method, the specified name
 	 * must match the name of the annotated method.
-	 * 
+	 *
 	 * <p>
 	 * If not specified, the name of the bind method is based upon how this
 	 * annotation is used:
@@ -191,11 +191,11 @@ public @interface Reference {
 	 * <li>{@link Component#reference()} element - There is no bind method name.
 	 * </li>
 	 * </ul>
-	 * 
+	 *
 	 * <p>
 	 * If there is a bind method name, the component must contain a method with
 	 * that name.
-	 * 
+	 *
 	 * @see "The bind attribute of the reference element of a Component Description."
 	 * @since 1.3
 	 */
@@ -203,7 +203,7 @@ public @interface Reference {
 
 	/**
 	 * The name of the updated method for this reference.
-	 * 
+	 *
 	 * <p>
 	 * If not specified, the name of the updated method is based upon how this
 	 * annotation is used:
@@ -222,11 +222,11 @@ public @interface Reference {
 	 * <li>{@link Component#reference()} element - There is no updated method
 	 * name.</li>
 	 * </ul>
-	 * 
+	 *
 	 * <p>
 	 * If there is an updated method name, the component must contain a method
 	 * with that name.
-	 * 
+	 *
 	 * @see "The updated attribute of the reference element of a Component Description."
 	 * @since 1.2
 	 */
@@ -234,7 +234,7 @@ public @interface Reference {
 
 	/**
 	 * The name of the unbind method for this reference.
-	 * 
+	 *
 	 * <p>
 	 * If not specified, the name of the unbind method is based upon how this
 	 * annotation is used:
@@ -253,11 +253,11 @@ public @interface Reference {
 	 * <li>{@link Component#reference()} element - There is no unbind method
 	 * name.</li>
 	 * </ul>
-	 * 
+	 *
 	 * <p>
 	 * If there is an unbind method name, the component must contain a method
 	 * with that name.
-	 * 
+	 *
 	 * @see "The unbind attribute of the reference element of a Component Description."
 	 */
 	String unbind() default "";
@@ -266,11 +266,11 @@ public @interface Reference {
 
 	/**
 	 * The name of the field for this reference.
-	 * 
+	 *
 	 * <p>
 	 * If specified and this reference annotates a field, the specified name
 	 * must match the name of the annotated field.
-	 * 
+	 *
 	 * <p>
 	 * If not specified, the name of the field is based upon how this annotation
 	 * is used:
@@ -280,11 +280,11 @@ public @interface Reference {
 	 * field.</li>
 	 * <li>{@link Component#reference()} element - There is no field name.</li>
 	 * </ul>
-	 * 
+	 *
 	 * <p>
 	 * If there is a field name, the component must contain a field with that
 	 * name.
-	 * 
+	 *
 	 * @see "The field attribute of the reference element of a Component Description."
 	 * @since 1.3
 	 */
@@ -292,7 +292,7 @@ public @interface Reference {
 
 	/**
 	 * The field option for this reference.
-	 * 
+	 *
 	 * <p>
 	 * If not specified, the field option is based upon how this annotation is
 	 * used:
@@ -307,7 +307,7 @@ public @interface Reference {
 	 * the field option is {@link FieldOption#REPLACE}</li>
 	 * <li>{@link Component#reference()} element - There is no field option.</li>
 	 * </ul>
-	 * 
+	 *
 	 * @see "The field-option attribute of the reference element of a Component Description."
 	 * @since 1.3
 	 */
