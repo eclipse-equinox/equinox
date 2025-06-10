@@ -10,5 +10,5 @@ Import-Package: org.eclipse.core.runtime;version="3.4.0";common=split,
  org.osgi.util.tracker
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
-Export-Package: org.eclipse.equinox.concurrent.future;version="1.1.0"
+Export-Package: org.eclipse.equinox.concurrent.future;version="1.1.0";uses:="org.eclipse.core.runtime"
 Automatic-Module-Name: org.eclipse.equinox.concurrent
