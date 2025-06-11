@@ -21,7 +21,7 @@
 		<relativePath>../..</relativePath>
 	</parent>
 	<artifactId>org.eclipse.equinox.ds.tests</artifactId>
-	<version>1.7.300-SNAPSHOT</version>
+	<version>1.7.400-SNAPSHOT</version>
 	<packaging>eclipse-test-plugin</packaging>
 	<properties>
 		<testClass>org.eclipse.equinox.ds.tests.AllTests</testClass>
