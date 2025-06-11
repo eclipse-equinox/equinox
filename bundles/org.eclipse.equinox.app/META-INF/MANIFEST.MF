@@ -7,7 +7,7 @@ Bundle-Vendor: %providerName
 Bundle-Activator: org.eclipse.equinox.internal.app.Activator
 Bundle-Localization: plugin
 Export-Package: 
- org.eclipse.equinox.app;version="1.1",
+ org.eclipse.equinox.app;version="1.1";uses:="org.osgi.framework",
  org.eclipse.equinox.internal.app;x-friends:="org.eclipse.core.runtime",
  org.osgi.service.application;version="1.1"
 Import-Package: org.eclipse.osgi.framework.console;resolution:=optional,
