@@ -34,14 +34,16 @@ public class ObjectPool {
 				Object refValue = ref.get();
 				if (refValue != null) {
 					obj = (T) refValue;
-					if (DEBUG_OBJECTPOOL_DUPS)
+					if (DEBUG_OBJECTPOOL_DUPS) {
 						Debug.println("[ObjectPool] Found duplicate object: " + getObjectString(obj)); //$NON-NLS-1$
+					}
 				}
 			} else {
 				objectCache.put(obj, new WeakReference<>(obj));
-				if (DEBUG_OBJECTPOOL_ADDS)
+				if (DEBUG_OBJECTPOOL_ADDS) {
 					Debug.println("[ObjectPool] Added unique object to pool: " + getObjectString(obj) + " Pool size: " //$NON-NLS-1$ //$NON-NLS-2$
 							+ objectCache.size());
+				}
 			}
 		}
 		return obj;
