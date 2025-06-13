@@ -725,7 +725,6 @@ public abstract class StateImpl implements State {
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
 	public void setOverrides(Object value) {
 		throw new UnsupportedOperationException();
 	}
