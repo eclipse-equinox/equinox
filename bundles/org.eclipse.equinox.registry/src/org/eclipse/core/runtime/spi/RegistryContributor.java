@@ -30,7 +30,7 @@ import org.eclipse.core.runtime.IContributor;
  * <p>
  * This class can not be extended.
  * </p>
- * 
+ *
  * @since org.eclipse.equinox.registry 3.2
  * @noextend This class is not intended to be subclassed by clients.
  */
@@ -90,7 +90,7 @@ public final class RegistryContributor implements IContributor {
 	 * example, if ID of 12 was used to identify contributorA, the ID of 12 can not
 	 * be used to identify contributorB or a host for the contributorC.
 	 * </p>
-	 * 
+	 *
 	 * @param actualId   contributor identifier
 	 * @param actualName name of the contributor
 	 * @param hostId     id associated with the host, or <code>null</code>
@@ -153,7 +153,7 @@ public final class RegistryContributor implements IContributor {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#toString()
 	 */
 	@Override

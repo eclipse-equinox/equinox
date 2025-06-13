@@ -178,7 +178,7 @@ public class Contribution implements KeyedElement {
 
 	/**
 	 * Find if this contribution has a children with ID = id.
-	 * 
+	 *
 	 * @param id possible ID of the child
 	 * @return true: contribution has this child
 	 */

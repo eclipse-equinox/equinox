@@ -30,7 +30,7 @@ package org.eclipse.core.runtime;
  * <p>
  * This interface is not intended to be implemented or extended by clients.
  * </p>
- * 
+ *
  * @see org.eclipse.core.runtime.ContributorFactoryOSGi
  * @see org.eclipse.core.runtime.ContributorFactorySimple
  *
