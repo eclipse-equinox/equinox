@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
- *    Liferay, Inc. - initial API and implementation and/or initial 
+ *    Liferay, Inc. - initial API and implementation and/or initial
  *                    documentation
  ******************************************************************************/
 
