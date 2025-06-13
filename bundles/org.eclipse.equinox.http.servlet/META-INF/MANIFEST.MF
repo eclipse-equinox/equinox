@@ -3,14 +3,20 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %bundleName
 Bundle-Vendor: %providerName
 Bundle-SymbolicName: org.eclipse.equinox.http.servlet
-Bundle-Version: 1.8.400.qualifier
+Bundle-Version: 1.8.500.qualifier
 Bundle-Activator: org.eclipse.equinox.http.servlet.internal.Activator
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-17
-Export-Package: org.eclipse.equinox.http.servlet;version="1.2.0",
+Export-Package: org.eclipse.equinox.http.servlet;version="1.2.0";
+  uses:="org.osgi.framework,
+   org.eclipse.equinox.http.servlet.internal.servlet,
+   javax.servlet,
+   org.osgi.service.http,
+   javax.servlet.http,
+   org.osgi.service.http.context",
  org.eclipse.equinox.http.servlet.context;version="1.0.0";x-internal:=true,
- org.eclipse.equinox.http.servlet.session;version="1.0.0";x-internal:=true,
- org.eclipse.equinox.http.servlet.dto;version="1.0.0";x-internal:=true
+ org.eclipse.equinox.http.servlet.dto;version="1.0.0";x-internal:=true,
+ org.eclipse.equinox.http.servlet.session;version="1.0.0";x-internal:=true
 Import-Package: javax.servlet;version="[3.1.0,5.0.0)",
  javax.servlet.descriptor;version="[3.1.0,5.0.0)",
  javax.servlet.http;version="[3.1.0,5.0.0)",

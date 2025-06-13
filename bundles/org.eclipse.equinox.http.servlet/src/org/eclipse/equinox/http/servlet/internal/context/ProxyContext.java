@@ -106,7 +106,7 @@ public class ProxyContext {
 
 	/**
 	 * deleteDirectory is a convenience method to recursively delete a directory
-	 * 
+	 *
 	 * @param directory - the directory to delete.
 	 * @return was the delete succesful
 	 */
