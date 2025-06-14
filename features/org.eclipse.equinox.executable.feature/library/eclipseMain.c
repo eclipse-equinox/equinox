@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2015 IBM Corporation and others.
+ * Copyright (c) 2006, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,7 @@
  *     Andrew Niefer
  *     Red Hat, Inc - Bug 379102 - Prevent running Eclipse as root (optionally)
  *     Rapicorp, Inc - Bug 461728 - [Mac] Allow users to specify values in eclipse.ini outside of the installation
+ *     Tue Ton - support for FreeBSD
  *******************************************************************************/
  
 #include "eclipseUnicode.h"
@@ -441,16 +442,16 @@ static _TCHAR* getDefaultOfficialName(_TCHAR* program)
 	}
 #endif
 	/* Upper case the first character */
-#ifndef LINUX
-	{
-		*ch = _totupper(*ch);
-	}
-#else
+#if defined(LINUX) || defined(FREEBSD)
 	{
 		if (*ch >= 'a' && *ch <= 'z')
 		{
 			*ch -= 32;
 		}
+	}
+#else
+	{
+		*ch = _totupper(*ch);
 	}
 #endif
 	return ch;
@@ -527,8 +528,9 @@ static _TCHAR* findLibrary(_TCHAR* library, _TCHAR* program)
 }
 
 static int isRoot(){
-#ifdef LINUX
+#if defined(LINUX) || defined(FREEBSD)
 	return geteuid() == 0;
-#endif
+#else
 	return 0;
+#endif
 }
