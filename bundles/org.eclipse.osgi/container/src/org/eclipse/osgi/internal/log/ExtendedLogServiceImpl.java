@@ -34,25 +34,21 @@ public class ExtendedLogServiceImpl implements ExtendedLogService {
 		this.bundle = bundle;
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public void log(int level, String message) {
 		log(null, level, message, null);
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public void log(int level, String message, Throwable exception) {
 		log(null, level, message, exception);
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public void log(ServiceReference<?> sr, int level, String message) {
 		log(sr, level, message, null);
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public void log(ServiceReference<?> sr, int level, String message, Throwable exception) {
 		getLogger((String) null).log(sr, level, message, exception);
@@ -75,8 +71,9 @@ public class ExtendedLogServiceImpl implements ExtendedLogService {
 
 	@Override
 	public Logger getLogger(Bundle logBundle, String name) {
-		if (logBundle == null || logBundle == bundle)
+		if (logBundle == null || logBundle == bundle) {
 			return getLogger(name);
+		}
 		// only check permission if getting another bundles log
 		factory.checkLogPermission();
 		ExtendedLogService bundleLogService = factory.getLogService(logBundle);

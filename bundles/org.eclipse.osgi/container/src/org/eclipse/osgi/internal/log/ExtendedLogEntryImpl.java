@@ -48,8 +48,9 @@ public class ExtendedLogEntryImpl implements ExtendedLogEntry, LogEntry {
 	}
 
 	private static long getId(Thread thread) {
-		if (threadIds == null)
+		if (threadIds == null) {
 			return thread.getId();
+		}
 
 		Long threadId = threadIds.get(thread);
 		if (threadId == null) {
@@ -113,7 +114,6 @@ public class ExtendedLogEntryImpl implements ExtendedLogEntry, LogEntry {
 		return throwable;
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public int getLevel() {
 		return level;
