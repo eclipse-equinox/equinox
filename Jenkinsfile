@@ -108,22 +108,12 @@ pipeline {
 			steps {
 				dir('equinox') {
 					checkout scm
-					script {
-						def authorMail = sh(script: 'git log -1 --pretty=format:"%ce" HEAD', returnStdout: true)
-						echo 'HEAD commit author: ' + authorMail
-						def buildBotMail = 'equinox-bot@eclipse.org'
-						if (buildBotMail.equals(authorMail) && !params.any{ e -> e.key.startsWith('forceNativeBuilds-') && e.value }) {
-							// Prevent endless build-loops due to self triggering because of a previous automated native-build and the associated updates.
-							currentBuild.result = 'ABORTED'
-							error('Abort build only triggered by automated natives update.')
-						}
-						sh """
-							git config --global user.email '${buildBotMail}'
+					sh '''
+							git config --global user.email 'equinox-bot@eclipse.org'
 							git config --global user.name 'Eclipse Equinox Bot'
 							git remote set-url --push origin git@github.com:eclipse-equinox/equinox.git
 							git fetch --all --tags --quiet
-						"""
-					}
+					'''
 				}
 				dir('equinox.binaries') {
 					checkout([$class: 'GitSCM',
