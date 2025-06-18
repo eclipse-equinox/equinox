@@ -130,7 +130,6 @@ public final class ReadOnlyState implements State {
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
 	public void setOverrides(Object value) {
 		throw new UnsupportedOperationException();
 	}
