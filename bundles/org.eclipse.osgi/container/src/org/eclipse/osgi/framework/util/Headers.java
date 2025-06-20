@@ -31,7 +31,7 @@ import org.osgi.framework.BundleException;
  * <li>The String keys in the Dictionary are case-preserved, but the get
  * operation is case-insensitive.
  * </ul>
- * 
+ *
  * @since 3.1
  * @deprecated As of 3.13. Replaced by {@link CaseInsensitiveDictionaryMap}.
  */
@@ -94,11 +94,13 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 		boolean stringKey = key instanceof String;
 		for (int i = 0; i < size; i++) {
 			if (stringKey && (headers[i] instanceof String)) {
-				if (((String) headers[i]).equalsIgnoreCase((String) key))
+				if (((String) headers[i]).equalsIgnoreCase((String) key)) {
 					return i;
+				}
 			} else {
-				if (headers[i].equals(key))
+				if (headers[i].equals(key)) {
 					return i;
+				}
 			}
 		}
 		return -1;
@@ -115,8 +117,9 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 				values[i] = values[i + 1];
 			}
 		}
-		if (remove < size)
+		if (remove < size) {
 			size--;
+		}
 		return removed;
 	}
 
@@ -147,8 +150,9 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 	@Override
 	public synchronized V get(Object key) {
 		int i = -1;
-		if ((i = getIndex(key)) != -1)
+		if ((i = getIndex(key)) != -1) {
 			return values[i];
+		}
 		return null;
 	}
 
@@ -169,8 +173,9 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 	 * @since 3.2
 	 */
 	public synchronized V set(K key, V value, boolean replace) {
-		if (readOnly)
+		if (readOnly) {
 			throw new UnsupportedOperationException();
+		}
 		if (key instanceof String) {
 			@SuppressWarnings("unchecked")
 			K k = (K) ((String) key).intern();
@@ -178,12 +183,14 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 		}
 		int i = getIndex(key);
 		if (value == null) { /* remove */
-			if (i != -1)
+			if (i != -1) {
 				return remove(i);
+			}
 		} else { /* put */
 			if (i != -1) { /* duplicate key */
-				if (!replace)
+				if (!replace) {
 					throw new IllegalArgumentException(NLS.bind(Msg.HEADER_DUPLICATE_KEY_EXCEPTION, key));
+				}
 				V oldVal = values[i];
 				values[i] = value;
 				return oldVal;
@@ -243,8 +250,9 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 	 */
 	@Override
 	public synchronized V put(K key, V value) {
-		if (readOnly)
+		if (readOnly) {
 			throw new UnsupportedOperationException();
+		}
 		return set(key, value, true);
 	}
 
@@ -298,7 +306,7 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 	}
 
 	private static class ArrayEnumeration<E> implements Enumeration<E> {
-		private E[] array;
+		private final E[] array;
 		int cur = 0;
 
 		public ArrayEnumeration(E[] array, int size) {
@@ -321,8 +329,9 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 
 	@Override
 	public synchronized void clear() {
-		if (readOnly)
+		if (readOnly) {
 			throw new UnsupportedOperationException();
+		}
 	}
 
 	@Override

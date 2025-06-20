@@ -86,8 +86,9 @@ public class PackageAdminImpl implements PackageAdmin {
 	@Override
 	public ExportedPackage getExportedPackage(String name) {
 		ExportedPackage[] allExports = getExportedPackages(name);
-		if (allExports == null)
+		if (allExports == null) {
 			return null;
+		}
 		ExportedPackage result = null;
 		for (ExportedPackage allExport : allExports) {
 			if (name.equals(allExport.getName())) {
@@ -302,8 +303,9 @@ public class PackageAdminImpl implements PackageAdmin {
 
 		@Override
 		public Bundle getExportingBundle() {
-			if (!providerWiring.isInUse())
+			if (!providerWiring.isInUse()) {
 				return null;
+			}
 			return providerWiring.getBundle();
 		}
 
@@ -378,6 +380,7 @@ public class PackageAdminImpl implements PackageAdmin {
 		/**
 		 * @deprecated
 		 */
+		@Deprecated
 		@Override
 		public String getSpecificationVersion() {
 			return getVersion().toString();
@@ -417,8 +420,9 @@ public class PackageAdminImpl implements PackageAdmin {
 
 		@Override
 		public Bundle getBundle() {
-			if (!providerWiring.isInUse())
+			if (!providerWiring.isInUse()) {
 				return null;
+			}
 			return providerWiring.getBundle();
 		}
 
