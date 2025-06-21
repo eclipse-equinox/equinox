@@ -8,9 +8,9 @@ Fragment-Host: system.bundle
 ExtensionBundle-Activator: org.eclipse.equinox.internal.region.RegionManager
 Export-Package: org.eclipse.equinox.region;version="1.2.0";
   uses:="org.osgi.framework,
+   org.osgi.framework.hooks.bundle,
    org.osgi.framework.hooks.resolver,
-   org.osgi.framework.wiring,
    org.osgi.framework.hooks.service,
-   org.osgi.framework.hooks.bundle"
+   org.osgi.framework.wiring"
 Bundle-Vendor: %Bundle-Vendor
 Automatic-Module-Name: org.eclipse.equinox.region
