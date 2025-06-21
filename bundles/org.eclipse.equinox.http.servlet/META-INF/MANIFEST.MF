@@ -8,11 +8,11 @@ Bundle-Activator: org.eclipse.equinox.http.servlet.internal.Activator
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Export-Package: org.eclipse.equinox.http.servlet;version="1.2.0";
-  uses:="org.osgi.framework,
-   org.eclipse.equinox.http.servlet.internal.servlet,
-   javax.servlet,
-   org.osgi.service.http,
+  uses:="javax.servlet,
    javax.servlet.http,
+   org.eclipse.equinox.http.servlet.internal.servlet,
+   org.osgi.framework,
+   org.osgi.service.http,
    org.osgi.service.http.context",
  org.eclipse.equinox.http.servlet.context;version="1.0.0";x-internal:=true,
  org.eclipse.equinox.http.servlet.dto;version="1.0.0";x-internal:=true,
