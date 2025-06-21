@@ -14,10 +14,6 @@
 package org.eclipse.equinox.plurl.test;
 
 import static org.eclipse.equinox.plurl.test.PlurlTestHandlers.createTestURLStreamHandlerFactory;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.fail;
-import static org.junit.Assume.assumeThat;
-
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -25,10 +21,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.eclipse.equinox.plurl.test.PlurlTestHandlers.TestFactoryType;
-import org.junit.After;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestName;
 
 @SuppressWarnings("nls")
 public class PlurlStreamHandlerFactoryTest
