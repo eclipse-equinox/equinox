@@ -49,7 +49,7 @@ package org.eclipse.core.runtime;
  * <p>
  * This interface is not intended to be implemented by clients.
  * </p>
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface IConfigurationElement {
@@ -97,7 +97,7 @@ public interface IConfigurationElement {
 	 * The names of configuration element attributes are the same as the attribute
 	 * names of the corresponding XML element. For example, the configuration markup
 	 * </p>
-	 * 
+	 *
 	 * <pre>
 	 * &lt;bg pattern="stripes"/&gt;
 	 * </pre>
@@ -131,7 +131,7 @@ public interface IConfigurationElement {
 	 * If multi-language support is not enabled, this method is equivalent to the
 	 * method {@link #getAttribute(String)}.
 	 * </p>
-	 * 
+	 *
 	 * @param attrName the name of the attribute
 	 * @param locale   the requested locale
 	 * @return attribute value, or <code>null</code> if none
@@ -150,7 +150,7 @@ public interface IConfigurationElement {
 	 * The names of configuration element attributes are the same as the attribute
 	 * names of the corresponding XML element. For example, the configuration markup
 	 * </p>
-	 * 
+	 *
 	 * <pre>
 	 * &lt;bg pattern="stripes"/&gt;
 	 * </pre>
@@ -182,7 +182,7 @@ public interface IConfigurationElement {
 	 * The names of configuration element attributes are the same as the attribute
 	 * names of the corresponding XML element. For example, the configuration markup
 	 * </p>
-	 * 
+	 *
 	 * <pre>
 	 * &lt;bg color="blue" pattern="stripes"/&gt;
 	 * </pre>
@@ -205,7 +205,7 @@ public interface IConfigurationElement {
 	 * Each child corresponds to a nested XML element in the configuration markup.
 	 * For example, the configuration markup
 	 * </p>
-	 * 
+	 *
 	 * <pre>
 	 * &lt;view&gt;
 	 * 	&lt;verticalHint&gt;top&lt;/verticalHint&gt;
@@ -250,11 +250,11 @@ public interface IConfigurationElement {
 	 * Returns the name of this configuration element. The name of a configuration
 	 * element is the same as the XML tag of the corresponding XML element. For
 	 * example, the configuration markup
-	 * 
+	 *
 	 * <pre>
 	 * &lt;wizard name="Create Project"/&gt;
 	 * </pre>
-	 * 
+	 *
 	 * corresponds to a configuration element named <code>"wizard"</code>.
 	 *
 	 * @return the name of this configuration element
@@ -279,11 +279,11 @@ public interface IConfigurationElement {
 	/**
 	 * Returns the text value of this configuration element. For example, the
 	 * configuration markup
-	 * 
+	 *
 	 * <pre>
 	 * &lt;script lang="javascript"&gt;.\scripts\cp.js&lt;/script&gt;
 	 * </pre>
-	 * 
+	 *
 	 * corresponds to a configuration element <code>"script"</code> with value
 	 * <code>".\scripts\cp.js"</code>.
 	 * <p>
@@ -313,7 +313,7 @@ public interface IConfigurationElement {
 	 * If multi-language support is not enabled, this method is equivalent to the
 	 * method {@link #getValue()}.
 	 * </p>
-	 * 
+	 *
 	 * @param locale the requested locale
 	 * @return the text value of this configuration element in the specified locale,
 	 *         or <code>null</code>
@@ -328,11 +328,11 @@ public interface IConfigurationElement {
 	/**
 	 * Returns the untranslated text value of this configuration element. For
 	 * example, the configuration markup
-	 * 
+	 *
 	 * <pre>
 	 * &lt;script lang="javascript"&gt;.\scripts\cp.js&lt;/script&gt;
 	 * </pre>
-	 * 
+	 *
 	 * corresponds to a configuration element <code>"script"</code> with value
 	 * <code>".\scripts\cp.js"</code>.
 	 * <p>
@@ -342,7 +342,7 @@ public interface IConfigurationElement {
 	 * Note that translation specified in the plug-in manifest file is <b>not</b>
 	 * automatically applied. For example, the configuration markup
 	 * </p>
-	 * 
+	 *
 	 * <pre>
 	 * &lt;tooltip&gt;#hattip&lt;/tooltip&gt;
 	 * </pre>
@@ -445,7 +445,7 @@ public interface IConfigurationElement {
 
 	/**
 	 * {@inheritDoc}
-	 * 
+	 *
 	 * @return true if the given element has same handle id
 	 * @see #getHandleId()
 	 */
@@ -465,7 +465,7 @@ public interface IConfigurationElement {
 	 * Returns unique identifier of the registry object from which this element was
 	 * created. Two configuration element instances are considered to be equal if
 	 * their handle id's are same.
-	 * 
+	 *
 	 * @return The handle id of the registry object from which this configuration
 	 *         element was created.
 	 * @see #equals(Object)
