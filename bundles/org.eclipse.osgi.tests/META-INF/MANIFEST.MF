@@ -17,23 +17,18 @@ Import-Package: org.osgi.service.event,
  org.osgi.util.promise,
  org.osgi.util.xml
 Export-Package: org.eclipse.osgi.tests.appadmin;
-  uses:="org.osgi.framework,
+  uses:="junit.framework,
    org.eclipse.equinox.app,
-   junit.framework,
+   org.osgi.framework,
    org.osgi.util.tracker",
  org.eclipse.osgi.tests.bundles;
-  uses:="org.eclipse.equinox.log,
-   org.osgi.framework.launch,
-   org.eclipse.osgi.launch,
+  uses:="org.eclipse.osgi.launch,
    org.eclipse.osgi.service.resolver,
-   org.eclipse.osgi.framework.log,
-   org.osgi.service.url,
-   org.osgi.framework,
-   org.osgi.service.packageadmin,
-   org.osgi.framework.connect,
-   org.eclipse.core.runtime,
    org.junit.rules,
-   org.osgi.service.log,
+   org.osgi.framework,
+   org.osgi.framework.connect,
+   org.osgi.framework.launch,
+   org.osgi.service.packageadmin,
    org.osgi.service.startlevel"
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 DynamicImport-Package: ext.framework.b
