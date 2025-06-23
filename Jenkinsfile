@@ -15,7 +15,7 @@
 
 def runOnNativeBuildAgent(String platform, Closure body) {
 	def final nativeBuildStageName = 'Perform native launcher build'
-	if (platform == 'gtk.linux.x86_64') {
+	if (platform == 'gtk.linux.x86_64' || platform == 'gtk.linux.aarch64') {
 		podTemplate(inheritFrom: 'basic' /* inherit general configuration */, containers: [
 			containerTemplate(name: 'launcherbuild', image: 'eclipse/platformreleng-debian-swtgtk3nativebuild:10',
 				resourceRequestCpu:'1000m', resourceRequestMemory:'512Mi',
