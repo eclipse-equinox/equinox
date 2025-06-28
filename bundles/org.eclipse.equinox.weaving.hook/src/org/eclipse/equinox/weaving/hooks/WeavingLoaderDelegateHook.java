@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2014 Martin Lippert and others.
+ * Copyright (c) 2008, 2025 Martin Lippert and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -79,11 +79,6 @@ public class WeavingLoaderDelegateHook extends ClassLoaderHook {
 		this.supplementerRegistry = supplementerRegistry;
 	}
 
-	/**
-	 *
-	 * @see org.eclipse.osgi.internal.hookregistry.ClassLoaderHook#postFindClass(java.lang.String,
-	 *      org.eclipse.osgi.internal.loader.ModuleClassLoader)
-	 */
 	@Override
 	public Class<?> postFindClass(final String name, final ModuleClassLoader classLoader)
 			throws ClassNotFoundException {
@@ -98,7 +93,7 @@ public class WeavingLoaderDelegateHook extends ClassLoaderHook {
 		try {
 			final Supplementer[] supplementers = supplementerRegistry.getSupplementers(bundleID);
 			if (supplementers != null) {
-				for (Supplementer supplementer : supplementers) {
+				for (final Supplementer supplementer : supplementers) {
 					try {
 						final Bundle bundle = supplementer.getSupplementerHost();
 						if (bundle.getState() != Bundle.UNINSTALLED) {
@@ -118,11 +113,6 @@ public class WeavingLoaderDelegateHook extends ClassLoaderHook {
 		return null;
 	}
 
-	/**
-	 *
-	 * @see org.eclipse.osgi.internal.hookregistry.ClassLoaderHook#postFindResource(java.lang.String,
-	 *      org.eclipse.osgi.internal.loader.ModuleClassLoader)
-	 */
 	@Override
 	public URL postFindResource(final String name, final ModuleClassLoader classLoader) throws FileNotFoundException {
 		final long bundleID = classLoader.getBundle().getBundleId();
@@ -136,7 +126,7 @@ public class WeavingLoaderDelegateHook extends ClassLoaderHook {
 		try {
 			final Supplementer[] supplementers = supplementerRegistry.getSupplementers(bundleID);
 			if (supplementers != null) {
-				for (Supplementer supplementer : supplementers) {
+				for (final Supplementer supplementer : supplementers) {
 					try {
 						final URL resource = supplementer.getSupplementerHost().getResource(name);
 						if (resource != null) {
@@ -154,11 +144,6 @@ public class WeavingLoaderDelegateHook extends ClassLoaderHook {
 		return null;
 	}
 
-	/**
-	 *
-	 * @see org.eclipse.osgi.internal.hookregistry.ClassLoaderHook#postFindResources(java.lang.String,
-	 *      org.eclipse.osgi.internal.loader.ModuleClassLoader)
-	 */
 	@Override
 	public Enumeration<URL> postFindResources(final String name, final ModuleClassLoader classLoader)
 			throws FileNotFoundException {
@@ -173,7 +158,7 @@ public class WeavingLoaderDelegateHook extends ClassLoaderHook {
 		try {
 			final Supplementer[] supplementers = supplementerRegistry.getSupplementers(bundleID);
 			if (supplementers != null) {
-				for (Supplementer supplementer : supplementers) {
+				for (final Supplementer supplementer : supplementers) {
 					try {
 						final Enumeration<URL> resource = supplementer.getSupplementerHost().getResources(name);
 						if (resource != null) {

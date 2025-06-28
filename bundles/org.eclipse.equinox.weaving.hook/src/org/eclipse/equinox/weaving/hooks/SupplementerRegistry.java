@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2017 Martin Lippert and others.
+ * Copyright (c) 2008, 2025 Martin Lippert and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -114,9 +114,6 @@ public class SupplementerRegistry implements ISupplementerRegistry {
 		this.dontWeaveTheseBundles.add("org.eclipse.equinox.simpleconfigurator");
 	}
 
-	/**
-	 * @see org.eclipse.equinox.service.weaving.ISupplementerRegistry#addBundle(org.osgi.framework.Bundle)
-	 */
 	@Override
 	public void addBundle(final Bundle bundle) {
 		// First analyze which supplementers already exists for this bundle
@@ -126,9 +123,6 @@ public class SupplementerRegistry implements ISupplementerRegistry {
 		addSupplementer(bundle, true);
 	}
 
-	/**
-	 * @see org.eclipse.equinox.service.weaving.ISupplementerRegistry#addSupplementedBundle(org.osgi.framework.Bundle)
-	 */
 	@Override
 	public void addSupplementedBundle(final Bundle bundle) {
 		try {
@@ -155,10 +149,6 @@ public class SupplementerRegistry implements ISupplementerRegistry {
 		}
 	}
 
-	/**
-	 * @see org.eclipse.equinox.service.weaving.ISupplementerRegistry#addSupplementer(org.osgi.framework.Bundle,
-	 *      boolean)
-	 */
 	@Override
 	public void addSupplementer(final Bundle bundle, final boolean updateBundles) {
 		try {
@@ -187,11 +177,6 @@ public class SupplementerRegistry implements ISupplementerRegistry {
 		}
 	}
 
-	/**
-	 * @see org.eclipse.equinox.service.weaving.ISupplementerRegistry#getMatchingSupplementers(java.lang.String,
-	 *      org.eclipse.osgi.util.ManifestElement[],
-	 *      org.eclipse.osgi.util.ManifestElement[])
-	 */
 	@Override
 	public List<Supplementer> getMatchingSupplementers(final String symbolicName, final ManifestElement[] imports,
 			final ManifestElement[] exports) {
@@ -199,7 +184,7 @@ public class SupplementerRegistry implements ISupplementerRegistry {
 
 		if (supplementers.size() > 0 && !this.dontWeaveTheseBundles.contains(symbolicName)) {
 			result = new LinkedList<>();
-			for (Supplementer supplementer : supplementers.values()) {
+			for (final Supplementer supplementer : supplementers.values()) {
 				if (isSupplementerMatching(symbolicName, imports, exports, supplementer)) {
 					result.add(supplementer);
 				}
@@ -209,25 +194,16 @@ public class SupplementerRegistry implements ISupplementerRegistry {
 		return result;
 	}
 
-	/**
-	 * @see org.eclipse.equinox.service.weaving.ISupplementerRegistry#getPackageAdmin()
-	 */
 	@Override
 	public PackageAdmin getPackageAdmin() {
 		return packageAdmin;
 	}
 
-	/**
-	 * @see org.eclipse.equinox.service.weaving.ISupplementerRegistry#getSupplementers(org.osgi.framework.Bundle)
-	 */
 	@Override
 	public Supplementer[] getSupplementers(final Bundle bundle) {
 		return getSupplementers(bundle.getBundleId());
 	}
 
-	/**
-	 * @see org.eclipse.equinox.service.weaving.ISupplementerRegistry#getSupplementers(long)
-	 */
 	@Override
 	public Supplementer[] getSupplementers(final long bundleID) {
 		if (supplementersByBundle.containsKey(bundleID)) {
@@ -269,9 +245,6 @@ public class SupplementerRegistry implements ISupplementerRegistry {
 		// }
 	}
 
-	/**
-	 * @see org.eclipse.equinox.service.weaving.ISupplementerRegistry#removeBundle(org.osgi.framework.Bundle)
-	 */
 	@Override
 	public void removeBundle(final Bundle bundle) {
 		// if this bundle is itself supplemented by others, remove the bundle from those
@@ -309,7 +282,7 @@ public class SupplementerRegistry implements ISupplementerRegistry {
 			}
 
 			// remove this supplementer from the list of supplementers per other bundle
-			for (Bundle supplementedBundle : supplementedBundles) {
+			for (final Bundle supplementedBundle : supplementedBundles) {
 				final long bundleId = supplementedBundle.getBundleId();
 				final List<Supplementer> supplementerList = new ArrayList<>(
 						Arrays.asList(this.supplementersByBundle.get(bundleId)));
@@ -330,7 +303,7 @@ public class SupplementerRegistry implements ISupplementerRegistry {
 
 		final List<Bundle> bundlesToRefresh = new ArrayList<>();
 
-		for (Bundle installedBundle : installedBundles) {
+		for (final Bundle installedBundle : installedBundles) {
 			try {
 				final Bundle bundle = installedBundle;
 				// skip the bundle itself, just resupplement already installed bundles
@@ -380,17 +353,11 @@ public class SupplementerRegistry implements ISupplementerRegistry {
 		}
 	}
 
-	/**
-	 * @see org.eclipse.equinox.service.weaving.ISupplementerRegistry#setBundleContext(org.osgi.framework.BundleContext)
-	 */
 	@Override
 	public void setBundleContext(final BundleContext context) {
 		this.context = context;
 	}
 
-	/**
-	 * @see org.eclipse.equinox.service.weaving.ISupplementerRegistry#setPackageAdmin(org.osgi.service.packageadmin.PackageAdmin)
-	 */
 	@Override
 	public void setPackageAdmin(final PackageAdmin packageAdmin) {
 		this.packageAdmin = packageAdmin;
