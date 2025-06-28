@@ -27,6 +27,7 @@ import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.eclipse.equinox.console.common.ConsoleInputStream;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
 import org.osgi.framework.BundleContext;
 
 public class TelnetCommandTests {
@@ -52,7 +53,8 @@ public class TelnetCommandTests {
 			BundleContext context = mock(BundleContext.class);
 			when(context.getProperty(USE_CONFIG_ADMIN_PROP)).thenReturn(FALSE);
 			when(context.getProperty(TELNET_PORT_PROP_NAME)).thenReturn(Integer.toString(TELNET_PORT));
-			when(context.registerService(any(String.class), any(), any(Dictionary.class))).thenReturn(null);
+			when(context.registerService(any(String.class), any(), ArgumentMatchers.<Dictionary<String, String>>any()))
+					.thenReturn(null);
 
 			TelnetCommand command = new TelnetCommand(processor, context);
 			command.startService();

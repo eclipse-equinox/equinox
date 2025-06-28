@@ -29,6 +29,7 @@ import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.eclipse.equinox.console.common.ConsoleInputStream;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ManagedService;
@@ -57,12 +58,14 @@ public class TelnetCommandWithConfigAdminTests {
 
 		BundleContext context = mock(BundleContext.class);
 		when(context.getProperty(USE_CONFIG_ADMIN_PROP)).thenReturn(TRUE);
-		when(context.registerService(any(String.class), any(ManagedService.class), any(Dictionary.class)))
+		when(context.registerService(any(String.class), any(ManagedService.class),
+				ArgumentMatchers.<Dictionary<String, String>>any()))
 				.thenAnswer(invocation -> {
 					configurator = (ManagedService) invocation.getArguments()[1];
 					return registration;
 				});
-		when(context.registerService(any(String.class), any(TelnetCommand.class), any(Dictionary.class)))
+		when(context.registerService(any(String.class), any(TelnetCommand.class),
+				ArgumentMatchers.<Dictionary<String, String>>any()))
 				.thenReturn(null);
 
 		TelnetCommand command = new TelnetCommand(processor, context);
@@ -112,12 +115,14 @@ public class TelnetCommandWithConfigAdminTests {
 
 		BundleContext context = mock(BundleContext.class);
 		when(context.getProperty(USE_CONFIG_ADMIN_PROP)).thenReturn(TRUE);
-		when(context.registerService(any(String.class), any(ManagedService.class), any(Dictionary.class)))
+		when(context.registerService(any(String.class), any(ManagedService.class),
+				ArgumentMatchers.<Dictionary<String, String>>any()))
 				.thenAnswer(invocation -> {
 					configurator = (ManagedService) invocation.getArguments()[1];
 					return registration;
 				});
-		when(context.registerService(any(String.class), any(TelnetCommand.class), any(Dictionary.class)))
+		when(context.registerService(any(String.class), any(TelnetCommand.class),
+				ArgumentMatchers.<Dictionary<String, String>>any()))
 				.thenReturn(null);
 
 		TelnetCommand command = new TelnetCommand(processor, context);
