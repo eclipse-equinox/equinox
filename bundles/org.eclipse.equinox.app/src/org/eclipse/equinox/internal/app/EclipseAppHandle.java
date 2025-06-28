@@ -325,23 +325,20 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 			return null;
 		}
 		// Implement our own Comparator to sort services
-		Arrays.sort(refs, new Comparator<ServiceReference>() {
-			@Override
-			public int compare(ServiceReference ref1, ServiceReference ref2) {
-				// sort in descending order
-				// sort based on service ranking first; highest rank wins
-				Object property = ref1.getProperty(Constants.SERVICE_RANKING);
-				int rank1 = (property instanceof Integer i) ? i.intValue() : 0;
-				property = ref2.getProperty(Constants.SERVICE_RANKING);
-				int rank2 = (property instanceof Integer i) ? i.intValue() : 0;
-				if (rank1 != rank2) {
-					return rank1 > rank2 ? -1 : 1;
-				}
-				// rankings are equal; sort by id, lowest id wins
-				long id1 = ((Long) (ref1.getProperty(Constants.SERVICE_ID))).longValue();
-				long id2 = ((Long) (ref2.getProperty(Constants.SERVICE_ID))).longValue();
-				return id2 > id1 ? -1 : 1;
+		Arrays.sort(refs, (ref1, ref2) -> {
+			// sort in descending order
+			// sort based on service ranking first; highest rank wins
+			Object property = ref1.getProperty(Constants.SERVICE_RANKING);
+			int rank1 = (property instanceof Integer i) ? i.intValue() : 0;
+			property = ref2.getProperty(Constants.SERVICE_RANKING);
+			int rank2 = (property instanceof Integer i) ? i.intValue() : 0;
+			if (rank1 != rank2) {
+				return rank1 > rank2 ? -1 : 1;
 			}
+			// rankings are equal; sort by id, lowest id wins
+			long id1 = ((Long) (ref1.getProperty(Constants.SERVICE_ID))).longValue();
+			long id2 = ((Long) (ref2.getProperty(Constants.SERVICE_ID))).longValue();
+			return id2 > id1 ? -1 : 1;
 		});
 		return refs;
 	}

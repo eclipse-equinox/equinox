@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2018 IBM Corporation and others.
+ * Copyright (c) 2005, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -47,18 +47,18 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		_context = bc;
 		// doing simple get service here because we expect the PackageAdmin service to
 		// always be available
-		ServiceReference ref = bc.getServiceReference(PackageAdmin.class.getName());
+		ServiceReference<PackageAdmin> ref = bc.getServiceReference(PackageAdmin.class);
 		if (ref != null) {
-			_packageAdmin = (PackageAdmin) bc.getService(ref);
+			_packageAdmin = bc.getService(ref);
 		}
-		_frameworkLogTracker = new ServiceTracker(bc, FrameworkLog.class.getName(), null);
+		_frameworkLogTracker = new ServiceTracker(bc, FrameworkLog.class, null);
 		_frameworkLogTracker.open();
 		getDebugOptions(bc);
 		processCommandLineArgs(bc);
 		// set the app manager context before starting the container
 		AppPersistence.start(bc);
 		// we must have an extension registry started before we can start the container
-		registryTracker = new ServiceTracker(bc, IExtensionRegistry.class.getName(), this);
+		registryTracker = new ServiceTracker(bc, IExtensionRegistry.class, this);
 		registryTracker.open();
 		// start the app commands for the console
 		try {
@@ -90,11 +90,11 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	}
 
 	private void getDebugOptions(BundleContext context) {
-		ServiceReference debugRef = context.getServiceReference(DebugOptions.class.getName());
+		ServiceReference<DebugOptions> debugRef = context.getServiceReference(DebugOptions.class);
 		if (debugRef == null) {
 			return;
 		}
-		DebugOptions debugOptions = (DebugOptions) context.getService(debugRef);
+		DebugOptions debugOptions = context.getService(debugRef);
 		DEBUG = debugOptions.getBooleanOption(PI_APP + "/debug", false); //$NON-NLS-1$
 		context.ungetService(debugRef);
 	}
@@ -104,11 +104,11 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		if (bc == null) {
 			return null;
 		}
-		ServiceReference infoRef = bc.getServiceReference(EnvironmentInfo.class.getName());
+		ServiceReference<EnvironmentInfo> infoRef = bc.getServiceReference(EnvironmentInfo.class);
 		if (infoRef == null) {
 			return null;
 		}
-		EnvironmentInfo envInfo = (EnvironmentInfo) bc.getService(infoRef);
+		EnvironmentInfo envInfo = bc.getService(infoRef);
 		if (envInfo == null) {
 			return null;
 		}
@@ -129,7 +129,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		if (context == null) {
 			return null; // really should never happen since we close the tracker before nulling out
 		}
-							// context
+		// context
 		Object service = null;
 		EclipseAppContainer startContainer = null;
 		synchronized (this) {
@@ -189,12 +189,9 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		if (System.getSecurityManager() == null) {
 			tracker.open(allServices);
 		} else {
-			AccessController.doPrivileged(new PrivilegedAction() {
-				@Override
-				public Object run() {
-					tracker.open(allServices);
-					return null;
-				}
+			AccessController.doPrivileged((PrivilegedAction) () -> {
+				tracker.open(allServices);
+				return null;
 			});
 		}
 	}
@@ -204,12 +201,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		if (System.getSecurityManager() == null) {
 			return tracker.getService();
 		}
-		return AccessController.doPrivileged(new PrivilegedAction() {
-			@Override
-			public Object run() {
-				return tracker.getService();
-			}
-		});
+		return AccessController.doPrivileged((PrivilegedAction) () -> tracker.getService());
 	}
 
 	// helper used to protect callers from permission checks when getting locations
@@ -217,12 +209,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		if (System.getSecurityManager() == null) {
 			return bundle.getLocation();
 		}
-		return (String) AccessController.doPrivileged(new PrivilegedAction() {
-			@Override
-			public Object run() {
-				return bundle.getLocation();
-			}
-		});
+		return (String) AccessController.doPrivileged((PrivilegedAction) () -> bundle.getLocation());
 	}
 
 	// helper method to get a bundle from a contributor.

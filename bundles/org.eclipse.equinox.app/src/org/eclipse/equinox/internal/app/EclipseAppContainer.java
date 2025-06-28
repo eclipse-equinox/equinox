@@ -93,7 +93,7 @@ public class EclipseAppContainer
 	public EclipseAppContainer(BundleContext context, IExtensionRegistry extensionRegistry) {
 		this.context = context;
 		this.extensionRegistry = extensionRegistry;
-		launcherTracker = new ServiceTracker(context, ApplicationLauncher.class.getName(), this);
+		launcherTracker = new ServiceTracker<>(context, ApplicationLauncher.class, this);
 	}
 
 	void start() {

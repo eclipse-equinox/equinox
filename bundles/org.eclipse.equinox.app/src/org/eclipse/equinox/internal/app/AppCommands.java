@@ -67,11 +67,11 @@ public class AppCommands implements CommandProvider {
 	public void start(BundleContext ctx) {
 		this.context = ctx;
 		try {
-			applicationDescriptors = new ServiceTracker(ctx, ApplicationDescriptor.class.getName(), null);
+			applicationDescriptors = new ServiceTracker<>(ctx, ApplicationDescriptor.class, null);
 			applicationDescriptors.open();
-			applicationHandles = new ServiceTracker(ctx, ApplicationHandle.class.getName(), null);
+			applicationHandles = new ServiceTracker<>(ctx, ApplicationHandle.class, null);
 			applicationHandles.open();
-			scheduledApplications = new ServiceTracker(ctx, ScheduledApplication.class.getName(), null);
+			scheduledApplications = new ServiceTracker<>(ctx, ScheduledApplication.class, null);
 			scheduledApplications.open();
 			launchableApp = ctx.createFilter(LAUNCHABLE_APP_FILTER);
 			activeApp = ctx.createFilter(ACTIVE_APP_FILTER);
