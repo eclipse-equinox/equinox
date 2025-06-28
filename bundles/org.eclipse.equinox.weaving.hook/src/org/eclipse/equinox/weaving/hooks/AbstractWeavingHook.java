@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2009 IBM Corporation and others.
+ * Copyright (c) 2006, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -40,10 +40,6 @@ public abstract class AbstractWeavingHook extends ClassLoaderHook implements Hoo
 	public static boolean verbose = Boolean.getBoolean("org.aspectj.osgi.verbose"); //$NON-NLS-1$
 
 	private ISupplementerRegistry supplementerRegistry;
-
-	/**
-	 * @see org.eclipse.osgi.internal.hookregistry.HookConfigurator#addHooks(HookRegistry)
-	 */
 	@Override
 	public void addHooks(final HookRegistry hooks) {
 		if (verbose) {
@@ -59,9 +55,6 @@ public abstract class AbstractWeavingHook extends ClassLoaderHook implements Hoo
 		hooks.addClassLoaderHook(new WeavingLoaderDelegateHook(supplementerRegistry));
 	}
 
-	/**
-	 * @see org.eclipse.osgi.internal.hookregistry.ActivatorHookFactory#createActivator()
-	 */
 	@Override
 	public BundleActivator createActivator() {
 		return this;

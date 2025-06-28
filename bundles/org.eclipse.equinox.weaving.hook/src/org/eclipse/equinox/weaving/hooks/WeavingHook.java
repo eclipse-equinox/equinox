@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2020 IBM Corporation and others.
+ * Copyright (c) 2006, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -131,12 +131,12 @@ public class WeavingHook extends AbstractWeavingHook {
 
 		// re-build supplementer registry state for installed bundles
 		final Bundle[] installedBundles = context.getBundles();
-		for (Bundle installedBundle : installedBundles) {
+		for (final Bundle installedBundle : installedBundles) {
 			if (installedBundle.getState() != Bundle.UNINSTALLED) {
 				supplementerRegistry.addSupplementer(installedBundle, false);
 			}
 		}
-		for (Bundle installedBundle : installedBundles) {
+		for (final Bundle installedBundle : installedBundles) {
 			if (installedBundle.getState() != Bundle.UNINSTALLED) {
 				supplementerRegistry.addSupplementedBundle(installedBundle);
 			}
@@ -147,10 +147,6 @@ public class WeavingHook extends AbstractWeavingHook {
 		}
 	}
 
-	/**
-	 * @see org.eclipse.equinox.weaving.hooks.AbstractWeavingHook#processClass(String,
-	 *      byte[], ClasspathEntry, BundleEntry, ClasspathManager)
-	 */
 	@Override
 	public byte[] processClass(final String name, final byte[] classbytes, final ClasspathEntry classpathEntry,
 			final BundleEntry entry, final ClasspathManager manager) {
@@ -164,10 +160,6 @@ public class WeavingHook extends AbstractWeavingHook {
 		return newClassytes;
 	}
 
-	/**
-	 * @see org.eclipse.equinox.weaving.hooks.AbstractWeavingHook#recordClassDefine(String,
-	 *      Class, byte[], ClasspathEntry, BundleEntry, ClasspathManager)
-	 */
 	@Override
 	public void recordClassDefine(final String name, final Class<?> clazz, final byte[] classbytes,
 			final ClasspathEntry classpathEntry, final BundleEntry entry, final ClasspathManager manager) {
@@ -201,10 +193,6 @@ public class WeavingHook extends AbstractWeavingHook {
 		adaptorFactory.dispose(context);
 	}
 
-	/**
-	 * @see org.eclipse.osgi.internal.hookregistry.BundleFileWrapperFactoryHook#wrapBundleFile(org.eclipse.osgi.storage.bundlefile.BundleFile,
-	 *      org.eclipse.osgi.storage.BundleInfo.Generation, boolean)
-	 */
 	@Override
 	public BundleFileWrapper wrapBundleFile(final BundleFile bundleFile, final Generation generation,
 			final boolean base) {
