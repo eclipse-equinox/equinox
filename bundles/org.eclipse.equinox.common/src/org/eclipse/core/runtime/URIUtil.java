@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2011 IBM Corporation and others.
+ * Copyright (c) 2008, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -102,7 +102,7 @@ public final class URIUtil {
 		String ssp = base.getSchemeSpecificPart();
 		if (ssp.endsWith("/")) { //$NON-NLS-1$
 			ssp += extension;
-		} else { //$NON-NLS-1$
+		} else {
 			ssp = ssp + "/" + extension; //$NON-NLS-1$
 		}
 		return new URI(base.getScheme(), ssp, base.getFragment());

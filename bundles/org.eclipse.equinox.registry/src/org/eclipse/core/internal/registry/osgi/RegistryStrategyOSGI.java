@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2018 IBM Corporation and others.
+ * Copyright (c) 2005, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -211,7 +211,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 		Bundle contributingBundle;
 		if (overridenContributorName != null && !overridenContributorName.equals("")) { //$NON-NLS-1$
 			contributingBundle = OSGIUtils.getDefault().getBundle(overridenContributorName);
-		} else { //$NON-NLS-1$
+		} else {
 			contributingBundle = getBundle(contributor.getId());
 		}
 
