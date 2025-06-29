@@ -38,7 +38,7 @@ import org.eclipse.core.runtime.IContributor;
  * <p>
  * This interface can be used without OSGi running.
  * </p>
- * 
+ *
  * @since 3.4
  * @noextend This interface is not intended to be extended by clients.
  * @noimplement This interface is not intended to be implemented by clients.
@@ -51,7 +51,7 @@ public interface IDynamicExtensionRegistry {
 	 * This method is an access controlled method. Access tokens are specified when
 	 * the registry is constructed by the registry implementers.
 	 * </p>
-	 * 
+	 *
 	 * @see org.eclipse.core.runtime.RegistryFactory#createRegistry(RegistryStrategy,
 	 *      Object, Object)
 	 * @param contributor the contributor to be removed
@@ -61,7 +61,7 @@ public interface IDynamicExtensionRegistry {
 
 	/**
 	 * Finds out if registry has the contributor.
-	 * 
+	 *
 	 * @param contributor registry contributor
 	 * @return true if the registry has this contributor; false otherwise
 	 */
@@ -69,7 +69,7 @@ public interface IDynamicExtensionRegistry {
 
 	/**
 	 * Returns all contributors associated with the registry at this time.
-	 * 
+	 *
 	 * @return all contributors associated with the registry
 	 */
 	public IContributor[] getAllContributors();

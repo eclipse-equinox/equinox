@@ -28,7 +28,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
  * <p>
  * This class is not intended to be subclassed.
  * </p>
- * 
+ *
  * @see ConfigurationElementDescription
  * @see IConfigurationElement
  */
@@ -36,14 +36,14 @@ public final class ConfigurationElementAttribute {
 
 	/**
 	 * Attribute name.
-	 * 
+	 *
 	 * @see IConfigurationElement#getAttributeNames()
 	 */
 	private final String name;
 
 	/**
 	 * Attribute value.
-	 * 
+	 *
 	 * @see IConfigurationElement#getAttributeAsIs(String)
 	 */
 	private final String value;
@@ -61,7 +61,7 @@ public final class ConfigurationElementAttribute {
 
 	/**
 	 * Returns attribute name.
-	 * 
+	 *
 	 * @return attribute name
 	 * @see IConfigurationElement#getAttributeNames()
 	 */
@@ -71,7 +71,7 @@ public final class ConfigurationElementAttribute {
 
 	/**
 	 * Returns value of the attribute.
-	 * 
+	 *
 	 * @return attribute value
 	 * @see IConfigurationElement#getAttributeAsIs(String)
 	 */

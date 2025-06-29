@@ -42,7 +42,7 @@ public class KeyedHashSet {
 	/**
 	 * Adds an element to this set. If an element with the same key already exists,
 	 * replaces it depending on the replace flag.
-	 * 
+	 *
 	 * @return true if the element was added/stored, false otherwise
 	 */
 	public boolean add(KeyedElement element) {
