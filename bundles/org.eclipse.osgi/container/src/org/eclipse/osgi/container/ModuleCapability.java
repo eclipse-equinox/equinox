@@ -16,8 +16,10 @@ package org.eclipse.osgi.container;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import org.osgi.framework.namespace.NativeNamespace;
 import org.osgi.framework.wiring.BundleCapability;
+import org.osgi.resource.Capability;
 
 /**
  * An implementation of {@link BundleCapability}.
@@ -30,6 +32,7 @@ public final class ModuleCapability implements BundleCapability {
 	private final Map<String, Object> attributes;
 	private final Map<String, Object> transientAttrs;
 	private final ModuleRevision revision;
+	private transient int hashCode;
 
 	ModuleCapability(String namespace, Map<String, String> directives, Map<String, Object> attributes,
 			ModuleRevision revision) {
@@ -92,5 +95,27 @@ public final class ModuleCapability implements BundleCapability {
 	@Override
 	public String toString() {
 		return namespace + ModuleContainer.toString(attributes, false) + ModuleContainer.toString(directives, true);
+	}
+
+	@Override
+	public int hashCode() {
+		if (hashCode != 0) {
+			return hashCode;
+		}
+		return hashCode = Objects.hash(namespace, directives, attributes, revision);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj instanceof Capability) {
+			Capability other = (Capability) obj;
+			return Objects.equals(revision, other.getResource()) && Objects.equals(namespace, other.getNamespace())
+					&& Objects.equals(directives, other.getDirectives())
+					&& Objects.equals(attributes, other.getAttributes());
+		}
+		return false;
 	}
 }
