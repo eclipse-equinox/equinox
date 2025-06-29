@@ -19,7 +19,7 @@ package org.eclipse.core.runtime;
  * instead of referring to a class. For example, the following extension to the
  * preference page extension-point uses a factory called
  * <code>PreferencePageFactory</code>.
- * 
+ *
  * <pre>
  * <code>
  *  &lt;extension point="org.eclipse.ui.preferencePages"&gt;
@@ -47,7 +47,7 @@ package org.eclipse.core.runtime;
  * <p>
  * This interface can be used without OSGi running.
  * </p>
- * 
+ *
  * @see org.eclipse.core.runtime.IConfigurationElement
  */
 public interface IExecutableExtensionFactory {
