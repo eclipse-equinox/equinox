@@ -10,14 +10,17 @@
  *
  * Contributors:
  *     Christoph Läubrich - initial API and implementation
+ *     IBM Corporation -  Update deprecated logger 
  *******************************************************************************/
 package org.eclipse.equinox.slf4j;
 
 import org.osgi.service.log.Logger;
+import org.slf4j.Marker;
+import org.slf4j.event.Level;
 import org.slf4j.helpers.FormattingTuple;
 import org.slf4j.helpers.MessageFormatter;
 
-class EquinoxLogger extends org.slf4j.helpers.MarkerIgnoringBase {
+class EquinoxLogger extends org.slf4j.helpers.AbstractLogger {
 
 	private static final long serialVersionUID = 1L;
 	private final Logger logger;
@@ -240,6 +243,41 @@ class EquinoxLogger extends org.slf4j.helpers.MarkerIgnoringBase {
 			FormattingTuple tp = MessageFormatter.arrayFormat(format, argArray);
 			logger.error(tp.getMessage(), tp.getThrowable());
 		}
+	}
+
+	@Override
+	public boolean isTraceEnabled(Marker marker) {
+		return isTraceEnabled();
+	}
+
+	@Override
+	public boolean isDebugEnabled(Marker marker) {
+		return isDebugEnabled();
+	}
+
+	@Override
+	public boolean isInfoEnabled(Marker marker) {
+		return isInfoEnabled();
+	}
+
+	@Override
+	public boolean isWarnEnabled(Marker marker) {
+		return isWarnEnabled();
+	}
+
+	@Override
+	public boolean isErrorEnabled(Marker marker) {
+		return isErrorEnabled();
+	}
+
+	@Override
+	protected String getFullyQualifiedCallerName() {
+		return this.name;
+	}
+
+	@Override
+	protected void handleNormalizedLoggingCall(Level level, Marker marker, String messagePattern, Object[] arguments,
+			Throwable throwable) {		
 	}
 
 }
