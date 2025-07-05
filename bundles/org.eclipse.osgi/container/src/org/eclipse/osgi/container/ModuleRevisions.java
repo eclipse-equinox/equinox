@@ -25,7 +25,7 @@ import org.osgi.framework.wiring.BundleRevisions;
  * provides a bridge between the revisions, the module and the container they
  * are associated with. The ModuleRevisions holds the information about the
  * installation of a module in a container such as the module id and location.
- * 
+ *
  * @since 3.10
  */
 public final class ModuleRevisions implements BundleRevisions {
@@ -67,7 +67,7 @@ public final class ModuleRevisions implements BundleRevisions {
 	/**
 	 * Same as {@link ModuleRevisions#getRevisions()} except it returns a list of
 	 * {@link ModuleRevision}.
-	 * 
+	 *
 	 * @return the list of module revisions
 	 */
 	public List<ModuleRevision> getModuleRevisions() {
