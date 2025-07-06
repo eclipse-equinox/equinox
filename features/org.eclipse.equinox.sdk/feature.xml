@@ -47,6 +47,10 @@
          id="org.eclipse.equinox.server.jetty.source"
          version="0.0.0"/>
 
+   <requires>
+      <import plugin="org.eclipse.jdt.core.compiler.batch"/>
+   </requires>
+
    <plugin
          id="org.eclipse.equinox.http.servletbridge"
          version="0.0.0"/>
@@ -77,14 +81,6 @@
 
    <plugin
          id="org.eclipse.equinox.servletbridge.source"
-         version="0.0.0"/>
-
-   <plugin
-         id="org.eclipse.jdt.core.compiler.batch"
-         version="0.0.0"/>
-
-   <plugin
-         id="org.eclipse.jdt.core.compiler.batch.source"
          version="0.0.0"/>
 
 </feature>
