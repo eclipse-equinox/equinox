@@ -23,7 +23,7 @@ package org.eclipse.core.runtime;
  * <p>
  * This class can be used without OSGi running.
  * </p>
- * 
+ *
  * @noinstantiate This class is not intended to be instantiated by clients.
  * @noextend This class is not intended to be subclassed by clients.
  */

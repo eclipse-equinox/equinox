@@ -47,7 +47,7 @@ package org.eclipse.core.runtime;
  * <p>
  * This interface is not intended to be implemented by clients.
  * </p>
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface IExtensionPoint {
@@ -198,7 +198,7 @@ public interface IExtensionPoint {
 	 * If multi-language support is not enabled, this method is equivalent to the
 	 * method {@link #getLabel()}.
 	 * </p>
-	 * 
+	 *
 	 * @param locale the requested locale
 	 * @return a displayable string label for this extension point, possibly the
 	 *         empty string
@@ -248,7 +248,7 @@ public interface IExtensionPoint {
 
 	/*
 	 * (non-javadoc)
-	 * 
+	 *
 	 * @see Object#equals(java.lang.Object)
 	 */
 	@Override

@@ -103,7 +103,7 @@ public class ReferenceMap {
 	private static interface IEntry {
 		/**
 		 * Returns the integer key for this entry.
-		 * 
+		 *
 		 * @return The integer key
 		 */
 		public int getKey();
@@ -111,14 +111,14 @@ public class ReferenceMap {
 		/**
 		 * Returns the next entry in the linked list of entries with the same hash
 		 * value, or <code>null</code> if there is no next entry.
-		 * 
+		 *
 		 * @return The next entry, or <code>null</code>.
 		 */
 		public IEntry getNext();
 
 		/**
 		 * Returns the value of this entry.
-		 * 
+		 *
 		 * @return The entry value.
 		 */
 		public Object getValue();
@@ -184,7 +184,7 @@ public class ReferenceMap {
 	 * The threshold variable is calculated by multiplying table.length and
 	 * loadFactor. Note: I originally marked this field as final, but then this
 	 * class didn't compile under JDK1.2.2.
-	 * 
+	 *
 	 * @serial
 	 */
 	private final float loadFactor;
@@ -206,7 +206,7 @@ public class ReferenceMap {
 
 	/**
 	 * When size reaches threshold, the map is resized.
-	 * 
+	 *
 	 * @see #resize()
 	 */
 	private transient int threshold;
@@ -214,7 +214,7 @@ public class ReferenceMap {
 	/**
 	 * The reference type for values. Must be HARD or SOFT Note: I originally marked
 	 * this field as final, but then this class didn't compile under JDK1.2.2.
-	 * 
+	 *
 	 * @serial
 	 */
 	int valueType;

@@ -33,7 +33,7 @@ import org.eclipse.core.runtime.spi.RegistryStrategy;
  * <p>
  * This class is not intended to be subclassed or instantiated.
  * </p>
- * 
+ *
  * @since org.eclipse.equinox.registry 3.2
  * @noinstantiate This class is not intended to be instantiated by clients.
  */
@@ -57,7 +57,7 @@ public final class RegistryFactory {
 	 * users attempting to modify dynamic contributions to the registry have to use
 	 * the user token. Users may pass in <code>null</code> as a user token.
 	 * </p>
-	 * 
+	 *
 	 * @param strategy    registry strategy or <code>null</code>
 	 * @param masterToken the token used for master control of the registry or
 	 *                    <code>null</code>
@@ -109,7 +109,7 @@ public final class RegistryFactory {
 	 * The master token should be passed to the OSGi registry strategy to permit it
 	 * to perform contributions to the registry.
 	 * </p>
-	 * 
+	 *
 	 * @param storageDirs   array of file system directories or <code>null</code>
 	 * @param cacheReadOnly array of read only attributes or <code>null</code>
 	 * @param token         control token for the registry
@@ -128,7 +128,7 @@ public final class RegistryFactory {
 	 * <p>
 	 * The given registry provider must not be <code>null</code>.
 	 * </p>
-	 * 
+	 *
 	 * @see RegistryFactory#getRegistry()
 	 * @param provider extension registry provider
 	 * @throws CoreException if a default registry provider was already set for this

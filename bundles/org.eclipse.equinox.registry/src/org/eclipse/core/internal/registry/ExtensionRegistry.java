@@ -51,7 +51,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Object#hashCode()
 		 */
 		@Override
@@ -307,7 +307,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.core.runtime.IExtensionRegistry#getConfigurationElementsFor(java.
 	 * lang.String)
@@ -325,7 +325,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.core.runtime.IExtensionRegistry#getConfigurationElementsFor(java.
 	 * lang.String, java.lang.String)
@@ -342,7 +342,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.core.runtime.IExtensionRegistry#getConfigurationElementsFor(java.
 	 * lang.String, java.lang.String, java.lang.String)
@@ -373,7 +373,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.core.runtime.IExtensionRegistry#getExtension(java.lang.String)
 	 */
@@ -405,7 +405,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.core.runtime.IExtensionRegistry#getExtension(java.lang.String,
 	 * java.lang.String)
@@ -423,7 +423,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.core.runtime.IExtensionRegistry#getExtension(java.lang.String,
 	 * java.lang.String, java.lang.String)
@@ -440,7 +440,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.core.runtime.IExtensionRegistry#getExtensionPoint(java.lang.
 	 * String)
 	 */
@@ -456,7 +456,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.core.runtime.IExtensionRegistry#getExtensionPoint(java.lang.
 	 * String, java.lang.String)
 	 */
@@ -472,7 +472,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.core.runtime.IExtensionRegistry#getExtensionPoints()
 	 */
 	@Override
@@ -487,7 +487,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.core.runtime.IExtensionRegistry#getExtensionPoints(java.lang.
 	 * String)
@@ -504,7 +504,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.core.runtime.IExtensionRegistry#getExtensions(java.lang.String)
 	 */
@@ -548,7 +548,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.core.runtime.IExtensionRegistry#getNamespaces()
 	 */
 	@Override
@@ -830,7 +830,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	/**
 	 * Stops the registry. Registry has to be stopped to properly close cache and
 	 * dispose of listeners.
-	 * 
+	 *
 	 * @param key - key token for this registry
 	 */
 	@Override
@@ -1244,7 +1244,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	 * method. Proper token should be passed as an argument for non-modifiable
 	 * registries.
 	 * </p>
-	 * 
+	 *
 	 * @param identifier      Id of the extension point. If non-qualified names is
 	 *                        supplied, it will be converted internally into a fully
 	 *                        qualified name
@@ -1340,7 +1340,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	 * method. Proper token should be passed as an argument for non-modifiable
 	 * registries.
 	 * </p>
-	 * 
+	 *
 	 * @see org.eclipse.core.internal.registry.spi.ConfigurationElementDescription
 	 *
 	 * @param identifier            Id of the extension. If non-qualified name is

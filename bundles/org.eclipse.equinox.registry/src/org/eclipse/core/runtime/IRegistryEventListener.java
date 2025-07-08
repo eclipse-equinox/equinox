@@ -27,7 +27,7 @@ import java.util.EventListener;
  * <p>
  * Clients may implement this interface.
  * </p>
- * 
+ *
  * @see IExtensionRegistry#addListener(IRegistryEventListener, String)
  * @since 3.4
  */
@@ -39,7 +39,7 @@ public interface IRegistryEventListener extends EventListener {
 	 * The extensions supplied as the argument are valid only for the duration of
 	 * the invocation of this method.
 	 * </p>
-	 * 
+	 *
 	 * @param extensions extensions added to the registry
 	 */
 	public void added(IExtension[] extensions);
@@ -50,7 +50,7 @@ public interface IRegistryEventListener extends EventListener {
 	 * The extensions supplied as the argument are valid only for the duration of
 	 * the invocation of this method.
 	 * </p>
-	 * 
+	 *
 	 * @param extensions extensions removed from the registry
 	 */
 	public void removed(IExtension[] extensions);
@@ -61,7 +61,7 @@ public interface IRegistryEventListener extends EventListener {
 	 * The extension points supplied as the argument are valid only for the duration
 	 * of the invocation of this method.
 	 * </p>
-	 * 
+	 *
 	 * @param extensionPoints extension points added to the registry
 	 */
 	public void added(IExtensionPoint[] extensionPoints);
@@ -72,7 +72,7 @@ public interface IRegistryEventListener extends EventListener {
 	 * The extension points supplied as the argument are valid only for the duration
 	 * of the invocation of this method.
 	 * </p>
-	 * 
+	 *
 	 * @param extensionPoints extension points removed from the registry
 	 */
 	public void removed(IExtensionPoint[] extensionPoints);

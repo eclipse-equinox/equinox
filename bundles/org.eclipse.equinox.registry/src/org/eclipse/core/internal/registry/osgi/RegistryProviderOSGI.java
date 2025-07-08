@@ -26,7 +26,7 @@ public final class RegistryProviderOSGI implements IRegistryProvider {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.equinox.registry.IRegistryProvider#getRegistry()
 	 */
 	@Override

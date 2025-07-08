@@ -58,7 +58,7 @@ import java.util.ResourceBundle;
  * <p>
  * This interface is not intended to be implemented by clients.
  * </p>
- * 
+ *
  * @since 3.0
  * @noimplement This interface is not intended to be implemented by clients.
  */
@@ -79,7 +79,7 @@ public interface IExtensionRegistry {
 	 * registry. Registry change notifications are sent asynchronously. The listener
 	 * continues to receive notifications until it is removed.
 	 * </p>
-	 * 
+	 *
 	 * @param listener  the listener
 	 * @param namespace the namespace in which to listen for changes
 	 * @see IRegistryChangeListener
@@ -99,7 +99,7 @@ public interface IExtensionRegistry {
 	 * <p>
 	 * This method is equivalent to:
 	 * </p>
-	 * 
+	 *
 	 * <pre>
 	 * addRegistryChangeListener(listener, null);
 	 * </pre>
@@ -259,7 +259,7 @@ public interface IExtensionRegistry {
 	/**
 	 * Returns all extensions supplied by the contributor, or <code>null</code> if
 	 * there are no such extensions.
-	 * 
+	 *
 	 * @param contributor the contributor for the extensions (for OSGi registry,
 	 *                    bundles and fragments are different contributors)
 	 * @return the extensions, or <code>null</code>
@@ -277,7 +277,7 @@ public interface IExtensionRegistry {
 	 * a package name and a class name). The simple names are presumed to be unique
 	 * in the namespace.
 	 * </p>
-	 * 
+	 *
 	 * @return all namespaces known to this registry
 	 */
 	public String[] getNamespaces();
@@ -308,7 +308,7 @@ public interface IExtensionRegistry {
 	 * master token and a user token. Master token allows all operations; user token
 	 * allows non-persisted registry elements to be modified.
 	 * </p>
-	 * 
+	 *
 	 * @param is                stream open on the XML file. The XML file can
 	 *                          contain an extension point(s) or/and extension(s)
 	 *                          described in the format similar to plugin.xml. The
@@ -343,7 +343,7 @@ public interface IExtensionRegistry {
 	 * master token and a user token. Master token allows all operations; user token
 	 * only allows non-persisted registry elements to be modified.
 	 * </p>
-	 * 
+	 *
 	 * @param extension extension to be removed
 	 * @param token     the key used to check permissions
 	 * @return <code>true</code> if the extension was successfully removed, and
@@ -364,7 +364,7 @@ public interface IExtensionRegistry {
 	 * master token and a user token. Master token allows all operations; user token
 	 * only allows non-persisted registry elements to be modified.
 	 * </p>
-	 * 
+	 *
 	 * @param extensionPoint extension point to be removed
 	 * @param token          the key used to check permissions
 	 * @return <code>true</code> if the extension point was successfully removed,
@@ -383,7 +383,7 @@ public interface IExtensionRegistry {
 	 * This method is an access controlled method. Master token should be passed as
 	 * an argument.
 	 * </p>
-	 * 
+	 *
 	 * @see RegistryFactory#createRegistry(org.eclipse.core.runtime.spi.RegistryStrategy,
 	 *      Object, Object)
 	 * @param token master token for the registry
@@ -410,7 +410,7 @@ public interface IExtensionRegistry {
 	 * <p>
 	 * This method has no effect if the listener is already registered.
 	 * </p>
-	 * 
+	 *
 	 * @param listener the listener
 	 * @since org.eclipse.equinox.registry 3.4
 	 */
@@ -427,7 +427,7 @@ public interface IExtensionRegistry {
 	 * <p>
 	 * This method has no effect if the listener is already registered.
 	 * </p>
-	 * 
+	 *
 	 * @param listener         the listener
 	 * @param extensionPointId the unique identifier of extension point
 	 * @see IExtensionPoint#getUniqueIdentifier()
@@ -440,7 +440,7 @@ public interface IExtensionRegistry {
 	 * <p>
 	 * This method has no effect if the listener is not registered.
 	 * </p>
-	 * 
+	 *
 	 * @param listener the listener
 	 * @see #addListener(IRegistryEventListener)
 	 * @see #addListener(IRegistryEventListener, String)
@@ -455,7 +455,7 @@ public interface IExtensionRegistry {
 	 * See the runtime option "-registryMultiLanguage" for enabling multi-language
 	 * support.
 	 * </p>
-	 * 
+	 *
 	 * @return <code>true</code> if multiple languages are supported by this
 	 *         instance of the extension registry; <code>false</code> otherwise.
 	 * @since org.eclipse.equinox.registry 3.5

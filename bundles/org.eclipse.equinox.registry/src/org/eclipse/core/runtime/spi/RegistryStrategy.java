@@ -40,7 +40,7 @@ import org.eclipse.osgi.util.NLS;
  * <p>
  * This class can be overridden and/or instantiated by clients.
  * </p>
- * 
+ *
  * @since org.eclipse.equinox.registry 3.2
  */
 public class RegistryStrategy {
@@ -131,7 +131,7 @@ public class RegistryStrategy {
 	 * This method writes a message to <code>System.out</code> in the following
 	 * format:
 	 * </p>
-	 * 
+	 *
 	 * <pre>
 	 * [Error|Warning|Log]: Main error message
 	 * [Error|Warning|Log]: Child error message 1
@@ -171,7 +171,7 @@ public class RegistryStrategy {
 	 * and {@link #onStart(IExtensionRegistry, boolean)} as both methods will be
 	 * called on the registry startup.
 	 * </p>
-	 * 
+	 *
 	 * @param registry the extension registry being started
 	 *
 	 * @deprecated use {@link #onStart(IExtensionRegistry, boolean)}.
@@ -200,7 +200,7 @@ public class RegistryStrategy {
 	 * Override this method to provide additional processing to be performed just
 	 * before the registry is stopped. Overrides should call
 	 * <code>super.onStop()</code> at the end of the processing.
-	 * 
+	 *
 	 * @param registry the extension registry being stopped
 	 */
 	public void onStop(IExtensionRegistry registry) {
@@ -259,7 +259,7 @@ public class RegistryStrategy {
 	 * Override this method to customize scheduling of an extension registry event.
 	 * Note that this method <strong>must</strong> make the following call to
 	 * actually process the event:
-	 * 
+	 *
 	 * <pre>
 	 * <code>
 	 * 	RegistryStrategy.processChangeEvent(listeners, deltas, registry);
@@ -418,7 +418,7 @@ public class RegistryStrategy {
 	 * This method may return 0 to indicate that no time stamp verification is
 	 * required.
 	 * </p>
-	 * 
+	 *
 	 * @return a value corresponding to the last modification time of contributions
 	 *         contained in the registry
 	 */
@@ -458,7 +458,7 @@ public class RegistryStrategy {
 	 * <p>
 	 * This method is only used if multi-language support is enabled.
 	 * </p>
-	 * 
+	 *
 	 * @param nonTranslated message keys to be translated
 	 * @param contributor   the contributor of the keys to be translated
 	 * @param locale        the requested locale for the keys
@@ -488,7 +488,7 @@ public class RegistryStrategy {
 	 * <p>
 	 * This method is only used if multi-language support is enabled.
 	 * </p>
-	 * 
+	 *
 	 * @see IExtensionRegistry#isMultiLanguage()
 	 * @return the default locale
 	 * @since org.eclipse.equinox.registry 3.5
