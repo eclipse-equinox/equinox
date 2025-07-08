@@ -22,7 +22,7 @@ package org.eclipse.core.internal.registry;
  * <p>
  * This class is not indended to be subclassed.
  * </p>
- * 
+ *
  * @since org.eclipse.equinox.registry 3.3
  */
 public final class RegistryTimestamp {
@@ -42,7 +42,7 @@ public final class RegistryTimestamp {
 
 	/**
 	 * Returns value of the aggregated timestamp.
-	 * 
+	 *
 	 * @return value of the aggregated timestamp
 	 */
 	public long getContentsTimestamp() {
@@ -51,7 +51,7 @@ public final class RegistryTimestamp {
 
 	/**
 	 * Set value of the aggregated timestamp.
-	 * 
+	 *
 	 * @param timestamp the aggregated timestamp of the current registry contents
 	 */
 	public void set(long timestamp) {
@@ -70,7 +70,7 @@ public final class RegistryTimestamp {
 	/**
 	 * Determines if the aggregate timestamp was modified using add() or remove()
 	 * methods.
-	 * 
+	 *
 	 * @return true: the timestamp was modified after the last set/reset
 	 */
 	public boolean isModifed() {
@@ -79,7 +79,7 @@ public final class RegistryTimestamp {
 
 	/**
 	 * Add individual contribution timestamp to the aggregated timestamp.
-	 * 
+	 *
 	 * @param timestamp the time stamp of the contribution being added to the
 	 *                  registry
 	 */
@@ -90,7 +90,7 @@ public final class RegistryTimestamp {
 
 	/**
 	 * Remove individual contribution timestamp from the aggregated timestamp.
-	 * 
+	 *
 	 * @param timestamp the time stamp of the contribution being removed from the
 	 *                  registry
 	 */

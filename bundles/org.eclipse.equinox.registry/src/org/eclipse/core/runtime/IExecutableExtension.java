@@ -44,7 +44,7 @@ public interface IExecutableExtension {
 	 * Regular executable extensions specify their Java implementation class name as
 	 * an attribute of the configuration element for the extension. For example
 	 * </p>
-	 * 
+	 *
 	 * <pre>
 	 *     &lt;action run="com.example.BaseAction"/&gt;
 	 * </pre>
@@ -70,7 +70,7 @@ public interface IExecutableExtension {
 	 * specifies an attribute <code>"run"</code> to contain the name of the
 	 * extension implementation, an adapter can be configured as
 	 * </p>
-	 * 
+	 *
 	 * <pre>
 	 *     &lt;action run="com.example.ExternalAdapter:./cmds/util.exe -opt 3"/&gt;
 	 * </pre>
@@ -80,7 +80,7 @@ public interface IExecutableExtension {
 	 * adapter data in the form of xml markup. Using this form, the example above
 	 * would become
 	 * </p>
-	 * 
+	 *
 	 * <pre>
 	 *     &lt;action&gt;
 	 *         &lt;run class="com.xyz.ExternalAdapter"&gt;

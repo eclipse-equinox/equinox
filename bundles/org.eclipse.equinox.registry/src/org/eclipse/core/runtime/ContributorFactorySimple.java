@@ -24,7 +24,7 @@ import org.eclipse.core.runtime.spi.RegistryContributor;
  * <p>
  * This class can not be extended or instantiated by clients.
  * </p>
- * 
+ *
  * @since org.eclipse.equinox.registry 3.2
  * @noinstantiate This class is not intended to be instantiated by clients.
  * @noextend This class is not intended to be subclassed by clients.

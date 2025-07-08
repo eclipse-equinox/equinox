@@ -20,7 +20,7 @@ import org.eclipse.core.runtime.InvalidRegistryObjectException;
  * users. The handles never hold on to any "real" content of the object being
  * represented. A handle can become stale if its referenced object has been
  * removed from the registry.
- * 
+ *
  * @since 3.1.
  */
 public abstract class Handle {
@@ -39,7 +39,7 @@ public abstract class Handle {
 
 	/**
 	 * Return the actual object corresponding to this handle.
-	 * 
+	 *
 	 * @throws InvalidRegistryObjectException when the handle is stale.
 	 */
 	abstract RegistryObject getObject();

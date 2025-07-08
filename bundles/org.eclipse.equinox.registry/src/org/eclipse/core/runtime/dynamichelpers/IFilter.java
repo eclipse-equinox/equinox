@@ -25,7 +25,7 @@ import org.eclipse.core.runtime.IExtensionPoint;
  * <p>
  * This interface can be used without OSGi running.
  * </p>
- * 
+ *
  * @since 3.1
  */
 public interface IFilter {

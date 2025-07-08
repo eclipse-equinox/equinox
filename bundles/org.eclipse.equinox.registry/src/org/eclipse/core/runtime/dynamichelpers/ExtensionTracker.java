@@ -26,7 +26,7 @@ import org.eclipse.core.runtime.*;
  * <p>
  * This class can be used without OSGi running.
  * </p>
- * 
+ *
  * @see org.eclipse.core.runtime.dynamichelpers.IExtensionTracker
  * @since 3.1
  */
@@ -67,7 +67,7 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.core.runtime.dynamichelpers.IExtensionTracker#registerHandler(org
 	 * .eclipse.core.runtime.dynamichelpers.IExtensionChangeHandler,
@@ -86,7 +86,7 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see IExtensionTracker@unregisterHandler(IExtensionChangeHandler)
 	 */
 	@Override
@@ -101,7 +101,7 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see IExtensionTracker@registerObject(IExtension, Object, int)
 	 */
 	@Override
@@ -215,7 +215,7 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see IExtensionTracker@getObjects(IExtension)
 	 */
 	@Override
@@ -235,7 +235,7 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see IExtensionTracker@close()
 	 */
 	@Override
@@ -256,7 +256,7 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see IExtensionTracker@unregisterObject(IExtension, Object)
 	 */
 	@Override
@@ -274,7 +274,7 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see IExtensionTracker@unregisterObject(IExtension)
 	 */
 	@Override
