@@ -14,7 +14,6 @@
 package org.eclipse.core.runtime.preferences;
 
 import java.net.URL;
-import org.eclipse.core.internal.preferences.AbstractScope;
 import org.eclipse.core.internal.preferences.PreferencesOSGiUtils;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.osgi.service.datalocation.Location;

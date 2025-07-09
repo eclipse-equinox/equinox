@@ -13,43 +13,11 @@
  *******************************************************************************/
 package org.eclipse.core.internal.preferences;
 
-import java.util.Objects;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.core.runtime.preferences.IScopeContext;
-
 /**
- * Abstract super-class for scope context object contributed by the Platform.
- *
- * @since 3.0
+ * @deprecated use the public API instead of this internal class, this class
+ *             will be removed with the next release (2025-12)
  */
-public abstract class AbstractScope implements IScopeContext {
-
-	/*
-	 * Default path hierarchy for nodes is /<scope>/<qualifier>.
-	 *
-	 * @see
-	 * org.eclipse.core.runtime.preferences.IScopeContext#getNode(java.lang.String)
-	 */
-	@Override
-	public IEclipsePreferences getNode(String qualifier) {
-		if (qualifier == null) {
-			throw new IllegalArgumentException();
-		}
-		return (IEclipsePreferences) PreferencesService.getDefault().getRootNode().node(getName()).node(qualifier);
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		return obj instanceof IScopeContext other //
-				&& getName().equals(other.getName()) //
-				&& Objects.equals(getLocation(), other.getLocation());
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(getName(), getLocation());
-	}
+@Deprecated(forRemoval = true, since = "2025-09")
+public abstract class AbstractScope extends org.eclipse.core.runtime.preferences.AbstractScope {
+	// only for backward compatibility
 }

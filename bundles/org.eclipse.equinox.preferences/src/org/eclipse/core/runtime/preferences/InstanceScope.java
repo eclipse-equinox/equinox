@@ -13,7 +13,6 @@
  *******************************************************************************/
 package org.eclipse.core.runtime.preferences;
 
-import org.eclipse.core.internal.preferences.AbstractScope;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.osgi.service.datalocation.Location;
 
