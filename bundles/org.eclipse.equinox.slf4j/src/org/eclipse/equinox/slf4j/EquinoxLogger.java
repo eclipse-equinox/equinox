@@ -10,7 +10,7 @@
  *
  * Contributors:
  *     Christoph Läubrich - initial API and implementation
- *     IBM Corporation -  Update deprecated logger 
+ *     IBM Corporation -  Update deprecated logger
  *******************************************************************************/
 package org.eclipse.equinox.slf4j;
 
@@ -48,12 +48,12 @@ class EquinoxLogger extends org.slf4j.helpers.AbstractLogger {
 	public boolean isWarnEnabled() {
 		return logger != null && logger.isWarnEnabled();
 	}
-	
+
 	@Override
 	public boolean isErrorEnabled() {
 		return logger != null && logger.isErrorEnabled();
 	}
-	
+
 	@Override
 	public boolean isTraceEnabled(Marker marker) {
 		return isTraceEnabled();
@@ -86,11 +86,11 @@ class EquinoxLogger extends org.slf4j.helpers.AbstractLogger {
 
 	@Override
 	protected void handleNormalizedLoggingCall(Level level, Marker marker, String messagePattern, Object[] arguments,
-			Throwable throwable) {	
+			Throwable throwable) {
 		if (logger == null) {
 			return;
 		}
-		
+
 		if(level == Level.TRACE && logger.isTraceEnabled()) {
 			String formattedMessage = MessageFormatter.basicArrayFormat(messagePattern, arguments);
 			logger.trace(formattedMessage,throwable);
