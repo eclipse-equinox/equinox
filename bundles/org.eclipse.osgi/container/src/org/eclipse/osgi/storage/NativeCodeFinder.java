@@ -64,12 +64,14 @@ public class NativeCodeFinder {
 	public String[] mapLibraryNames(String mappedLibName) {
 		int extIndex = mappedLibName.lastIndexOf('.');
 		List<String> LIB_EXTENSIONS = generation.getBundleInfo().getStorage().getConfiguration().LIB_EXTENSIONS;
-		if (LIB_EXTENSIONS.isEmpty() || extIndex < 0)
+		if (LIB_EXTENSIONS.isEmpty() || extIndex < 0) {
 			return EMPTY_STRINGS;
+		}
 		String libNameBase = mappedLibName.substring(0, extIndex);
 		String[] results = new String[LIB_EXTENSIONS.size()];
-		for (int i = 0; i < results.length; i++)
+		for (int i = 0; i < results.length; i++) {
 			results[i] = libNameBase + LIB_EXTENSIONS.get(i);
+		}
 		return results;
 	}
 
@@ -82,8 +84,9 @@ public class NativeCodeFinder {
 					// we must copy the library to a temp space to allow another class loader to
 					// load the library
 					String temp = generation.getBundleInfo().getStorage().copyToTempLibrary(generation, path);
-					if (temp != null)
+					if (temp != null) {
 						path = temp;
+					}
 				} else {
 					loadedNativeCode.add(path);
 				}
@@ -112,15 +115,19 @@ public class NativeCodeFinder {
 	}
 
 	private String findEclipseNativeCode(String libname, String mappedName, String[] altMappedNames) {
-		if (libname.length() == 0)
+		if (libname.length() == 0) {
 			return null;
-		if (libname.charAt(0) == '/' || libname.charAt(0) == '\\')
+		}
+		if (libname.charAt(0) == '/' || libname.charAt(0) == '\\') {
 			libname = libname.substring(1);
+		}
 		String result = searchEclipseVariants(mappedName);
-		if (result != null)
+		if (result != null) {
 			return result;
-		for (int i = 0; i < altMappedNames.length && result == null; i++)
+		}
+		for (int i = 0; i < altMappedNames.length && result == null; i++) {
 			result = searchEclipseVariants(altMappedNames[i]);
+		}
 		return result;
 	}
 
@@ -132,8 +139,9 @@ public class NativeCodeFinder {
 			BundleEntry libEntry = baseBundleFile.getEntry(variant + path);
 			if (libEntry != null) {
 				File libFile = baseBundleFile.getFile(variant + path, true);
-				if (libFile == null)
+				if (libFile == null) {
 					return null;
+				}
 				// see bug 88697 - HP requires libraries to have executable permissions
 				if (org.eclipse.osgi.service.environment.Constants.OS_HPUX
 						.equals(generation.getBundleInfo().getStorage().getConfiguration().getOS())) {
@@ -151,24 +159,28 @@ public class NativeCodeFinder {
 
 	private String findBundleNativeCode(String libname, String mappedName, String[] altMappedNames) {
 		String path = null;
-		if (debug.DEBUG_LOADER)
+		if (debug.DEBUG_LOADER) {
 			debug.trace(OPTION_DEBUG_LOADER, "  mapped library name: " + mappedName); //$NON-NLS-1$
+		}
 		List<String> nativePaths = getNativePaths();
 		if (nativePaths.isEmpty()) {
 			return null;
 		}
 		path = findNativePath(nativePaths, mappedName);
 		if (path == null) {
-			for (int i = 0; i < altMappedNames.length && path == null; i++)
+			for (int i = 0; i < altMappedNames.length && path == null; i++) {
 				path = findNativePath(nativePaths, altMappedNames[i]);
+			}
 		}
 		if (path == null) {
-			if (debug.DEBUG_LOADER)
+			if (debug.DEBUG_LOADER) {
 				debug.trace(OPTION_DEBUG_LOADER, "  library does not exist: " + mappedName); //$NON-NLS-1$
+			}
 			path = findNativePath(nativePaths, libname);
 		}
-		if (debug.DEBUG_LOADER)
+		if (debug.DEBUG_LOADER) {
 			debug.trace(OPTION_DEBUG_LOADER, "  returning library: " + path); //$NON-NLS-1$
+		}
 		return path;
 	}
 
@@ -203,8 +215,9 @@ public class NativeCodeFinder {
 				@SuppressWarnings("unchecked")
 				List<String> result = (List<String>) moduleWire.getRequirement().getAttributes()
 						.get(REQUIREMENT_NATIVE_PATHS_ATTRIBUTE);
-				if (result != null)
+				if (result != null) {
 					return result;
+				}
 				// this must be a multi-clause Bundle-NativeCode header, need to check for the
 				// correct one in the index
 				try {
@@ -222,8 +235,9 @@ public class NativeCodeFinder {
 						@SuppressWarnings("unchecked")
 						List<String> indexResult = (List<String>) moduleWire.getRequirement().getAttributes()
 								.get(REQUIREMENT_NATIVE_PATHS_ATTRIBUTE + '.' + index);
-						if (indexResult != null)
+						if (indexResult != null) {
 							return indexResult;
+						}
 					}
 				} catch (InvalidSyntaxException e) {
 					throw new RuntimeException(e);
@@ -235,8 +249,9 @@ public class NativeCodeFinder {
 
 	private String findNativePath(List<String> nativePaths, String libname) {
 		int slash = libname.lastIndexOf('/');
-		if (slash >= 0)
+		if (slash >= 0) {
 			libname = libname.substring(slash + 1);
+		}
 		for (String nativePath : nativePaths) {
 			slash = nativePath.lastIndexOf('/');
 			String path = slash < 0 ? nativePath : nativePath.substring(slash + 1);
@@ -250,8 +265,9 @@ public class NativeCodeFinder {
 				}
 				// this is a normal library contained within the bundle
 				File nativeFile = generation.getBundleFile().getFile(nativePath, true);
-				if (nativeFile != null)
+				if (nativeFile != null) {
 					return nativeFile.getAbsolutePath();
+				}
 			}
 		}
 		return null;
