@@ -58,6 +58,10 @@ class Candidates
 {
     private static final boolean FILTER_USES = Boolean
             .parseBoolean(System.getProperty("felix.resolver.candidates.filteruses", "true"));
+
+    private static final boolean FILTER_INVALID_PACKAGE_PROVIDER = Boolean
+            .parseBoolean(System.getProperty("felix.resolver.candidates.filterpackages", "true"));
+
     static class PopulateResult {
         boolean success;
         ResolutionError error;
@@ -1358,6 +1362,18 @@ class Candidates
             }
         }
         return null;
+    }
+
+    public void process(Logger logger) {
+        checkSubstitutes();
+        if (FILTER_INVALID_PACKAGE_PROVIDER) {
+            for (Requirement requirement : m_candidateMap.keySet().toArray(new Requirement[0])) {
+                if (requirement == null) {
+                    continue;
+                }
+                ProblemReduction.removeInvalidPackageProvider(this, requirement, logger);
+            }
+        }
     }
 
     public FaultyResourcesReport getFaultyResources() {
