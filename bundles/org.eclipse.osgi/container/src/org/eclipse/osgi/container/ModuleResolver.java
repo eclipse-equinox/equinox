@@ -1024,7 +1024,7 @@ final class ModuleResolver {
 						BundleException be = (BundleException) e.getCause();
 						if (be.getType() == BundleException.REJECTED_BY_HOOK) {
 							return new ModuleResolutionReport(null, Collections.emptyMap(),
-									new ResolutionException(be), -1, -1, -1, -1, -1);
+									new ResolutionException(be), -1, -1, -1, -1, -1, adaptor);
 						}
 					}
 					throw e;
@@ -1068,7 +1068,7 @@ final class ModuleResolver {
 					if (DEBUG_WIRING) {
 						printWirings(result);
 					}
-					report = reportBuilder.build(result, re, logger);
+					report = reportBuilder.build(result, re, logger, adaptor);
 					if (DEBUG_REPORT) {
 						if (report.getResolutionException() != null) {
 							adaptor.traceThrowable(OPTION_REPORT, report.getResolutionException());

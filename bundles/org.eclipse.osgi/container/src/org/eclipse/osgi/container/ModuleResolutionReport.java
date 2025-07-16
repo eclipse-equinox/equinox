@@ -51,9 +51,9 @@ class ModuleResolutionReport implements ResolutionReport {
 		}
 
 		public ModuleResolutionReport build(Map<Resource, List<Wire>> resolutionResult, ResolutionException cause,
-				ResolveLogger logger) {
+				ResolveLogger logger, ModuleContainerAdaptor adaptor) {
 			return new ModuleResolutionReport(resolutionResult, resourceToEntries, cause, logger.totalPerm,
-					logger.processedPerm, logger.usesPerm, logger.subPerm, logger.importPerm);
+					logger.processedPerm, logger.usesPerm, logger.subPerm, logger.importPerm, adaptor);
 		}
 
 	}
@@ -86,14 +86,17 @@ class ModuleResolutionReport implements ResolutionReport {
 	private int usesPerm;
 	private int subPerm;
 	private int importPerm;
+	private boolean printOptional;
 
 	ModuleResolutionReport(Map<Resource, List<Wire>> resolutionResult, Map<Resource, List<Entry>> entries,
-			ResolutionException cause, int totalPerm, int processedPerm, int usesPerm, int subPerm, int importPerm) {
+			ResolutionException cause, int totalPerm, int processedPerm, int usesPerm, int subPerm, int importPerm,
+			ModuleContainerAdaptor adaptor) {
 		this.totalPerm = totalPerm;
 		this.processedPerm = processedPerm;
 		this.usesPerm = usesPerm;
 		this.subPerm = subPerm;
 		this.importPerm = importPerm;
+		this.printOptional = Boolean.parseBoolean(adaptor.getProperty("equinox.resolver.report.printOptional")); //$NON-NLS-1$
 		this.entries = entries == null ? Collections.emptyMap() : Collections.unmodifiableMap(new HashMap<>(entries));
 		this.resolutionResult = resolutionResult == null ? Collections.emptyMap()
 				: Collections.unmodifiableMap(resolutionResult);
@@ -115,7 +118,8 @@ class ModuleResolutionReport implements ResolutionReport {
 	}
 
 	private static String getResolutionReport0(String prepend, ModuleRevision revision,
-			Map<Resource, List<ResolutionReport.Entry>> reportEntries, Set<BundleRevision> visited) {
+			Map<Resource, List<ResolutionReport.Entry>> reportEntries, Set<BundleRevision> visited,
+			boolean printOptional) {
 		if (prepend == null) {
 			prepend = ""; //$NON-NLS-1$
 		}
@@ -135,42 +139,54 @@ class ModuleResolutionReport implements ResolutionReport {
 			result.append(prepend).append("  ").append(Msg.ModuleResolutionReport_NoReport); //$NON-NLS-1$
 		} else {
 			for (ResolutionReport.Entry entry : revisionEntries) {
-				printResolutionEntry(result, prepend + "  ", entry, reportEntries, visited); //$NON-NLS-1$
+				printResolutionEntry(result, prepend + "  ", entry, reportEntries, visited, printOptional); //$NON-NLS-1$
 			}
 		}
 		return result.toString();
 	}
 
 	private static void printResolutionEntry(StringBuilder result, String prepend, ResolutionReport.Entry entry,
-			Map<Resource, List<ResolutionReport.Entry>> reportEntries, Set<BundleRevision> visited) {
+			Map<Resource, List<ResolutionReport.Entry>> reportEntries, Set<BundleRevision> visited,
+			boolean printOptional) {
 		switch (entry.getType()) {
-		case MISSING_CAPABILITY:
+		case MISSING_CAPABILITY: {
+			Requirement requirement = (Requirement) entry.getData();
+			if (!printOptional && ModuleRequirement.isOptional(requirement)) {
+				return;
+			}
 			result.append(prepend).append(Msg.ModuleResolutionReport_UnresolvedReq)
-					.append(ModuleContainer.toString((Requirement) entry.getData())).append('\n');
+					.append(ModuleContainer.toString(requirement)).append('\n');
+		}
 			break;
 		case SINGLETON_SELECTION:
 			result.append(prepend).append(Msg.ModuleResolutionReport_AnotherSingleton).append(entry.getData())
 					.append('\n');
 			break;
-		case UNRESOLVED_PROVIDER:
+		case UNRESOLVED_PROVIDER: {
 			@SuppressWarnings("unchecked")
 			Map<Requirement, Set<Capability>> unresolvedProviders = (Map<Requirement, Set<Capability>>) entry.getData();
 			for (Map.Entry<Requirement, Set<Capability>> unresolvedRequirement : unresolvedProviders.entrySet()) {
 				// for now only printing the first possible unresolved candidates
 				Set<Capability> unresolvedCapabilities = unresolvedRequirement.getValue();
+				Requirement requirement = unresolvedRequirement.getKey();
+				if (!printOptional && ModuleRequirement.isOptional(requirement)) {
+					continue;
+				}
 				if (!unresolvedCapabilities.isEmpty()) {
 					Capability unresolvedCapability = unresolvedCapabilities.iterator().next();
 					// make sure this is not a case of importing and exporting the same package
 					if (!unresolvedRequirement.getKey().getResource().equals(unresolvedCapability.getResource())) {
 						result.append(prepend).append(Msg.ModuleResolutionReport_UnresolvedReq)
-								.append(ModuleContainer.toString(unresolvedRequirement.getKey())).append('\n');
+								.append(ModuleContainer.toString(requirement)).append('\n');
 						result.append(prepend).append("  -> ") //$NON-NLS-1$
 								.append(ModuleContainer.toString(unresolvedCapability)).append('\n');
 						result.append(getResolutionReport0(prepend + "     ", //$NON-NLS-1$
-								(ModuleRevision) unresolvedCapability.getResource(), reportEntries, visited));
+								(ModuleRevision) unresolvedCapability.getResource(), reportEntries, visited,
+								printOptional));
 					}
 				}
 			}
+		}
 			break;
 		case FILTERED_BY_RESOLVER_HOOK:
 			result.append(Msg.ModuleResolutionReport_FilteredByHook).append('\n');
@@ -188,7 +204,7 @@ class ModuleResolutionReport implements ResolutionReport {
 
 	@Override
 	public String getResolutionReportMessage(Resource resource) {
-		return getResolutionReport0(null, (ModuleRevision) resource, getEntries(), null);
+		return getResolutionReport0(null, (ModuleRevision) resource, getEntries(), null, printOptional);
 	}
 
 	@Override
