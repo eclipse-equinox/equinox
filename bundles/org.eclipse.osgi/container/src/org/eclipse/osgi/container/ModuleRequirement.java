@@ -24,6 +24,7 @@ import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.BundleRequirement;
 import org.osgi.resource.Namespace;
+import org.osgi.resource.Requirement;
 
 /**
  * An implementation of {@link BundleRequirement}. This requirement implements
@@ -151,6 +152,11 @@ public class ModuleRequirement implements BundleRequirement {
 		ModuleRequirement getOriginal() {
 			return ModuleRequirement.this;
 		}
+	}
+
+	static boolean isOptional(Requirement req) {
+		String resolution = req.getDirectives().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE);
+		return Namespace.RESOLUTION_OPTIONAL.equalsIgnoreCase(resolution);
 	}
 
 }
