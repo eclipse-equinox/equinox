@@ -41,6 +41,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.equinox.internal.jsp.jasper.JspClassLoader;
+import org.osgi.annotation.bundle.Referenced;
 import org.osgi.framework.Bundle;
 
 /**
@@ -80,7 +81,12 @@ import org.osgi.framework.Bundle;
  *
  * @noextend This class is not intended to be subclassed by clients.
  */
-
+@Referenced(
+/*
+ * This is referenced by <code>ServletContextAdaptor.createServletContext</code>
+ * that uses reflection
+ */
+javax.servlet.descriptor.JspConfigDescriptor.class)
 public class JspServlet extends HttpServlet {
 	private static class BundlePermissionCollection extends PermissionCollection {
 		private static final long serialVersionUID = -6365478608043900677L;
