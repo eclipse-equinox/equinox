@@ -70,53 +70,6 @@
         </executions>
       </plugin>
 
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>xml-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>generate-extra-iu</id>
-            <phase>verify</phase>
-            <goals>
-              <goal>transform</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <transformationSets>
-            <transformationSet>
-              <dir>target</dir>
-              <includes>
-                <include>p2content.xml</include>
-              </includes>
-              <stylesheet>cp-content.xsl</stylesheet>
-            </transformationSet>
-          </transformationSets>
-        </configuration>
-      </plugin>
-      <plugin>
-        <artifactId>maven-resources-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>copy-extra-iu</id>
-            <phase>verify</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${basedir}/target</outputDirectory>
-              <resources>
-                <resource>
-                  <directory>${basedir}/target/generated-resources/xml/xslt</directory>
-                  <includes>
-                    <include>p2content.xml</include>
-                  </includes>
-                </resource>
-              </resources>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
   </build>
 
