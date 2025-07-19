@@ -1,0 +1,134 @@
+Manifest-Version: 1.0
+Automatic-Module-Name: biz.aQute.repository
+Bundle-Copyright: Copyright (c) aQute SARL (2000, 2024) and others. Al
+ l Rights Reserved.
+Bundle-Developers: pkriens; email=Peter.Kriens@aQute.biz; name="Peter 
+ Kriens"; organization=Bndtools; organizationUrl=https://github.com/bn
+ dtools; roles="architect,developer"; timezone=1, bjhargrave; name="BJ
+  Hargrave"; email="bj@hargrave.dev"; url="https://github.com/bjhargra
+ ve"; organization="IBM"; organizationUrl="https://developer.ibm.com";
+  roles="developer"; timezone="America/New_York", rotty3000; name="Ray
+  Augé"; email="raymond.auge@liferay.com"; url="https://rotty3000.git
+ hub.io"; organization="Liferay Inc."; organizationUrl="https://www.li
+ feray.com"; roles="developer"; timezone="America/New_York"
+Bundle-DocURL: https://bnd.bndtools.org/
+Bundle-License: "(Apache-2.0 OR EPL-2.0)";description="This program an
+ d the accompanying materials are made available under the terms of th
+ e Apache License, Version 2.0, or the Eclipse Public License 2.0.";li
+ nk="https://opensource.org/licenses/Apache-2.0,https://opensource.org
+ /licenses/EPL-2.0"
+Bundle-ManifestVersion: 2
+Bundle-Name: biz.aQute.repository
+Bundle-SCM: url=https://github.com/bndtools/bnd,connection=scm:git:htt
+ ps://github.com/bndtools/bnd.git,developerConnection=scm:git:git@gith
+ ub.com:bndtools/bnd.git,tag=7.1.0
+Bundle-SymbolicName: biz.aQute.repository
+Bundle-Vendor: Bndtools https://bndtools.org/
+Bundle-Version: 7.1.0.202411251545
+Export-Package: aQute.p2.api;version="1.5.0";uses:="aQute.bnd.util.dto
+ ,org.osgi.framework",aQute.p2.export;version="1.0.0";bnd-plugins=true
+ ;uses:="aQute.bnd.annotation.plugin,aQute.bnd.build,aQute.bnd.osgi,aQ
+ ute.bnd.service.export",aQute.bnd.deployer.repository;version="5.1.0"
+ ;bnd-plugins=true;uses:="aQute.bnd.annotation.plugin,aQute.bnd.deploy
+ er.repository.api,aQute.bnd.osgi.repository,aQute.bnd.repository.osgi
+ ,aQute.bnd.service,aQute.bnd.service.progress,aQute.bnd.service.url,a
+ Qute.bnd.version,aQute.service.reporter,org.osgi.framework,org.osgi.r
+ esource,org.osgi.service.coordinator,org.osgi.service.log,org.osgi.se
+ rvice.repository",aQute.bnd.deployer.repository.api;version="2.0";use
+ s:="aQute.bnd.service,org.osgi.resource,org.osgi.service.log",aQute.b
+ nd.deployer.repository.providers;version="2.1";bnd-plugins=true;uses:
+ ="aQute.bnd.deployer.repository.api,aQute.bnd.service,org.osgi.servic
+ e.log",aQute.bnd.repository.maven.provider;version="2.1.0";bnd-plugin
+ s=true;uses:="aQute.bnd.annotation.plugin,aQute.bnd.build,aQute.bnd.o
+ sgi,aQute.bnd.osgi.repository,aQute.bnd.service,aQute.bnd.service.mav
+ en,aQute.bnd.service.release,aQute.bnd.util.dto,aQute.bnd.version,aQu
+ te.maven.api,aQute.service.reporter,org.osgi.resource",aQute.bnd.repo
+ sitory.p2.provider;version="1.5.0";bnd-plugins=true;uses:="aQute.bnd.
+ annotation.plugin,aQute.bnd.osgi.repository,aQute.bnd.service,aQute.b
+ nd.version,aQute.service.reporter,org.osgi.resource",aQute.bnd.reposi
+ tory.maven.pom.provider;version="2.2.0";bnd-plugins=true;uses:="aQute
+ .bnd.annotation.plugin,aQute.bnd.osgi.repository,aQute.bnd.service,aQ
+ ute.bnd.service.repository,aQute.bnd.version,aQute.maven.api,aQute.se
+ rvice.reporter,org.osgi.resource",aQute.bnd.repository.osgi;version="
+ 1.2.0";bnd-plugins=true;uses:="aQute.bnd.annotation.plugin,aQute.bnd.
+ osgi.repository,aQute.bnd.service,aQute.bnd.service.repository,aQute.
+ bnd.version,aQute.service.reporter,org.osgi.resource",aQute.bnd.repos
+ itory.fileset;version="1.1.0";bnd-plugins=true;uses:="aQute.bnd.osgi.
+ repository,aQute.bnd.service,aQute.bnd.version,aQute.service.reporter
+ ,org.osgi.resource",aQute.maven.api;version="1.8.0";uses:="aQute.bnd.
+ util.dto,aQute.bnd.version,aQute.maven.provider,org.osgi.util.promise
+ ",aQute.maven.dto;version="1.0";uses:="aQute.bnd.util.dto,aQute.bnd.v
+ ersion",aQute.maven.nexus.provider;version="1.5.0";uses:="aQute.bnd.h
+ ttp,aQute.bnd.result,aQute.bnd.service.url,aQute.bnd.util.dto,org.osg
+ i.dto",aQute.maven.provider;version="2.6";uses:="aQute.bnd.http,aQute
+ .bnd.service.url,aQute.bnd.util.dto,aQute.bnd.version,aQute.maven.api
+ ,aQute.service.reporter,org.osgi.util.promise,org.w3c.dom",aQute.bnd.
+ deployer.http;bnd-plugins=true;version="7.1.0",aQute.bnd.deployer.obr
+ ;bnd-plugins=true;version="7.1.0",aQute.bnd.deployer.repository.wrapp
+ er;bnd-plugins=true;version="7.1.0"
+Git-Descriptor: 7.0.0.DEV-1660-g47e504d78
+Git-SHA: 47e504d7881ba466703c55a8dca7b0578561582d
+Import-Package: aQute.bnd.annotation.plugin;version="[1.1,2)",aQute.bn
+ d.build;version="[4.6,5)",aQute.bnd.deployer.repository.api;version="
+ [2.0,3)",aQute.bnd.exceptions;version="[3.0,4)",aQute.bnd.filerepo;ve
+ rsion="[1.0,2)",aQute.bnd.header;version="[2.7,3)",aQute.bnd.http;ver
+ sion="[2.0,3)",aQute.bnd.maven;version="[3.5,4)",aQute.bnd.memoize;ve
+ rsion="[2.0,3)",aQute.bnd.osgi;version="[7.2,8)",aQute.bnd.osgi.repos
+ itory;version="[3.2,4)",aQute.bnd.osgi.resource;version="[5.1,6)",aQu
+ te.bnd.result;version="[2.0,3)",aQute.bnd.service;version="[4.9,5)",a
+ Qute.bnd.service.clipboard;version="[1.0,2)",aQute.bnd.service.export
+ ;version="[1.0,2)",aQute.bnd.service.maven;version="[1.0,2)",aQute.bn
+ d.service.progress;version="[1.3,1.4)",aQute.bnd.service.release;vers
+ ion="[1.0,2)",aQute.bnd.service.repository;version="[1.7,2)",aQute.bn
+ d.service.resource;version="[1.1,2)",aQute.bnd.service.tags;version="
+ [1.0,2)",aQute.bnd.service.url;version="[2.0,3)",aQute.bnd.stream;ver
+ sion="[1.4,2)",aQute.bnd.unmodifiable;version="[2.1,3)",aQute.bnd.uti
+ l.dto;version="[1.0,2)",aQute.bnd.util.repository;version="[2.1,3)",a
+ Qute.bnd.version;version="[2.3,3)",aQute.p2.api;version="[1.5,2)",aQu
+ te.service.reporter;version="[1.3,2)",javax.net.ssl,javax.xml.namespa
+ ce,javax.xml.parsers,javax.xml.stream,javax.xml.transform,javax.xml.x
+ path,org.osgi.dto;version="[1.0,2)",org.osgi.framework;version="[1.8,
+ 2)",org.osgi.resource;version="[1.0,2)",org.osgi.service.coordinator;
+ version="[1.0,2)",org.osgi.service.log;version="[1.3,2)",org.osgi.ser
+ vice.repository;version="[1.1,1.2)",org.osgi.util.function;version="[
+ 1.2,2)",org.osgi.util.promise;version="[1.2,2)",org.slf4j;version="[1
+ .7,2)",org.w3c.dom,org.xml.sax
+Private-Package: aQute.p2.provider;version="1.0.0",aQute.p2.packed,aQu
+ te.lib.collections;version="4.3.0",aQute.lib.converter;version="2.5.0
+ ",aQute.lib.date;version="1.0.0",aQute.lib.filter;version="1.2.0",aQu
+ te.lib.getopt;version="3.0.1",aQute.lib.hex;version="1.4.0",aQute.lib
+ .io;version="4.5.0",aQute.lib.justif;version="1.1.0",aQute.lib.string
+ s;version="1.12.0",aQute.lib.tag;version="1.5",aQute.lib.utf8properti
+ es;version="4.1.0",aQute.lib.xml;version="1.0.0",aQute.lib.zip;versio
+ n="1.3.0",aQute.libg.command;version="3.3.0",aQute.libg.cryptography;
+ version="1.3.0",aQute.libg.generics;version="1.0.1",aQute.libg.glob;v
+ ersion="1.6.0",aQute.libg.gzip;version="1.0.0",aQute.libg.reporter.sl
+ f4j;version="1.6.0",aQute.libg.uri;version="3.5.0",org.tukaani.xz,aQu
+ te.configurable;version="2.0.0",aQute.lib.base64;version="1.3.0",aQut
+ e.lib.fileset;version="3.3.0",aQute.lib.hierarchy;version="1.0.0",aQu
+ te.lib.markdown;version="3.2.0",aQute.lib.stringrover;version="1.2.0"
+ ,aQute.libg.qtokens;version="1.3.0",aQute.libg.reporter;version="1.5.
+ 1",aQute.libg.tuple;version="1.0",org.tukaani.xz.check,org.tukaani.xz
+ .common,org.tukaani.xz.delta,org.tukaani.xz.index,org.tukaani.xz.lz,o
+ rg.tukaani.xz.lzma,org.tukaani.xz.rangecoder,org.tukaani.xz.simple,aQ
+ ute.libg.ints;version="1.0.0"
+Provide-Capability: bnd.external.plugin;implementation="aQute.bnd.depl
+ oyer.repository.LocalIndexedRepo";bnd.external.plugin=LocalIndexedRep
+ o;parameters="aQute.bnd.deployer.repository.LocalIndexedRepo$Config",
+ bnd.external.plugin;implementation="aQute.bnd.repository.maven.pom.pr
+ ovider.BndPomRepository";bnd.external.plugin=BndPomRepository;paramet
+ ers="aQute.bnd.repository.maven.pom.provider.PomConfiguration",bnd.ex
+ ternal.plugin;implementation="aQute.bnd.repository.maven.provider.Mav
+ enBndRepository";bnd.external.plugin=MavenBndRepository;parameters="a
+ Qute.bnd.repository.maven.provider.Configuration",bnd.external.plugin
+ ;implementation="aQute.bnd.repository.maven.provider.MavenPlugin";bnd
+ .external.plugin=MavenPlugin;hide=true,bnd.external.plugin;implementa
+ tion="aQute.bnd.repository.osgi.OSGiRepository";bnd.external.plugin=O
+ SGiRepository;parameters="aQute.bnd.repository.osgi.OSGiRepository$Co
+ nfig",bnd.external.plugin;implementation="aQute.bnd.repository.p2.pro
+ vider.P2Repository";bnd.external.plugin="P2 Repo";parameters="aQute.b
+ nd.repository.p2.provider.P2Config",bnd.external.plugin;implementatio
+ n="aQute.p2.export.P2Exporter";bnd.external.plugin="p2.exporter"
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+SPDX-License-Identifier: (Apache-2.0 OR EPL-2.0)
+

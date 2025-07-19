@@ -1,0 +1,29 @@
+Manifest-Version: 1.0
+Bnd-LastModified: 1432153468214
+Bundle-Copyright: Copyright (c) OSGi Alliance (2000, 2015). All Rights R
+ eserved.
+Bundle-Description: OSGi Companion Code for org.osgi.service.repository 
+ Version 1.1.0.
+Bundle-Developers: osgi; email=info@osgi.org; name="OSGi Alliance"; orga
+ nization="OSGi Alliance"
+Bundle-DocURL: http://www.osgi.org/
+Bundle-License: http://opensource.org/licenses/apache2.0.php; link="http
+ ://www.apache.org/licenses/LICENSE-2.0"; description="Apache License, V
+ ersion 2.0"
+Bundle-ManifestVersion: 2
+Bundle-Name: org.osgi:org.osgi.service.repository
+Bundle-SCM: url=https://osgi.org/git/build.git, connection=scm:git:https
+ ://osgi.org/git/build.git, developerConnection=scm:git:https://osgi.org
+ /git/build.git
+Bundle-SymbolicName: org.osgi.service.repository
+Bundle-Vendor: OSGi Alliance http://www.osgi.org/
+Bundle-Version: 1.1.0.201505202024
+Created-By: 1.7.0_80 (Oracle Corporation)
+Export-Package: org.osgi.service.repository;version="1.1";uses:="org.osg
+ i.resource,org.osgi.util.promise"
+Git-Descriptor: hudson-build.cmpn-793
+Git-SHA: b0858c3b90a73ecc81055c7565fbbcbd4f76674e
+Import-Package: org.osgi.resource;version="[1.0,2)",org.osgi.util.promis
+ e;version="[1.0,2)"
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.5))"
+Tool: Bnd-2.4.1.201501161923

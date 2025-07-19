@@ -1,0 +1,42 @@
+Manifest-Version: 1.0
+Automatic-Module-Name: biz.aQute.bnd.util
+Bundle-Copyright: Copyright (c) aQute SARL (2000, 2024) and others. Al
+ l Rights Reserved.
+Bundle-Description: Util classes
+Bundle-Developers: pkriens; email=Peter.Kriens@aQute.biz; name="Peter 
+ Kriens"; organization=Bndtools; organizationUrl=https://github.com/bn
+ dtools; roles="architect,developer"; timezone=1, bjhargrave; name="BJ
+  Hargrave"; email="bj@hargrave.dev"; url="https://github.com/bjhargra
+ ve"; organization="IBM"; organizationUrl="https://developer.ibm.com";
+  roles="developer"; timezone="America/New_York", rotty3000; name="Ray
+  Augé"; email="raymond.auge@liferay.com"; url="https://rotty3000.git
+ hub.io"; organization="Liferay Inc."; organizationUrl="https://www.li
+ feray.com"; roles="developer"; timezone="America/New_York"
+Bundle-DocURL: https://bnd.bndtools.org/
+Bundle-License: "(Apache-2.0 OR EPL-2.0)";description="This program an
+ d the accompanying materials are made available under the terms of th
+ e Apache License, Version 2.0, or the Eclipse Public License 2.0.";li
+ nk="https://opensource.org/licenses/Apache-2.0,https://opensource.org
+ /licenses/EPL-2.0"
+Bundle-ManifestVersion: 2
+Bundle-Name: biz.aQute.bnd.util
+Bundle-SCM: url=https://github.com/bndtools/bnd,connection=scm:git:htt
+ ps://github.com/bndtools/bnd.git,developerConnection=scm:git:git@gith
+ ub.com:bndtools/bnd.git,tag=7.1.0
+Bundle-SymbolicName: biz.aQute.bnd.util
+Bundle-Vendor: Bndtools https://bndtools.org/
+Bundle-Version: 7.1.0.202411251545
+Export-Package: aQute.bnd.classfile;version="1.612.0",aQute.bnd.classf
+ ile.builder;version="1.611.0";uses:="aQute.bnd.classfile",aQute.bnd.c
+ lassfile.preview;version="0.610.0",aQute.bnd.exceptions;version="3.0.
+ 0",aQute.bnd.memoize;version="2.0.1",aQute.bnd.result;version="2.0.0"
+ ;uses:="aQute.bnd.exceptions",aQute.bnd.signatures;version="1.1.0",aQ
+ ute.bnd.stream;version="1.4.0",aQute.bnd.unmodifiable;version="2.1.0"
+Git-Descriptor: 7.0.0.DEV-1660-g47e504d78
+Git-SHA: 47e504d7881ba466703c55a8dca7b0578561582d
+Import-Package: aQute.bnd.exceptions;version="[3.0,4)"
+Private-Package: aQute.lib.io;version="4.5.0",aQute.lib.stringrover;ve
+ rsion="1.2.0",aQute.libg.glob;version="1.6.0"
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+SPDX-License-Identifier: (Apache-2.0 OR EPL-2.0)
+
