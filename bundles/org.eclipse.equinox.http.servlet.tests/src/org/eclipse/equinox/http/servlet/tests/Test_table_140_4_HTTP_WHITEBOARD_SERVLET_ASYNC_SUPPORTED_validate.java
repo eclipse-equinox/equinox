@@ -32,7 +32,6 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 public class Test_table_140_4_HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED_validate extends BaseTest {
 
-	@SuppressWarnings("serial")
 	@Test
 	public void test_table_140_4_HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED_validate() {
 		BundleContext context = getBundleContext();

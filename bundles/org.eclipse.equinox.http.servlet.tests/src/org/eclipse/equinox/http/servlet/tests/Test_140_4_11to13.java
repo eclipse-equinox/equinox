@@ -42,7 +42,6 @@ public class Test_140_4_11to13 extends BaseTest {
 
 		final AtomicBoolean invoked = new AtomicBoolean(false);
 
-		@SuppressWarnings("serial")
 		Servlet servlet = new HttpServlet() {
 
 			@Override

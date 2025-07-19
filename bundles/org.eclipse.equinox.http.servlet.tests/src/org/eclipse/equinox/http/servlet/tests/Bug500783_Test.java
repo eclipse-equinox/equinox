@@ -41,7 +41,6 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 public class Bug500783_Test extends BaseTest {
 
-	@SuppressWarnings("serial")
 	@Test
 	public void test() throws Exception {
 		BundleContext context = getBundleContext();
