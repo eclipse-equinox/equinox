@@ -16,23 +16,29 @@ package org.eclipse.osgi.internal.loader.classpath;
 
 import static org.eclipse.osgi.internal.debug.Debug.OPTION_DEBUG_LOADER;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import org.eclipse.osgi.container.Module;
 import org.eclipse.osgi.container.ModuleCapability;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
 import org.eclipse.osgi.container.ModuleRevision;
 import org.eclipse.osgi.container.ModuleWire;
+import org.eclipse.osgi.container.ModuleWiring;
 import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
 import org.eclipse.osgi.framework.util.ArrayMap;
 import org.eclipse.osgi.internal.debug.Debug;
@@ -471,6 +477,18 @@ public class ClasspathManager {
 		return null;
 	}
 
+	private static final String JAVA_SPI_PREFIX = "META-INF/services/";
+	/**
+	 * This represents a class that is mentioned a foreign bundle that was queried
+	 * with the SPI but is not imported anywhere, this is a bit like an implicit
+	 * "dynamic import class" that is possibly never exported.
+	 * 
+	 * For a real implementation This should include cleanups, or weak references.
+	 */
+	private final Map<String, Module> spiClassMap = new HashMap<>();
+
+
+
 	/**
 	 * Finds the local resources by searching the ClasspathEntry objects of the
 	 * classpath manager.
@@ -499,11 +517,64 @@ public class ClasspathManager {
 		for (FragmentClasspath fragCP : getFragmentClasspaths()) {
 			findLocalResources(resource, fragCP.getEntries(), m, classPathIndex, resources);
 		}
+		if (resource.startsWith(JAVA_SPI_PREFIX) && isServiceloaderInStack()) {
+			// Core framework SPI support:
+			// When resources are requested that start with META-INF/services/ then a
+			// service loader call is in progress
+			String typeName = resource.substring(JAVA_SPI_PREFIX.length());
+			System.out.println("Query Java SPI interfaces for " + typeName + " in bundle " + m.getBundle() + "...");
+			// First now lookup the type in the bundle for further checks...
+			try {
+				Class<?> spiClass = findLocalClass(typeName);
+				// Now we would need to find all bundles that import this type and are
+				// compatible with our classspace
+				for (Module other : m.getContainer().getModules()) {
+					if (other == m) {
+						continue;
+					}
+					ClasspathManager cpm = getClasspathManager(other);
+					if (cpm != null && isCompatible(other, spiClass)) {
+						URL url = cpm.findLocalResource(resource);
+						if (url != null) {
+							System.out.println("Adding resource from " + other.getBundle() + "...");
+							resources.add(url);
+							// Now we need to "learn" the classes that might be loaded due to we return this
+							// resource to the caller...
+							try (InputStream stream = url.openStream()) {
+								BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+								String spiProviderClassName;
+								while ((spiProviderClassName = reader.readLine()) != null) {
+									System.out.println(" --> " + spiProviderClassName);
+									spiClassMap.put(spiProviderClassName, other);
+								}
+							} catch (IOException e) {
+								// if anything goes wrong we can't use this...
+							}
+						}
+					}
+				}
+			} catch (ClassNotFoundException e) {
+				// Type is not found (what should not happen) so we can't do much here...
+			}
+		}
 
 		if (resources.size() > 0)
 			return Collections.enumeration(resources);
 		return Collections.emptyEnumeration();
 	}
+
+	private boolean isServiceloaderInStack() {
+		// TODO For demonstration purpose we always return true here, but a frameworks
+		// might check if there is really a serviceloader call in the current threads
+		// stack
+		return true;
+	}
+
+	private boolean isCompatible(Module m, Class<?> spiClass) {
+		// TODO for demonstration purpose we always return true here...
+		return true;
+	}
+
 
 	private void findLocalResources(String resource, ClasspathEntry[] cpEntries, Module m, int[] classPathIndex,
 			List<URL> resources) {
@@ -648,7 +719,33 @@ public class ClasspathManager {
 				return result;
 			}
 		}
+		// look in SPI
+		ClasspathManager foreign = getClasspathManager(spiClassMap.get(classname));
+		if (foreign != null && isServiceloaderInStack()) {
+			System.out.println("Loading class from foreign SPI Mapping... ");
+			try {
+				return foreign.findLocalClass(classname);
+			} catch (ClassNotFoundException suppressed) {
+				// if this does not work out return...
+			}
+		}
+		return null;
+	}
 
+	private ClasspathManager getClasspathManager(Module module) {
+		if (module != null) {
+			ModuleRevision revision = module.getCurrentRevision();
+			if (revision != null) {
+				ModuleWiring wiring = revision.getWiring();
+				if (wiring != null) {
+					ClassLoader loader = wiring.getClassLoader();
+					if (loader instanceof ModuleClassLoader) {
+						return ((ModuleClassLoader) loader).getClasspathManager();
+					}
+				}
+			}
+		}
+		// TODO Auto-generated method stub
 		return null;
 	}
 
