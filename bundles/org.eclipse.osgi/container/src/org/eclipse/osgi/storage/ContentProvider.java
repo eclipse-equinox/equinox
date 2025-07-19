@@ -33,7 +33,7 @@ public interface ContentProvider {
 
 	/**
 	 * A file of the content, may be {@code null}
-	 * 
+	 *
 	 * @return the file, may be {@code null}
 	 * @throws BundleException
 	 */
@@ -41,7 +41,7 @@ public interface ContentProvider {
 
 	/**
 	 * The type of content
-	 * 
+	 *
 	 * @return the type of content
 	 */
 	Type getType();

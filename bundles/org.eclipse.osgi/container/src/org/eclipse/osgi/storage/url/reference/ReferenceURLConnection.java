@@ -54,8 +54,9 @@ public class ReferenceURLConnection extends URLConnection {
 			File file = new File(path);
 
 			if (!file.isAbsolute()) {
-				if (installPath != null)
+				if (installPath != null) {
 					file = makeAbsolute(installPath, file);
+				}
 			}
 
 			file = LocationHelper.decodePath(file);
@@ -68,8 +69,9 @@ public class ReferenceURLConnection extends URLConnection {
 	}
 
 	private void checkRead(File file) throws IOException {
-		if (!file.exists())
+		if (!file.exists()) {
 			throw new FileNotFoundException(file.toString());
+		}
 		if (!Files.isReadable(file.toPath())) {
 			if (file.isFile()) {
 				// Try to open the file to ensure that this is possible: see bug 260217
@@ -89,8 +91,9 @@ public class ReferenceURLConnection extends URLConnection {
 				// directory),
 				// or if an IO error occurred during the listing of the files, including if the
 				// access is denied
-				if (files == null)
+				if (files == null) {
 					throw new FileNotFoundException(file.toString() + " (probably access denied)"); //$NON-NLS-1$
+				}
 			} else {
 				// TODO not sure if we can get here.
 			}
@@ -117,8 +120,9 @@ public class ReferenceURLConnection extends URLConnection {
 	}
 
 	private static File makeAbsolute(String base, File relative) {
-		if (relative.isAbsolute())
+		if (relative.isAbsolute()) {
 			return relative;
+		}
 		return new File(new FilePath(base + relative.getPath()).toString());
 	}
 }

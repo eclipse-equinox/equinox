@@ -268,8 +268,9 @@ public class ManifestElement {
 		if (result == null) {
 			return null;
 		}
-		if (result instanceof String)
+		if (result instanceof String) {
 			return (String) result;
+		}
 
 		@SuppressWarnings("unchecked")
 		List<String> valueList = (List<String>) result;
@@ -288,8 +289,9 @@ public class ManifestElement {
 		if (result == null) {
 			return null;
 		}
-		if (result instanceof String)
+		if (result instanceof String) {
 			return new String[] {(String) result};
+		}
 		@SuppressWarnings("unchecked")
 		List<String> valueList = (List<String>) result;
 		return valueList.toArray(new String[valueList.size()]);
@@ -299,8 +301,9 @@ public class ManifestElement {
 	 * Return an enumeration of table keys for the specified table.
 	 */
 	private Enumeration<String> getTableKeys(HashMap<String, Object> table) {
-		if (table == null)
+		if (table == null) {
 			return null;
+		}
 		return Collections.enumeration(table.keySet());
 	}
 
@@ -345,14 +348,16 @@ public class ManifestElement {
 	 * @throws BundleException if the header value is invalid
 	 */
 	public static ManifestElement[] parseHeader(String header, String value) throws BundleException {
-		if (value == null)
+		if (value == null) {
 			return (null);
+		}
 		List<ManifestElement> headerElements = new ArrayList<>(10);
 		Tokenizer tokenizer = new Tokenizer(value);
 		parseloop: while (true) {
 			String next = tokenizer.getString(";,"); //$NON-NLS-1$
-			if (next == null)
+			if (next == null) {
 				throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value), BundleException.MANIFEST_ERROR);
+			}
 			List<String> headerValues = new ArrayList<>();
 			StringBuilder headerValue = new StringBuilder(next);
 			headerValues.add(next);
@@ -362,19 +367,22 @@ public class ManifestElement {
 			// Header values may be a list of ';' separated values.  Just append them all into one value until the first '=' or ','
 			while (c == ';') {
 				next = tokenizer.getString(";,=:"); //$NON-NLS-1$
-				if (next == null)
+				if (next == null) {
 					throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value), BundleException.MANIFEST_ERROR);
+				}
 				c = tokenizer.getChar();
 				while (c == ':') { // may not really be a :=
 					c = tokenizer.getChar();
 					if (c != '=') {
 						String restOfNext = tokenizer.getToken(";,=:"); //$NON-NLS-1$
-						if (restOfNext == null)
+						if (restOfNext == null) {
 							throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value), BundleException.MANIFEST_ERROR);
+						}
 						next += ":" + c + restOfNext; //$NON-NLS-1$
 						c = tokenizer.getChar();
-					} else
+					} else {
 						directive = true;
+					}
 				}
 				if (c == ';' || c == ',' || c == '\0') /* more */ {
 					headerValues.add(next);
@@ -390,12 +398,14 @@ public class ManifestElement {
 					c = tokenizer.getChar();
 					if (c != '=') {
 						String restOfNext = tokenizer.getToken("=:"); //$NON-NLS-1$
-						if (restOfNext == null)
+						if (restOfNext == null) {
 							throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value), BundleException.MANIFEST_ERROR);
+						}
 						next += ":" + c + restOfNext; //$NON-NLS-1$
 						c = tokenizer.getChar();
-					} else
+					} else {
 						directive = true;
+					}
 				}
 				// determine if the attribute is the form attr:List<type>
 				String preserveEscapes = null;
@@ -408,14 +418,16 @@ public class ManifestElement {
 					}
 				}
 				String val = tokenizer.getString(";,", preserveEscapes); //$NON-NLS-1$
-				if (val == null)
+				if (val == null) {
 					throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value), BundleException.MANIFEST_ERROR);
+				}
 
 				try {
-					if (directive)
+					if (directive) {
 						manifestElement.addDirective(next, val);
-					else
+					} else {
 						manifestElement.addAttribute(next, val);
+					}
 					directive = false;
 				} catch (Exception e) {
 					throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value), BundleException.MANIFEST_ERROR, e);
@@ -423,21 +435,25 @@ public class ManifestElement {
 				c = tokenizer.getChar();
 				if (c == ';') /* more */ {
 					next = tokenizer.getToken("=:"); //$NON-NLS-1$
-					if (next == null)
+					if (next == null) {
 						throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value), BundleException.MANIFEST_ERROR);
+					}
 					c = tokenizer.getChar();
 				}
 			}
 			headerElements.add(manifestElement);
-			if (c == ',') /* another manifest element */
+			if (c == ',') { /* another manifest element */
 				continue parseloop;
-			if (c == '\0') /* end of value */
+			}
+			if (c == '\0') { /* end of value */
 				break parseloop;
+			}
 			throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value), BundleException.MANIFEST_ERROR);
 		}
 		int size = headerElements.size();
-		if (size == 0)
+		if (size == 0) {
 			return (null);
+		}
 
 		ManifestElement[] result = headerElements.toArray(new ManifestElement[size]);
 		return (result);
@@ -465,14 +481,16 @@ public class ManifestElement {
 	 * @since 3.2
 	 */
 	public static String[] getArrayFromList(String stringList, String separator) {
-		if (stringList == null || stringList.trim().length() == 0)
+		if (stringList == null || stringList.trim().length() == 0) {
 			return new String[0];
+		}
 		List<String> list = new ArrayList<>();
 		StringTokenizer tokens = new StringTokenizer(stringList, separator);
 		while (tokens.hasMoreTokens()) {
 			String token = tokens.nextToken().trim();
-			if (token.length() != 0)
+			if (token.length() != 0) {
 				list.add(token);
+			}
 		}
 		return list.toArray(new String[list.size()]);
 	}
@@ -485,7 +503,7 @@ public class ManifestElement {
 	 * <p>
 	 * The supplied input stream is consumed by this method and will be closed.
 	 * </p>
-	 * 
+	 *
 	 * @param manifest an input stream for a bundle manifest.
 	 * @throws BundleException if the manifest has an invalid syntax
 	 * @throws IOException     if an error occurs while reading the manifest
@@ -514,8 +532,9 @@ public class ManifestElement {
 	 * @return the map with the header/value pairs from the bundle manifest
 	 */
 	public static Map<String, String> parseBundleManifest(InputStream manifest, Map<String, String> headers) throws IOException, BundleException {
-		if (headers == null)
+		if (headers == null) {
 			headers = new HashMap<>();
+		}
 
 		manifest = new BufferedInputStream(manifest);
 		try {
@@ -605,8 +624,9 @@ public class ManifestElement {
 	public String toString() {
 		Enumeration<String> attrKeys = getKeys();
 		Enumeration<String> directiveKeys = getDirectiveKeys();
-		if (attrKeys == null && directiveKeys == null)
+		if (attrKeys == null && directiveKeys == null) {
 			return mainValue;
+		}
 		StringBuilder result = new StringBuilder(mainValue);
 		if (attrKeys != null) {
 			while (attrKeys.hasMoreElements()) {
@@ -624,12 +644,14 @@ public class ManifestElement {
 	}
 
 	private void addValues(boolean directive, String key, String[] values, StringBuilder result) {
-		if (values == null)
+		if (values == null) {
 			return;
+		}
 		for (String value : values) {
 			result.append(';').append(key);
-			if (directive)
+			if (directive) {
 				result.append(':');
+			}
 			result.append("=\"").append(value).append('\"'); //$NON-NLS-1$
 		}
 	}
