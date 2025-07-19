@@ -62,7 +62,6 @@ public class TestUpload extends BaseTest {
 		servletProps.put(HTTP_WHITEBOARD_SERVLET_MULTIPART_ENABLED, Boolean.TRUE);
 		servletProps.put(HTTP_WHITEBOARD_SERVLET_MULTIPART_MAXFILESIZE, 1024L);
 
-		@SuppressWarnings("serial")
 		final Servlet uploadServlet = new HttpServlet() {
 			@Override
 			protected void doPost(HttpServletRequest req, HttpServletResponse resp)

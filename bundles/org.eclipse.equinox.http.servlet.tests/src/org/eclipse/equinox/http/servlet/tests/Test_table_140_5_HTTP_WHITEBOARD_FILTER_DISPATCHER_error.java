@@ -68,7 +68,6 @@ public class Test_table_140_5_HTTP_WHITEBOARD_FILTER_DISPATCHER_error extends Ba
 		assertEquals(0, requestInfoDTO.filterDTOs.length);
 		assertEquals("a", requestAdvisor.request("a"));
 
-		@SuppressWarnings("serial")
 		MockServlet mockServlet = new MockServlet() {
 
 			@Override
