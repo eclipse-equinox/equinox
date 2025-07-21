@@ -4,11 +4,11 @@
 #
 # This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License 2.0
-# which accompanies this distribution, and is available at 
+# which accompanies this distribution, and is available at
 # https://www.eclipse.org/legal/epl-2.0/
 #
 # SPDX-License-Identifier: EPL-2.0
-# 
+#
 # Contributors:
 #     IBM Corporation - initial API and implementation
 #     Kevin Cornell (Rational Software Corporation)
@@ -44,10 +44,6 @@ defaultJava=DEFAULT_JAVA_JNI
 defaultJavaHome=""
 javaHome=""
 makefile=""
-if [ "${CC}" = "" ]; then
-	CC=cc
-	export CC
-fi
 
 # Parse the command line arguments and override the default values.
 extraArgs=""
@@ -115,8 +111,6 @@ case $defaultOS in
 	echo "Unknown OS -- build aborted"
 	;;
 esac
-export CC
-
 
 # Set up environment variables needed by the makefiles.
 PROGRAM_OUTPUT="$programOutput"
@@ -139,6 +133,14 @@ if [ $defaultOSArch = "ppc64le" ];  then
 	export M_ARCH
 fi
 
+originalCC="$CC"
+if [ $defaultOSArch = "aarch64" ] && [ "$(uname -m)" != "aarch64" ]; then
+    CC="aarch64-linux-gnu-gcc"
+elif [ "${CC}" = "" ]; then
+	CC=cc
+fi
+export CC
+
 if [ "$EXE_OUTPUT_DIR" = "" ]; then EXE_OUTPUT_DIR="$BINARIES_DIR/org.eclipse.equinox.executable/bin/$defaultWS/$defaultOS/$defaultOSArch"; fi
 if [ "$LIB_OUTPUT_DIR" = "" ]; then LIB_OUTPUT_DIR="$BINARIES_DIR/org.eclipse.equinox.launcher.$defaultWS.$defaultOS.$defaultOSArch"; fi
 
@@ -160,6 +162,7 @@ else
 	echo "Unknown OS $OS -- build aborted"
 fi
 
-#restore original JAVA_HOME
+#restore original JAVA_HOME and CC
 JAVA_HOME="$origJavaHome"
-export JAVA_HOME
+CC="$originalCC"
+export JAVA_HOME CC

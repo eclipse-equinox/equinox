@@ -21,21 +21,29 @@ SCRIPT=$( basename "${BASH_SOURCE[0]}" )
 # no libs other than ${ALLOWED_LIBS}
 ARCH=$1; shift
 FILE=$1; shift
-ALLOWED_GLIBC_VERSION=$1; shift
 ALLOWED_LIBS="$@"; shift
 
-if [[ "${ARCH}" != "x86_64" && "${ARCH}" != "aarch64" ]]; then
-    # We don't enforce max version and library sets on these architectures because
-    # 1. We build on native hardware for those platforms so we don't have
-    #    ability to use docker to adjust dependency versions as easily
-    # 2. The other platforms that are newer are generally faster moving
-    #    and it is less likely to break users to have harder version
-    #    requirements.
-    # As we get bigger user base on these architectures we should start enforcing
-    # upper bounds for them too.
-    echo "We do not enforce glibc version or library dependencies for ${ARCH} architecture so far. All good."
-    exit 0
-fi
+case "${ARCH}" in
+    x86_64)
+        ALLOWED_GLIBC_VERSION="2.7"
+        ;;
+    aarch64)
+        # glibc 2.17 gives us compatibility with RHEL 7 and Debian 8.
+        ALLOWED_GLIBC_VERSION="2.17"
+        ;;
+    *)
+        # We don't enforce max version and library sets on other architectures because
+        # 1. We build on native hardware for those platforms so we don't have
+        #    ability to use docker to adjust dependency versions as easily
+        # 2. The other platforms that are newer are generally faster moving
+        #    and it is less likely to break users to have harder version
+        #    requirements.
+        # As we get bigger user base on these architectures we should start enforcing
+        # upper bounds for them too.
+        echo "We do not enforce glibc version or library dependencies for ${ARCH} architecture so far. All good."
+        exit 0
+        ;;
+esac
 
 # Check for permitted libraries using `readelf -d` looking for shared
 # libraries that are listed as needed. e.g. lines like:
