@@ -1,0 +1,132 @@
+Manifest-Version: 1.0
+Automatic-Module-Name: aQute.libg
+Bundle-Copyright: Copyright (c) aQute SARL (2000, 2024) and others. Al
+ l Rights Reserved.
+Bundle-Description: A library to be statically linked. Contains many s
+ mall utilities. This bundle should not be installed in a framework, i
+ t is compile only.
+Bundle-Developers: pkriens; email=Peter.Kriens@aQute.biz; name="Peter 
+ Kriens"; organization=Bndtools; organizationUrl=https://github.com/bn
+ dtools; roles="architect,developer"; timezone=1, bjhargrave; name="BJ
+  Hargrave"; email="bj@hargrave.dev"; url="https://github.com/bjhargra
+ ve"; organization="IBM"; organizationUrl="https://developer.ibm.com";
+  roles="developer"; timezone="America/New_York", rotty3000; name="Ray
+  Augé"; email="raymond.auge@liferay.com"; url="https://rotty3000.git
+ hub.io"; organization="Liferay Inc."; organizationUrl="https://www.li
+ feray.com"; roles="developer"; timezone="America/New_York"
+Bundle-DocURL: https://bnd.bndtools.org/
+Bundle-License: "(Apache-2.0 OR EPL-2.0)";description="This program an
+ d the accompanying materials are made available under the terms of th
+ e Apache License, Version 2.0, or the Eclipse Public License 2.0.";li
+ nk="https://opensource.org/licenses/Apache-2.0,https://opensource.org
+ /licenses/EPL-2.0"
+Bundle-ManifestVersion: 2
+Bundle-Name: aQute.libg
+Bundle-SCM: url=https://github.com/bndtools/bnd,connection=scm:git:htt
+ ps://github.com/bndtools/bnd.git,developerConnection=scm:git:git@gith
+ ub.com:bndtools/bnd.git,tag=7.1.0
+Bundle-SymbolicName: aQute.libg
+Bundle-Vendor: Bndtools https://bndtools.org/
+Bundle-Version: 7.1.0.202411251545
+Export-Package: aQute.bnd.exceptions;version="3.0.0",aQute.configurabl
+ e;version="2.0.0",aQute.lib.annotations.setter;version="4.2.0",aQute.
+ lib.aspects;version="2.0.0";uses:="aQute.bnd.exceptions",aQute.lib.ba
+ se64;version="1.3.0",aQute.lib.bundles;version="5.0.1";uses:="org.osg
+ i.framework,org.osgi.framework.dto",aQute.lib.codec;version="1.0",aQu
+ te.lib.collections;version="4.3.0",aQute.lib.comparators;version="1.0
+ .0",aQute.lib.concurrent.serial;version="1.0";uses:="org.osgi.util.pr
+ omise",aQute.lib.concurrentinit;version="4.0",aQute.lib.config.proxy;
+ version="1.0",aQute.lib.consoleapp;version="4.0.4";uses:="aQute.lib.e
+ nv,aQute.lib.getopt",aQute.lib.converter;version="2.5.0",aQute.lib.da
+ ta;version="1.0.0",aQute.lib.date;version="1.0.0",aQute.lib.dot;versi
+ on="1.0.0",aQute.lib.env;version="3.2.0";uses:="aQute.libg.reporter,a
+ Qute.libg.sed,aQute.service.reporter",aQute.lib.exceptions;version="2
+ .4.0",aQute.lib.fileset;version="3.3.0",aQute.lib.filter;version="1.2
+ .0",aQute.lib.formatter;version="1.0.0",aQute.lib.getopt;version="3.0
+ .1";uses:="aQute.service.reporter",aQute.lib.hex;version="1.4.0",aQut
+ e.lib.hierarchy;version="1.0.0",aQute.lib.index;version="1.0",aQute.l
+ ib.inject;version="4.2.0";uses:="aQute.lib.converter",aQute.lib.io;ve
+ rsion="4.5.0";uses:="aQute.bnd.exceptions",aQute.lib.json;version="3.
+ 5.0";uses:="aQute.lib.converter",aQute.lib.justif;version="1.1.0",aQu
+ te.lib.link;version="4.3.0",aQute.lib.log2reporter;version="3.2.0";us
+ es:="aQute.libg.reporter",aQute.lib.manifest;version="1.0.0",aQute.li
+ b.markdown;version="3.2.0",aQute.lib.mavenpasswordobfuscator;version=
+ "4.0",aQute.lib.persistentmap;version="1.1.0",aQute.lib.properties;ve
+ rsion="3.2.0",aQute.lib.putjar;version="1.0",aQute.lib.redirect;versi
+ on="2.0.0";uses:="aQute.bnd.exceptions",aQute.lib.regex;version="1.0.
+ 0",aQute.lib.settings;version="1.3.0",aQute.lib.specinterface;version
+ ="1.0.0",aQute.lib.startlevel;version="1.0.0";uses:="org.osgi.framewo
+ rk,org.osgi.framework.launch",aQute.lib.stringrover;version="1.2.0",a
+ Qute.lib.strings;version="1.12.0",aQute.lib.tag;version="1.5",aQute.l
+ ib.utf8properties;version="4.1.0";uses:="aQute.service.reporter",aQut
+ e.lib.watcher;version="1.0.0",aQute.lib.xml;version="1.0.0";uses:="ja
+ vax.xml.parsers,javax.xml.stream,javax.xml.transform",aQute.lib.xmldt
+ oparser;version="1.0",aQute.lib.xpath;version="4.1";uses:="javax.xml.
+ xpath,org.w3c.dom",aQute.lib.zip;version="1.3.0";uses:="aQute.lib.hie
+ rarchy",aQute.libg.asn1;version="1.0",aQute.libg.cafs;version="1.0";u
+ ses:="aQute.libg.cryptography",aQute.libg.classdump;version="1.0",aQu
+ te.libg.classloaders;version="1.1.0",aQute.libg.clauses;version="1.0"
+ ;uses:="aQute.libg.log",aQute.libg.command;version="3.3.0";uses:="aQu
+ te.service.reporter",aQute.libg.cryptography;version="1.3.0";uses:="a
+ Qute.libg.tuple",aQute.libg.dtos;uses:="org.osgi.dto";version="7.1.0"
+ ,aQute.libg.fileiterator;version="1.0",aQute.libg.filelock;version="1
+ .0.0",aQute.libg.filters;version="1.0",aQute.libg.forker;version="1.0
+ ",aQute.libg.generics;version="1.0.1",aQute.libg.glob;version="1.6.0"
+ ,aQute.libg.gzip;version="1.0.0",aQute.libg.ints;version="1.0.0",aQut
+ e.libg.log;version="1.0",aQute.libg.map;version="1.4.0",aQute.libg.pa
+ rameters;version="1.1.0",aQute.libg.qtokens;version="1.3.0",aQute.lib
+ g.re;version="7.1.0",aQute.libg.remote;version="3.2.0",aQute.libg.rem
+ ote.sink;version="3.2.0";uses:="aQute.libg.remote",aQute.libg.remote.
+ source;version="3.2.0";uses:="aQute.libg.remote",aQute.libg.reporter;
+ version="1.5.1";uses:="aQute.service.reporter",aQute.libg.reporter.sl
+ f4j;version="1.6.0";uses:="aQute.libg.reporter,aQute.service.reporter
+ ,org.slf4j",aQute.libg.sax;version="1.0";uses:="javax.xml.transform,o
+ rg.xml.sax",aQute.libg.sax.filters;version="1.0";uses:="aQute.libg.sa
+ x,org.xml.sax",aQute.libg.sed;version="1.2.0";uses:="aQute.libg.repor
+ ter,aQute.service.reporter",aQute.libg.shacache;version="1.0.0",aQute
+ .libg.slf4j;version="1.0";uses:="org.slf4j",aQute.libg.tarjan;version
+ ="1.0",aQute.libg.tuple;version="1.0",aQute.libg.uri;version="3.5.0",
+ aQute.libg.xslt;version="1.0";uses:="javax.xml.transform",aQute.servi
+ ce.reporter;version="1.3.0"
+Git-Descriptor: 7.0.0.DEV-1660-g47e504d78
+Git-SHA: 47e504d7881ba466703c55a8dca7b0578561582d
+Import-Package: aQute.bnd.exceptions;version="[3.0,4)",
+ aQute.configurable;version="[2.0,3)",
+ aQute.lib.base64;version="[1.3,2)",
+ aQute.lib.bundles;version="[5.0,6)",
+ aQute.lib.collections;version="[4.3,5)",
+ aQute.lib.converter;version="[2.5,3)",
+ aQute.lib.date;version="[1.0,2)",
+ aQute.lib.env;version="[3.2,4)",
+ aQute.lib.fileset;version="[3.3,4)",
+ aQute.lib.getopt;version="[3.0,4)",
+ aQute.lib.hex;version="[1.4,2)",
+ aQute.lib.hierarchy;version="[1.0,2)",
+ aQute.lib.index;version="[1.0,2)",
+ aQute.lib.io;version="[4.5,5)",
+ aQute.lib.json;version="[3.5,4)",
+ aQute.lib.justif;version="[1.1,2)",
+ aQute.lib.markdown;version="[3.2,4)",
+ aQute.lib.settings;version="[1.3,2)",
+ aQute.lib.stringrover;version="[1.2,2)",
+ aQute.lib.strings;version="[1.12,2)",
+ aQute.lib.utf8properties;version="[4.1,5)",
+ aQute.lib.xml;version="[1.0,2)",
+ aQute.libg.command;version="[3.3,4)",
+ aQute.libg.cryptography;version="[1.3,2)",
+ aQute.libg.fileiterator;version="[1.0,2)",
+ aQute.libg.generics;version="[1.0,2)",
+ aQute.libg.glob;version="[1.6,2)",
+ aQute.libg.ints;version="[1.0,2)",
+ aQute.libg.log;version="[1.0,2)",
+ aQute.libg.parameters;version="[1.1,2)",
+ aQute.libg.qtokens;version="[1.3,2)",
+ aQute.libg.remote;version="[3.2,4)",
+ aQute.libg.reporter;version="[1.5,2)",
+ aQute.libg.sax;version="[1.0,2)",
+ aQute.libg.sed;version="[1.2,2)",
+ aQute.libg.tuple;version="[1.0,2)",
+ aQute.service.reporter;version="[1.3,2)"
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+SPDX-License-Identifier: (Apache-2.0 OR EPL-2.0)
+

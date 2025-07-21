@@ -4366,6 +4366,15 @@ public class TestModuleContainer extends AbstractTest {
 		assertNotMoreThanPermutationCreated(result, ResolutionReport::getSubstitutionPermutations, 20);
 	}
 
+	@Test
+	public void testInvalidRemoval() throws Exception {
+		System.out.println("TestModuleContainer.testInvalidRemoval()");
+		ResolutionReport result = resolveTestSet("set3");
+		// TODO get down permutation count!
+		assertSucessfulWith(result, 3);
+		assertNotMoreThanPermutationCreated(result, ResolutionReport::getSubstitutionPermutations, 2);
+	}
+
 	private ResolutionReport resolveTestSet(String name) throws Exception {
 		Enumeration<URL> entries = getBundle().findEntries("/test_files/containerTests/" + name, "*.MF", false);
 		Map<Long, String> manifests = new TreeMap<>();
