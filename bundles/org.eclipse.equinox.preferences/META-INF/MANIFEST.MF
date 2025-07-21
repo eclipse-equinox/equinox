@@ -13,8 +13,7 @@ Export-Package: org.eclipse.core.internal.preferences;x-friends:="org.eclipse.co
  org.eclipse.core.internal.preferences.exchange;x-friends:="org.eclipse.core.runtime",
  org.eclipse.core.runtime.preferences;version="3.6.0";uses:="org.eclipse.core.runtime,org.osgi.service.prefs"
 Bundle-ActivationPolicy: lazy; exclude:="org.eclipse.core.internal.preferences.exchange"
-Import-Package: org.eclipse.osgi.framework.log,
- org.eclipse.osgi.service.datalocation,
+Import-Package: org.eclipse.osgi.service.datalocation,
  org.eclipse.osgi.service.debug,
  org.eclipse.osgi.service.environment,
  org.eclipse.osgi.util,
