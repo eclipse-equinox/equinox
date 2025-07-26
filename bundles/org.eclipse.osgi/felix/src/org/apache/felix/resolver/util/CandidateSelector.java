@@ -22,8 +22,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-
+import org.apache.felix.resolver.Util;
 import org.osgi.resource.Capability;
+import org.osgi.resource.Requirement;
 
 public class CandidateSelector {
     protected final AtomicBoolean isUnmodifiable;
@@ -61,10 +62,16 @@ public class CandidateSelector {
         return unmodifiable.size() <= currentIndex;
     }
 
-    public Capability removeCurrentCandidate() {
+	public Capability removeCurrentCandidate(Requirement requirement) {
         Capability current = getCurrentCandidate();
         if (current != null) {
             currentIndex += 1;
+			if (getCurrentCandidate() == null && !Util.isOptional(requirement)) {
+				currentIndex -= 1;
+				throw new IllegalStateException(
+						"Only one candidate (" + current + ") is left and the requirement " + requirement
+								+ " is not optional!");
+			}
         }
         return current;
     }

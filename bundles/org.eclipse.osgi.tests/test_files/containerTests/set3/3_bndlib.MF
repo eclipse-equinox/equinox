@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: biz.aQute.bndlib
+Bundle-SymbolicName: biz.aQute.bndlib
+Bundle-Version: 7.1.0.202411251545
+Import-Package: aQute.bnd.exceptions;version="[3.0,4)",
+ aQute.bnd.result;version="[2.0,3)"

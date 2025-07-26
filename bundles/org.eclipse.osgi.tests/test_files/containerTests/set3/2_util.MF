@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: biz.aQute.bnd.util
+Bundle-SymbolicName: biz.aQute.bnd.util
+Bundle-Version: 7.1.0.202411251545
+Export-Package: aQute.bnd.exceptions;version="3.0.0",
+ aQute.bnd.result;version="2.0.0";uses:="aQute.bnd.exceptions"
+Import-Package: aQute.bnd.exceptions;version="[3.0,4)"

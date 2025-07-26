@@ -18,17 +18,37 @@
  */
 package org.apache.felix.resolver;
 
-import java.io.PrintStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.apache.felix.resolver.ResolverImpl.ResolveSession;
 import org.apache.felix.resolver.reason.ReasonException;
-import org.apache.felix.resolver.util.*;
+import org.apache.felix.resolver.util.CandidateSelector;
+import org.apache.felix.resolver.util.CopyOnWriteSet;
+import org.apache.felix.resolver.util.OpenHashMap;
+import org.apache.felix.resolver.util.OpenHashMapList;
+import org.apache.felix.resolver.util.OpenHashMapSet;
+import org.apache.felix.resolver.util.ShadowList;
 import org.osgi.framework.Version;
-import org.osgi.framework.namespace.*;
-import org.osgi.resource.*;
+import org.osgi.framework.namespace.HostNamespace;
+import org.osgi.framework.namespace.IdentityNamespace;
+import org.osgi.framework.namespace.PackageNamespace;
+import org.osgi.resource.Capability;
+import org.osgi.resource.Requirement;
+import org.osgi.resource.Resource;
+import org.osgi.resource.Wire;
+import org.osgi.resource.Wiring;
 import org.osgi.service.resolver.HostedCapability;
 import org.osgi.service.resolver.ResolutionException;
 import org.osgi.service.resolver.ResolveContext;
@@ -370,7 +390,7 @@ class Candidates
                                 case SUBSTITUTED:
                                 default:
                                     // Need to remove any substituted that comes before an exported candidate
-                                    candidates.removeCurrentCandidate();
+									candidates.removeCurrentCandidate(dependent);
                                     // continue to next candidate
                                     break;
                             }
@@ -716,7 +736,7 @@ class Candidates
     {
         CandidateSelector candidates = m_candidateMap.get(req);
         // Remove the conflicting candidate.
-        Capability cap = candidates.removeCurrentCandidate();
+		Capability cap = candidates.removeCurrentCandidate(req);
         if (candidates.isEmpty())
         {
             m_candidateMap.remove(req);
