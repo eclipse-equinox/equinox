@@ -30,35 +30,35 @@ import java.net.URL;
 public interface Location {
 	/**
 	 * Constant which defines the type value used for the eclipse home location
-	 * 
+	 *
 	 * @since 3.18
 	 */
 	public static final String ECLIPSE_HOME_LOCATION_TYPE = "eclipse.home.location"; //$NON-NLS-1$
 
 	/**
 	 * Constant which defines the type value used for the user area
-	 * 
+	 *
 	 * @since 3.18
 	 */
 	public static final String USER_AREA_TYPE = "osgi.user.area"; //$NON-NLS-1$
 
 	/**
 	 * Constant which defines the type value used for the configuration area
-	 * 
+	 *
 	 * @since 3.18
 	 */
 	public static final String CONFIGURATION_AREA_TYPE = "osgi.configuration.area"; //$NON-NLS-1$
 
 	/**
 	 * Constant which defines the type value used for the install area
-	 * 
+	 *
 	 * @since 3.18
 	 */
 	public static final String INSTALL_AREA_TYPE = "osgi.install.area"; //$NON-NLS-1$
 
 	/**
 	 * Constant which defines the type value used for the instance area
-	 * 
+	 *
 	 * @since 3.18
 	 */
 	public static final String INSTANCE_AREA_TYPE = "osgi.instance.area"; //$NON-NLS-1$
@@ -66,7 +66,7 @@ public interface Location {
 	/**
 	 * Constant which defines the service property used for a location to represent
 	 * its type
-	 * 
+	 *
 	 * @see #ECLIPSE_HOME_LOCATION_TYPE
 	 * @see #ECLIPSE_HOME_FILTER
 	 * @see #USER_AREA_TYPE
@@ -77,7 +77,7 @@ public interface Location {
 	 * @see #INSTALL_FILTER
 	 * @see #INSTANCE_AREA_TYPE
 	 * @see #INSTANCE_FILTER
-	 * 
+	 *
 	 * @since 3.18
 	 */
 	public static final String SERVICE_PROPERTY_TYPE = "type"; //$NON-NLS-1$
@@ -87,7 +87,7 @@ public interface Location {
 	 * its url as a {@link String} (using {@link URL#toExternalForm()}), as long as
 	 * the location is not set, this property will be missing, allowing consumers to
 	 * track {@link Location}s that are (not) set yet.
-	 * 
+	 *
 	 * @since 3.18
 	 */
 	public static final String SERVICE_PROPERTY_URL = "url"; //$NON-NLS-1$
@@ -96,7 +96,7 @@ public interface Location {
 	 * Constant which defines the service property used for a location to represent
 	 * its default url as a {@link String} (using {@link URL#toExternalForm()}), if
 	 * the location has no default url this property will be missing.
-	 * 
+	 *
 	 * @since 3.18
 	 */
 	public static final String SERVICE_PROPERTY_DEFAULT_URL = "defaultUrl"; //$NON-NLS-1$
@@ -204,6 +204,7 @@ public interface Location {
 	 * @throws IllegalStateException if the location's value is already set
 	 * @deprecated use {@link #set(URL, boolean)} instead.
 	 */
+	@Deprecated
 	public boolean setURL(URL value, boolean lock) throws IllegalStateException;
 
 	/**
