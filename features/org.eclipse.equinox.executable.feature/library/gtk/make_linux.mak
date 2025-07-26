@@ -45,7 +45,7 @@ PROGRAM_LIBRARY = $(PROGRAM_OUTPUT)_$(LIB_VERSION).so
 
 # 64 bit specific flag:
 ifeq ($(M_CFLAGS),)
-ifeq ($(DEFAULT_OS_ARCH),x86_64)
+ifneq ($(filter x86_64 aarch64,$(DEFAULT_OS_ARCH)),)
 # Bug 517013: Avoid using memcpy() to remain compatible with older glibc (not use these flags on 32bit.
 M_CFLAGS ?= -fno-builtin-memcpy -fno-builtin-memmove
 endif
@@ -78,7 +78,7 @@ GTK_LIBS = \
  -DGTK3_LIB="\"libgtk-3.so.0\"" -DGDK3_LIB="\"libgdk-3.so.0\"" \
  -DPIXBUF_LIB="\"libgdk_pixbuf-2.0.so.0\"" -DGOBJ_LIB="\"libgobject-2.0.so.0\"" \
  -DGIO_LIB="\"libgio-2.0.so.0\"" -DGLIB_LIB="\"libglib-2.0.so.0\""
-LFLAGS = ${M_ARCH} -shared -fpic -Wl,--export-dynamic 
+LFLAGS = ${M_ARCH} -shared -fpic -Wl,--export-dynamic
 GTK_CFLAGS := $(shell pkg-config --cflags gtk+-3.0)
 CFLAGS = ${M_CFLAGS} ${M_ARCH} -g -s -Wall\
 	-fpic \
@@ -142,25 +142,11 @@ $(DLL): $(DLL_OBJS) $(COMMON_OBJS)
 # on the widest range on Linuxes.
 # All other error handling regarding missing/problematic libraries
 # can be done at runtime.
-ifeq ($(DEFAULT_OS_ARCH),x86_64)
 PERMITTED_LIBRARIES=libc.so.6 libpthread.so.0 libdl.so.2
-PERMITTED_GLIBC_VERSION=2.7
 checklibs: all
 	$(info Verifying $(EXEC) $(DLL) have permitted dependencies)
-	./check_dependencies.sh $(EXEC) $(PERMITTED_GLIBC_VERSION) $(PERMITTED_LIBRARIES)
-	./check_dependencies.sh $(DLL) $(PERMITTED_GLIBC_VERSION) $(PERMITTED_LIBRARIES)
-else
-# We don't enforce max version and library sets on non-x86-64 because
-# 1. We build on native hardware for those platforms so we don't have
-#    ability to use docker to adjust dependency versions as easily
-# 2. The other platforms that are newer are generally faster moving
-#    and it is less likely to break users to have harder version
-#    requirements.
-# As we get bigger user base on non-x86-64 we should start enforcing
-# upper bounds for them too.
-checklibs: all
-endif
-
+	./check_dependencies.sh $(DEFAULT_OS_ARCH) $(EXEC) $(PERMITTED_LIBRARIES)
+	./check_dependencies.sh $(DEFAULT_OS_ARCH) $(DLL) $(PERMITTED_LIBRARIES)
 
 install: all
 	$(info Install into: EXE_OUTPUT_DIR:$(EXE_OUTPUT_DIR) LIB_OUTPUT_DIR:$(LIB_OUTPUT_DIR))
