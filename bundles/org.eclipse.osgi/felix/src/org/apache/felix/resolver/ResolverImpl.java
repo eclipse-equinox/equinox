@@ -548,6 +548,7 @@ public class ResolverImpl implements Resolver
     private void getInitialCandidates(ResolveSession session) {
         // Create object to hold all candidates.
         Candidates initialCandidates;
+		List<Resource> resources = new ArrayList<Resource>();
         if (session.isDynamic()) {
             // Create all candidates pre-populated with the single candidate set
             // for the resolving dynamic import of the host.
@@ -558,7 +559,6 @@ public class ResolverImpl implements Resolver
                 return;
             }
         } else {
-            List<Resource> toPopulate = new ArrayList<Resource>();
 
             // Populate mandatory resources; since these are mandatory
             // resources, failure throws a resolve exception.
@@ -566,7 +566,7 @@ public class ResolverImpl implements Resolver
             {
                 if (Util.isFragment(resource) || (session.getContext().getWirings().get(resource) == null))
                 {
-                    toPopulate.add(resource);
+                    resources.add(resource);
                 }
             }
             // Populate optional resources; since these are optional
@@ -575,12 +575,12 @@ public class ResolverImpl implements Resolver
             {
                 if (Util.isFragment(resource) || (session.getContext().getWirings().get(resource) == null))
                 {
-                    toPopulate.add(resource);
+                    resources.add(resource);
                 }
             }
 
             initialCandidates = new Candidates(session);
-            initialCandidates.populate(toPopulate);
+            initialCandidates.populate(resources);
         }
 
         // Merge any fragments into hosts.
@@ -591,6 +591,41 @@ public class ResolverImpl implements Resolver
         }
         else
         {
+			// For the initial permutation we must now reduce the problem once for all
+			// resources and all requirements, later we can do this incrementally when we
+			// permuted the problem
+			Candidates before = initialCandidates.copy();
+			List<Resource> removed = new ArrayList<>();
+			for (Resource resource : resources) {
+				List<Requirement> requirements = resource.getRequirements(null);
+				for (Requirement requirement : requirements) {
+					List<Candidates> removeUsesViolations = ProblemReduction
+							.removeInvalidPackageProvider(initialCandidates, requirement, m_logger);
+					if (removeUsesViolations.size() > 0) {
+						removed.add(resource);
+					}
+				}
+			}
+			for (Resource resource : removed) {
+				session.logger.debug("======================== Reduced " + Util.getSymbolicName(resource)
+						+ " =========================");
+				session.logger.logCandidates(resource, req -> {
+					List<Capability> list = before.getCandidates(req);
+					if (list == null) {
+						return Collections.emptyList();
+					}
+					return list;
+				});
+				session.logger.debug("-- to ---");
+				session.logger.logCandidates(resource, req -> {
+					List<Capability> list = initialCandidates.getCandidates(req);
+					if (list == null) {
+						return Collections.emptyList();
+					}
+					return list;
+				});
+			}
+			session.logger.debug("======================== Start permutations =========================");
             // Record the initial candidate permutation.
             session.addPermutation(PermutationType.USES, initialCandidates);
         }
