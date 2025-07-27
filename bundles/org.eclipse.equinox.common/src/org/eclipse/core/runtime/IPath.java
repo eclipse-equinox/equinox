@@ -15,6 +15,8 @@
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
+import java.io.Serializable;
+
 /**
  * A path is an ordered collection of string segments, separated by a standard
  * separator character, "/". A path may also have a leading and/or a trailing
@@ -24,7 +26,7 @@ package org.eclipse.core.runtime;
  * independent path has <code>null</code> for a device id.
  * <p>
  * Note that paths are value objects; all operations on paths return a new path;
- * the path that is operated on is unscathed.
+ * the path that is operated on is unchanged.
  * </p>
  * <p>
  * UNC paths are denoted by leading double-slashes such as
@@ -43,7 +45,7 @@ package org.eclipse.core.runtime;
  * @noextend This interface is not intended to be extended by clients.
  * @noimplement This interface is not intended to be implemented by clients.
  */
-public interface IPath extends Cloneable {
+public interface IPath extends Cloneable, Serializable {
 
 	/**
 	 * Path separator character constant "/" used in paths.
