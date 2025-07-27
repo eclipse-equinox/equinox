@@ -36,15 +36,7 @@
          version="0.0.0"/>
 
    <includes
-         id="org.eclipse.equinox.server.core.source"
-         version="0.0.0"/>
-
-   <includes
          id="org.eclipse.equinox.server.jetty"
-         version="0.0.0"/>
-
-   <includes
-         id="org.eclipse.equinox.server.jetty.source"
          version="0.0.0"/>
 
    <requires>
@@ -56,15 +48,7 @@
          version="0.0.0"/>
 
    <plugin
-         id="org.eclipse.equinox.http.servletbridge.source"
-         version="0.0.0"/>
-
-   <plugin
          id="org.eclipse.equinox.jsp.jasper"
-         version="0.0.0"/>
-
-   <plugin
-         id="org.eclipse.equinox.jsp.jasper.source"
          version="0.0.0"/>
 
    <plugin
@@ -72,15 +56,7 @@
          version="0.0.0"/>
 
    <plugin
-         id="org.eclipse.equinox.jsp.jasper.registry.source"
-         version="0.0.0"/>
-
-   <plugin
          id="org.eclipse.equinox.servletbridge"
-         version="0.0.0"/>
-
-   <plugin
-         id="org.eclipse.equinox.servletbridge.source"
          version="0.0.0"/>
 
 </feature>
