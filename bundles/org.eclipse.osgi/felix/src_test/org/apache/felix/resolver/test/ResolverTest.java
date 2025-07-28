@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.felix.resolver.Logger;
+import org.apache.felix.resolver.Packages;
 import org.apache.felix.resolver.ResolverImpl;
 import org.apache.felix.resolver.test.util.BundleCapability;
 import org.apache.felix.resolver.test.util.BundleRequirement;
@@ -834,20 +835,20 @@ public class ResolverTest
 
         Capability cap = Mockito.mock(Capability.class);
         assertEquals(Collections.emptySet(),
-                m.invoke(null, cap, new HashMap<Resource, ResolverImpl.Packages>()));
+                m.invoke(null, cap, new HashMap<Resource, Packages>()));
 
         Capability cap2 = Mockito.mock(Capability.class);
         Resource res2 = Mockito.mock(Resource.class);
         Mockito.when(cap2.getResource()).thenReturn(res2);
-        Map<Resource, ResolverImpl.Packages> map2 = new HashMap<Resource, ResolverImpl.Packages>();
-        map2.put(res2, new ResolverImpl.Packages(res2));
+        Map<Resource, Packages> map2 = new HashMap<Resource, Packages>();
+        map2.put(res2, new Packages(res2));
         assertEquals(Collections.emptySet(), m.invoke(null, cap2, map2));
 
         Capability cap3 = Mockito.mock(Capability.class);
         Resource res3 = Mockito.mock(Resource.class);
         Mockito.when(cap3.getResource()).thenReturn(res3);
-        Map<Resource, ResolverImpl.Packages> map3 = new HashMap<Resource, ResolverImpl.Packages>();
-        ResolverImpl.Packages pkgs3 = new ResolverImpl.Packages(res3);
+        Map<Resource, Packages> map3 = new HashMap<Resource, Packages>();
+        Packages pkgs3 = new Packages(res3);
         Set<Capability> srcCaps3 = Collections.singleton(Mockito.mock(Capability.class));
         Map<Capability, Set<Capability>> srcMap3 = Collections.singletonMap(
                 cap3, srcCaps3);
