@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: aQute.libg
+Bundle-SymbolicName: aQute.libg
+Bundle-Version: 7.1.0.202411251545
+Export-Package: aQute.bnd.exceptions;version="3.0.0"
+Import-Package: aQute.bnd.exceptions;version="[3.0,4)"

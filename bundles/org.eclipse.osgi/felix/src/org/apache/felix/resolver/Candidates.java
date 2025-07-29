@@ -728,6 +728,69 @@ class Candidates
         return null;
     }
 
+	public boolean isSubstitutionPackage(Requirement req) {
+		CandidateSelector candidates = m_candidateMap.get(req);
+		if (candidates == null) {
+			return false;
+		}
+		return candidates.isSubstitutionPackage();
+	}
+
+	/**
+	 * In case of substitution packages we need to be able to discard a capability
+	 * from all candidate lists if we choose to use the import over the export.
+	 * @param capability the package capability to drop
+	 */
+
+	public void discardExportPackageCapability(Capability capability) {
+		if (Util.isExportedPackage(capability)) {
+			Collection<Requirement> dependent = m_dependentMap.get(capability);
+			if (dependent == null || dependent.isEmpty()) {
+				return;
+			}
+			for (Requirement requirement : dependent) {
+				CandidateSelector candidates = m_candidateMap.get(requirement);
+				Capability current = candidates.getCurrentCandidate();
+				if (current == capability) {
+					candidates.removeCurrentCandidate();
+				} else {
+					List<Capability> remaining = new ArrayList<Capability>(candidates.getRemainingCandidates());
+					if (remaining.remove(capability)) {
+						if (remaining.isEmpty()) {
+							m_candidateMap.remove(requirement);
+						} else {
+							m_candidateMap.put(requirement,
+									candidates.copyWith(remaining));
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * In case of substitution packages we need to take a decision if the internal
+	 * or external binding is used. If the internal one is chosen, then no other
+	 * providers are to be selected for this package and we can remove them to
+	 * prevent further permutation.
+	 * @param req the requirement to clear from other providers
+	 * @return
+	 */
+
+	public CandidateSelector dropOtherCandidates(Requirement req) {
+		// this is a special case where we need to completely replace the
+		// CandidateSelector
+		// this method should never be called from normal Candidates permutations
+		CandidateSelector candidates = m_candidateMap.get(req);
+		Capability currentCandidate = candidates.getCurrentCandidate();
+		if (currentCandidate == null) {
+			return candidates;
+		}
+		candidates = candidates.copyWith(Collections.singletonList(currentCandidate));
+		m_candidateMap.put(req, candidates);
+		return candidates;
+	}
+
     public Capability getFirstCandidate(Requirement req)
     {
         CandidateSelector candidates = m_candidateMap.get(req);
@@ -740,6 +803,8 @@ class Candidates
 
     public Capability removeFirstCandidate(Requirement req)
     {
+		// TODO if a candidate is removed that is a substitution package we must make
+		// sure to drop the provided export eventually!?
         CandidateSelector candidates = m_candidateMap.get(req);
         // Remove the conflicting candidate.
         Capability cap = candidates.removeCurrentCandidate();
@@ -1184,17 +1249,47 @@ class Candidates
 
     public Candidates permutate(Requirement req)
     {
-        if (!Util.isMultiple(req) && canRemoveCandidate(req))
-        {
-            Candidates perm = copy();
+		if (SubstitutionPackages.USE_LEGACY_SUBSTITUTION_PACKAGES) {
+			if (!Util.isMultiple(req) && canRemoveCandidate(req)) {
+				Candidates perm = copy();
+				Capability removed = perm.removeFirstCandidate(req);
+				if (FILTER_USES) {
+					ProblemReduction.removeUsesViolations(perm, req, m_session.getLogger());
+				}
+				return perm;
+			}
+			return null;
+		} else {
+			Candidates perm = copy();
             Capability removed = perm.removeFirstCandidate(req);
-            if (FILTER_USES) {
-                    ProblemReduction.removeUsesViolations(perm, req, m_session.getLogger());
-            }
+			if (perm.m_candidateMap.get(req) == null) {
+				return null;
+			}
             return perm;
-        }
-        return null;
+		}
     }
+
+	public List<Candidates> process(Logger logger) {
+		if (SubstitutionPackages.USE_LEGACY_SUBSTITUTION_PACKAGES) {
+			return Collections.emptyList();
+		}
+		// we now need to do two steps:
+		// 1) resolve substitutions either to internal or external
+		// 2) remove violating package providers
+		List<Candidates> alternatives = new ArrayList<>();
+		for (Requirement requirement : m_candidateMap.keySet()) {
+			if (requirement == null) {
+				continue;
+			}
+			Candidates candidates = SubstitutionPackages.resolve(this, requirement, logger);
+			if (candidates != null) {
+				alternatives.add(candidates);
+			}
+			List<Candidates> invalidPackageProvider = ProblemReduction.removeInvalidPackageProvider(this, requirement,
+					logger);
+		}
+		return alternatives;
+	}
 
     public boolean canRemoveCandidate(Requirement req)
     {

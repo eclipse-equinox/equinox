@@ -1,0 +1,24 @@
+Manifest-Version: 1.0
+Created-By: Apache Maven Bundle Plugin 5.1.9
+Build-Jdk-Spec: 21
+Bundle-Description: The slf4j API
+Bundle-DocURL: http://www.slf4j.org
+Bundle-License: https://opensource.org/license/mit
+Bundle-ManifestVersion: 2
+Bundle-Name: SLF4J API Module
+Bundle-SymbolicName: slf4j.api
+Bundle-Vendor: SLF4J.ORG
+Bundle-Version: 2.0.17
+Export-Package: org.slf4j;uses:="org.slf4j.event,org.slf4j.helpers,org.s
+ lf4j.spi";version="2.0.17",org.slf4j.event;uses:="org.slf4j,org.slf4j.h
+ elpers";version="2.0.17",org.slf4j.helpers;uses:="org.slf4j,org.slf4j.e
+ vent,org.slf4j.spi";version="2.0.17",org.slf4j.spi;uses:="org.slf4j,org
+ .slf4j.event,org.slf4j.helpers";version="2.0.17",org.slf4j;version="1.7
+ .36",org.slf4j.helpers;version="1.7.36"
+Implementation-Title: slf4j-api
+Implementation-Version: 2.0.17
+Import-Package: org.slf4j.spi;version="[2.0.17,3)"
+Tool: Bnd-6.3.1.202206071316
+X-Compile-Source-JDK: 8
+X-Compile-Target-JDK: 8
+
