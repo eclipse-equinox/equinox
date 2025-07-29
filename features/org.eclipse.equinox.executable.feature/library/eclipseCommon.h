@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2024 IBM Corporation and others.
+ * Copyright (c) 2006, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -55,7 +55,6 @@
 #define SKIP_OLD_ARGS      _T_ECLIPSE("--launcher.skipOldUserArgs")
 
 #define XXPERMGEN          _T_ECLIPSE("-XX:MaxPermSize=")
-#define ADDMODULES         _T_ECLIPSE("--add-modules")
 #define ACTION_OPENFILE    _T_ECLIPSE("openFile")
 #define GTK_VERSION        _T_ECLIPSE("--launcher.GTK_version")
 

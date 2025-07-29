@@ -1023,46 +1023,6 @@ static _TCHAR** mergeConfigurationFilesVMArgs() {
 	return concatArgs(configVMArgs, userLauncherIniVMArgs);
 }
 
-static void adjustVMArgs(_TCHAR *javaVM, _TCHAR *jniLib, _TCHAR **vmArgv[]) {
-	/* JVMs whose version is >= 9 need an extra VM argument (--add-modules) to start eclipse but earlier versions
-	 * do not recognize this argument, remove it from the list of VM arguments when the JVM version is below 9 */
-
-	int i = 0;
-
-#ifdef MACOSX
-	if (!skipJava9ParamRemoval && !isModularVM(javaVM, jniLib)) {
-#else
-	if (!isModularVM(javaVM, jniLib)) {
-#endif
-		while ((*vmArgv)[i] != NULL) {
-			if (_tcsncmp((*vmArgv)[i], ADDMODULES, _tcslen(ADDMODULES)) == 0) {
-				int j = 0, k = 0;
-
-				if ((_tcschr((*vmArgv)[i], '=') != NULL) && ((*vmArgv)[i][13] == '=')) {
-					/* --add-modules=<value> */
-					j = i + 1;
-				} else if (_tcslen(ADDMODULES) == _tcslen((*vmArgv)[i])) {
-					/* --add-modules <value> OR --add-modules <end-of-vmArgv> */
-					((*vmArgv)[i + 1] != NULL) ? (j = i + 2) : (j = i + 1);
-				} else {
-					/* Probable new argument e.g. --add-modules-if-required or misspelled argument e.g. --add-modulesq */
-					i++;
-					continue;
-				}
-
-				/* shift all remaining arguments, but keep i, so that we can find repeated occurrences of --add-modules */
-				k = i;
-				(*vmArgv)[k] = (*vmArgv)[j];
-				while ((*vmArgv)[j] != NULL) {
-					(*vmArgv)[++k] = (*vmArgv)[++j];
-				}
-			} else {
-				i++;
-			}
-		}
-	}
-}
-
 /*
  * Get the command and arguments to start the Java VM.
  *
@@ -1087,8 +1047,6 @@ static void getVMCommand( int launchMode, int argc, _TCHAR* argv[], _TCHAR **vmA
 
 	/* If the user specified "-vmargs", add them instead of the default VM args. */
 	vmArg = (userVMarg != NULL) ? userVMarg : getArgVM( (launchMode == LAUNCH_JNI) ? jniLib : javaVM );
-
-	adjustVMArgs(javaVM, jniLib, &vmArg);
 
  	/* Calculate the number of VM arguments. */
  	while (vmArg[ nVMarg ] != NULL)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -46,7 +46,6 @@ char *findCommand(char *command);
 char*  defaultVM     = "java";
 char*  vmLibrary	 = "JavaVM";
 char*  shippedVMDir  = "../../jre/Contents/Home/bin/"; // relative to launcher
-int isModularJVM = 0;
 
 static void adjustLibraryPath(char * vmLibrary);
 static char * findLib(char * command);
@@ -324,47 +323,6 @@ char** getArgVM( char* vm )
 	return result;
 }
 
-/* set isModularJVM to 1 if the JVM version is >= 9, 0 otherwise */
-void checkJavaVersion(char* command) {
-	FILE *fp;
-	char buffer[4096];
-	char *version = NULL, *firstChar;
-    int numChars = 0;
-	sprintf(buffer,"%s -version 2>&1", command);
-	fp = popen(buffer, "r");
-	if (fp == NULL) {
-		return;
-	}
-	while (fgets(buffer, sizeof(buffer)-1, fp) != NULL) {
-		if (!version) {
-			firstChar = (char *) (strchr(buffer, '"') + 1);
-			if (firstChar != NULL)
-				numChars = (int)  (strrchr(buffer, '"') - firstChar);
-
-			/* Allocate a buffer and copy the version string into it. */
-			if (numChars > 0)
-			{
-				version = malloc( numChars + 1 );
-				strncpy(version, firstChar, numChars);
-				version[numChars] = '\0';
-			}
-		}
-		if (version != NULL) {
-			char *str = version;
-			/* According to the new Java version-string scheme, the first element is
-			 * the major version number, details at http://openjdk.java.net/jeps/223 */
-			char *majorVersion = strtok(str, ".-");
-			if (majorVersion != NULL && (strtol(majorVersion, NULL, 10) >= 9)) {
-				isModularJVM = 1;
-			}
-			free(version);
-		}
-		break;
-	}
-	pclose(fp);
-	return;
-}
-
 char * getJavaHome() {
 	FILE *fp;
 	char path[4096];
@@ -427,8 +385,6 @@ char * findVMLibrary( char* command ) {
 			return NULL;
 		}
 	}
-	// This is necessary to initialize isModularJVM
-	checkJavaVersion(cmd);
 	result = JAVA_FRAMEWORK;
 	if (strstr(cmd, "/JavaVM.framework/") == NULL) {
 		char * lib = findLib(cmd);
@@ -629,10 +585,6 @@ void processVMArgs(char **vmargs[] )
 		_stprintf( c, APP_ICON_PATTERN, pid );
 		setenv(c, icon, 1);
 	}
-}
-
-int isModularVM( _TCHAR * javaVM, _TCHAR * jniLib ) {
-	return isModularJVM;
 }
 
 NSString* getApplicationSupport() {
