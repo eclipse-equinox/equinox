@@ -148,9 +148,6 @@ public class ResolverImpl implements Resolver
             try
             {
                 getInitialCandidates(session);
-                if (session.getCurrentError() != null) {
-                    throw session.getCurrentError().toException();
-                }
 
                 Map<Resource, ResolutionError> faultyResources = new HashMap<Resource, ResolutionError>();
                 Candidates allCandidates = findValidCandidates(session, faultyResources);
@@ -223,7 +220,7 @@ public class ResolverImpl implements Resolver
         return wireMap;
     }
 
-    private void getInitialCandidates(ResolveSession session) {
+    private void getInitialCandidates(ResolveSession session) throws ResolutionException {
         // Create object to hold all candidates.
         Candidates initialCandidates;
         if (session.isDynamic()) {
@@ -232,8 +229,7 @@ public class ResolverImpl implements Resolver
             initialCandidates = new Candidates(session);
             ResolutionError prepareError = initialCandidates.populateDynamic();
             if (prepareError != null) {
-                session.setCurrentError(prepareError);
-                return;
+                throw prepareError.toException();
             }
         } else {
             List<Resource> toPopulate = new ArrayList<Resource>();
@@ -265,7 +261,7 @@ public class ResolverImpl implements Resolver
         ResolutionError prepareError = initialCandidates.prepare();
         if (prepareError != null)
         {
-            session.setCurrentError(prepareError);
+            throw prepareError.toException();
         }
         else
         {
