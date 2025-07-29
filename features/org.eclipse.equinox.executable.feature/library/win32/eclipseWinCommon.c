@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2009 IBM Corporation and others.
+ * Copyright (c) 2006, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -37,7 +37,7 @@ static int initialized = 0;
 void displayMessage( _TCHAR* title, _TCHAR* message )
 {
 	if(!initialized)
-		initWindowSystem(0, NULL, 0);
+		initWindowSystem(0, NULL);
 	MessageBox( topWindow, message, title, MB_OK );
 }
 
@@ -48,7 +48,7 @@ void displayMessage( _TCHAR* title, _TCHAR* message )
  * Return the window handle as the data for the splash command.
  *
  */
-int initWindowSystem( int* pArgc, _TCHAR* argv[], int showSplash )
+int initWindowSystem( int* pArgc, _TCHAR* argv[] )
 {
 	HINSTANCE module = GetModuleHandle(NULL);
 	HICON icon = NULL;

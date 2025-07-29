@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -541,7 +541,7 @@ static int _run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
    	 * graphics.  On Mac, we need it initialized to get the dock icon properly, so always do
    	 * it now.
    	 */
-    initWindowSystem( &argc, argv, !noSplash );
+    initWindowSystem( &argc, argv );
 #elif _WIN32
     /*fix the DLL search path for security */
     fixDLLSearchPath();
@@ -620,7 +620,7 @@ static int _run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
     if ((!suppressErrors) && (!noSplash)) {
 	char *display = getenv("DISPLAY");
         if (display != NULL) {
-            initWindowSystem( &argc, argv, 1);
+            initWindowSystem( &argc, argv);
         }
     }
 #endif

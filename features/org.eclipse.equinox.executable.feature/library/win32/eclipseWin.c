@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -200,7 +200,7 @@ int reuseWorkbench(_TCHAR** filePath, int timeout) {
 	} 
 	
 	/* no window, set a timer to look again later */
-	if (initWindowSystem(0, NULL, 0) == 0)
+	if (initWindowSystem(0, NULL) == 0)
 		SetTimer( topWindow, findWindowTimerId, findWindowTimeout, findWindowProc );
 	
 	return 0;
@@ -307,7 +307,7 @@ int showSplash( const _TCHAR* featureImage )
 	/* if Java was started first and is calling back to show the splash, we might not
 	 * have initialized the window system yet
 	 */
-	initWindowSystem(0, NULL, 1);
+	initWindowSystem(0, NULL);
 	
     /* fetch screen DPI and round it according to the swt.autoScale setting, 
     this implementation needs to be kept in sync with org.eclipse.swt.internal.DPIUtil#setDeviceZoom(int) */

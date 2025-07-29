@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2016 IBM Corporation and others.
+ * Copyright (c) 2006, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -38,7 +38,7 @@ void displayMessage(char* title, char* message)
 	GtkWidget* dialog;
 	
     /* If GTK has not been initialized yet, do it now. */
-    if (initWindowSystem( &saveArgc, saveArgv, 1 ) != 0) {
+    if (initWindowSystem( &saveArgc, saveArgv) != 0) {
 		printf("%s:\n%s\n", title, message);
     	return;
     }
@@ -79,7 +79,7 @@ void displayMessage(char* title, char* message)
 }
 
 /* Initialize the Window System */
-int initWindowSystem(int* pArgc, char* argv[], int showSplash)
+int initWindowSystem(int* pArgc, char* argv[])
 {
 	int defaultArgc = 1;
 	char * defaultArgv [] = { "", 0 };
