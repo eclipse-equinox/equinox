@@ -147,13 +147,10 @@ public class ResolverImpl implements Resolver
             retry = false;
             try
             {
-                getInitialCandidates(session);
-                if (session.getCurrentError() != null) {
-                    throw session.getCurrentError().toException();
-                }
+                Candidates initialCandidates = getInitialCandidates(session);
 
                 Map<Resource, ResolutionError> faultyResources = new HashMap<Resource, ResolutionError>();
-                Candidates allCandidates = findValidCandidates(session, faultyResources);
+                Candidates allCandidates = findValidCandidates(session, faultyResources, initialCandidates);
                 session.checkForCancel();
 
                 // If there is a resolve exception, then determine if an
@@ -223,7 +220,7 @@ public class ResolverImpl implements Resolver
         return wireMap;
     }
 
-    private void getInitialCandidates(ResolveSession session) {
+    private Candidates getInitialCandidates(ResolveSession session) throws ResolutionException {
         // Create object to hold all candidates.
         Candidates initialCandidates;
         if (session.isDynamic()) {
@@ -233,7 +230,7 @@ public class ResolverImpl implements Resolver
             ResolutionError prepareError = initialCandidates.populateDynamic();
             if (prepareError != null) {
                 session.setCurrentError(prepareError);
-                return;
+                throw prepareError.toException();
             }
         } else {
             List<Resource> toPopulate = new ArrayList<Resource>();
@@ -266,27 +263,17 @@ public class ResolverImpl implements Resolver
         if (prepareError != null)
         {
             session.setCurrentError(prepareError);
+            throw prepareError.toException();
         }
-        else
-        {
-            // Record the initial candidate permutation.
-            session.addPermutation(PermutationType.USES, initialCandidates);
-        }
+        return initialCandidates;
     }
 
-    private Candidates findValidCandidates(ResolveSession session, Map<Resource, ResolutionError> faultyResources) {
-        Candidates allCandidates = null;
+    private Candidates findValidCandidates(ResolveSession session, Map<Resource, ResolutionError> faultyResources,
+            Candidates initialCandidates) {
+        Candidates allCandidates = initialCandidates;
         boolean foundFaultyResources = false;
         do
         {
-            allCandidates = session.getNextPermutation();
-            if (allCandidates == null)
-            {
-                break;
-            }
-
-//allCandidates.dump();
-
             Map<Resource, ResolutionError> currentFaultyResources = new HashMap<Resource, ResolutionError>();
 
             session.setCurrentError(
@@ -311,6 +298,11 @@ public class ResolverImpl implements Resolver
                     faultyResources.putAll(currentFaultyResources);
                 }
             }
+            Candidates next = session.getNextPermutation();
+            if (next == null) {
+                break;
+            }
+            allCandidates = next;
         }
         while (!session.isCancelled() && session.getCurrentError() != null);
 

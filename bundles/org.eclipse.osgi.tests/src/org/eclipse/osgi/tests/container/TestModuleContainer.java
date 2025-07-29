@@ -4362,7 +4362,7 @@ public class TestModuleContainer extends AbstractTest {
 	public void testLocalUseConstraintViolations() throws Exception {
 		ResolutionReport result = resolveTestSet("set1");
 		// TODO get down permutation count!
-		assertSucessfulWith(result, 49);
+		assertSucessfulWith(result, 48);
 		assertNotMoreThanPermutationCreated(result, ResolutionReport::getSubstitutionPermutations, 20);
 	}
 
