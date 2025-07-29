@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -58,11 +58,8 @@ extern void displayMessage( _TCHAR* title, _TCHAR* message );
  *
  * This method is called after the command line arguments have been
  * parsed. Its purpose is to initialize the corresponding window system.
- *
- * The showSplash flag indicates the splash window will be displayed by
- * this process (e.g., value will be zero for the main launcher).
  */
-extern int initWindowSystem( int* argc, _TCHAR* argv[], int showSplash );
+extern int initWindowSystem( int* argc, _TCHAR* argv[] );
 
 
 /** Show the Splash Window

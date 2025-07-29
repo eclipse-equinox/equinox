@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -74,7 +74,7 @@ gboolean reuseWorkbench(_TCHAR** filePath, int timeout) {
 	openFileTimeout = timeout;
 	openFilePath = filePath;
 
-	if (initWindowSystem(&initialArgc, initialArgv, 1) != 0)
+	if (initWindowSystem(&initialArgc, initialArgv) != 0)
 		return -1;
 
 	if (!gdbus_initProxy()) {
@@ -259,7 +259,7 @@ int showSplash( const char* featureImage ) {
 	if (initialArgv == NULL)
 		initialArgc = 0;
 	
-	if( initWindowSystem(&initialArgc, initialArgv, 1) != 0)
+	if( initWindowSystem(&initialArgc, initialArgv) != 0)
 		return -1;
 	
 	shellHandle = gtk.gtk_window_new(GTK_WINDOW_TOPLEVEL);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2021 IBM Corporation and others.
+ * Copyright (c) 2006, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -33,7 +33,7 @@ static CFBundleRef javaVMBundle = NULL;
  *
  * Initialize Cocoa.
  */
-int initWindowSystem( int* pArgc, char* argv[], int showSplash )
+int initWindowSystem( int* pArgc, char* argv[] )
 {
 	char *homeDir = getProgramDir();
 	/*debug("install dir: %s\n", homeDir);*/
