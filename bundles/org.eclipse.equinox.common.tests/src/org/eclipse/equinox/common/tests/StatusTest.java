@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -16,6 +16,8 @@ package org.eclipse.equinox.common.tests;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -27,7 +29,6 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Collections;
 
 import org.eclipse.core.internal.runtime.RuntimeLog;
@@ -81,51 +82,51 @@ public class StatusTest {
 
 	@Test
 	public void testMultiStatusReturnValues() {
-		assertEquals("1.1", multistatus1PluginId, multistatus1.getPlugin());
-		assertEquals("1.2", multistatus1Code, multistatus1.getCode());
-		assertTrue("1.3", Arrays.equals(multistatus1Children, multistatus1.getChildren()));
-		assertEquals("1.4", multistatus1Message, multistatus1.getMessage());
-		assertEquals("1.5", multistatus1Exception, multistatus1.getException());
-		assertTrue("1.6", multistatus1.isMultiStatus());
-		assertEquals("1.7", IStatus.OK, multistatus1.getSeverity());
-		assertTrue("1.8", multistatus1.isOK());
-		assertEquals("1.9", false, status1.matches(IStatus.ERROR | IStatus.WARNING | IStatus.INFO));
+		assertEquals(multistatus1PluginId, multistatus1.getPlugin());
+		assertEquals(multistatus1Code, multistatus1.getCode());
+		assertArrayEquals(multistatus1Children, multistatus1.getChildren());
+		assertEquals(multistatus1Message, multistatus1.getMessage());
+		assertEquals(multistatus1Exception, multistatus1.getException());
+		assertTrue(multistatus1.isMultiStatus());
+		assertEquals(IStatus.OK, multistatus1.getSeverity());
+		assertTrue(multistatus1.isOK());
+		assertFalse(status1.matches(IStatus.ERROR | IStatus.WARNING | IStatus.INFO));
 	}
 
 	@Test
 	public void testSingleStatusReturnValues() {
-		assertEquals("1.0", status1Severity, status1.getSeverity());
-		assertEquals("1.1", status1PluginId, status1.getPlugin());
-		assertEquals("1.2", status1Code, status1.getCode());
-		assertEquals("1.3", status1Message, status1.getMessage());
-		assertEquals("1.4", status1Exception, status1.getException());
-		assertEquals("1.5", 0, status1.getChildren().length);
-		assertEquals("1.6", false, status1.isMultiStatus());
-		assertEquals("1.7", status1Severity == IStatus.OK, status1.isOK());
-		assertEquals("1.8", status1.matches(IStatus.ERROR | IStatus.WARNING | IStatus.INFO), !status1.isOK());
+		assertEquals(status1Severity, status1.getSeverity());
+		assertEquals(status1PluginId, status1.getPlugin());
+		assertEquals(status1Code, status1.getCode());
+		assertEquals(status1Message, status1.getMessage());
+		assertEquals(status1Exception, status1.getException());
+		assertEquals(0, status1.getChildren().length);
+		assertFalse(status1.isMultiStatus());
+		assertTrue(status1.isOK());
+		assertNotEquals(status1.matches(IStatus.ERROR | IStatus.WARNING | IStatus.INFO), status1.isOK());
 
-		assertEquals("2.0", status2Severity, status2.getSeverity());
-		assertEquals("2.1", status2PluginId, status2.getPlugin());
-		assertEquals("2.2", status2Code, status2.getCode());
-		assertEquals("2.3", status2Message, status2.getMessage());
-		assertEquals("2.4", status2Exception, status2.getException());
-		assertEquals("2.5", 0, status2.getChildren().length);
-		assertEquals("2.6", false, status2.isMultiStatus());
-		assertEquals("2.7", status2Severity == IStatus.OK, status2.isOK());
-		assertEquals("2.8", status2.matches(IStatus.ERROR), !status2.isOK());
+		assertEquals(status2Severity, status2.getSeverity());
+		assertEquals(status2PluginId, status2.getPlugin());
+		assertEquals(status2Code, status2.getCode());
+		assertEquals(status2Message, status2.getMessage());
+		assertEquals(status2Exception, status2.getException());
+		assertEquals(0, status2.getChildren().length);
+		assertFalse(status2.isMultiStatus());
+		assertFalse(status2.isOK());
+		assertNotEquals(status2.matches(IStatus.ERROR), status2.isOK());
 	}
 
 	@Test
 	public void testAdd() {
 
 		multistatus1.add(status1);
-		assertEquals("1.0", status1, (multistatus1.getChildren())[0]);
+		assertEquals(status1, (multistatus1.getChildren())[0]);
 
 		multistatus1.add(multistatus2);
-		assertEquals("1.1", multistatus2, (multistatus1.getChildren())[1]);
+		assertEquals(multistatus2, (multistatus1.getChildren())[1]);
 
 		multistatus1.add(multistatus1);
-		assertEquals("1.2", multistatus1, (multistatus1.getChildren())[2]);
+		assertEquals(multistatus1, (multistatus1.getChildren())[2]);
 
 	}
 
@@ -177,39 +178,28 @@ public class StatusTest {
 
 		multistatus1.add(status2);
 		multistatus1.addAll(multistatus2);
-		Status[] array = new Status[3];
-		array[0] = status2;
-		array[1] = status1;
-		array[2] = status1;
+		Status[] array = { status2, status1, status1 };
 
-		assertTrue("1.0", multistatus1.getChildren().length == 3);
-		assertTrue("1.1", Arrays.equals(array, multistatus1.getChildren()));
+		assertEquals(3, multistatus1.getChildren().length);
+		assertArrayEquals(array, multistatus1.getChildren());
 
 		multistatus1.add(multistatus2);
 		multistatus1.addAll(multistatus1);
-		Status[] array2 = new Status[8];
-		array2[0] = status2;
-		array2[1] = status1;
-		array2[2] = status1;
-		array2[3] = multistatus2;
-		array2[4] = status2;
-		array2[5] = status1;
-		array2[6] = status1;
-		array2[7] = multistatus2;
+		Status[] array2 = { status2, status1, status1, multistatus2, status2, status1, status1, multistatus2 };
 
-		assertTrue("2.0", multistatus1.getChildren().length == 8);
-		assertTrue("2.1", Arrays.equals(array2, multistatus1.getChildren()));
+		assertEquals(8, multistatus1.getChildren().length);
+		assertArrayEquals(array2, multistatus1.getChildren());
 
 	}
 
 	@Test
 	public void testIsOK() {
 
-		assertTrue("1.0", multistatus2.isOK());
+		assertTrue(multistatus2.isOK());
 
 		multistatus1.add(status2);
 		multistatus1.addAll(multistatus2);
-		assertTrue("1.1", !multistatus1.isOK());
+		assertFalse(multistatus1.isOK());
 
 	}
 
@@ -218,30 +208,21 @@ public class StatusTest {
 
 		multistatus1.merge(status2);
 		multistatus1.merge(multistatus2);
-		Status[] array = new Status[3];
-		array[0] = status2;
-		array[1] = status1;
-		array[2] = status1;
+		Status[] array = { status2, status1, status1 };
 
-		assertTrue("1.0", multistatus1.getChildren().length == 3);
-		assertTrue("1.1", Arrays.equals(array, multistatus1.getChildren()));
+		assertEquals(3, multistatus1.getChildren().length);
+		assertArrayEquals(array, multistatus1.getChildren());
 
 		multistatus1.merge(multistatus1);
-		Status[] array2 = new Status[6];
-		array2[0] = status2;
-		array2[1] = status1;
-		array2[2] = status1;
-		array2[3] = status2;
-		array2[4] = status1;
-		array2[5] = status1;
+		Status[] array2 = { status2, status1, status1, status2, status1, status1 };
 
-		assertTrue("2.0", multistatus1.getChildren().length == 6);
-		assertTrue("2.1", Arrays.equals(array2, multistatus1.getChildren()));
+		assertEquals(6, multistatus1.getChildren().length);
+		assertArrayEquals(array2, multistatus1.getChildren());
 
 		multistatus2.add(multistatus1);
-		assertTrue("3.0", !multistatus2.isOK());
+		assertFalse(multistatus2.isOK());
 		multistatus2.merge(multistatus2.getChildren()[2]);
-		assertTrue("3.1", multistatus2.getChildren().length == 9);
+		assertEquals(9, multistatus2.getChildren().length);
 
 	}
 
