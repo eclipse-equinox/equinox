@@ -32,6 +32,7 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import org.apache.felix.resolver.Candidates.FaultyResourcesReport;
 import org.apache.felix.resolver.util.ArrayMap;
 import org.osgi.framework.namespace.BundleNamespace;
 import org.osgi.framework.namespace.ExecutionEnvironmentNamespace;
@@ -265,41 +266,48 @@ public class ResolverImpl implements Resolver
     }
 
     private Candidates findValidCandidates(ResolveSession session, Map<Resource, ResolutionError> faultyResources) {
-        Candidates current = Objects.requireNonNull(session.getNextPermutation());
+        Backlog backlog = new Backlog(session);
+        Candidates current = Objects.requireNonNull(backlog.getNext());
         boolean foundFaultyResources = false;
-        do
-        {
-            ResolutionError substituteError = current.checkSubstitutes();
-            if (substituteError != null)
-            {
-                session.setCurrentError(substituteError);
-            } else {
-                Map<Resource, ResolutionError> currentFaultyResources = new HashMap<Resource, ResolutionError>();
-                session.setCurrentError(
-                        PackageSpaces.checkConsistency(session, current, currentFaultyResources, m_logger));
-                if (!currentFaultyResources.isEmpty()) {
-                    if (!foundFaultyResources) {
-                        foundFaultyResources = true;
-                        faultyResources.putAll(currentFaultyResources);
-                    } else if (faultyResources.size() > currentFaultyResources.size()) {
-                        // save the optimal faultyResources which has less
-                        faultyResources.clear();
-                        faultyResources.putAll(currentFaultyResources);
-                    }
+        Candidates bestCandidate = null;
+        ResolutionError bestError = null;
+        while (!session.isCancelled()) {
+            Map<Resource, ResolutionError> currentFaultyResources = new HashMap<Resource, ResolutionError>();
+            session.setCurrentError(
+                    PackageSpaces.checkConsistency(session, current, currentFaultyResources, m_logger));
+            if (!currentFaultyResources.isEmpty()) {
+                if (!foundFaultyResources) {
+                    foundFaultyResources = true;
+                    faultyResources.putAll(currentFaultyResources);
+                } else if (faultyResources.size() > currentFaultyResources.size()) {
+                    // save the optimal faultyResources which has less
+                    faultyResources.clear();
+                    faultyResources.putAll(currentFaultyResources);
                 }
             }
-            if (session.getCurrentError() == null) {
+            FaultyResourcesReport report = current.getFaultyResources();
+            ResolutionError currentError = session.getCurrentError();
+            if (currentError == null && report.getUnresolvedRequirements().isEmpty()) {
+                // Success!
                 break;
             }
-            Candidates next = session.getNextPermutation();
+            if (bestCandidate == null || report.isBetterThan(bestCandidate.getFaultyResources())) {
+                bestCandidate = current;
+                if (currentError == null && report.isMissingMandatory()) {
+                    bestError = report;
+                } else {
+                    bestError = currentError;
+                }
+            }
+            Candidates next = backlog.getNext();
             if (next == null)
             {
-                break;
+                // nothing more, return the best we found
+                session.setCurrentError(bestError);
+                return bestCandidate;
             }
             current = next;
         }
-        while (!session.isCancelled());
-
         return current;
     }
 

@@ -32,6 +32,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.felix.resolver.reason.ReasonException;
 import org.apache.felix.resolver.util.CandidateSelector;
 import org.apache.felix.resolver.util.CopyOnWriteSet;
@@ -756,9 +758,9 @@ class Candidates
         // this is a special case where we need to completely replace the CandidateSelector
         // this method should never be called from normal Candidates permutations
         CandidateSelector candidates = m_candidateMap.get(req);
-		if (candidates == null) {
-			return null;
-		}
+        if (candidates == null) {
+            return null;
+        }
         List<Capability> remaining = new ArrayList<Capability>(candidates.getRemainingCandidates());
         remaining.removeAll(caps);
         if (remaining.isEmpty()) {
@@ -1356,6 +1358,84 @@ class Candidates
             }
         }
         return null;
+    }
+
+    public FaultyResourcesReport getFaultyResources() {
+        Set<Entry<Requirement, CandidateSelector>> set = m_candidateMap.entrySet();
+        FaultyResourcesReport report = new FaultyResourcesReport();
+        for (Entry<Requirement, CandidateSelector> entry : set) {
+            if (entry.getValue().isEmpty()) {
+                Requirement requirement = entry.getKey();
+                if (Util.isOptional(requirement)) {
+                    report.optional.computeIfAbsent(requirement.getResource(), nil -> new ArrayList<>())
+                            .add(requirement);
+                } else {
+                    report.mandatory.computeIfAbsent(requirement.getResource(), nil -> new ArrayList<>())
+                            .add(requirement);
+                }
+            }
+        }
+        return report;
+    }
+
+    public static final class FaultyResourcesReport extends ResolutionError {
+
+        private Map<Resource, List<Requirement>> optional = new HashMap<>();
+        private Map<Resource, List<Requirement>> mandatory = new HashMap<>();
+
+        private void append(StringBuilder sb, String type, Map<Resource, List<Requirement>> map) {
+            sb.append("Resources with missing ");
+            sb.append(type);
+            sb.append(" requirements: ");
+            sb.append(map.size());
+            for (Entry<Resource, List<Requirement>> entry : map.entrySet()) {
+                sb.append("\n  ");
+                sb.append(entry.getKey());
+                for (Requirement requirement : entry.getValue()) {
+                    sb.append("\n    ");
+                    sb.append(requirement);
+                }
+            }
+        }
+
+        public boolean isBetterThan(FaultyResourcesReport other) {
+            if (mandatory.size() < other.mandatory.size()) {
+                return true;
+            }
+            return optional.size() < other.optional.size();
+        }
+
+        public boolean isMissingMandatory() {
+            return mandatory.size() > 0;
+        }
+
+        public boolean isMissingOptional() {
+            return optional.size() > 0;
+        }
+
+        public boolean isMissing() {
+            return isMissingMandatory() || isMissingOptional();
+        }
+
+        @Override
+        public String getMessage() {
+            StringBuilder sb = new StringBuilder();
+            append(sb, "mandatory", mandatory);
+            return sb.toString();
+        }
+
+        @Override
+        public ResolutionException toException() {
+            return new ReasonException(ReasonException.Reason.MissingRequirement, getMessage(), null,
+                    getUnresolvedRequirements());
+        }
+
+        @Override
+        public Collection<Requirement> getUnresolvedRequirements() {
+            return Stream.concat(mandatory.values().stream().flatMap(List::stream),
+                    optional.values().stream().flatMap(List::stream)).collect(Collectors.toList());
+        }
+
     }
 
 }
