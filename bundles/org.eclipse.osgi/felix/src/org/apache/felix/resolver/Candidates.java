@@ -18,15 +18,36 @@
  */
 package org.apache.felix.resolver;
 
-import java.io.PrintStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.felix.resolver.reason.ReasonException;
-import org.apache.felix.resolver.util.*;
+import org.apache.felix.resolver.util.CandidateSelector;
+import org.apache.felix.resolver.util.CopyOnWriteSet;
+import org.apache.felix.resolver.util.OpenHashMap;
+import org.apache.felix.resolver.util.OpenHashMapList;
+import org.apache.felix.resolver.util.OpenHashMapSet;
+import org.apache.felix.resolver.util.ShadowList;
 import org.osgi.framework.Version;
-import org.osgi.framework.namespace.*;
-import org.osgi.resource.*;
+import org.osgi.framework.namespace.HostNamespace;
+import org.osgi.framework.namespace.IdentityNamespace;
+import org.osgi.framework.namespace.PackageNamespace;
+import org.osgi.resource.Capability;
+import org.osgi.resource.Requirement;
+import org.osgi.resource.Resource;
+import org.osgi.resource.Wire;
+import org.osgi.resource.Wiring;
 import org.osgi.service.resolver.HostedCapability;
 import org.osgi.service.resolver.ResolutionException;
 import org.osgi.service.resolver.ResolveContext;
@@ -695,7 +716,12 @@ class Candidates
         CandidateSelector candidates = m_candidateMap.get(req);
         if (candidates != null)
         {
-            return candidates.getRemainingCandidates();
+            List<Capability> list = candidates.getRemainingCandidates();
+            if (list.isEmpty()) {
+                m_candidateMap.remove(req);
+                return null;
+            }
+            return list;
         }
         return null;
     }
@@ -730,9 +756,16 @@ class Candidates
         // this is a special case where we need to completely replace the CandidateSelector
         // this method should never be called from normal Candidates permutations
         CandidateSelector candidates = m_candidateMap.get(req);
+		if (candidates == null) {
+			return null;
+		}
         List<Capability> remaining = new ArrayList<Capability>(candidates.getRemainingCandidates());
         remaining.removeAll(caps);
-        candidates = new CandidateSelector(remaining, m_candidateSelectorsUnmodifiable);
+        if (remaining.isEmpty()) {
+            m_candidateMap.remove(req);
+            return null;
+        }
+        candidates = candidates.copyWith(remaining);
         m_candidateMap.put(req, candidates);
         return candidates;
     }

@@ -101,7 +101,7 @@ public class Util
     }
 
     public static String getPackageName(Capability capability) {
-        if (capability != null && PackageNamespace.PACKAGE_NAMESPACE.equals(capability.getNamespace())) {
+        if (isExportedPackage(capability)) {
             Object object = capability.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE);
             if (object instanceof String) {
                 return (String) object;
@@ -111,7 +111,7 @@ public class Util
     }
 
     public static Set<String> getUses(Capability capability) {
-        if (capability != null && PackageNamespace.PACKAGE_NAMESPACE.equals(capability.getNamespace())) {
+        if (isExportedPackage(capability)) {
             String uses = capability.getDirectives().get(PackageNamespace.CAPABILITY_USES_DIRECTIVE);
             if (uses != null && !uses.isEmpty()) {
                 return Arrays.stream(uses.split(",")).map(String::trim).collect(Collectors.toSet());
@@ -119,4 +119,8 @@ public class Util
         }
         return Collections.emptySet();
     }
+
+    public static boolean isExportedPackage(Capability capability) {
+        return capability != null && PackageNamespace.PACKAGE_NAMESPACE.equals(capability.getNamespace());
+	}
 }
