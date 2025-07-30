@@ -22,8 +22,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-
+import org.apache.felix.resolver.Util;
 import org.osgi.resource.Capability;
+import org.osgi.resource.Requirement;
 
 public class CandidateSelector {
     protected final AtomicBoolean isUnmodifiable;
@@ -43,6 +44,11 @@ public class CandidateSelector {
 
     public CandidateSelector copy() {
         return new CandidateSelector(this);
+    }
+
+    public CandidateSelector copyWith(List<Capability> candidates) {
+        CandidateSelector selector = new CandidateSelector(candidates, isUnmodifiable);
+        return selector;
     }
 
     public int getRemainingCandidateCount() {
