@@ -53,7 +53,4 @@ extern _TCHAR* concatPaths(_TCHAR** paths, _TCHAR pathSeparator);
 /* check that the buffer contains all the given paths */
 extern int containsPaths(_TCHAR * str, _TCHAR** paths);
 
-/* Compare JVM Versions */
-extern int versionCmp( char* ver1, char* ver2 );
-
 #endif /* ECLIPSE_UTIL_H */
