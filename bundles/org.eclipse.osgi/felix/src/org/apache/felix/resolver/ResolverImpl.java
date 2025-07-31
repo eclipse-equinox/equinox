@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -271,46 +272,41 @@ public class ResolverImpl implements Resolver
     }
 
     private Candidates findValidCandidates(ResolveSession session, Map<Resource, ResolutionError> faultyResources) {
-        Candidates allCandidates = null;
+        Candidates current = Objects.requireNonNull(session.getNextPermutation());
         boolean foundFaultyResources = false;
         do
         {
-            allCandidates = session.getNextPermutation();
-            if (allCandidates == null)
+            ResolutionError substituteError = current.checkSubstitutes();
+            if (substituteError != null)
+            {
+                session.setCurrentError(substituteError);
+            } else {
+                Map<Resource, ResolutionError> currentFaultyResources = new HashMap<Resource, ResolutionError>();
+                session.setCurrentError(checkConsistency(session, current, currentFaultyResources));
+                if (!currentFaultyResources.isEmpty()) {
+                    if (!foundFaultyResources) {
+                        foundFaultyResources = true;
+                        faultyResources.putAll(currentFaultyResources);
+                    } else if (faultyResources.size() > currentFaultyResources.size()) {
+                        // save the optimal faultyResources which has less
+                        faultyResources.clear();
+                        faultyResources.putAll(currentFaultyResources);
+                    }
+                }
+            }
+            if (session.getCurrentError() == null) {
+                break;
+            }
+            Candidates next = session.getNextPermutation();
+            if (next == null)
             {
                 break;
             }
-
-//allCandidates.dump();
-
-            Map<Resource, ResolutionError> currentFaultyResources = new HashMap<Resource, ResolutionError>();
-
-            session.setCurrentError(
-                    checkConsistency(
-                            session,
-                            allCandidates,
-                            currentFaultyResources
-                    )
-            );
-
-            if (!currentFaultyResources.isEmpty())
-            {
-                if (!foundFaultyResources)
-                {
-                    foundFaultyResources = true;
-                    faultyResources.putAll(currentFaultyResources);
-                }
-                else if (faultyResources.size() > currentFaultyResources.size())
-                {
-                    // save the optimal faultyResources which has less
-                    faultyResources.clear();
-                    faultyResources.putAll(currentFaultyResources);
-                }
-            }
+            current = next;
         }
-        while (!session.isCancelled() && session.getCurrentError() != null);
+        while (!session.isCancelled());
 
-        return allCandidates;
+        return current;
     }
 
     private ResolutionError checkConsistency(
@@ -318,11 +314,6 @@ public class ResolverImpl implements Resolver
         Candidates allCandidates,
         Map<Resource, ResolutionError> currentFaultyResources)
     {
-        ResolutionError rethrow = allCandidates.checkSubstitutes();
-        if (rethrow != null)
-        {
-            return rethrow;
-        }
         Map<Resource, Resource> allhosts = allCandidates.getRootHosts();
         // Calculate package spaces
         Map<Resource, Packages> resourcePkgMap =
@@ -333,7 +324,7 @@ public class ResolverImpl implements Resolver
                 new OpenHashMap<Resource, Object>(resourcePkgMap.size());
         for (Entry<Resource, Resource> entry : allhosts.entrySet())
         {
-            rethrow = checkPackageSpaceConsistency(
+            ResolutionError rethrow = checkPackageSpaceConsistency(
                     session, entry.getValue(),
                     allCandidates, session.isDynamic(), resourcePkgMap, resultCache);
             if (session.isCancelled()) {
