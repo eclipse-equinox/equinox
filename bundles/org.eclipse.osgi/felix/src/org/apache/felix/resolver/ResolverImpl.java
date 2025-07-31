@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -271,24 +272,16 @@ public class ResolverImpl implements Resolver
     }
 
     private Candidates findValidCandidates(ResolveSession session, Map<Resource, ResolutionError> faultyResources) {
-        Candidates allCandidates = null;
+        Candidates current = Objects.requireNonNull(session.getNextPermutation());
         boolean foundFaultyResources = false;
         do
         {
-            allCandidates = session.getNextPermutation();
-            if (allCandidates == null)
-            {
-                break;
-            }
-
-//allCandidates.dump();
-
             Map<Resource, ResolutionError> currentFaultyResources = new HashMap<Resource, ResolutionError>();
 
             session.setCurrentError(
                     checkConsistency(
                             session,
-                            allCandidates,
+                            current,
                             currentFaultyResources
                     )
             );
@@ -307,10 +300,15 @@ public class ResolverImpl implements Resolver
                     faultyResources.putAll(currentFaultyResources);
                 }
             }
+            Candidates next = session.getNextPermutation();
+            if (next == null)
+            {
+                break;
+            }
         }
         while (!session.isCancelled() && session.getCurrentError() != null);
 
-        return allCandidates;
+        return current;
     }
 
     private ResolutionError checkConsistency(
