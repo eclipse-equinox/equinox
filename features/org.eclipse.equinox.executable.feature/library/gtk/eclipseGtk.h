@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2018 IBM Corporation and others.
+ * Copyright (c) 2007, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -16,7 +16,7 @@
 
 #include <gtk/gtk.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
-#include <gdk/gdkx.h>
+#include <gdk/gdk.h>
 
 struct GTK_PTRS {
 	short 		not_initialized;
@@ -60,7 +60,6 @@ struct GTK_PTRS {
 	void 		(*g_variant_builder_unref) 	(GVariantBuilder *);
 	void		(*g_variant_unref) 			(GVariant *);
 		
-	GdkDisplay* (*gdk_display_get_default)  		();
 	GdkPixbuf*	(*gdk_pixbuf_new_from_file)			(const char*, GError **);
 	GdkPixbuf*	(*gdk_pixbuf_scale_simple)			(const GdkPixbuf*, int, int, GdkInterpType);
 	int			(*gdk_pixbuf_get_width)				(const GdkPixbuf*);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2020 IBM Corporation and others.
+ * Copyright (c) 2007, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -61,7 +61,6 @@ static FN_TABLE gtkFunctions[] = {
 };
 /* functions from libgdk-3.so.0*/
 static FN_TABLE gdkFunctions[] = {
-	FN_TABLE_ENTRY(gdk_display_get_default, 1),
 	FN_TABLE_ENTRY(gdk_screen_get_default, 1),
 	FN_TABLE_ENTRY(gdk_screen_get_resolution, 1),
 	{ NULL, NULL }
