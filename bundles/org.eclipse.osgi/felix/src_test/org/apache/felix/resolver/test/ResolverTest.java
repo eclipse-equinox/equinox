@@ -23,7 +23,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -32,8 +31,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.felix.resolver.Logger;
+import org.apache.felix.resolver.PackageSpaces;
 import org.apache.felix.resolver.Packages;
 import org.apache.felix.resolver.ResolverImpl;
 import org.apache.felix.resolver.test.util.BundleCapability;
@@ -829,20 +828,16 @@ public class ResolverTest
 
     @Test
     public void testPackageSources() throws Exception {
-        Method m = ResolverImpl.class.getDeclaredMethod("getPackageSources",
-                Capability.class, Map.class);
-        m.setAccessible(true);
-
         Capability cap = Mockito.mock(Capability.class);
         assertEquals(Collections.emptySet(),
-                m.invoke(null, cap, new HashMap<Resource, Packages>()));
+				PackageSpaces.getPackageSources(cap, new HashMap<Resource, Packages>()));
 
         Capability cap2 = Mockito.mock(Capability.class);
         Resource res2 = Mockito.mock(Resource.class);
         Mockito.when(cap2.getResource()).thenReturn(res2);
         Map<Resource, Packages> map2 = new HashMap<Resource, Packages>();
         map2.put(res2, new Packages(res2));
-        assertEquals(Collections.emptySet(), m.invoke(null, cap2, map2));
+		assertEquals(Collections.emptySet(), PackageSpaces.getPackageSources(cap2, map2));
 
         Capability cap3 = Mockito.mock(Capability.class);
         Resource res3 = Mockito.mock(Resource.class);
@@ -854,7 +849,7 @@ public class ResolverTest
                 cap3, srcCaps3);
         pkgs3.m_sources.putAll(srcMap3);
         map3.put(res3, pkgs3);
-        assertEquals(srcCaps3, m.invoke(null, cap3, map3));
+		assertEquals(srcCaps3, PackageSpaces.getPackageSources(cap3, map3));
 
     }
 
