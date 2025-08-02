@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.osgi; singleton:=true
+Bundle-ManifestVersion: 2
+
