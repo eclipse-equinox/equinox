@@ -56,7 +56,11 @@ public class Backlog {
     public Candidates getNext() {
         Candidates candidates;
         while ((candidates = session.getNextPermutation()) != null) {
-            ResolutionError substituteError = candidates.checkSubstitutes();
+            if (SubstitutionPackages.USE_LEGACY_SUBSTITUTION_PACKAGES) {
+                candidates.checkSubstitutes();
+            } else {
+                candidates.process(session.getLogger());
+            }
             FaultyResourcesReport report = candidates.getFaultyResources();
             if (!report.isMissing() || session.isCancelled()) {
                 return candidates;

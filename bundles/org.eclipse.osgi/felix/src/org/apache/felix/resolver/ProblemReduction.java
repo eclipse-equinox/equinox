@@ -51,9 +51,9 @@ class ProblemReduction {
         Resource targetResource = requirement.getResource();
         // fetch the current candidate for this requirement
         Capability currentCandidate = candidates.getFirstCandidate(requirement);
-		if (currentCandidate == null) {
-			return Collections.emptyList();
-		}
+        if (currentCandidate == null) {
+            return Collections.emptyList();
+        }
         Resource candidateResource = currentCandidate.getResource();
         // now check if it has any uses constraints
         Set<String> uses = new TreeSet<>(Util.getUses(currentCandidate));
@@ -61,7 +61,6 @@ class ProblemReduction {
             // there is nothing this one can conflict in this current set of candidates
             return Collections.emptyList();
         }
-
 
         if (logger.isDebugEnabled()) {
             logger.logRequirement("=== remove uses violations for %s", requirement);
@@ -108,6 +107,72 @@ class ProblemReduction {
         return dropped;
     }
 
+    /**
+     * Removes all invalid package providers for a given {@link Requirement} and
+     * {@link Candidates} in a local search, that is if the requirement is a package
+     * and that package is used by any unique selected package for another import,
+     * then only the same provider can be a valid candidate without leading to a
+     * use-constraint violation otherwise.
+     * 
+     * @param candidates  candidates to filter
+     * @param requirement the requirement where the search should start
+     * @return a list of Candidates that where dropped as part of the filtering
+     */
+    static List<Candidates> removeInvalidPackageProvider(Candidates candidates, Requirement requirement,
+            Logger logger) {
+        List<Candidates> dropped = new ArrayList<>();
+        Resource targetResource = requirement.getResource();
+        List<Requirement> requirements = targetResource.getRequirements(PackageNamespace.PACKAGE_NAMESPACE);
+        boolean changed;
+        do {
+            changed = false;
+            for (Requirement packageRequirement : requirements) {
+                Capability singlePackageProvider = getSingleProvider(candidates, packageRequirement);
+                if (singlePackageProvider == null) {
+                    continue;
+                }
+                Capability capabilityForRequirement = getProviderCapabilityForRequirement(candidates,
+                        singlePackageProvider.getResource(), requirement);
+                if (capabilityForRequirement == null) {
+                    continue;
+                }
+                Set<String> uses = Util.getUses(singlePackageProvider);
+                if (uses.isEmpty() || !uses.contains(Util.getPackageName(capabilityForRequirement))) {
+                    continue;
+                }
+                // now we need to drop all providers that are before our provider
+                while (candidates.getFirstCandidate(requirement).getResource() != singlePackageProvider.getResource()) {
+                    dropped.add(candidates.copy());
+                    candidates.removeFirstCandidate(requirement);
+                    changed = true;
+                }
+            }
+        } while (changed);
+        return dropped;
+    }
+
+    private static Capability getProviderCapabilityForRequirement(Candidates candidates, Resource provider,
+            Requirement requirement) {
+        List<Capability> list = candidates.getCandidates(requirement);
+        if (list == null) {
+            return null;
+        }
+        for (Capability capability : list) {
+            if (capability.getResource() == provider) {
+                return capability;
+            }
+        }
+        return null;
+    }
+
+    private static Capability getSingleProvider(Candidates candidates, Requirement packageRequirement) {
+        List<Capability> providers = candidates.getCandidates(packageRequirement);
+        if (providers != null && providers.size() == 1) {
+            return providers.get(0);
+        }
+        return null;
+    }
+
     private static Capability removeViolators(Candidates candidates, Resource candidateResource,
             Requirement packageRequirement, List<Candidates> dropped) {
         Capability capability;
@@ -125,5 +190,13 @@ class ProblemReduction {
         }
         return Collections.unmodifiableList(list);
     }
+
+    public static List<Candidates> reduce(Candidates initialCandidates, Requirement requirement, Logger m_logger) {
+        ArrayList<Candidates> result = new ArrayList<>();
+        result.addAll(removeUsesViolations(initialCandidates, requirement, m_logger));
+        result.addAll(removeInvalidPackageProvider(initialCandidates, requirement, m_logger));
+        return result;
+    }
+
 
 }

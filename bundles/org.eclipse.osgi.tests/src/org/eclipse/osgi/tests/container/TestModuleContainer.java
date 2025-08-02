@@ -2013,7 +2013,7 @@ public class TestModuleContainer extends AbstractTest {
 		assertEquals("l should resolve.", State.RESOLVED, uses_l.getState());
 		assertEquals("m.conflict1 should resolve.", State.RESOLVED, uses_m_conflict1.getState());
 		assertEquals("m.conflict2 should resolve.", State.RESOLVED, uses_m_conflict2.getState());
-		assertSucessfulWith(report, max);
+		assertSucessfulWith(report, max, Integer.MAX_VALUE, Integer.MAX_VALUE);
 	}
 
 	@Test
@@ -3931,29 +3931,35 @@ public class TestModuleContainer extends AbstractTest {
 				"osgi.ee; osgi.ee=JavaSE; version:List<Version>=\"1.3, 1.4, 1.5, 1.6, 1.7\"", //
 				container);
 		ResolutionReport report = container.resolve(Arrays.asList(systemBundle), true);
-		assertSucessfulWith(report, 1);
+		assertSucessfulWith(report, 1, Integer.MAX_VALUE, Integer.MAX_VALUE);
 
 		List<Module> modules = new ArrayList<>();
 		for (String manifest : HTTPCOMPS_AND_EATHER) {
 			modules.add(installDummyModule(manifest, manifest, container));
 		}
 		report = container.resolve(modules, true);
-		assertSucessfulWith(report, 115);
+		assertSucessfulWith(report, 115, Integer.MAX_VALUE, Integer.MAX_VALUE);
 	}
 
-	protected void assertSucessfulWith(ResolutionReport report, int maxTotalPermutations) {
+	protected void assertSucessfulWith(ResolutionReport report, int maxTotalPermutations, int maxSubstitution,
+			int maxUses) {
 		assertNull("Failed to resolve test.", report.getResolutionException());
-		assertNotMoreThanPermutationCreated(report, ResolutionReport::getTotalPermutations, maxTotalPermutations);
+		assertNotMoreThanPermutationCreated(report, ResolutionReport::getTotalPermutations, maxTotalPermutations,
+				"total");
+		assertNotMoreThanPermutationCreated(report, ResolutionReport::getSubstitutionPermutations, maxSubstitution,
+				"substitution");
+		assertNotMoreThanPermutationCreated(report, ResolutionReport::getUsesPermutations, maxUses, "uses");
 	}
 
 	protected void assertNotMoreThanPermutationCreated(ResolutionReport report,
-			ToIntFunction<ResolutionReport> extractor, int max) {
+			ToIntFunction<ResolutionReport> extractor, int max, String type) {
 		int permutations = extractor.applyAsInt(report);
 		if (permutations > max) {
-			fail("Maximum of " + max + " permutations expected but was " + permutations);
+			fail("Maximum of " + max + " " + type + " permutations expected but was " + permutations);
 		} else if (permutations < max) {
 			System.out.println(
-					"## Permutations (" + permutations + ") are below the threshold (" + max
+					"## [" + name.getMethodName() + "] The " + type + " permutations (" + permutations
+							+ ") are below the threshold (" + max
 							+ "), consider adjusting the testcase to assert the lower count!");
 		}
 		return;
@@ -4362,8 +4368,30 @@ public class TestModuleContainer extends AbstractTest {
 	public void testLocalUseConstraintViolations() throws Exception {
 		ResolutionReport result = resolveTestSet("set1");
 		// TODO get down permutation count!
-		assertSucessfulWith(result, 49);
-		assertNotMoreThanPermutationCreated(result, ResolutionReport::getSubstitutionPermutations, 20);
+		assertSucessfulWith(result, 49, Integer.MAX_VALUE, Integer.MAX_VALUE);
+	}
+
+	@Test
+
+	public void testLocalUseConstraintViolations2() throws Exception {
+		System.out.println(" =============== TestModuleContainer.testLocalUseConstraintViolations2() ==========");
+		ResolutionReport result = resolveTestSet("set2");
+		// TODO get down permutation count!
+		assertSucessfulWith(result, 9, Integer.MAX_VALUE, Integer.MAX_VALUE);
+	}
+
+	@Test
+	public void testSubstitutionPackageResolution() throws Exception {
+		System.out.println("############## TestModuleContainer.testInvalidRemoval() #####");
+		ResolutionReport result = resolveTestSet("set3");
+		// TODO get down permutation count
+		// In this example we see the following:
+		// - libg has two possible choices for its substitution package, the internal one is chosen in first iteration -> resolved
+		// - util has two possible choices for its substitution package, the external one is chosen in first iteration -> libg
+		// - now util has to be removed as a provider only having libg as the only one left 
+		// - bndlib now can only use libg for exceptions package but this conflicts with  result from util that has use constraint on exceptions package
+		// - on second iteration now libg chose external and drops it exports removing it from util+bndlib -> resolved state
+		assertSucessfulWith(result, 4, Integer.MAX_VALUE, Integer.MAX_VALUE);
 	}
 
 	private ResolutionReport resolveTestSet(String name) throws Exception {

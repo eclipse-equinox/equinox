@@ -30,6 +30,8 @@ import org.eclipse.osgi.util.ManifestElement;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
+import org.junit.rules.TestName;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -39,6 +41,9 @@ import org.osgi.framework.hooks.resolver.ResolverHook;
 
 public abstract class AbstractTest {
 	protected Set<ServiceRegistration<?>> serviceRegistrations;
+
+	@Rule
+	public TestName name = new TestName();
 
 	@Before
 	public void setUp() {
