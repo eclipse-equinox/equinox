@@ -1982,20 +1982,21 @@ public class TestModuleContainer extends AbstractTest {
 	 */
 	@Test
 	public void testUses5Importer() throws BundleException, IOException {
-		doTestUses5("uses.k.importer.MF", 3);
+		doTestUses5("uses.k.importer.MF", 3, 0, 3, 0);
 	}
 
 	@Test
 	public void testUses5ReqCap() throws BundleException, IOException {
-		doTestUses5("uses.k.reqCap.MF", 3);
+		doTestUses5("uses.k.reqCap.MF", 3, 0, 3, 0);
 	}
 
 	@Test
 	public void testUses5Requirer() throws BundleException, IOException {
-		doTestUses5("uses.k.requirer.MF", 3);
+		doTestUses5("uses.k.requirer.MF", 3, 0, 3, 0);
 	}
 
-	public void doTestUses5(String kManifest, int max) throws BundleException, IOException {
+	public void doTestUses5(String kManifest, int maxTotal, int maxSub, int maxUse, int maxPkg)
+			throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
 
@@ -2013,7 +2014,7 @@ public class TestModuleContainer extends AbstractTest {
 		assertEquals("l should resolve.", State.RESOLVED, uses_l.getState());
 		assertEquals("m.conflict1 should resolve.", State.RESOLVED, uses_m_conflict1.getState());
 		assertEquals("m.conflict2 should resolve.", State.RESOLVED, uses_m_conflict2.getState());
-		assertSucessfulWith(report, max);
+		assertSucessfulWith(report, maxTotal, maxSub, maxUse, maxPkg);
 	}
 
 	@Test
@@ -3931,29 +3932,36 @@ public class TestModuleContainer extends AbstractTest {
 				"osgi.ee; osgi.ee=JavaSE; version:List<Version>=\"1.3, 1.4, 1.5, 1.6, 1.7\"", //
 				container);
 		ResolutionReport report = container.resolve(Arrays.asList(systemBundle), true);
-		assertSucessfulWith(report, 1);
+		assertSucessfulWith(report, 1, 0, 1, 0);
 
 		List<Module> modules = new ArrayList<>();
 		for (String manifest : HTTPCOMPS_AND_EATHER) {
 			modules.add(installDummyModule(manifest, manifest, container));
 		}
 		report = container.resolve(modules, true);
-		assertSucessfulWith(report, 115);
+		assertSucessfulWith(report, 114, 62, 47, 5);
 	}
 
-	protected void assertSucessfulWith(ResolutionReport report, int maxTotalPermutations) {
+	protected void assertSucessfulWith(ResolutionReport report, int maxTotalPermutations, int maxSubstitution,
+			int maxUses, int maxImport) {
 		assertNull("Failed to resolve test.", report.getResolutionException());
-		assertNotMoreThanPermutationCreated(report, ResolutionReport::getTotalPermutations, maxTotalPermutations);
+		assertNotMoreThanPermutationCreated(report, ResolutionReport::getTotalPermutations, maxTotalPermutations,
+				"total");
+		assertNotMoreThanPermutationCreated(report, ResolutionReport::getSubstitutionPermutations, maxSubstitution,
+				"substitution");
+		assertNotMoreThanPermutationCreated(report, ResolutionReport::getUsesPermutations, maxUses, "uses");
+		assertNotMoreThanPermutationCreated(report, ResolutionReport::getImportPermutations, maxImport, "import");
 	}
 
 	protected void assertNotMoreThanPermutationCreated(ResolutionReport report,
-			ToIntFunction<ResolutionReport> extractor, int max) {
+			ToIntFunction<ResolutionReport> extractor, int max, String type) {
 		int permutations = extractor.applyAsInt(report);
 		if (permutations > max) {
-			fail("Maximum of " + max + " permutations expected but was " + permutations);
+			fail("Maximum of " + max + " " + type + " permutations expected but was " + permutations);
 		} else if (permutations < max) {
 			System.out.println(
-					"## Permutations (" + permutations + ") are below the threshold (" + max
+					"## [" + name.getMethodName() + "] The " + type + " permutations (" + permutations
+							+ ") are below the threshold (" + max
 							+ "), consider adjusting the testcase to assert the lower count!");
 		}
 		return;
@@ -4362,12 +4370,32 @@ public class TestModuleContainer extends AbstractTest {
 	public void testLocalUseConstraintViolations() throws Exception {
 		ResolutionReport result = resolveTestSet("set1");
 		// TODO get down permutation count!
-		assertSucessfulWith(result, 49);
-		assertNotMoreThanPermutationCreated(result, ResolutionReport::getSubstitutionPermutations, 20);
+		assertSucessfulWith(result, 49, 20, 23, 6);
 	}
 
-	private ResolutionReport resolveTestSet(String name) throws Exception {
-		Enumeration<URL> entries = getBundle().findEntries("/test_files/containerTests/" + name, "*.MF", false);
+	@Test
+
+	public void testLocalUseConstraintViolations2() throws Exception {
+		ResolutionReport result = resolveTestSet("set2");
+		// TODO get down permutation count!
+		assertSucessfulWith(result, 7, 3, 1, 3);
+	}
+
+	@Test
+	public void testSubstitutionPackageResolution() throws Exception {
+		ResolutionReport result = resolveTestSet("set3");
+		// TODO get down permutation count
+		// In this example we see the following:
+		// - libg has two possible choices for its substitution package, the internal one is chosen in first iteration -> resolved
+		// - util has two possible choices for its substitution package, the external one is chosen in first iteration -> libg
+		// - now util has to be removed as a provider only having libg as the only one left 
+		// - bndlib now can only use libg for exceptions package but this conflicts with  result from util that has use constraint on exceptions package
+		// - on second iteration now libg chose external and drops it exports removing it from util+bndlib -> resolved state
+		assertSucessfulWith(result, 3, 2, 1, 0);
+	}
+
+	private ResolutionReport resolveTestSet(String testSetName) throws Exception {
+		Enumeration<URL> entries = getBundle().findEntries("/test_files/containerTests/" + testSetName, "*.MF", false);
 		Map<Long, String> manifests = new TreeMap<>();
 		while (entries.hasMoreElements()) {
 			URL url = entries.nextElement();
@@ -4375,7 +4403,7 @@ public class TestModuleContainer extends AbstractTest {
 			String[] split = path.split("/");
 			String mfname = split[split.length - 1];
 			long l = Long.parseLong(mfname.split("_")[0]);
-			manifests.put(l, name + "/" + mfname);
+			manifests.put(l, testSetName + "/" + mfname);
 		}
 		// Always want to go to zero threads when idle
 		int coreThreads = 0;
