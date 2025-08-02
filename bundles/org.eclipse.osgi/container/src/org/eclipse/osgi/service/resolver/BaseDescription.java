@@ -24,28 +24,28 @@ import org.osgi.framework.wiring.BundleCapability;
  * This interface is not intended to be implemented by clients. The
  * {@link StateObjectFactory} should be used to construct instances.
  * </p>
- * 
+ *
  * @since 3.1
  * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface BaseDescription {
 	/**
 	 * Returns the name.
-	 * 
+	 *
 	 * @return the name
 	 */
 	public String getName();
 
 	/**
 	 * Returns the version.
-	 * 
+	 *
 	 * @return the version
 	 */
 	public Version getVersion();
 
 	/**
 	 * Returns the bundle which supplies this base description
-	 * 
+	 *
 	 * @return the bundle which supplies this base description
 	 * @since 3.2
 	 */
@@ -55,7 +55,7 @@ public interface BaseDescription {
 	 * Returns the directives declared with the description. This will return all
 	 * known directives for the type of description. The set of directives differs
 	 * for each description type.
-	 * 
+	 *
 	 * @return the known directives declared with the description
 	 * @since 3.7
 	 */
@@ -65,7 +65,7 @@ public interface BaseDescription {
 	 * Returns the attributes declared with the description. This will return all
 	 * known attributes for the type of description. The set of attributes differs
 	 * for each description type.
-	 * 
+	 *
 	 * @return the attributes declared with the description
 	 * @since 3.7
 	 */
@@ -75,7 +75,7 @@ public interface BaseDescription {
 	 * Returns the capability represented by this description. Some descriptions
 	 * types may not be able to represent a capability. In such cases
 	 * <code>null</code> is returned.
-	 * 
+	 *
 	 * @return the capability represented by this base description
 	 * @since 3.7
 	 */
