@@ -4388,7 +4388,7 @@ public class TestModuleContainer extends AbstractTest {
 		// In this example we see the following:
 		// - libg has two possible choices for its substitution package, the internal one is chosen in first iteration -> resolved
 		// - util has two possible choices for its substitution package, the external one is chosen in first iteration -> libg
-		// - now util has to be removed as a provider only having libg as the only one left 
+		// - now util has to be removed as a provider only having libg as the only one left
 		// - bndlib now can only use libg for exceptions package but this conflicts with  result from util that has use constraint on exceptions package
 		// - on second iteration now libg chose external and drops it exports removing it from util+bndlib -> resolved state
 		assertSucessfulWith(result, 3, 2, 1, 0);
