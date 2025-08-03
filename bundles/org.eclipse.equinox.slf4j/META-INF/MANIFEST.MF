@@ -13,7 +13,6 @@ Import-Package: org.eclipse.equinox.log;version="[1.1.0,2.0.0)",
  org.slf4j.event;version="[2.0.0,3.0.0)",
  org.slf4j.helpers;version="[2.0.0,3.0.0)",
  org.slf4j.spi;version="[2.0.0,3.0.0)"
-Require-Bundle: org.eclipse.equinox.common;bundle-version="[3.20.0,4.0.0)"
 Automatic-Module-Name: org.eclipse.equinox.slf4j
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.eclipse.equinox.slf4j.EquinoxLoggerFactoryActivator
