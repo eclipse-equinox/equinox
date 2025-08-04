@@ -254,7 +254,12 @@ public class SystemBundleActivator implements BundleActivator {
 						e.getMessage(), e);
 			}
 		}
-
+		try {
+			plurl.uninstall();
+		} catch (Exception e) {
+			bundle.getEquinoxContainer().getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR,
+					e.getMessage(), e);
+		}
 		// unregister services
 		for (ServiceRegistration<?> registration : registrations)
 			registration.unregister();

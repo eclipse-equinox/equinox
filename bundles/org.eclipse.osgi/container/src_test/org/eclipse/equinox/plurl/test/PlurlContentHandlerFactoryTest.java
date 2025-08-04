@@ -14,6 +14,7 @@
 package org.eclipse.equinox.plurl.test;
 
 import static org.eclipse.equinox.plurl.test.PlurlStreamHandlerFactoryTest.checkProtocol;
+import static org.eclipse.equinox.plurl.test.PlurlTestHandlers.canReflect;
 import static org.eclipse.equinox.plurl.test.PlurlTestHandlers.createTestContentHandlerFactory;
 import static org.eclipse.equinox.plurl.test.PlurlTestHandlers.createTestURLStreamHandlerFactory;
 import static org.hamcrest.CoreMatchers.is;
@@ -25,22 +26,39 @@ import static org.junit.Assume.assumeThat;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import org.eclipse.equinox.plurl.test.PlurlStreamHandlerFactoryTest.TesterClass;
+import org.eclipse.equinox.plurl.test.PlurlStreamHandlerFactoryTest.TesterClass1;
+import org.eclipse.equinox.plurl.test.PlurlStreamHandlerFactoryTest.TesterClass2;
 import org.eclipse.equinox.plurl.test.PlurlTestHandlers.TestContentHandlerFactory;
 import org.eclipse.equinox.plurl.test.PlurlTestHandlers.TestFactoryType;
 import org.eclipse.equinox.plurl.test.PlurlTestHandlers.TestURLStreamHandlerFactory;
 import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.Test;
 
 @SuppressWarnings("nls")
 public class PlurlContentHandlerFactoryTest
 {
-	private static PlurlTestHandlers plurlTestHandlers = new PlurlTestHandlers();
+	private static PlurlTestHandlers plurlTestHandlers;
 
+	@Before
+	public synchronized void installPlurl() {
+		if (plurlTestHandlers == null) {
+			plurlTestHandlers = new PlurlTestHandlers();
+		}
+	}
 	@After
 	public void cleanupHandlers() {
 		plurlTestHandlers.cleanupHandlers();
+	}
+
+	@AfterClass
+	public static void uninstallPlurl() {
+		plurlTestHandlers.uninstall(true);
+		plurlTestHandlers = null;
 	}
 
 	@Test
@@ -89,7 +107,7 @@ public class PlurlContentHandlerFactoryTest
 	}
 
 	private void doAddRemoveFactory(TestFactoryType type) throws IOException {
-		assumeThat(plurlTestHandlers.canReflect(type), is(String.valueOf(true)));
+		assumeThat(canReflect(type), is(String.valueOf(true)));
 
 		final String root = "root";
 		final String P1 = "p1";
@@ -163,7 +181,7 @@ public class PlurlContentHandlerFactoryTest
 	}
 
 	private void doTestGCURLFactory(TestFactoryType type) throws IOException {
-		assumeThat(plurlTestHandlers.canReflect(type), is(String.valueOf(true)));
+		assumeThat(canReflect(type), is(String.valueOf(true)));
 
 		TestURLStreamHandlerFactory rootPlurlFactory = createTestURLStreamHandlerFactory(type,
 				"gctest");
@@ -188,6 +206,59 @@ public class PlurlContentHandlerFactoryTest
 		checkContent(rootPlurlFactory.TYPES, false);
 	}
 
+	@Test
+	public void testContentPlurlFactory() throws IOException {
+		doTestContentContext(TestFactoryType.PLURL_FACTORY, plurlTestHandlers, null);
+	}
+
+	@Test
+	public void testContentNotPlurlFactory() throws IOException {
+		doTestContentContext(TestFactoryType.NOT_PLURL_FACTORY, plurlTestHandlers, null);
+	}
+
+	@Test
+	public void testContentLegacyFactory() throws IOException {
+		doTestContentContext(TestFactoryType.LEGACY_FACTORY, plurlTestHandlers, null);
+	}
+
+	@Test
+	public void testContentProxyFactory() throws IOException {
+		doTestContentContext(TestFactoryType.PLURL_PROXY_FACTORY, plurlTestHandlers, null);
+	}
+
+	static void doTestContentContext(TestFactoryType type, PlurlTestHandlers handlersToUse,
+			PlurlTestHandlers handlersToUninstall) throws IOException {
+		assumeThat(canReflect(type), is(String.valueOf(true)));
+		final String TEST_PROTOCOL1 = "testprotocol1";
+		final String TEST_PROTOCOL2 = "testprotocol2";
+		final String TEST_PROTOCOL3 = "testprotocol3";
+
+		// install the handler factory that uses the content mime types to test
+		PlurlTestHandlers.TestURLStreamHandlerFactory urlStreamHandlerFactory = createTestURLStreamHandlerFactory(type,
+				Arrays.asList(TEST_PROTOCOL1, TEST_PROTOCOL2, TEST_PROTOCOL3));
+		handlersToUse.add(type, urlStreamHandlerFactory);
+
+		TestContentHandlerFactory testContent1 = createTestContentHandlerFactory(type,
+				Arrays.asList(TEST_PROTOCOL1, TEST_PROTOCOL2), TesterClass1.class);
+		handlersToUse.add(type, testContent1);
+
+		TestContentHandlerFactory testContent2 = createTestContentHandlerFactory(type,
+				Arrays.asList(TEST_PROTOCOL2, TEST_PROTOCOL3), TesterClass2.class);
+		handlersToUse.add(type, testContent2);
+
+		if (handlersToUninstall != null) {
+			handlersToUninstall.uninstall(false);
+		}
+
+		TesterClass t1 = new TesterClass1();
+		TesterClass t2 = new TesterClass2();
+
+		checkContent(t1, testContent1.TYPES, true);
+		checkContent(t1, Collections.singletonList(TEST_PROTOCOL3), false);
+		checkContent(t2, testContent2.TYPES, true);
+		checkContent(t2, Collections.singletonList(TEST_PROTOCOL1), false);
+	}
+
 	static void checkContent(List<String> mimetypes, boolean expectSuccess) throws IOException {
 		for (String mimetype : mimetypes) {
 			checkURLContent(mimetype + "://test/it", expectSuccess);
@@ -207,7 +278,7 @@ public class PlurlContentHandlerFactoryTest
 
 	private static void checkURLContent(TesterClass testerClass, String spec, boolean expectSuccess)
 			throws IOException {
-		checkURLContent(testerClass.createURL(spec), expectSuccess);
+		checkURLContent(testerClass, testerClass.createURL(spec), expectSuccess);
 	}
 
 	private static void checkURLContent(URL u, boolean expectSuccess) throws IOException {
@@ -218,5 +289,12 @@ public class PlurlContentHandlerFactoryTest
 		}
 	}
 
+	private static void checkURLContent(TesterClass testerClass, URL u, boolean expectSuccess) throws IOException {
+		if (expectSuccess) {
+			assertEquals("Wrong content value", u.getProtocol(), testerClass.getContent(u));
+		} else {
+			assertNotEquals("Wrong content value", u.getProtocol(), testerClass.getContent(u));
+		}
+	}
 }
 
