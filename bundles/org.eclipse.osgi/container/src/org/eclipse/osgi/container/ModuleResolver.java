@@ -477,10 +477,11 @@ final class ModuleResolver {
 		class ResolveLogger extends Logger {
 			private Map<Resource, ResolutionException> errors = null;
 			public int totalPerm;
-			public int processedPerm;
+			public int totalProcessedPerm;
 			public int usesPerm;
 			public int importPerm;
 			public int subPerm;
+			public int processedPerm;
 
 			public ResolveLogger() {
 				super(DEBUG_USES ? Logger.LOG_DEBUG : 0);
@@ -609,6 +610,11 @@ final class ModuleResolver {
 
 			@Override
 			public void logProcessPermutation(PermutationType type) {
+				totalProcessedPerm++;
+			}
+
+			@Override
+			public void logPermutationProcessed(ResolutionError error) {
 				processedPerm++;
 			}
 

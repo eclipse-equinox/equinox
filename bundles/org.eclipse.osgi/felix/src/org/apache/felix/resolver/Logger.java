@@ -185,4 +185,20 @@ public class Logger
     {
         // do nothing by default
     }
+
+    /**
+     * Called whenever a permutation was processed and if processing yields any
+     * error (usually a uses-contraint violation but also unresolved resources),
+     * this reflects actual work to be performed, while
+     * {@link #logPermutationAdded(PermutationType)} and
+     * {@link #logProcessPermutation(PermutationType)} indicate that a permutations
+     * is added for later examination or pulled from the stack for further
+     * processing.
+     * 
+     * @param error if this permutation resulted in an error or was successful in
+     *              which case the value is <code>null</code>
+     */
+    public void logPermutationProcessed(ResolutionError error) {
+
+    }
 }

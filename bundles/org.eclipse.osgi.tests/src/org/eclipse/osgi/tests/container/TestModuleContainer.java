@@ -1982,17 +1982,17 @@ public class TestModuleContainer extends AbstractTest {
 	 */
 	@Test
 	public void testUses5Importer() throws BundleException, IOException {
-		doTestUses5("uses.k.importer.MF", 3, 0, 3, 0);
+		doTestUses5("uses.k.importer.MF", 2, 0, 3, 0);
 	}
 
 	@Test
 	public void testUses5ReqCap() throws BundleException, IOException {
-		doTestUses5("uses.k.reqCap.MF", 3, 0, 3, 0);
+		doTestUses5("uses.k.reqCap.MF", 2, 0, 3, 0);
 	}
 
 	@Test
 	public void testUses5Requirer() throws BundleException, IOException {
-		doTestUses5("uses.k.requirer.MF", 3, 0, 3, 0);
+		doTestUses5("uses.k.requirer.MF", 2, 0, 3, 0);
 	}
 
 	public void doTestUses5(String kManifest, int maxTotal, int maxSub, int maxUse, int maxPkg)
@@ -3939,14 +3939,13 @@ public class TestModuleContainer extends AbstractTest {
 			modules.add(installDummyModule(manifest, manifest, container));
 		}
 		report = container.resolve(modules, true);
-		assertSucessfulWith(report, 114, 62, 47, 5);
+		assertSucessfulWith(report, 15, 62, 47, 5);
 	}
 
-	protected void assertSucessfulWith(ResolutionReport report, int maxTotalPermutations, int maxSubstitution,
+	protected void assertSucessfulWith(ResolutionReport report, int maxProcessed, int maxSubstitution,
 			int maxUses, int maxImport) {
 		assertNull("Failed to resolve test.", report.getResolutionException());
-		assertNotMoreThanPermutationCreated(report, ResolutionReport::getTotalPermutations, maxTotalPermutations,
-				"total");
+		assertNotMoreThanPermutationCreated(report, ResolutionReport::getProcessedPermutations, maxProcessed, "processed");
 		assertNotMoreThanPermutationCreated(report, ResolutionReport::getSubstitutionPermutations, maxSubstitution,
 				"substitution");
 		assertNotMoreThanPermutationCreated(report, ResolutionReport::getUsesPermutations, maxUses, "uses");
@@ -4369,29 +4368,26 @@ public class TestModuleContainer extends AbstractTest {
 	@Test
 	public void testLocalUseConstraintViolations() throws Exception {
 		ResolutionReport result = resolveTestSet("set1");
-		// TODO get down permutation count!
-		assertSucessfulWith(result, 49, 20, 23, 6);
+		assertSucessfulWith(result, 6, 20, 23, 6);
 	}
 
 	@Test
 
 	public void testLocalUseConstraintViolations2() throws Exception {
 		ResolutionReport result = resolveTestSet("set2");
-		// TODO get down permutation count!
-		assertSucessfulWith(result, 7, 3, 1, 3);
+		assertSucessfulWith(result, 3, 3, 1, 3);
 	}
 
 	@Test
 	public void testSubstitutionPackageResolution() throws Exception {
 		ResolutionReport result = resolveTestSet("set3");
-		// TODO get down permutation count
 		// In this example we see the following:
 		// - libg has two possible choices for its substitution package, the internal one is chosen in first iteration -> resolved
 		// - util has two possible choices for its substitution package, the external one is chosen in first iteration -> libg
 		// - now util has to be removed as a provider only having libg as the only one left
 		// - bndlib now can only use libg for exceptions package but this conflicts with  result from util that has use constraint on exceptions package
 		// - on second iteration now libg chose external and drops it exports removing it from util+bndlib -> resolved state
-		assertSucessfulWith(result, 3, 2, 1, 0);
+		assertSucessfulWith(result, 1, 2, 1, 0);
 	}
 
 	private ResolutionReport resolveTestSet(String testSetName) throws Exception {
