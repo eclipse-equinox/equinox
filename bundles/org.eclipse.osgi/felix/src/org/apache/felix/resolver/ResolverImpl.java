@@ -289,8 +289,10 @@ public class ResolverImpl implements Resolver
             ResolutionError currentError = session.getCurrentError();
             if (currentError == null && report.getUnresolvedRequirements().isEmpty()) {
                 // Success!
+                m_logger.logPermutationProcessed(null);
                 break;
             }
+            m_logger.logPermutationProcessed(currentError == null ? report : currentError);
             if (bestCandidate == null || report.isBetterThan(bestCandidate.getFaultyResources())) {
                 bestCandidate = current;
                 if (currentError == null && report.isMissingMandatory()) {
