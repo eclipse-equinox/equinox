@@ -36,6 +36,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
@@ -55,10 +57,10 @@ public final class PlurlImpl implements Plurl {
 	private static final String PROTOCOL_HANDLER_PKGS = "java.protocol.handler.pkgs"; //$NON-NLS-1$
 	private static final String CONTENT_HANDLER_PKGS = "java.content.handler.pkgs"; //$NON-NLS-1$
 	private static final String DEFAULT_VM_CONTENT_HANDLERS = "sun.net.www.content"; //$NON-NLS-1$
-	private volatile Set<String> forbiddenProtocols = new HashSet<>(
+	volatile Set<String> forbiddenProtocols = new HashSet<>(
 			Arrays.asList("jar", "jmod", "file", "jrt")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	private static final String THIS_PACKAGE = PlurlImpl.class.getPackage().getName();
-	static String PLURL_STREAM_HANDLER_CLASS_NAME = PlurlStreamHandler.class.getName();
+	static final String PLURL_STREAM_HANDLER_CLASS_NAME = PlurlStreamHandler.class.getName();
 	static final Field URL_HANDLER_FIELD = findUrlHandlerField();
 
 	private static final Collection<ClassLoader> systemLoaders;
@@ -132,8 +134,21 @@ public final class PlurlImpl implements Plurl {
 		return true;
 	}
 
+	static enum SetFactories {
+		notInstalled, // not installed yet
+		primordial, // there were no factories set until plurl
+		override, // single factories existed before plurl overrode them
+		plurlAlreadySet // some other PlurlImpl instance already installed plurl
+	}
+
+	SetFactories setFactories = SetFactories.notInstalled;
+
+	URLStreamHandlerFactory parentURLStreamHandlerFactory = null;
+	ContentHandlerFactory parentContentHandlerFactory = null;
+
 	List<URLStreamHandlerFactoryHolder> streamHandlerFactories = Collections.emptyList();
 	List<ContentHandlerFactoryHolder> contentHandlerFactories = Collections.emptyList();
+	List<PlurlImplHolder> plurlImpls = Collections.emptyList();
 
 	final ServiceLoader<URLStreamHandlerFactory> builtinURLStreamHandlerFactoryLoader;
 	final ServiceLoader<ContentHandlerFactory> builtinContentHandlerFactoryLoader;
@@ -169,12 +184,22 @@ public final class PlurlImpl implements Plurl {
 
 	public class PlurlURLStreamHandlerFactory extends URLStreamHandler
 			implements URLStreamHandlerFactory, LegacyFactory {
+		private final URLStreamHandlerFactory parent;
+
+		public PlurlURLStreamHandlerFactory(URLStreamHandlerFactory parent) {
+			this.parent = parent;
+		}
+
 		@Override
 		public URLStreamHandler createURLStreamHandler(String protocol) {
 			if (protocol.equals(PLURL_PROTOCOL)) {
 				return this;
 			}
-			return createURLStreamHandlerImpl(protocol);
+			URLStreamHandler handler = createURLStreamHandlerImpl(protocol);
+			if (handler == null && parent != null) {
+				return parent.createURLStreamHandler(protocol);
+			}
+			return handler;
 		}
 
 		@Override
@@ -194,14 +219,20 @@ public final class PlurlImpl implements Plurl {
 
 		@Override
 		public boolean isMultiplexing() {
-			return PlurlImpl.this.isMultiplexing(getContentHandlerFactories());
+			return PlurlImpl.this.isMultiplexing(getURLStreamHandlerFactories());
 		}
 	}
 
 	public class PlurlContentHandlerFactory implements ContentHandlerFactory, LegacyFactory {
+		private final ContentHandlerFactory parent;
+
+		public PlurlContentHandlerFactory(ContentHandlerFactory parent) {
+			this.parent = parent;
+		}
 		@Override
 		public ContentHandler createContentHandler(String mimetype) {
-			return createContentHandlerImpl(mimetype);
+			ContentHandler fromParent = parent == null ? null : parent.createContentHandler(mimetype);
+			return createContentHandlerImpl(mimetype, fromParent);
 		}
 
 		@Override
@@ -216,11 +247,33 @@ public final class PlurlImpl implements Plurl {
 
 		@Override
 		public boolean isMultiplexing() {
-			return PlurlImpl.this.isMultiplexing(getURLStreamHandlerFactories());
+			return PlurlImpl.this.isMultiplexing(getContentHandlerFactories());
 		}
 	}
 
-	public void install(String... forbidden) {
+	private boolean checkPlurlProtocol() {
+		try {
+			URL plurl = new URL(Plurl.PLURL_PROTOCOL, Plurl.PLURL_OP, PLURL_REGISTER_IMPLEMENTATION);
+			// plurl is already available; try registering our impl
+			@SuppressWarnings("unchecked")
+			Consumer<Object> addImpl = (Consumer<Object>) plurl.openConnection().getContent();
+			addImpl.accept(this);
+			this.setFactories = SetFactories.plurlAlreadySet;
+			return true;
+		} catch (MalformedURLException e) {
+			// expected if there is no plurl installed yet.
+			return false;
+		} catch (IOException e) {
+			// could not add our implementation; move on
+		}
+		return true;
+	}
+
+	public synchronized void install(String... forbidden) {
+		if (setFactories == SetFactories.override || setFactories == SetFactories.primordial) {
+			// already installed; no-op
+			return;
+		}
 		if (forbidden != null && forbidden.length > 0) {
 			Set<String> forbiddenSet = new HashSet<>(Arrays.asList(forbidden));
 			if (forbiddenSet.contains(PLURL_FORBID_NOTHING)) {
@@ -229,32 +282,224 @@ public final class PlurlImpl implements Plurl {
 				forbiddenProtocols = forbiddenSet;
 			}
 		}
-		try {
-			new URL(PLURL_PROTOCOL, PLURL_OP, PLURL_ADD_URL_STREAM_HANDLER_FACTORY);
-			// plurl is already installed
+		if (checkPlurlProtocol()) {
 			return;
-		} catch (MalformedURLException e) {
-			// expected if there is no plurl installed yet.
 		}
 
-		try {
-			// sync on URLConnection to prevent more than one thread from setting plurl
-			synchronized (URLConnection.class) {
-				URLConnection.setContentHandlerFactory(new PlurlContentHandlerFactory());
-				URL.setURLStreamHandlerFactory(new PlurlURLStreamHandlerFactory());
-			}
-		} catch (Throwable t) {
-			// There will be timing issues here if multiple Plurl Impls try to install
-			// at the same time. Check for plurl protocol again before throwing exception;
-			try {
-				new URL(PLURL_PROTOCOL, PLURL_OP, PLURL_ADD_URL_STREAM_HANDLER_FACTORY);
-				// plurl is already installed
+		// sync on URLConnection to prevent more than one thread from setting plurl
+		synchronized (URLConnection.class) {
+			// try again with lock
+			if (checkPlurlProtocol()) {
 				return;
-			} catch (MalformedURLException e) {
-				// expected if there is no plurl installed yet.
 			}
-			throw new IllegalStateException("Cannot install the plurl factories.", t); //$NON-NLS-1$
+			boolean contentHandlerFactorySet = false;
+			try {
+				URLConnection.setContentHandlerFactory(new PlurlContentHandlerFactory(null));
+				contentHandlerFactorySet = true;
+				URL.setURLStreamHandlerFactory(new PlurlURLStreamHandlerFactory(null));
+				setFactories = SetFactories.primordial;
+			} catch (Throwable t) {
+				try {
+					forceFactories(t, contentHandlerFactorySet);
+					setFactories = SetFactories.override;
+				} catch (Exception e) {
+					String message = "Cannot install the plurl factories. " //$NON-NLS-1$
+							+ "The java.base module must be configured to open the java.net package for reflection " //$NON-NLS-1$
+							+ "in order to allow plurl to replace the existing factories. " //$NON-NLS-1$
+							+ "For example, by using the JVM option: '--add-opens java.base/java.net=ALL-UNNAMED'. "; //$NON-NLS-1$
+					throw new IllegalStateException(message, e);
+				}
+			}
 		}
+	}
+
+	private boolean unregisterPlurlImpl() {
+		try {
+			URL plurl = new URL(Plurl.PLURL_PROTOCOL, Plurl.PLURL_OP, PLURL_UNREGISTER_IMPLEMENTATION);
+			// plurl is already available; try adding ours impl
+			@SuppressWarnings("unchecked")
+			Consumer<Object> removeImpl = (Consumer<Object>) plurl.openConnection().getContent();
+			removeImpl.accept(this);
+			return true;
+		} catch (MalformedURLException e) {
+			// expected if there is no plurl installed
+			return false;
+		} catch (IOException e) {
+			// could not remove our implementation; move on
+		}
+		return true;
+	}
+
+	@Override
+	public synchronized void uninstall() {
+		if (setFactories == SetFactories.notInstalled) {
+			// not installed; do nothing
+			return;
+		}
+		if (setFactories == SetFactories.primordial) {
+			// we don't let primordial Plurls get uninstalled;
+			// this is a no-op;
+			return;
+		}
+		if (setFactories == SetFactories.plurlAlreadySet) {
+			// some other plurl is set; unregister ours
+			unregisterPlurlImpl();
+			setFactories = SetFactories.notInstalled;
+			return;
+		}
+
+		// set this plurl as not installed
+		setFactories = SetFactories.notInstalled;
+
+		// find a designate
+		Object designate = null;
+		PlurlImplHolder nextHolder = null;
+		Iterator<PlurlImplHolder> iHolders = plurlImpls.iterator();
+		while (iHolders.hasNext()) {
+			PlurlImplHolder next = iHolders.next();
+			iHolders.remove();
+			// pin designate object to avoid GC
+			designate = next.getImpl();
+			if (designate != null) {
+				nextHolder = next;
+				break;
+			}
+		}
+
+		Exception forceError = null;
+		try {
+			forceURLStreamHandlerFactory(false, parentURLStreamHandlerFactory);
+		} catch (Exception e) {
+			// this is unexpected since we forced the plurl at install
+			forceError = e;
+		}
+		try {
+			forceContentHandlerFactory(false, parentContentHandlerFactory);
+		} catch (Exception e) {
+			// this is unexpected since we forced the plurl at install
+			if (forceError != null) {
+				e.addSuppressed(forceError);
+			}
+			forceError = e;
+		}
+		if (forceError != null) {
+			// again, this would be very unexpected since we forced plurl at install
+			throw new RuntimeException(forceError);
+		}
+
+		if (nextHolder != null) {
+			// found a designate; now force it to be installed
+			nextHolder.install();
+		}
+		// Hack to make sure the designate isn't GC'ed before we call install by using
+		// the reference after; otherwise the JVM could determine the variable is out of
+		// scope and therefore allow it to be GC'ed
+		if (designate != null) {
+			designate.hashCode();
+		}
+	}
+
+	private void forceFactories(Throwable t, boolean contentHandlerFactorySet) throws Exception {
+		try {
+			if (!contentHandlerFactorySet) {
+				forceContentHandlerFactory(true, null);
+			}
+			forceURLStreamHandlerFactory(true, null);
+		} catch (Exception e) {
+			e.addSuppressed(t);
+			throw e;
+		}
+	}
+
+	private void forceURLStreamHandlerFactory(boolean installPlurl, URLStreamHandlerFactory forceBack)
+			throws Exception {
+		Field factoryField = getStaticField(URL.class, URLStreamHandlerFactory.class);
+		if (factoryField == null) {
+			throw new Exception("Could not find URLStreamHandlerFactory field"); //$NON-NLS-1$
+		}
+		// look for a lock to synchronize on
+		Object lock = getURLStreamHandlerFactoryLock();
+		synchronized (lock) {
+			URLStreamHandlerFactory toSet = installPlurl ? (URLStreamHandlerFactory) factoryField.get(null) : forceBack;
+			if (installPlurl) {
+				parentURLStreamHandlerFactory = toSet;
+				// current factory does not support plurl, ok we'll wrap it
+				toSet = new PlurlURLStreamHandlerFactory(toSet);
+			}
+
+			factoryField.set(null, null);
+			// always attempt to clear the handlers cache
+			// This allows an optimization for the single framework use-case
+			resetURLStreamHandlers();
+			URL.setURLStreamHandlerFactory(toSet);
+		}
+	}
+
+	private Object getURLStreamHandlerFactoryLock() throws IllegalAccessException {
+		Object lock;
+		try {
+			Field streamHandlerLockField = URL.class.getDeclaredField("streamHandlerLock"); //$NON-NLS-1$
+			streamHandlerLockField.setAccessible(true);
+			lock = streamHandlerLockField.get(null);
+		} catch (NoSuchFieldException noField) {
+			// could not find the lock, lets sync on the class object
+			lock = URL.class;
+		}
+		return lock;
+	}
+
+	private void resetURLStreamHandlers() throws IllegalAccessException {
+		Field handlersField = getStaticField(URL.class, Hashtable.class);
+		if (handlersField != null) {
+			@SuppressWarnings("rawtypes")
+			Hashtable<?, ?> handlers = (Hashtable) handlersField.get(null);
+			if (handlers != null) {
+				handlers.clear();
+			}
+		}
+	}
+
+	private void forceContentHandlerFactory(boolean installPlurl, ContentHandlerFactory forceBack) throws Exception {
+		Field factoryField = getStaticField(URLConnection.class, java.net.ContentHandlerFactory.class);
+		if (factoryField == null) {
+			throw new Exception("Could not find ContentHandlerFactory field"); //$NON-NLS-1$
+		}
+
+		ContentHandlerFactory toSet = installPlurl ? (ContentHandlerFactory) factoryField.get(null) : forceBack;
+		if (installPlurl) {
+			parentContentHandlerFactory = toSet;
+			// current factory does not support plurl, ok we'll wrap it
+			toSet = new PlurlContentHandlerFactory(toSet);
+		}
+		// null out the field so that we can successfully call setContentHandlerFactory
+		factoryField.set(null, null);
+		// always attempt to clear the handlers cache
+		// This allows an optimization for the single framework use-case
+		resetContentHandlers();
+		URLConnection.setContentHandlerFactory(toSet);
+	}
+
+	private void resetContentHandlers() throws IllegalAccessException {
+		Field handlersField = getStaticField(URLConnection.class, Hashtable.class);
+		if (handlersField != null) {
+			@SuppressWarnings("rawtypes")
+			Hashtable<?, ?> handlers = (Hashtable) handlersField.get(null);
+			if (handlers != null) {
+				handlers.clear();
+			}
+		}
+	}
+
+	public Field getStaticField(Class<?> clazz, Class<?> type) {
+		Field[] fields = clazz.getDeclaredFields();
+		for (Field field : fields) {
+			boolean isStatic = Modifier.isStatic(field.getModifiers());
+			if (isStatic && field.getType().equals(type)) {
+				field.setAccessible(true);
+				return field;
+			}
+		}
+		return null;
 	}
 
 	public PlurlImpl() {
@@ -272,19 +517,19 @@ public final class PlurlImpl implements Plurl {
 		}
 	}
 
-	ContentHandler createContentHandlerImpl(String mimetype) {
+	ContentHandler createContentHandlerImpl(String mimetype, ContentHandler fromParent) {
 		ContentHandler builtin = findBuiltInContentHandler(mimetype);
 		if (builtin != null) {
 			return builtin;
 		}
 		// Never return null for content handlers because then
 		// we will never get called again.
-		return new PlurlRootContentHandler(mimetype);
+		return new PlurlRootContentHandler(mimetype, fromParent);
 	}
 
 	URLStreamHandler createURLStreamHandlerImpl(String protocol) {
 		if (forbiddenProtocols.contains(protocol)) {
-			// to dangerous to these to be overridden
+			// to dangerous for these to be overridden
 			return null;
 		}
 		// Check if we are recursing
@@ -455,11 +700,15 @@ public final class PlurlImpl implements Plurl {
 				case PLURL_ADD_URL_STREAM_HANDLER_FACTORY:
 					return (f) -> add((URLStreamHandlerFactory) f);
 				case PLURL_REMOVE_URL_STREAM_HANDLER_FACTORY:
-					return (f) -> remove(URLStreamHandlerFactory.class.cast(f));
+					return (f) -> remove((URLStreamHandlerFactory) f);
 				case PLURL_ADD_CONTENT_HANDLER_FACTORY:
 					return (f) -> add((ContentHandlerFactory) f);
 				case PLURL_REMOVE_CONTENT_HANDLER_FACTORY:
-					return (f) -> remove(ContentHandlerFactory.class.cast(f));
+					return (f) -> remove((ContentHandlerFactory) f);
+				case PLURL_REGISTER_IMPLEMENTATION:
+					return (p) -> addImpl(p);
+				case PLURL_UNREGISTER_IMPLEMENTATION:
+					return (p) -> removeImpl(p);
 				default:
 					throw new IOException("Unknown plurl operation: " + path); //$NON-NLS-1$
 				}
@@ -469,6 +718,32 @@ public final class PlurlImpl implements Plurl {
 
 	boolean isMultiplexing(List<?> factories) {
 		return factories.size() > 1;
+	}
+
+	synchronized void addImpl(Object p) {
+		if (setFactories == SetFactories.primordial) {
+			// If this plurl is the primordial factory (no singletons set in the JVM)
+			// then we don't track other plurl installs because we will never
+			// remove this plurl from the JVM singleton
+			return;
+		}
+		if (p == this) {
+			// someone called install again on this Plurl; ignore it
+			return;
+		}
+		List<PlurlImplHolder> updated = new ArrayList<>(plurlImpls);
+		// remove any GC'ed handlers or the new impl (incase it is being added again)
+		updated.removeIf((h) -> h.getImpl() == null || h.getImpl() == p);
+		// add new impl
+		updated.add(new PlurlImplHolder(p));
+		plurlImpls = updated;
+	}
+
+	synchronized void removeImpl(Object p) {
+		List<PlurlImplHolder> updated = new ArrayList<>(plurlImpls);
+		// remove the impl and any that got GC'ed
+		updated.removeIf((h) -> h.getImpl() == p || h.getImpl() == null);
+		plurlImpls = updated.isEmpty() ? Collections.emptyList() : updated;
 	}
 
 	synchronized void add(URLStreamHandlerFactory f) {
@@ -603,17 +878,22 @@ public final class PlurlImpl implements Plurl {
 
 	class PlurlRootContentHandler extends ContentHandler {
 		private final String contentType;
+		private final ContentHandler fromParent;
 
-		PlurlRootContentHandler(String contentType) {
+		PlurlRootContentHandler(String contentType, ContentHandler fromParent) {
 			this.contentType = contentType;
+			this.fromParent = fromParent;
 		}
 
 		@Override
 		public Object getContent(URLConnection uConn) throws IOException {
 			ContentHandler handler = findContentHandler(contentType);
-			if (handler != null)
+			if (handler != null) {
 				return handler.getContent(uConn);
-
+			}
+			if (fromParent != null) {
+				return fromParent.getContent(uConn);
+			}
 			return uConn.getInputStream();
 		}
 	}
@@ -677,6 +957,72 @@ public final class PlurlImpl implements Plurl {
 		protected abstract H createHandler(String type, F f);
 
 		protected abstract void remove(F f);
+	}
+
+	class PlurlImplHolder {
+		private final WeakReference<Object> plurlImpl;
+
+		PlurlImplHolder(Object plurlImpl) {
+			this.plurlImpl = new WeakReference<>(plurlImpl);
+		}
+
+		public void install() {
+			// should be able to reflect on the plurl instance because install is public
+			Object currentPlurl = plurlImpl.get();
+			// should never be null since we pinned the object before calling
+			try {
+				Method install = currentPlurl.getClass().getMethod("install", String[].class); //$NON-NLS-1$
+				install.invoke(currentPlurl, (Object) forbiddenProtocols.toArray(new String[0]));
+			} catch (NoSuchMethodException e) {
+				// should never happen
+				throw new RuntimeException(e);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+			synchronized (PlurlImpl.this) {
+				try {
+					URL registerPlurl = new URL(PLURL_PROTOCOL, PLURL_OP, PLURL_REGISTER_IMPLEMENTATION);
+					for (PlurlImplHolder plurlImplHolder : plurlImpls) {
+						Object p = plurlImplHolder.getImpl();
+						@SuppressWarnings("unchecked")
+						Consumer<Object> addImpl = (Consumer<Object>) registerPlurl.openConnection().getContent();
+						addImpl.accept(p);
+					}
+					URL addContentHandlerFactory = new URL(PLURL_PROTOCOL, PLURL_OP, PLURL_ADD_CONTENT_HANDLER_FACTORY);
+					for (ContentHandlerFactoryHolder contentHandlerFactoryHolder : contentHandlerFactories) {
+						ContentHandlerFactory c = contentHandlerFactoryHolder.getFactory();
+						@SuppressWarnings("unchecked")
+						Consumer<Object> addImpl = (Consumer<Object>) addContentHandlerFactory.openConnection()
+								.getContent();
+						addImpl.accept(c);
+					}
+					URL addURLStreamHandlerFactory = new URL(PLURL_PROTOCOL, PLURL_OP,
+							PLURL_ADD_URL_STREAM_HANDLER_FACTORY);
+					for (URLStreamHandlerFactoryHolder urlStreamHandlerFactoryHolder : streamHandlerFactories) {
+						URLStreamHandlerFactory s = urlStreamHandlerFactoryHolder.getFactory();
+						@SuppressWarnings("unchecked")
+						Consumer<Object> addImpl = (Consumer<Object>) addURLStreamHandlerFactory.openConnection()
+								.getContent();
+						addImpl.accept(s);
+					}
+				} catch (MalformedURLException e) {
+					throw new RuntimeException(e);
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				} finally {
+					plurlImpls.clear();
+					contentHandlerFactories.clear();
+					streamHandlerFactories.clear();
+					parentContentHandlerFactory = null;
+					parentURLStreamHandlerFactory = null;
+				}
+			}
+
+		}
+
+		public Object getImpl() {
+			return plurlImpl.get();
+		}
 	}
 
 	public class ContentHandlerFactoryHolder extends PlurlFactoryHolder<ContentHandlerFactory, ContentHandler> {

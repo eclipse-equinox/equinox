@@ -101,15 +101,54 @@ public interface Plurl {
 	public static final String PLURL_REMOVE_CONTENT_HANDLER_FACTORY = "removeContentHandlerFactory"; //$NON-NLS-1$
 
 	/**
+	 * An optional plurl protocol operation to register a {@code Plurl} instance
+	 * with the current plurl protocol implementation. This is an optional operation
+	 * that a {@code Plurl} implementation may implement to allow another plurl
+	 * instance to be registered as a delegate. A delegate may be used to install
+	 * the delegate plurl instance when the current plurl gets {@link #uninstall()
+	 * uninstalled}.
+	 */
+	public static final String PLURL_REGISTER_IMPLEMENTATION = "plurlRegisterImplementation"; //$NON-NLS-1$
+
+	/**
+	 * An optional plurl protocol operation to unregister a {@code Plurl} instance
+	 * with the current plurl instance set with the JVM. This is an optional
+	 * operation that a {@code Plurl} implementation may implement to allow another
+	 * plurl instance to be unregistered as a delegate.
+	 */
+	public static final String PLURL_UNREGISTER_IMPLEMENTATION = "plurlUnegisterImplementation"; //$NON-NLS-1$
+	/**
 	 * The value to use for the {@link #install(String...)} method to indicate that
 	 * no protocols are forbidden. for overriding by plurl handlers.
 	 */
 	public static final String PLURL_FORBID_NOTHING = "plurlForbidNothing"; //$NON-NLS-1$
 
 	/**
-	 * Installs plurl factories into the JVM singletons. If plurl factories are
-	 * already installed then this is a no-op. If the plurl factories cannot be
-	 * installed then an {@code IllegalStateException} is thrown.
+	 * Installs the plurl factories into the JVM singletons. If plurl factories are
+	 * already installed then this plurl instance is
+	 * {@link #PLURL_REGISTER_IMPLEMENTATION registered} with the existing plurl
+	 * instance set with the JVM by using something like the following:
+	 *
+	 * <pre>
+	 * ((Consumer&lt;Object&gt;) ("plurl://op/plurlRegisterImplementation").getContent()).accept(this);
+	 * </pre>
+	 *
+	 * If the plurl factories cannot be installed then an
+	 * {@code IllegalStateException} is thrown.
+	 * <p>
+	 * If the JVM singletons are already set with other factories that are not plurl
+	 * then an attempt is made to override the JVM singletons with this plurl
+	 * instance. This may only be possible if the implementation is allowed to do
+	 * deep reflection on the {@code java.net} package. If the JVM singletons are
+	 * overriden then the original singleton factory instances must be used as
+	 * parent factories of the plurl instance until the plurl instance is
+	 * {@link #uninstall() uninstalled}. if overriding the JVM singletons is not
+	 * possible then an {@link IllegalStateException} is thrown.
+	 * <p>
+	 * If the JVM singletons were not overriden then this plurl instance is
+	 * considered the primordial singleton factory for the JVM. Such a plurl
+	 * instance cannot be {@link #uninstall() uninstalled} and will live the
+	 * lifetime of the JVM.
 	 * <p>
 	 * When this method returns without throwing an exception then the following
 	 * will be true:
@@ -123,7 +162,10 @@ public interface Plurl {
 	 * with a plurl implementation which delegates to the
 	 * {@link PlurlContentHandlerFactory} objects that have been
 	 * {@link #add(PlurlContentHandlerFactory) added}.</li>
-	 * <li>The plurl protocol is available for creating {@code URL} objects.</li>
+	 * <li>The {@link #PLURL_PROTOCOL plurl} protocol is available for creating
+	 * {@code URL} objects.</li>
+	 * <li>If plurl factories are already installed then this plurl implementation
+	 * is registered as a delegate with the already installed plurl instance.</li>
 	 * </ol>
 	 * 
 	 * @param forbidden builtin JVM protocols that cannot be overridden by plurl. If
@@ -134,6 +176,37 @@ public interface Plurl {
 	 * @throws IllegalStateException if the Plurl factories cannot be installed
 	 */
 	public void install(String... forbidden);
+
+	/**
+	 * If this plurl instance is the primordial factory for the JVM then uninstall
+	 * is a no-op and the plurl instance will remain set with the JVM for the
+	 * lifetime of the JVM instance.
+	 * <p>
+	 * If this plurl is not the primordial factory and is the current plurl set with
+	 * the JVM singletons then this plurl instance must do the following:
+	 * <ol>
+	 * <li>Reset the original parent factories as the singleton factories of the
+	 * JVM</li>
+	 * <li>If there are any other plurl instances that got
+	 * {@link #PLURL_REGISTER_IMPLEMENTATION registered} with this plurl instance
+	 * then one of the registered plurl instances must be selected to be the next
+	 * delegate plurl instance to {@link #install(String...) install}.</li>
+	 * <li>If a delegate plurl instance gets installed then any existing factories
+	 * that were added to this plurl instance must be added to the new delegate
+	 * plurl instance and any {@link #PLURL_REGISTER_IMPLEMENTATION registered}
+	 * plurl instances must be registered with the new delegate plurl instance.</li>
+	 * <li>This plurl instance must release all references to other factories or
+	 * plurl instances.</li>
+	 * </ol>
+	 * If this plurl instance is not the current plurl set with JVM then this plurl
+	 * {@link #PLURL_REGISTER_IMPLEMENTATION registered} with the existing plurl
+	 * instance set with the JVM by using something like the following:
+	 *
+	 * <pre>
+	 * ((Consumer&lt;Object&gt;) ("plurl://op/plurlRegisterImplementation").getContent()).accept(this);
+	 * </pre>
+	 */
+	public void uninstall();
 
 	/**
 	 * Adds a {@link PlurlStreamHandlerFactory} to an {@link #install installed}
