@@ -29,6 +29,7 @@ import java.net.URLStreamHandlerFactory;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 import java.util.WeakHashMap;
@@ -285,6 +286,8 @@ public class PlurlTestHandlers {
 	}
 	static final boolean CAN_REFLECT_SET_URL_HANDLER;
 	static final String CAN_REFLECT_ON_URL_STREAM_HANDLER;
+	static final String CAN_REFLECT_ON_URL;
+
 	static final ClassLoader PROXY_LOADER;
 	static {
 		boolean canReflectSetUrlHandler = false;
@@ -318,6 +321,15 @@ public class PlurlTestHandlers {
 			canReflectOnURLStreamHandler = e.getMessage();
 		}
 		CAN_REFLECT_ON_URL_STREAM_HANDLER = canReflectOnURLStreamHandler;
+
+		String canReflectOnURL;
+		try {
+			getStaticField(URL.class, URLStreamHandlerFactory.class, true);
+			canReflectOnURL = String.valueOf(true);
+		} catch (Exception e) {
+			canReflectOnURL = e.getMessage();
+		}
+		CAN_REFLECT_ON_URL = canReflectOnURL;
 
 		URL apiLocation = Plurl.class.getProtectionDomain().getCodeSource().getLocation();
 		URL testLocation = PlurlTestHandlers.class.getProtectionDomain().getCodeSource().getLocation();
@@ -411,7 +423,7 @@ public class PlurlTestHandlers {
 		}
 	}
 
-	private final Plurl plurl;
+	private final Object plurl;
 	private final Set<URLStreamHandlerFactory> urlHandlers = Collections.newSetFromMap(new WeakHashMap<>());
 	private final Set<URLStreamHandlerFactory> legacyUrlHandlers = Collections.newSetFromMap(new WeakHashMap<>());
 	private final Set<URLStreamHandlerFactory> pinnedUrlHandlers = new HashSet<>();
@@ -420,9 +432,45 @@ public class PlurlTestHandlers {
 	private final Set<ContentHandlerFactory> pinnedContentHandlers = new HashSet<>();
 
 	PlurlTestHandlers() {
+		this(false);
+	}
+	PlurlTestHandlers(boolean useProxyLoader) {
 		// TODO should use service loader
-		plurl = new PlurlImpl();
-		plurl.install(Plurl.PLURL_FORBID_NOTHING);
+		if (useProxyLoader) {
+			plurl = createPlurlImplFromProxyLoader(Plurl.PLURL_FORBID_NOTHING);
+		} else {
+			PlurlImpl impl = new PlurlImpl();
+			impl.install(Plurl.PLURL_FORBID_NOTHING);
+			plurl = impl;
+		}
+	}
+
+	private Object createPlurlImplFromProxyLoader(String... forbidden) {
+		try {
+			Class<?> plurlImplClass = PROXY_LOADER.loadClass(PlurlImpl.class.getName());
+			Object impl = plurlImplClass.getConstructor().newInstance();
+			impl.getClass().getMethod("install", String[].class).invoke(impl, (Object) forbidden);
+			return impl;
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	void uninstall(boolean nullOutJVMFactories) {
+		try {
+			plurl.getClass().getMethod("uninstall").invoke(plurl);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+		if (nullOutJVMFactories) {
+			try {
+				// try to null out factories for next tests
+				forceContentHandlerFactory(null);
+				forceURLStreamHandlerFactory(null);
+			} catch (Exception e) {
+				// don't fail on forcing null; may be blocked by JVM
+			}
+		}
 	}
 
 	void cleanupHandlers() {
@@ -631,10 +679,112 @@ public class PlurlTestHandlers {
 		return null;
 	}
 
-	String canReflect(TestFactoryType type) {
+	static String canReflect(TestFactoryType type) {
 		if (type == TestFactoryType.PLURL_FACTORY || type == TestFactoryType.PLURL_PROXY_FACTORY) {
 			return String.valueOf(true);
 		}
 		return PlurlTestHandlers.CAN_REFLECT_ON_URL_STREAM_HANDLER;
+	}
+
+	static void forceURLStreamHandlerFactory(URLStreamHandlerFactory forceFactory) throws Exception {
+		try {
+			URL.setURLStreamHandlerFactory(forceFactory);
+			return;
+		} catch (Error e) {
+			// try to force set it with reflection
+		}
+		Field factoryField = getStaticField(URL.class, URLStreamHandlerFactory.class);
+		if (factoryField == null) {
+			// throw new Exception("Could not find URLStreamHandlerFactory field");
+			// //$NON-NLS-1$
+			return;
+		}
+		// look for a lock to synchronize on
+		Object lock = getURLStreamHandlerFactoryLock();
+		synchronized (lock) {
+			factoryField.set(null, null);
+			resetURLStreamHandlers();
+			URL.setURLStreamHandlerFactory(forceFactory);
+		}
+	}
+
+	private static Object getURLStreamHandlerFactoryLock() throws IllegalAccessException {
+		Object lock;
+		try {
+			Field streamHandlerLockField = URL.class.getDeclaredField("streamHandlerLock"); //$NON-NLS-1$
+			streamHandlerLockField.setAccessible(true);
+			lock = streamHandlerLockField.get(null);
+		} catch (NoSuchFieldException noField) {
+			// could not find the lock, lets sync on the class object
+			lock = URL.class;
+		}
+		return lock;
+	}
+
+	private static void resetURLStreamHandlers() throws IllegalAccessException {
+		Field handlersField = getStaticField(URL.class, Hashtable.class);
+		if (handlersField != null) {
+			@SuppressWarnings("rawtypes")
+			Hashtable<?, ?> handlers = (Hashtable) handlersField.get(null);
+			if (handlers != null) {
+				handlers.clear();
+			}
+		}
+	}
+
+	static void forceContentHandlerFactory(ContentHandlerFactory forceFactory) throws Exception {
+		try {
+			URLConnection.setContentHandlerFactory(forceFactory);
+			return;
+		} catch (Error e) {
+			// try to force set it with reflection
+		}
+		Field factoryField = getStaticField(URLConnection.class, java.net.ContentHandlerFactory.class);
+		if (factoryField == null) {
+			// throw new Exception("Could not find ContentHandlerFactory field");
+			// //$NON-NLS-1$
+			return;
+		}
+
+		// null out the field so that we can successfully call setContentHandlerFactory
+		factoryField.set(null, null);
+		// always attempt to clear the handlers cache
+		// This allows an optimization for the single framework use-case
+		resetContentHandlers();
+		URLConnection.setContentHandlerFactory(forceFactory);
+	}
+
+	private static void resetContentHandlers() throws IllegalAccessException {
+		Field handlersField = getStaticField(URLConnection.class, Hashtable.class);
+		if (handlersField != null) {
+			@SuppressWarnings("rawtypes")
+			Hashtable<?, ?> handlers = (Hashtable) handlersField.get(null);
+			if (handlers != null) {
+				handlers.clear();
+			}
+		}
+	}
+
+	private static Field getStaticField(Class<?> clazz, Class<?> type) {
+		return getStaticField(clazz, type, false);
+	}
+
+	private static Field getStaticField(Class<?> clazz, Class<?> type, boolean throwError) {
+		Field[] fields = clazz.getDeclaredFields();
+		for (Field field : fields) {
+			boolean isStatic = Modifier.isStatic(field.getModifiers());
+			if (isStatic && field.getType().equals(type)) {
+				try {
+					field.setAccessible(true);
+				} catch (RuntimeException e) {
+					if (throwError) {
+						throw e;
+					}
+					return null;
+				}
+				return field;
+			}
+		}
+		return null;
 	}
 }

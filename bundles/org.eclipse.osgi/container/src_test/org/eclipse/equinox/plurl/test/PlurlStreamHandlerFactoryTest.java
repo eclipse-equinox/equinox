@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.equinox.plurl.test;
 
+import static org.eclipse.equinox.plurl.test.PlurlTestHandlers.canReflect;
 import static org.eclipse.equinox.plurl.test.PlurlTestHandlers.createTestURLStreamHandlerFactory;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.fail;
@@ -26,44 +27,55 @@ import java.util.Collections;
 import java.util.List;
 import org.eclipse.equinox.plurl.test.PlurlTestHandlers.TestFactoryType;
 import org.junit.After;
-import org.junit.Rule;
+import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.rules.TestName;
 
 @SuppressWarnings("nls")
 public class PlurlStreamHandlerFactoryTest
 {
-	private static PlurlTestHandlers plurlTestHandlers = new PlurlTestHandlers();
-	@Rule
-	public TestName name = new TestName();
+	protected static PlurlTestHandlers plurlTestHandlers;
 
+	@Before
+	public synchronized void installPlurl() {
+		if (plurlTestHandlers == null) {
+			plurlTestHandlers = new PlurlTestHandlers();
+		}
+	}
 	@After
 	public void cleanupHandlers() {
 		plurlTestHandlers.cleanupHandlers();
 	}
 
+	@AfterClass
+	public static void uninstallPlurl() {
+		plurlTestHandlers.uninstall(true);
+		plurlTestHandlers = null;
+	}
+
 	@Test
 	public void testAddRemovePlurlFactory() throws IOException {
-		doAddRemoveFactory(TestFactoryType.PLURL_FACTORY);
+		doAddRemoveFactory(TestFactoryType.PLURL_FACTORY, plurlTestHandlers, null);
 	}
 
 	@Test
 	public void testAddRemoveNotPlurlFactory() throws IOException {
-		doAddRemoveFactory(TestFactoryType.NOT_PLURL_FACTORY);
+		doAddRemoveFactory(TestFactoryType.NOT_PLURL_FACTORY, plurlTestHandlers, null);
 	}
 
 	@Test
 	public void testAddRemoveLegacyFactory() throws IOException {
-		doAddRemoveFactory(TestFactoryType.LEGACY_FACTORY);
+		doAddRemoveFactory(TestFactoryType.LEGACY_FACTORY, plurlTestHandlers, null);
 	}
 
 	@Test
 	public void testAddRemoveProxyFactory() throws IOException {
-		doAddRemoveFactory(TestFactoryType.PLURL_PROXY_FACTORY);
+		doAddRemoveFactory(TestFactoryType.PLURL_PROXY_FACTORY, plurlTestHandlers, null);
 	}
 
-	private void doAddRemoveFactory(TestFactoryType type) throws IOException {
-		assumeThat(plurlTestHandlers.canReflect(type), is(String.valueOf(true)));
+	static void doAddRemoveFactory(TestFactoryType type, PlurlTestHandlers handlersToUse,
+			PlurlTestHandlers handlersToUninstall) throws IOException {
+		assumeThat(canReflect(type), is(String.valueOf(true)));
 
 		final String ROOT_FACTORY = "rootfactory";
 		final String TEST_PROTOCOL1 = "testprotocol1";
@@ -72,19 +84,23 @@ public class PlurlStreamHandlerFactoryTest
 		// install the root handler factory
 		PlurlTestHandlers.TestURLStreamHandlerFactory rootPlurlFactory = createTestURLStreamHandlerFactory(type, ROOT_FACTORY);
 		rootPlurlFactory.shouldHandle.set(false);
-		plurlTestHandlers.add(type, rootPlurlFactory);
+		handlersToUse.add(type, rootPlurlFactory);
 		checkProtocol(rootPlurlFactory.TYPES, true);
 
 		PlurlTestHandlers.TestURLStreamHandlerFactory testProtocol1 = createTestURLStreamHandlerFactory(type, TEST_PROTOCOL1);
-		plurlTestHandlers.add(type, testProtocol1);
+		handlersToUse.add(type, testProtocol1);
 
 		PlurlTestHandlers.TestURLStreamHandlerFactory testProtocol2 = createTestURLStreamHandlerFactory(type, TEST_PROTOCOL2);
-		plurlTestHandlers.add(type, testProtocol2);
+		handlersToUse.add(type, testProtocol2);
 
 		PlurlTestHandlers.TestURLStreamHandlerFactory catchAll = new PlurlTestHandlers.CatchAllPlurlFactory(
 				ROOT_FACTORY,
 				TEST_PROTOCOL1, TEST_PROTOCOL2);
-		plurlTestHandlers.add(type, catchAll);
+		handlersToUse.add(type, catchAll);
+
+		if (handlersToUninstall != null) {
+			handlersToUninstall.uninstall(false);
+		}
 
 		testProtocol1.shouldHandle.set(false);
 		testProtocol2.shouldHandle.set(false);
@@ -105,9 +121,9 @@ public class PlurlStreamHandlerFactoryTest
 		testProtocol1.shouldHandle.set(true);
 		testProtocol2.shouldHandle.set(true);
 
-		plurlTestHandlers.remove(type, testProtocol1);
-		plurlTestHandlers.remove(type, testProtocol2);
-		plurlTestHandlers.remove(type, catchAll);
+		handlersToUse.remove(type, testProtocol1);
+		handlersToUse.remove(type, testProtocol2);
+		handlersToUse.remove(type, catchAll);
 
 		checkProtocol(testProtocol1.TYPES, false);
 		checkProtocol(testProtocol2.TYPES, false);
@@ -117,42 +133,47 @@ public class PlurlStreamHandlerFactoryTest
 
 	@Test
 	public void testURLContextPlurlFactory() throws IOException {
-		doTestURLContext(TestFactoryType.PLURL_FACTORY);
+		doTestURLContext(TestFactoryType.PLURL_FACTORY, plurlTestHandlers, null);
 	}
 
 	@Test
 	public void testURLContextNotPlurlFactory() throws IOException {
-		doTestURLContext(TestFactoryType.NOT_PLURL_FACTORY);
+		doTestURLContext(TestFactoryType.NOT_PLURL_FACTORY, plurlTestHandlers, null);
 	}
 
 	@Test
 	public void testURLContextLegacyFactory() throws IOException {
-		doTestURLContext(TestFactoryType.LEGACY_FACTORY);
+		doTestURLContext(TestFactoryType.LEGACY_FACTORY, plurlTestHandlers, null);
 	}
 
 	@Test
 	public void testURLContextProxyFactory() throws IOException {
-		doTestURLContext(TestFactoryType.PLURL_PROXY_FACTORY);
+		doTestURLContext(TestFactoryType.PLURL_PROXY_FACTORY, plurlTestHandlers, null);
 	}
 
-	private void doTestURLContext(TestFactoryType type) throws IOException {
-		assumeThat(plurlTestHandlers.canReflect(type), is(String.valueOf(true)));
+	static void doTestURLContext(TestFactoryType type, PlurlTestHandlers handlersToUse,
+			PlurlTestHandlers handlersToUninstall) throws IOException {
+		assumeThat(canReflect(type), is(String.valueOf(true)));
 		final String TEST_PROTOCOL1 = "testprotocol1";
 		final String TEST_PROTOCOL2 = "testprotocol2";
 		final String TEST_PROTOCOL3 = "testprotocol3";
 
 		PlurlTestHandlers.TestURLStreamHandlerFactory testFactory1 = createTestURLStreamHandlerFactory(type,
 				Arrays.asList(TEST_PROTOCOL1, TEST_PROTOCOL2), TesterClass1.class);
-		plurlTestHandlers.add(type, testFactory1);
+		handlersToUse.add(type, testFactory1);
 
 		PlurlTestHandlers.TestURLStreamHandlerFactory testFactory2 = createTestURLStreamHandlerFactory(type,
 				Arrays.asList(TEST_PROTOCOL2, TEST_PROTOCOL3), TesterClass2.class);
-		plurlTestHandlers.add(type, testFactory2);
+		handlersToUse.add(type, testFactory2);
 
 		PlurlTestHandlers.TestURLStreamHandlerFactory catchAll = new PlurlTestHandlers.CatchAllPlurlFactory(
 				TEST_PROTOCOL1,
 				TEST_PROTOCOL2, TEST_PROTOCOL3);
-		plurlTestHandlers.add(type, catchAll);
+		handlersToUse.add(type, catchAll);
+
+		if (handlersToUninstall != null) {
+			handlersToUninstall.uninstall(false);
+		}
 
 		TesterClass t1 = new TesterClass1();
 		TesterClass t2 = new TesterClass2();
@@ -165,13 +186,13 @@ public class PlurlStreamHandlerFactoryTest
 		checkProtocolContext(t1, t2, testFactory1.TYPES, testFactory2.TYPES);
 	}
 
-	private void checkProtocolContext(TesterClass t1, TesterClass t2, List<String> p1, List<String> p2)
+	static void checkProtocolContext(TesterClass t1, TesterClass t2, List<String> p1, List<String> p2)
 			throws MalformedURLException {
 		swapContext(t1, t2, p1);
 		swapContext(t2, t1, p2);
 	}
 
-	private void swapContext(TesterClass t1, TesterClass t2, List<String> protocols) throws MalformedURLException {
+	static void swapContext(TesterClass t1, TesterClass t2, List<String> protocols) throws MalformedURLException {
 		for (String p : protocols) {
 			URL u = t1.createURL(p + "://test/it");
 			t1.createURL(u, "new/path", true);
@@ -226,7 +247,7 @@ public class PlurlStreamHandlerFactoryTest
 	}
 
 	private void doTestGCURLFactory(TestFactoryType type) throws IOException {
-		assumeThat(plurlTestHandlers.canReflect(type), is(String.valueOf(true)));
+		assumeThat(canReflect(type), is(String.valueOf(true)));
 
 		PlurlTestHandlers.TestURLStreamHandlerFactory rootPlurlFactory = createTestURLStreamHandlerFactory(type, "rootfactory");
 		rootPlurlFactory.shouldHandle.set(false);
@@ -248,7 +269,7 @@ public class PlurlStreamHandlerFactoryTest
 	@Test
 	public void testBuiltinURLHandlers() throws IOException {
 		assumeThat(canCreate("sun.net.www.protocol.jar.Handler"), is(String.valueOf(true)));
-		assumeThat(plurlTestHandlers.canReflect(TestFactoryType.NOT_PLURL_FACTORY), is(String.valueOf(true)));
+		assumeThat(canReflect(TestFactoryType.NOT_PLURL_FACTORY), is(String.valueOf(true)));
 
 		PlurlTestHandlers.TestURLStreamHandlerFactory catchAll = new PlurlTestHandlers.CatchAllPlurlFactory("jar");
 		plurlTestHandlers.add(TestFactoryType.PLURL_FACTORY, catchAll);
@@ -309,6 +330,8 @@ public class PlurlStreamHandlerFactoryTest
 		URL createURL(URL u, String path, boolean expectSuccess) throws MalformedURLException;
 
 		String toExternalForm(URL u);
+
+		Object getContent(URL u) throws IOException;
 	}
 
 	static class TesterClass1 implements TesterClass {
@@ -337,6 +360,11 @@ public class PlurlStreamHandlerFactoryTest
 			}
 			return null;
 		}
+
+		@Override
+		public Object getContent(URL u) throws IOException {
+			return u.getContent();
+		}
 	}
 
 	static class TesterClass2 implements TesterClass {
@@ -364,6 +392,11 @@ public class PlurlStreamHandlerFactoryTest
 				}
 			}
 			return null;
+		}
+
+		@Override
+		public Object getContent(URL u) throws IOException {
+			return u.getContent();
 		}
 	}
 }
