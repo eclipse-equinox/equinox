@@ -148,8 +148,9 @@ public final class PlurlImpl implements Plurl {
 			protocols = new ArrayList<>(1);
 			creatingProtocols.set(protocols);
 		}
-		if (protocols.contains(protocol))
+		if (protocols.contains(protocol)) {
 			return true;
+		}
 		protocols.add(protocol);
 		return false;
 	}
@@ -220,6 +221,7 @@ public final class PlurlImpl implements Plurl {
 		}
 	}
 
+	@Override
 	public void install(String... forbidden) {
 		if (forbidden != null && forbidden.length > 0) {
 			Set<String> forbiddenSet = new HashSet<>(Arrays.asList(forbidden));
@@ -392,8 +394,9 @@ public final class PlurlImpl implements Plurl {
 		}
 		// now check property
 		String builtInHandlers = System.getProperty(PROTOCOL_HANDLER_PKGS);
-		if (builtInHandlers == null)
+		if (builtInHandlers == null) {
 			return null;
+		}
 
 		StringTokenizer tok = new StringTokenizer(builtInHandlers, "|"); //$NON-NLS-1$
 		while (tok.hasMoreElements()) {
@@ -611,8 +614,9 @@ public final class PlurlImpl implements Plurl {
 		@Override
 		public Object getContent(URLConnection uConn) throws IOException {
 			ContentHandler handler = findContentHandler(contentType);
-			if (handler != null)
+			if (handler != null) {
 				return handler.getContent(uConn);
+			}
 
 			return uConn.getInputStream();
 		}

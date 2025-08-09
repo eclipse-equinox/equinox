@@ -57,23 +57,27 @@ public abstract class BundleResourceHandler extends PlurlStreamHandlerBase {
 	 */
 	@Override
 	protected void parseURL(URL url, String str, int start, int end) {
-		if (end < start)
+		if (end < start) {
 			return;
-		if (url.getPath() != null)
+		}
+		if (url.getPath() != null) {
 			// A call to a URL constructor has been made that uses an authorized URL as its
 			// context.
 			// Null out bundleEntry because it will not be valid for the new path
 			bundleEntry = null;
+		}
 		String spec = ""; //$NON-NLS-1$
-		if (start < end)
+		if (start < end) {
 			spec = str.substring(start, end);
+		}
 		end -= start;
 		// Default is to use path and bundleId from context
 		String path = url.getPath();
 		String host = url.getHost();
 		int resIndex = url.getPort();
-		if (resIndex < 0) // -1 indicates port was not set; must default to 0
+		if (resIndex < 0) { // -1 indicates port was not set; must default to 0
 			resIndex = 0;
+		}
 		int pathIdx = 0;
 		if (spec.startsWith("//")) { //$NON-NLS-1$
 			int bundleIdIdx = 2;
@@ -84,54 +88,64 @@ public abstract class BundleResourceHandler extends PlurlStreamHandlerBase {
 				path = ""; //$NON-NLS-1$
 			}
 			int bundleIdEnd = spec.indexOf(':', bundleIdIdx);
-			if (bundleIdEnd > pathIdx || bundleIdEnd == -1)
+			if (bundleIdEnd > pathIdx || bundleIdEnd == -1) {
 				bundleIdEnd = pathIdx;
-			if (bundleIdEnd < pathIdx - 1)
+			}
+			if (bundleIdEnd < pathIdx - 1) {
 				try {
 					resIndex = Integer.parseInt(spec.substring(bundleIdEnd + 1, pathIdx));
 				} catch (NumberFormatException e) {
 					// do nothing; results in resIndex == 0
 				}
+			}
 			host = spec.substring(bundleIdIdx, bundleIdEnd);
 		}
-		if (pathIdx < end && spec.charAt(pathIdx) == '/')
+		if (pathIdx < end && spec.charAt(pathIdx) == '/') {
 			path = spec.substring(pathIdx, end);
-		else if (end > pathIdx) {
-			if (path == null || path.equals("")) //$NON-NLS-1$
+		} else if (end > pathIdx) {
+			if (path == null || path.equals("")) { //$NON-NLS-1$
 				path = "/"; //$NON-NLS-1$
+			}
 			int last = path.lastIndexOf('/') + 1;
-			if (last == 0)
+			if (last == 0) {
 				path = spec.substring(pathIdx, end);
-			else
+			} else {
 				path = path.substring(0, last) + spec.substring(pathIdx, end);
+			}
 		}
-		if (path == null)
+		if (path == null) {
 			path = ""; //$NON-NLS-1$
+		}
 		// modify path if there's any relative references
 		// see RFC2396 Section 5.2
 		// Note: For ".." references above the root the approach taken is removing them
 		// from the resolved path
-		if (path.endsWith("/.") || path.endsWith("/..")) //$NON-NLS-1$ //$NON-NLS-2$
+		if (path.endsWith("/.") || path.endsWith("/..")) { //$NON-NLS-1$ //$NON-NLS-2$
 			path = path + '/';
-		int dotIndex;
-		while ((dotIndex = path.indexOf("/./")) >= 0) //$NON-NLS-1$
-			path = path.substring(0, dotIndex + 1) + path.substring(dotIndex + 3);
-		while ((dotIndex = path.indexOf("/../")) >= 0) { //$NON-NLS-1$
-			if (dotIndex != 0)
-				path = path.substring(0, path.lastIndexOf('/', dotIndex - 1)) + path.substring(dotIndex + 3);
-			else
-				path = path.substring(dotIndex + 3);
 		}
-		while ((dotIndex = path.indexOf("//")) >= 0) //$NON-NLS-1$
+		int dotIndex;
+		while ((dotIndex = path.indexOf("/./")) >= 0) { //$NON-NLS-1$
+			path = path.substring(0, dotIndex + 1) + path.substring(dotIndex + 3);
+		}
+		while ((dotIndex = path.indexOf("/../")) >= 0) { //$NON-NLS-1$
+			if (dotIndex != 0) {
+				path = path.substring(0, path.lastIndexOf('/', dotIndex - 1)) + path.substring(dotIndex + 3);
+			} else {
+				path = path.substring(dotIndex + 3);
+			}
+		}
+		while ((dotIndex = path.indexOf("//")) >= 0) { //$NON-NLS-1$
 			path = path.substring(0, dotIndex + 1) + path.substring(dotIndex + 2);
+		}
 
 		// Check the permission of the caller to see if they
 		// are allowed access to the resource.
 		String authorized = SECURITY_UNCHECKED;
 		long bundleId = parseBundleIDFromURLHost(host);
 		Module module = getModule(bundleId);
-		if (checkAuthorization(module))
+		if (checkAuthorization(module)) {
 			authorized = SECURITY_CHECKED;
+		}
 		// Always force the use of the hash from the adaptor
 		host = createURLHostForBundleID(container, bundleId);
 		// Setting the authority portion of the URL to SECURITY_ATHORIZED
@@ -190,7 +204,7 @@ public abstract class BundleResourceHandler extends PlurlStreamHandlerBase {
 	 * Finds the bundle entry for this protocal. This is handled differently for
 	 * Bundle.gerResource() and Bundle.getEntry() because getResource uses the
 	 * bundle classloader and getEntry only used the base bundle file.
-	 * 
+	 *
 	 * @param url    The URL to find the entry for.
 	 * @param module the module to find the entry for.
 	 * @return the bundle entry
@@ -234,18 +248,21 @@ public abstract class BundleResourceHandler extends PlurlStreamHandlerBase {
 	public int hashCode(URL url) {
 		int hash = 0;
 		String protocol = url.getProtocol();
-		if (protocol != null)
+		if (protocol != null) {
 			hash += protocol.hashCode();
+		}
 
 		String host = url.getHost();
-		if (host != null)
+		if (host != null) {
 			hash += host.hashCode();
+		}
 
 		hash += url.getPort();
 
 		String path = url.getPath();
-		if (path != null)
+		if (path != null) {
 			hash += path.hashCode();
+		}
 
 		hash += container.hashCode();
 		return hash;
@@ -269,8 +286,9 @@ public abstract class BundleResourceHandler extends PlurlStreamHandlerBase {
 	@Override
 	public boolean sameFile(URL url1, URL url2) {
 		// do a hashcode test to allow each handler to check the adaptor first
-		if (url1.hashCode() != url2.hashCode())
+		if (url1.hashCode() != url2.hashCode()) {
 			return false;
+		}
 		return equalsIgnoreCase(url1.getProtocol(), url2.getProtocol()) && hostsEqual(url1, url2)
 				&& url1.getPort() == url2.getPort() && Objects.equals(url1.getPath(), url2.getPath());
 		// note that the authority is not checked here because it can be different for
@@ -280,11 +298,13 @@ public abstract class BundleResourceHandler extends PlurlStreamHandlerBase {
 
 	protected boolean checkAuthorization(Module module) {
 		SecurityManager sm = System.getSecurityManager();
-		if (sm == null)
+		if (sm == null) {
 			return true;
+		}
 		Bundle moduleBundle = module == null ? null : module.getBundle();
-		if (moduleBundle == null)
+		if (moduleBundle == null) {
 			return false;
+		}
 		sm.checkPermission(new AdminPermission(moduleBundle, AdminPermission.RESOURCE));
 		return true;
 	}

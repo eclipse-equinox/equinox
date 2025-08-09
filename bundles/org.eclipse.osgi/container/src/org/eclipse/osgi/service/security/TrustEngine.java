@@ -24,7 +24,7 @@ import org.eclipse.osgi.internal.signedcontent.TrustEngineListener;
  * <p>
  * Clients may implement this interface.
  * </p>
- * 
+ *
  * @since 3.4
  */
 public abstract class TrustEngine {
@@ -32,7 +32,7 @@ public abstract class TrustEngine {
 	 * Returns the certificate trust anchor contained in the specified chain which
 	 * was used to establish the authenticity of the chain. If no trust anchor is
 	 * found in the chain then <code>null</code> is returned.
-	 * 
+	 *
 	 * @param chain - a complete or incomplete certificate chain, implementations
 	 *              *MAY* complete chains
 	 * @return - the certificate trust anchor used to establish authenticity
@@ -45,7 +45,7 @@ public abstract class TrustEngine {
 	 * certificate, and any of its children, is to be considered trusted. If
 	 * <code>null</code> is used as the alias then an alias will be generated based
 	 * on the trust anchor certificate.
-	 * 
+	 *
 	 * @param anchor - the certificate to add as an anchor point
 	 * @param alias  - a unique and human-readable 'friendly name' which can be used
 	 *               to reference the certificate. A <code>null</code> value may be
@@ -60,8 +60,9 @@ public abstract class TrustEngine {
 	public String addTrustAnchor(Certificate anchor, String alias) throws IOException, GeneralSecurityException {
 		String storedAlias = doAddTrustAnchor(anchor, alias);
 		TrustEngineListener listener = trustEngineListener;
-		if (listener != null)
+		if (listener != null) {
 			listener.addedTrustAnchor(anchor);
+		}
 		return storedAlias;
 	}
 
@@ -70,7 +71,7 @@ public abstract class TrustEngine {
 	 * certificate, and any of its children, is to be considered trusted. If
 	 * <code>null</code> is used as the alias then an alias will be generated based
 	 * on the trust anchor certificate.
-	 * 
+	 *
 	 * @param anchor - the certificate to add as an anchor point
 	 * @param alias  - a unique and human-readable 'friendly name' which can be used
 	 *               to reference the certificate. A <code>null</code> value may be
@@ -87,7 +88,7 @@ public abstract class TrustEngine {
 
 	/**
 	 * Remove a trust anchor point from the engine, based on the certificate itself.
-	 * 
+	 *
 	 * @param anchor - the certificate to be removed
 	 * @throws IOException              if there is a problem connecting to the
 	 *                                  backing store
@@ -96,13 +97,14 @@ public abstract class TrustEngine {
 	public final void removeTrustAnchor(Certificate anchor) throws IOException, GeneralSecurityException {
 		doRemoveTrustAnchor(anchor);
 		TrustEngineListener listener = trustEngineListener;
-		if (listener != null)
+		if (listener != null) {
 			listener.removedTrustAnchor(anchor);
+		}
 	}
 
 	/**
 	 * Remove a trust anchor point from the engine, based on the certificate itself.
-	 * 
+	 *
 	 * @param anchor - the certificate to be removed
 	 * @throws IOException              if there is a problem connecting to the
 	 *                                  backing store
@@ -113,7 +115,7 @@ public abstract class TrustEngine {
 	/**
 	 * Remove a trust anchor point from the engine, based on the human readable
 	 * "friendly name"
-	 * 
+	 *
 	 * @param alias - the name of the trust anchor
 	 * @throws IOException              if there is a problem connecting to the
 	 *                                  backing store
@@ -124,15 +126,16 @@ public abstract class TrustEngine {
 		doRemoveTrustAnchor(alias);
 		if (existing != null) {
 			TrustEngineListener listener = trustEngineListener;
-			if (listener != null)
+			if (listener != null) {
 				listener.removedTrustAnchor(existing);
+			}
 		}
 	}
 
 	/**
 	 * Remove a trust anchor point from the engine, based on the human readable
 	 * "friendly name"
-	 * 
+	 *
 	 * @param alias - the name of the trust anchor
 	 * @throws IOException              if there is a problem connecting to the
 	 *                                  backing store
@@ -143,7 +146,7 @@ public abstract class TrustEngine {
 	/**
 	 * Return the certificate associated with the unique "friendly name" in the
 	 * engine.
-	 * 
+	 *
 	 * @param alias - the friendly name
 	 * @return the associated trust anchor
 	 * @throws IOException              if there is a problem connecting to the
@@ -155,7 +158,7 @@ public abstract class TrustEngine {
 	/**
 	 * Return the list of friendly name aliases for the TrustAnchors installed in
 	 * the engine.
-	 * 
+	 *
 	 * @return string[] - the list of friendly name aliases
 	 * @throws IOException              if there is a problem connecting to the
 	 *                                  backing store
