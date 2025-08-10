@@ -1075,7 +1075,7 @@ public class TestModuleContainer extends AbstractTest {
 
 		// resolve order does matter so that transitive dependencies are pulled in
 		// and cause substitution to happen in a certain way
-		container.resolve(Arrays.asList(g, f, e), true);
+		ResolutionReport report = container.resolve(Arrays.asList(g, f, e), true);
 
 		ModuleWiring wiringE = e.getCurrentRevision().getWiring();
 		ModuleWiring wiringF = f.getCurrentRevision().getWiring();
@@ -1093,6 +1093,7 @@ public class TestModuleContainer extends AbstractTest {
 
 		List<ModuleWire> providedWiresF = wiringF.getProvidedModuleWires(PackageNamespace.PACKAGE_NAMESPACE);
 		assertEquals("Wrong number of provided wires: " + providedWiresF, 0, providedWiresF.size());
+		assertSucessfulWith(report, 2, 1, 1, 1);
 	}
 
 	@Test
@@ -4388,6 +4389,46 @@ public class TestModuleContainer extends AbstractTest {
 		// - bndlib now can only use libg for exceptions package but this conflicts with  result from util that has use constraint on exceptions package
 		// - on second iteration now libg chose external and drops it exports removing it from util+bndlib -> resolved state
 		assertSucessfulWith(result, 1, 2, 1, 0);
+	}
+
+	@Test
+	public void testLargeSet() throws Exception {
+		ResolutionReport result = resolveModuleDatabaseDump("big", TimeUnit.MINUTES.toSeconds(5));
+		assertSucessfulWith(result, 2661, 29, 31623, 9272);
+	}
+
+	private ResolutionReport resolveModuleDatabaseDump(String testSetName, long batchTimeoutSeconds) throws Exception {
+		URL entry = getBundle().getEntry("/test_files/containerTests/" + testSetName + ".state");
+		assertNotNull("can't find test set: " + testSetName, entry);
+		int maxThreads = Math.max(Runtime.getRuntime().availableProcessors() - 1, 1);
+		BlockingQueue<Runnable> queue = new SynchronousQueue<>();
+		ThreadFactory threadFactory = r -> {
+			Thread t = new Thread(r, "Resolver thread - UNIT TEST"); //$NON-NLS-1$
+			t.setDaemon(true);
+			return t;
+		};
+		ScheduledExecutorService watchDog = Executors.newSingleThreadScheduledExecutor();
+		RejectedExecutionHandler rejectHandler = (r, exe) -> r.run();
+		ExecutorService executor = new ThreadPoolExecutor(0, maxThreads, 1, TimeUnit.SECONDS, queue,
+				threadFactory, rejectHandler);
+		ScheduledExecutorService timeoutExecutor = new ScheduledThreadPoolExecutor(1);
+		Map<String, String> configuration = new HashMap<>();
+		configuration.put(EquinoxConfiguration.PROP_RESOLVER_BATCH_TIMEOUT,
+				Long.toString(TimeUnit.SECONDS.toMillis(batchTimeoutSeconds)));
+		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(new DummyCollisionHook(false), configuration,
+				new DummyResolverHookFactory(), new DummyDebugOptions(Collections.emptyMap()));
+		adaptor.setResolverExecutor(executor);
+		adaptor.setTimeoutExecutor(timeoutExecutor);
+		try (DataInputStream stream = new DataInputStream(entry.openStream())) {
+			adaptor.getDatabase().load(stream);
+		}
+		ModuleContainer container = adaptor.getContainer();
+		AtomicBoolean timeout = new AtomicBoolean();
+		ScheduledFuture<?> watch = watchDog.schedule(() -> timeout.set(true), batchTimeoutSeconds, TimeUnit.SECONDS);
+		ResolutionReport report = container.resolve(container.getModules(), true);
+		watch.cancel(true);
+		assertFalse("Resolve operation timed out!", timeout.get());
+		return report;
 	}
 
 	private ResolutionReport resolveTestSet(String testSetName) throws Exception {
