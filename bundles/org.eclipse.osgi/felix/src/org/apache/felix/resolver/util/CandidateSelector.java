@@ -22,11 +22,28 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.apache.felix.resolver.Util;
 import org.osgi.resource.Capability;
-import org.osgi.resource.Requirement;
 
 public class CandidateSelector {
+
+    public static final CandidateSelector EMPTY = new CandidateSelector(Collections.emptyList(),
+            new AtomicBoolean(true)) {
+        @Override
+        public CandidateSelector copy() {
+            return this;
+        }
+
+        @Override
+        public CandidateSelector copyWith(List<Capability> candidates) {
+            return this;
+        }
+        
+        @Override
+        public boolean isEmpty() {
+        	return true;
+        }
+    };
+
     protected final AtomicBoolean isUnmodifiable;
     protected final List<Capability> unmodifiable;
     private int currentIndex = 0;
