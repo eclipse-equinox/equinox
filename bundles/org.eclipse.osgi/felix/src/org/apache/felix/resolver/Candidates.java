@@ -317,8 +317,8 @@ class Candidates
             {
                 continue;
             }
-            CandidateSelector substitutes = m_candidateMap.get(req);
-            if (substitutes != null && !substitutes.isEmpty())
+            CandidateSelector substitutes = getSelector(req);
+            if (substitutes != null)
             {
                 String packageName = (String) substitutes.getCurrentCandidate().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE);
                 List<Capability> exportedPackages = exportNames.get(packageName);
@@ -336,6 +336,14 @@ class Candidates
                 }
             }
         }
+    }
+
+    private CandidateSelector getSelector(Requirement requirement) {
+        CandidateSelector selector = m_candidateMap.get(requirement);
+        if (selector == null || selector.isEmpty()) {
+            return null;
+        }
+        return selector;
     }
 
     private static final int UNPROCESSED = 0;
@@ -371,7 +379,7 @@ class Candidates
             {
                 for (Requirement dependent : dependents)
                 {
-                    CandidateSelector candidates = m_candidateMap.get(dependent);
+                    CandidateSelector candidates = getSelector(dependent);
                     if (candidates != null)
                     {
                         candidates:
@@ -445,7 +453,7 @@ class Candidates
         // mark as processing to detect cycles
         substituteStatuses.put(substitutableCap, PROCESSING);
         // discover possible substitutes
-        CandidateSelector substitutes = m_candidateMap.get(substitutableReq);
+        CandidateSelector substitutes = getSelector(substitutableReq);
         if (substitutes != null)
         {
             for (Capability substituteCandidate : substitutes.getRemainingCandidates())
@@ -484,7 +492,7 @@ class Candidates
 
         populate(toPopulate);
 
-        CandidateSelector caps = m_candidateMap.get(m_session.getDynamicRequirement());
+        CandidateSelector caps = getSelector(m_session.getDynamicRequirement());
         if (caps != null)
         {
             m_session.getDynamicCandidates().retainAll(caps.getRemainingCandidates());
@@ -715,7 +723,7 @@ class Candidates
      */
     public List<Capability> getCandidates(Requirement req)
     {
-        CandidateSelector candidates = m_candidateMap.get(req);
+        CandidateSelector candidates = getSelector(req);
         if (candidates != null)
         {
             List<Capability> list = candidates.getRemainingCandidates();
@@ -730,8 +738,8 @@ class Candidates
 
     public Capability getFirstCandidate(Requirement req)
     {
-        CandidateSelector candidates = m_candidateMap.get(req);
-        if (candidates != null && !candidates.isEmpty())
+        CandidateSelector candidates = getSelector(req);
+        if (candidates != null)
         {
             return candidates.getCurrentCandidate();
         }
@@ -740,7 +748,10 @@ class Candidates
 
     public Capability removeFirstCandidate(Requirement req)
     {
-        CandidateSelector candidates = m_candidateMap.get(req);
+        CandidateSelector candidates = getSelector(req);
+        if (candidates == null) {
+            return null;
+        }
         // Remove the conflicting candidate.
         Capability cap = candidates.removeCurrentCandidate();
         if (candidates.isEmpty())
@@ -757,7 +768,7 @@ class Candidates
     {
         // this is a special case where we need to completely replace the CandidateSelector
         // this method should never be called from normal Candidates permutations
-        CandidateSelector candidates = m_candidateMap.get(req);
+        CandidateSelector candidates = getSelector(req);
         if (candidates == null) {
             return null;
         }
@@ -875,7 +886,7 @@ class Candidates
             for (Requirement r : hostResource.getRequirements(null))
             {
                 Requirement origReq = ((WrappedRequirement) r).getDeclaredRequirement();
-                CandidateSelector cands = m_candidateMap.get(origReq);
+                CandidateSelector cands = getSelector(origReq);
                 if (cands != null)
                 {
                     if (cands instanceof ShadowList)
@@ -990,7 +1001,7 @@ class Candidates
     }
 
     private ShadowList getShadowList(Requirement r) {
-        CandidateSelector cands = m_candidateMap.get(r);
+        CandidateSelector cands = getSelector(r);
         if (cands instanceof ShadowList)
         {
             return (ShadowList) cands;
@@ -1158,7 +1169,7 @@ class Candidates
     }
 
     private CandidateSelector removeCandidate(Requirement req, Capability cap) {
-        CandidateSelector candidates = m_candidateMap.get(req);
+        CandidateSelector candidates = getSelector(req);
         candidates.remove(cap);
         return candidates;
     }
@@ -1198,7 +1209,7 @@ class Candidates
 
     public boolean canRemoveCandidate(Requirement req)
     {
-        CandidateSelector candidates = m_candidateMap.get(req);
+        CandidateSelector candidates = getSelector(req);
         if (candidates != null)
         {
             Capability current = candidates.getCurrentCandidate();
@@ -1232,8 +1243,7 @@ class Candidates
                     {
                         for (Requirement dependent : dependents)
                         {
-                            CandidateSelector dependentSelector = m_candidateMap.get(
-                                    dependent);
+                            CandidateSelector dependentSelector = getSelector(dependent);
                             // If the dependent selector only has one capability left then check if
                             // the current candidate is the selector's current candidate.
                             if (dependentSelector != null
