@@ -18,6 +18,7 @@
  */
 package org.apache.felix.resolver;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -57,11 +58,11 @@ public class Backlog {
         Candidates candidates;
         while ((candidates = session.getNextPermutation()) != null) {
             ResolutionError substituteError = candidates.checkSubstitutes();
-            FaultyResourcesReport report = candidates.getFaultyResources();
+            FaultyResourcesReport report = candidates.getFaultyResources(Collections.emptyMap());
             if (!report.isMissing() || session.isCancelled()) {
                 return candidates;
             }
-            backlog.put(candidates, candidates.getFaultyResources());
+            backlog.put(candidates, candidates.getFaultyResources(Collections.emptyMap()));
         }
         if (backlog.isEmpty()) {
             return null;
