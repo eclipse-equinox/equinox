@@ -268,26 +268,16 @@ public class ResolverImpl implements Resolver
     private Candidates findValidCandidates(ResolveSession session, Map<Resource, ResolutionError> faultyResources) {
         Backlog backlog = new Backlog(session);
         Candidates current = Objects.requireNonNull(backlog.getNext());
-        boolean foundFaultyResources = false;
         Candidates bestCandidate = null;
         ResolutionError bestError = null;
         FaultyResourcesReport bestReport = null;
-
+        Map<Resource, ResolutionError> bestFaulty = null;
+        faultyResources.clear();
         while (!session.isCancelled()) {
             Map<Resource, ResolutionError> currentFaultyResources = new HashMap<Resource, ResolutionError>();
             ResolutionError consistency = PackageSpaces.checkConsistency(session, current, currentFaultyResources,
                     m_logger);
             session.setCurrentError(consistency);
-            if (!currentFaultyResources.isEmpty()) {
-                if (!foundFaultyResources) {
-                    foundFaultyResources = true;
-                    faultyResources.putAll(currentFaultyResources);
-                } else if (faultyResources.size() > currentFaultyResources.size()) {
-                    // save the optimal faultyResources which has less
-                    faultyResources.clear();
-                    faultyResources.putAll(currentFaultyResources);
-                }
-            }
             FaultyResourcesReport report = current.getFaultyResources(currentFaultyResources);
             if (consistency == null && report.getUnresolvedRequirements().isEmpty()) {
                 // Success!
@@ -297,6 +287,7 @@ public class ResolverImpl implements Resolver
             m_logger.logPermutationProcessed(consistency == null ? report : consistency);
             if (bestCandidate == null || report.isBetterThan(bestReport)) {
                 bestCandidate = current;
+                bestFaulty = currentFaultyResources;
                 bestReport = report;
                 if (consistency == null) {
                     if (report.isMissingMandatory()) {
@@ -312,7 +303,11 @@ public class ResolverImpl implements Resolver
             if (next == null)
             {
                 // nothing more, return the best we found
+
                 session.setCurrentError(bestError);
+                if (bestFaulty != null) {
+                    faultyResources.putAll(currentFaultyResources);
+                }
                 return bestCandidate;
             }
             current = next;
