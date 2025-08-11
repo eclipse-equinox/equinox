@@ -408,7 +408,7 @@ class Candidates
                         {
                             if (Util.isOptional(dependent))
                             {
-                                m_candidateMap.remove(dependent);
+                                m_candidateMap.put(dependent, CandidateSelector.EMPTY);
                             }
                             else
                             {
@@ -726,12 +726,7 @@ class Candidates
         CandidateSelector candidates = getSelector(req);
         if (candidates != null)
         {
-            List<Capability> list = candidates.getRemainingCandidates();
-            if (list.isEmpty()) {
-                m_candidateMap.remove(req);
-                return null;
-            }
-            return list;
+            return candidates.getRemainingCandidates();
         }
         return null;
     }
@@ -775,7 +770,7 @@ class Candidates
         List<Capability> remaining = new ArrayList<Capability>(candidates.getRemainingCandidates());
         remaining.removeAll(caps);
         if (remaining.isEmpty()) {
-            m_candidateMap.remove(req);
+            m_candidateMap.put(req, CandidateSelector.EMPTY);
             return null;
         }
         candidates = candidates.copyWith(remaining);
