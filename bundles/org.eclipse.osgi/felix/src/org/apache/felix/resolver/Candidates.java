@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -1365,17 +1366,30 @@ class Candidates
         return null;
     }
 
-    public FaultyResourcesReport getFaultyResources() {
+    public FaultyResourcesReport getFaultyResources(Map<Resource, ResolutionError> packageConsitencyErrors) {
         Set<Entry<Requirement, CandidateSelector>> set = m_candidateMap.entrySet();
         FaultyResourcesReport report = new FaultyResourcesReport();
         for (Entry<Requirement, CandidateSelector> entry : set) {
             if (entry.getValue().isEmpty()) {
                 Requirement requirement = entry.getKey();
                 if (Util.isOptional(requirement)) {
-                    report.optional.computeIfAbsent(requirement.getResource(), nil -> new ArrayList<>())
+                    report.optional.computeIfAbsent(requirement.getResource(), nil -> new LinkedHashSet<>())
                             .add(requirement);
                 } else {
-                    report.mandatory.computeIfAbsent(requirement.getResource(), nil -> new ArrayList<>())
+                    report.mandatory.computeIfAbsent(requirement.getResource(), nil -> new LinkedHashSet<>())
+                            .add(requirement);
+                }
+            }
+        }
+        for (Entry<Resource, ResolutionError> entry : packageConsitencyErrors.entrySet()) {
+            ResolutionError error = entry.getValue();
+            Collection<Requirement> unresolvedRequirements = error.getUnresolvedRequirements();
+            for (Requirement requirement : unresolvedRequirements) {
+                if (Util.isOptional(requirement)) {
+                    report.optional.computeIfAbsent(requirement.getResource(), nil -> new LinkedHashSet<>())
+                            .add(requirement);
+                } else {
+                    report.mandatory.computeIfAbsent(requirement.getResource(), nil -> new LinkedHashSet<>())
                             .add(requirement);
                 }
             }
@@ -1385,15 +1399,15 @@ class Candidates
 
     public static final class FaultyResourcesReport extends ResolutionError {
 
-        private Map<Resource, List<Requirement>> optional = new HashMap<>();
-        private Map<Resource, List<Requirement>> mandatory = new HashMap<>();
+        private Map<Resource, Collection<Requirement>> optional = new HashMap<>();
+        private Map<Resource, Collection<Requirement>> mandatory = new HashMap<>();
 
-        private void append(StringBuilder sb, String type, Map<Resource, List<Requirement>> map) {
+        private void append(StringBuilder sb, String type, Map<Resource, Collection<Requirement>> map) {
             sb.append("Resources with missing ");
             sb.append(type);
             sb.append(" requirements: ");
             sb.append(map.size());
-            for (Entry<Resource, List<Requirement>> entry : map.entrySet()) {
+            for (Entry<Resource, Collection<Requirement>> entry : map.entrySet()) {
                 sb.append("\n  ");
                 sb.append(entry.getKey());
                 for (Requirement requirement : entry.getValue()) {
@@ -1437,8 +1451,8 @@ class Candidates
 
         @Override
         public Collection<Requirement> getUnresolvedRequirements() {
-            return Stream.concat(mandatory.values().stream().flatMap(List::stream),
-                    optional.values().stream().flatMap(List::stream)).collect(Collectors.toList());
+            return Stream.concat(mandatory.values().stream().flatMap(Collection::stream),
+                    optional.values().stream().flatMap(Collection::stream)).collect(Collectors.toList());
         }
 
     }

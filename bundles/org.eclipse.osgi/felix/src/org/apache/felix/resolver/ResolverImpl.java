@@ -271,10 +271,13 @@ public class ResolverImpl implements Resolver
         boolean foundFaultyResources = false;
         Candidates bestCandidate = null;
         ResolutionError bestError = null;
+        FaultyResourcesReport bestReport = null;
+
         while (!session.isCancelled()) {
             Map<Resource, ResolutionError> currentFaultyResources = new HashMap<Resource, ResolutionError>();
-            session.setCurrentError(
-                    PackageSpaces.checkConsistency(session, current, currentFaultyResources, m_logger));
+            ResolutionError consistency = PackageSpaces.checkConsistency(session, current, currentFaultyResources,
+                    m_logger);
+            session.setCurrentError(consistency);
             if (!currentFaultyResources.isEmpty()) {
                 if (!foundFaultyResources) {
                     foundFaultyResources = true;
@@ -285,20 +288,24 @@ public class ResolverImpl implements Resolver
                     faultyResources.putAll(currentFaultyResources);
                 }
             }
-            FaultyResourcesReport report = current.getFaultyResources();
-            ResolutionError currentError = session.getCurrentError();
-            if (currentError == null && report.getUnresolvedRequirements().isEmpty()) {
+            FaultyResourcesReport report = current.getFaultyResources(currentFaultyResources);
+            if (consistency == null && report.getUnresolvedRequirements().isEmpty()) {
                 // Success!
                 m_logger.logPermutationProcessed(null);
                 break;
             }
-            m_logger.logPermutationProcessed(currentError == null ? report : currentError);
-            if (bestCandidate == null || report.isBetterThan(bestCandidate.getFaultyResources())) {
+            m_logger.logPermutationProcessed(consistency == null ? report : consistency);
+            if (bestCandidate == null || report.isBetterThan(bestReport)) {
                 bestCandidate = current;
-                if (currentError == null && report.isMissingMandatory()) {
-                    bestError = report;
+                bestReport = report;
+                if (consistency == null) {
+                    if (report.isMissingMandatory()) {
+                        bestError = report;
+                    } else {
+                        bestError = null;
+                    }
                 } else {
-                    bestError = currentError;
+                    bestError = consistency;
                 }
             }
             Candidates next = backlog.getNext();
