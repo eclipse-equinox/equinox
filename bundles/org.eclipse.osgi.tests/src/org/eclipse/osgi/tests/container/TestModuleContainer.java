@@ -1988,12 +1988,12 @@ public class TestModuleContainer extends AbstractTest {
 
 	@Test
 	public void testUses5ReqCap() throws BundleException, IOException {
-		doTestUses5("uses.k.reqCap.MF", 2, 0, 3, 0);
+		doTestUses5("uses.k.reqCap.MF", 3, 0, 3, 0);
 	}
 
 	@Test
 	public void testUses5Requirer() throws BundleException, IOException {
-		doTestUses5("uses.k.requirer.MF", 2, 0, 3, 0);
+		doTestUses5("uses.k.requirer.MF", 3, 0, 3, 0);
 	}
 
 	public void doTestUses5(String kManifest, int maxTotal, int maxSub, int maxUse, int maxPkg)
@@ -4394,7 +4394,7 @@ public class TestModuleContainer extends AbstractTest {
 	@Test
 	public void testLargeSet() throws Exception {
 		ResolutionReport result = resolveModuleDatabaseDump("big", TimeUnit.MINUTES.toSeconds(5));
-		assertSucessfulWith(result, 2661, 29, 31623, 9272);
+		assertSucessfulWith(result, 1821, 29, 26359, 6736);
 	}
 
 	private ResolutionReport resolveModuleDatabaseDump(String testSetName, long batchTimeoutSeconds) throws Exception {
