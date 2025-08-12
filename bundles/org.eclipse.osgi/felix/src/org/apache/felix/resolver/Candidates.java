@@ -752,7 +752,7 @@ class Candidates
         Capability cap = candidates.removeCurrentCandidate();
         if (candidates.isEmpty())
         {
-            m_candidateMap.remove(req);
+            m_candidateMap.put(req, CandidateSelector.EMPTY);
         }
         // Update the delta with the removed capability
         CopyOnWriteSet<Capability> capPath = m_delta.getOrCompute(req);
@@ -1368,7 +1368,7 @@ class Candidates
 
     public FaultyResourcesReport getFaultyResources(Map<Resource, ResolutionError> packageConsitencyErrors) {
         Set<Entry<Requirement, CandidateSelector>> set = m_candidateMap.entrySet();
-        FaultyResourcesReport report = new FaultyResourcesReport();
+        FaultyResourcesReport report = new FaultyResourcesReport(packageConsitencyErrors);
         for (Entry<Requirement, CandidateSelector> entry : set) {
             if (entry.getValue().isEmpty()) {
                 Requirement requirement = entry.getKey();
@@ -1399,10 +1399,22 @@ class Candidates
 
     public static final class FaultyResourcesReport extends ResolutionError {
 
-        private Map<Resource, Collection<Requirement>> optional = new HashMap<>();
-        private Map<Resource, Collection<Requirement>> mandatory = new HashMap<>();
+        private final Map<Resource, Collection<Requirement>> optional = new HashMap<>();
+        private final Map<Resource, Collection<Requirement>> mandatory = new HashMap<>();
+        private final Map<Resource, ResolutionError> packageConsitencyErrors;
+
+        private FaultyResourcesReport(Map<Resource, ResolutionError> packageConsitencyErrors) {
+            this.packageConsitencyErrors = packageConsitencyErrors.isEmpty() ? Collections.emptyMap()
+                    : new LinkedHashMap<>(packageConsitencyErrors);
+        }
 
         private void append(StringBuilder sb, String type, Map<Resource, Collection<Requirement>> map) {
+            if (map.isEmpty()) {
+                return;
+            }
+            if (sb.length() > 0) {
+                sb.append("\n");
+            }
             sb.append("Resources with missing ");
             sb.append(type);
             sb.append(" requirements: ");
@@ -1418,6 +1430,9 @@ class Candidates
         }
 
         public boolean isBetterThan(FaultyResourcesReport other) {
+            if (packageConsitencyErrors.size() < other.packageConsitencyErrors.size()) {
+                return true;
+            }
             if (mandatory.size() < other.mandatory.size()) {
                 return true;
             }
@@ -1440,6 +1455,20 @@ class Candidates
         public String getMessage() {
             StringBuilder sb = new StringBuilder();
             append(sb, "mandatory", mandatory);
+            append(sb, "optional", optional);
+            if (packageConsitencyErrors.size() > 0) {
+                if (sb.length() > 0) {
+                    sb.append("\n");
+                }
+                sb.append("Resources with use-constrain violations: ");
+                sb.append(packageConsitencyErrors.size());
+                for (Entry<Resource, ResolutionError> entry : packageConsitencyErrors.entrySet()) {
+                    sb.append("\n   ");
+                    sb.append(Util.getSymbolicName(entry.getKey()));
+                    sb.append(":");
+                    sb.append(entry.getValue().getMessage());
+                }
+            }
             return sb.toString();
         }
 
