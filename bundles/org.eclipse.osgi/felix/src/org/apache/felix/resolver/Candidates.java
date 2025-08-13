@@ -30,6 +30,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -57,6 +58,12 @@ import org.osgi.service.resolver.ResolveContext;
 
 class Candidates
 {
+
+    // Emergency Switch to disable the usage of the new {@link SubstitutionPackages}
+    // computation JVM wide. Will be removed when we are confident that no
+    // regressions occurs.
+    private static final boolean USE_LEGACY_SUBSTITUTION_PACKAGES = Boolean
+            .getBoolean("felix.resolver.substitution.legacy");
     private static final boolean FILTER_USES = Boolean
             .parseBoolean(System.getProperty("felix.resolver.candidates.filteruses", "true"));
     static class PopulateResult {
@@ -732,6 +739,77 @@ class Candidates
         return null;
     }
 
+    public boolean isSubstitutionPackage(Requirement req) {
+        CandidateSelector candidates = m_candidateMap.get(req);
+        if (candidates == null) {
+            return false;
+        }
+        return candidates.isSubstitutionPackage();
+    }
+
+    /**
+     * In case of substitution packages we need to be able to discard a capability
+     * from all candidate lists if we choose to use the import over the export.
+     * 
+     * @param requirement the requirement for what the export package capability
+     *                    must be dropped.
+     */
+    public void discardExportPackageCapability(Requirement requirement) {
+        CandidateSelector candidates = m_candidateMap.get(requirement);
+        if (candidates == null) {
+            return;
+        }
+        List<Capability> packages = candidates.getSubstitutionPackages();
+        for (Capability capability : packages) {
+            Collection<Requirement> dependents = m_dependentMap.get(capability);
+            if (dependents == null || dependents.isEmpty()) {
+                continue;
+            }
+            for (Requirement dependent : dependents) {
+                CandidateSelector dependentCandidates = m_candidateMap.get(dependent);
+                Capability current = dependentCandidates.getCurrentCandidate();
+                if (current == capability) {
+                    removeFirstCandidate(dependent);
+                } else {
+                    List<Capability> remaining = new ArrayList<Capability>(
+                            dependentCandidates.getRemainingCandidates());
+                    if (remaining.remove(capability)) {
+                        CopyOnWriteSet<Capability> capPath = m_delta.getOrCompute(dependent);
+                        capPath.add(capability);
+                        if (remaining.isEmpty()) {
+                            m_candidateMap.remove(requirement);
+                        } else {
+                            m_candidateMap.put(requirement, dependentCandidates.copyWith(remaining));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * In case of substitution packages we need to take a decision if the internal
+     * or external binding is used. If the internal one is chosen, then no other
+     * providers are to be selected for this package and we can remove them to
+     * prevent further permutation.
+     * @param req the requirement to clear from other providers
+     * @return
+     */
+
+    public CandidateSelector dropOtherCandidates(Requirement req) {
+        // this is a special case where we need to completely replace the
+        // CandidateSelector
+        // this method should never be called from normal Candidates permutations
+        CandidateSelector candidates = m_candidateMap.get(req);
+        Capability currentCandidate = candidates.getCurrentCandidate();
+        if (currentCandidate == null || candidates.getRemainingCandidates().size() == 1) {
+            return candidates;
+        }
+        candidates = candidates.copyWith(Collections.singletonList(currentCandidate));
+        m_candidateMap.put(req, candidates);
+        return candidates;
+    }
+
     public Capability getFirstCandidate(Requirement req)
     {
         CandidateSelector candidates = getSelector(req);
@@ -990,7 +1068,7 @@ class Candidates
 
         m_candidateMap.trim();
         m_dependentMap.trim();
-
+        m_candidateMap.forEach((r, c) -> c.calculate(r));
         // mark the selectors as unmodifiable now
         m_candidateSelectorsUnmodifiable.set(true);
         return null;
@@ -1189,8 +1267,20 @@ class Candidates
                 m_delta.deepClone());
     }
 
-    public Candidates permutate(Requirement req)
+    public Candidates permutate(Requirement req) {
+        return permutate(req, false);
+    }
+
+    public Candidates permutate(Requirement req, boolean always)
     {
+        if (always) {
+            Candidates perm = copy();
+            perm.removeFirstCandidate(req);
+            if (perm.getFirstCandidate(req) == null) {
+                return null;
+            }
+            return perm;
+        }
         if (!Util.isMultiple(req) && canRemoveCandidate(req))
         {
             Candidates perm = copy();
@@ -1201,6 +1291,105 @@ class Candidates
             return perm;
         }
         return null;
+    }
+
+    /**
+     * In case of a use restriction on a package with a single selected provider,
+     * all other providers become invalid and must be removed
+     * 
+     * @param requirement the requirement to clean up
+     * @param resource    the only valid provider resource
+     * @return <code>true</code> if any candidates where removed as result of this
+     *         call, <code>false</code> otherwise
+     */
+    public boolean removeOtherCandidatesFrom(Requirement requirement, Resource resource) {
+        // this is a special case where we need to completely replace the
+        // CandidateSelector
+        // this method should never be called from normal Candidates permutations
+        CandidateSelector candidates = m_candidateMap.get(requirement);
+        if (candidates == null || candidates.isEmpty()) {
+            return false;
+        }
+        List<Capability> remainingCandidates = candidates.getRemainingCandidates();
+        List<Capability> filteredCandidates = remainingCandidates.stream().filter(cap -> cap.getResource() == resource)
+                .collect(Collectors.toList());
+        if (remainingCandidates.size() == filteredCandidates.size()) {
+            return false;
+        }
+        if (filteredCandidates.isEmpty()) {
+            m_candidateMap.remove(requirement);
+            return true;
+        }
+        m_candidateMap.put(requirement, candidates.copyWith(filteredCandidates));
+        return true;
+    }
+
+    public List<Candidates> process(Logger logger) {
+        if (Candidates.USE_LEGACY_SUBSTITUTION_PACKAGES) {
+            checkSubstitutes();
+            return Collections.emptyList();
+        }
+        List<Candidates> alternatives = new ArrayList<>();
+        // first resolve all substitution packages
+        m_candidateMap.keySet().stream().filter(Objects::nonNull).forEach(requirement -> {
+            Candidates candidates = resolveSubstitutionPackages(requirement, logger);
+            if (candidates != null) {
+                alternatives.add(candidates);
+            }
+        });
+        // now iteratively remove uses constraint violations for packages that only have
+        // a single provider anyways
+        Set<Requirement> toProcess = m_candidateMap.keySet().stream().filter(Objects::nonNull)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        while (!toProcess.isEmpty()) {
+            for (Iterator iterator = toProcess.iterator(); iterator.hasNext();) {
+                Requirement r = (Requirement) iterator.next();
+                iterator.remove();
+                List<Requirement> recheck = ProblemReduction.removeInvalidPackageProvider(this, r, logger);
+                if (!recheck.isEmpty()) {
+                    toProcess.addAll(recheck);
+                    break;
+                }
+            }
+        }
+        return alternatives;
+    }
+
+    /**
+     * Resolves all substitution packages for the given candidate set and returns a
+     * list of new permutations that has to be considered, see <a href=
+     * "https://docs.osgi.org/specification/osgi.core/8.0.0/framework.module.html#framework.module-import.export.same.package">the
+     * spec</a> for reference. The rules are as follows for a package that is
+     * substitutable:
+     * <ol>
+     * <li><code>External</code> - If this resolves to an export statement in
+     * <b>another bundle</b>, then the overlapping export definition <b>in this
+     * bundle</b> is discarded.</li>
+     * <li><code>Internal</code> - If it is resolved to an export statement in
+     * <b>this bundle</b>, then the overlapping import definition <b>in this
+     * bundle</b> is discarded.</li>
+     * <li><code>Unresolved</code> - There is no matching export definition. In this
+     * case the framework is free to discard either the overlapping export
+     * definition or overlapping import definition in this bundle. If the export
+     * definition is discarded and the import definition is not optional then the
+     * bundle will fail to resolve.</li>
+     * </ol>
+     * 
+     * @return the {@link Candidates} permutation for an alternative substitution
+     *         choice or <code>null</code> otherwise
+     */
+    private Candidates resolveSubstitutionPackages(Requirement requirement, Logger logger) {
+        if (!isSubstitutionPackage(requirement)) {
+            return null;
+        }
+        Candidates permutation = permutate(requirement, true);
+        dropOtherCandidates(requirement);
+        Capability firstCandidate = getFirstCandidate(requirement);
+        if (firstCandidate == null || !firstCandidate.getResource().equals(requirement.getResource())) {
+            // Mapped to the external case, we need to discard our own export capability
+            discardExportPackageCapability(requirement);
+        }
+        return permutation;
     }
 
     public boolean canRemoveCandidate(Requirement req)
