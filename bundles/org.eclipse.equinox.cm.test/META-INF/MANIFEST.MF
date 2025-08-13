@@ -17,4 +17,3 @@ Import-Package: org.eclipse.core.runtime,
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Automatic-Module-Name: org.eclipse.equinox.cm.test
-Require-Bundle: org.eclipse.equinox.cm
