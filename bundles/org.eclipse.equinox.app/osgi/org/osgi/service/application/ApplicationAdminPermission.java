@@ -325,13 +325,6 @@ public class ApplicationAdminPermission extends Permission {
 		private String pattern;
 		private ApplicationDescriptor appDesc;
 
-		/**
-		 * @param pattern
-		 */
-		public SignerWrapper(String pattern) {
-			this.pattern = pattern;
-		}
-
 		SignerWrapper(ApplicationDescriptor appDesc) {
 			this.appDesc = appDesc;
 		}
