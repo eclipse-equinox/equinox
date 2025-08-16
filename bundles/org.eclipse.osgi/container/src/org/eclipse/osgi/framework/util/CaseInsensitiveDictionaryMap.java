@@ -38,7 +38,7 @@ import org.osgi.framework.Constants;
  * case-insensitive.</li>
  * <li>Keys and values must not be null.</li>
  * </ul>
- * 
+ *
  * @since 3.13
  */
 public class CaseInsensitiveDictionaryMap<K, V> extends Dictionary<K, V> implements Map<K, V> {
