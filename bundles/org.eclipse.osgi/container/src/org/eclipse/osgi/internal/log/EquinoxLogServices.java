@@ -54,9 +54,10 @@ public class EquinoxLogServices {
 		File logFile = new File(logFilePath);
 		if (!logFile.isAbsolute()) {
 			File configAreaDirectory = null;
-			if (configuration != null)
+			if (configuration != null) {
 				// TODO assumes the URL is a file: url
 				configAreaDirectory = new File(configuration.getURL().getPath());
+			}
 
 			if (configAreaDirectory != null) {
 				logFile = new File(configAreaDirectory, logFilePath);
@@ -78,8 +79,9 @@ public class EquinoxLogServices {
 			perfWriter = new EquinoxLogWriter((Writer) null, PERF_LOGGER_NAME, true, environmentInfo);
 		}
 
-		if ("true".equals(environmentInfo.getConfiguration(EclipseStarter.PROP_CONSOLE_LOG))) //$NON-NLS-1$
+		if ("true".equals(environmentInfo.getConfiguration(EclipseStarter.PROP_CONSOLE_LOG))) { //$NON-NLS-1$
 			logWriter.setConsoleLog(true);
+		}
 		String logHistoryMaxProp = environmentInfo.getConfiguration(EquinoxConfiguration.PROP_LOG_HISTORY_MAX);
 		int logHistoryMax = 0;
 		if (logHistoryMaxProp != null) {
