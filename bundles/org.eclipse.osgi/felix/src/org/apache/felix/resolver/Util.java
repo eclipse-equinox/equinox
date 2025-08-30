@@ -119,6 +119,13 @@ public class Util
         }
         return Collections.emptySet();
     }
+    
+	public static boolean isSubstitutionPackage(Requirement requirement, Capability capability) {
+        if (isExportedPackage(capability)) {
+        	return capability.getResource().equals(requirement.getResource());
+        }
+        return false;
+	}
 
     public static boolean isExportedPackage(Capability capability) {
         return capability != null && PackageNamespace.PACKAGE_NAMESPACE.equals(capability.getNamespace());
