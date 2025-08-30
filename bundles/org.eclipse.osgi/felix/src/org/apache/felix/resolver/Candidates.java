@@ -1429,6 +1429,10 @@ class Candidates
             }
         }
 
+        public Map<Resource, ResolutionError> getPackageConsitencyErrors() {
+            return packageConsitencyErrors;
+        }
+
         public boolean isBetterThan(FaultyResourcesReport other) {
             if (packageConsitencyErrors.size() < other.packageConsitencyErrors.size()) {
                 return true;
