@@ -16,12 +16,12 @@ Bundle-Vendor: %providerName
 Bundle-Activator: org.eclipse.core.internal.registry.osgi.Activator
 Import-Package: javax.xml.parsers,
  org.eclipse.core.runtime.jobs;resolution:=optional,
+ org.eclipse.osgi.container;version="[1.9.0,2.0.0)",
  org.eclipse.osgi.framework.console;resolution:=optional,
  org.eclipse.osgi.service.datalocation,
  org.eclipse.osgi.service.debug,
  org.eclipse.osgi.service.environment;resolution:=optional,
  org.eclipse.osgi.service.localization;version="1.1.0",
- org.eclipse.osgi.service.resolver;resolution:=optional,
  org.eclipse.osgi.storagemanager,
  org.eclipse.osgi.util,
  org.osgi.framework,
