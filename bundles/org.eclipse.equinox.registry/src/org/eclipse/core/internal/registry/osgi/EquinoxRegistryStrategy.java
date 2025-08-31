@@ -15,13 +15,13 @@
 package org.eclipse.core.internal.registry.osgi;
 
 import java.io.File;
-import java.util.Map;
+import java.util.*;
 import org.eclipse.core.internal.registry.RegistryMessages;
 import org.eclipse.core.internal.runtime.RuntimeLog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.osgi.container.Module;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 
 /**
  * The registry strategy used by the Equinox extension registry. Adds to the
@@ -74,12 +74,8 @@ public class EquinoxRegistryStrategy extends RegistryStrategyOSGI {
 					RegistryMessages.bundle_not_activated, null));
 			return -1;
 		}
-		// use a string here instead of the class to prevent class loading.
-		ServiceReference<?> ref = context.getServiceReference("org.eclipse.osgi.service.resolver.PlatformAdmin"); //$NON-NLS-1$
-		if (ref == null) {
-			return -1;
-		}
-		return EquinoxUtils.getContainerTimestamp(context, ref);
+		return Arrays.stream(context.getBundles()).map(bundle -> bundle.adapt(Module.class)).filter(Objects::nonNull)
+				.mapToLong(Module::getLastModified).sum();
 	}
 
 	/**

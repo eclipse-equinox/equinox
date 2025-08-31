@@ -14,7 +14,6 @@
 package org.eclipse.core.internal.registry.osgi;
 
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
-import org.eclipse.osgi.service.resolver.PlatformAdmin;
 import org.osgi.framework.*;
 
 /**
@@ -38,21 +37,6 @@ public class EquinoxUtils {
 		try {
 			EnvironmentInfo environmentInfo = (EnvironmentInfo) context.getService(ref);
 			return environmentInfo == null ? null : environmentInfo.getNonFrameworkArgs();
-		} finally {
-			context.ungetService(ref);
-		}
-	}
-
-	/**
-	 * Get the time stamp from the PlatformAdmin service.
-	 */
-	public static long getContainerTimestamp(BundleContext context, ServiceReference<?> ref) {
-		if (ref == null) {
-			return -1;
-		}
-		try {
-			PlatformAdmin admin = (PlatformAdmin) context.getService(ref);
-			return admin == null ? -1 : admin.getState(false).getTimeStamp();
 		} finally {
 			context.ungetService(ref);
 		}
