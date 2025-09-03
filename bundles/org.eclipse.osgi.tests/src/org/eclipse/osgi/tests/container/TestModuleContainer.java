@@ -4398,6 +4398,12 @@ public class TestModuleContainer extends AbstractTest {
 		assertSucessfulWith(result, 1821, 29, 26359, 6736);
 	}
 
+	@Test
+	public void testSdkSet() throws Exception {
+		ResolutionReport result = resolveModuleDatabaseDump("sdk202509", TimeUnit.MINUTES.toSeconds(1));
+		assertSucessfulWith(result, 9, 18, 1, 42);
+	}
+
 	private ResolutionReport resolveModuleDatabaseDump(String testSetName, long batchTimeoutSeconds) throws Exception {
 		URL entry = getBundle().getEntry("/test_files/containerTests/" + testSetName + ".state");
 		assertNotNull("can't find test set: " + testSetName, entry);
