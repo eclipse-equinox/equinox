@@ -82,8 +82,9 @@ public class ExtendedLogServiceFactory implements ServiceFactory<ExtendedLogServ
 
 	@Override
 	public void bundleChanged(BundleEvent event) {
-		if (event.getType() == BundleEvent.UNINSTALLED)
+		if (event.getType() == BundleEvent.UNINSTALLED) {
 			removeLogService(event.getBundle());
+		}
 	}
 
 	ExtendedLogServiceImpl getLogService(Bundle bundle) {
@@ -126,8 +127,9 @@ public class ExtendedLogServiceFactory implements ServiceFactory<ExtendedLogServ
 
 	void checkLogPermission() throws SecurityException {
 		SecurityManager sm = System.getSecurityManager();
-		if (sm != null)
+		if (sm != null) {
 			sm.checkPermission(logPermission);
+		}
 	}
 
 	EquinoxLoggerContext createEquinoxLoggerContext(String name) {

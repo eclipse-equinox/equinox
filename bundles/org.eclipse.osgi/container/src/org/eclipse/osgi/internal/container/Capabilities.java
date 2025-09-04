@@ -227,7 +227,7 @@ public class Capabilities {
 	 * provided by the specified revision to this database. These capabilities must
 	 * become available for lookup with the {@link #findCapabilities(Requirement)}
 	 * method.
-	 * 
+	 *
 	 * @param revision the revision which has capabilities to add
 	 * @return a collection of package names added for the osgi.wiring.package
 	 *         namespace
@@ -274,7 +274,7 @@ public class Capabilities {
 	/**
 	 * Returns a mutable snapshot of capabilities that are candidates for satisfying
 	 * the specified requirement.
-	 * 
+	 *
 	 * @param requirement the requirement
 	 * @return the candidates for the requirement
 	 */
