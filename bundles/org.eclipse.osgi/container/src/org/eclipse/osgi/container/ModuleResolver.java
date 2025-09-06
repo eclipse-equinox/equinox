@@ -512,8 +512,18 @@ final class ModuleResolver {
 				debug(String.format(message, ModuleContainer.toString(requirement)));
 			}
 
+			@Override
+			public String toString(Requirement requirement) {
+				return ModuleContainer.toString(requirement);
+			}
+
 			public void logCapability(String message, Capability requirement) {
 				debug(String.format(message, ModuleContainer.toString(requirement)));
+			}
+
+			@Override
+			public String toString(Capability capability) {
+				return ModuleContainer.toString(capability);
 			}
 
 			@Override
