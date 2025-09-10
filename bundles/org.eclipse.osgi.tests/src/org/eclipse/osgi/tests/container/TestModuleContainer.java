@@ -77,6 +77,7 @@ import org.eclipse.osgi.container.ModuleRevision;
 import org.eclipse.osgi.container.ModuleRevisionBuilder;
 import org.eclipse.osgi.container.ModuleWire;
 import org.eclipse.osgi.container.ModuleWiring;
+import org.eclipse.osgi.container.SystemModule;
 import org.eclipse.osgi.container.builders.OSGiManifestBuilderFactory;
 import org.eclipse.osgi.container.namespaces.EclipsePlatformNamespace;
 import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
@@ -4397,6 +4398,12 @@ public class TestModuleContainer extends AbstractTest {
 		assertSucessfulWith(result, 1821, 29, 26359, 6736);
 	}
 
+	@Test
+	public void testSdkSet() throws Exception {
+		ResolutionReport result = resolveModuleDatabaseDump("sdk202509", TimeUnit.MINUTES.toSeconds(1));
+		assertSucessfulWith(result, 9, 18, 1, 42);
+	}
+
 	private ResolutionReport resolveModuleDatabaseDump(String testSetName, long batchTimeoutSeconds) throws Exception {
 		URL entry = getBundle().getEntry("/test_files/containerTests/" + testSetName + ".state");
 		assertNotNull("can't find test set: " + testSetName, entry);
@@ -4423,11 +4430,25 @@ public class TestModuleContainer extends AbstractTest {
 			adaptor.getDatabase().load(stream);
 		}
 		ModuleContainer container = adaptor.getContainer();
+		List<Module> modules = container.getModules();
+		for (Module module : modules) {
+			if (module instanceof SystemModule system) {
+				system.init();
+				modules.remove(system);
+				break;
+			}
+		}
 		AtomicBoolean timeout = new AtomicBoolean();
 		ScheduledFuture<?> watch = watchDog.schedule(() -> timeout.set(true), batchTimeoutSeconds, TimeUnit.SECONDS);
 		ResolutionReport report = container.resolve(container.getModules(), true);
 		watch.cancel(true);
 		assertFalse("Resolve operation timed out!", timeout.get());
+		for (Module module : modules) {
+			if (!Module.RESOLVED_SET.contains(module.getState())) {
+				ModuleRevision revision = module.getCurrentRevision();
+				fail(revision + " is not resolved");
+			}
+		}
 		return report;
 	}
 

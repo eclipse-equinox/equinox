@@ -18,6 +18,8 @@
  */
 package org.apache.felix.resolver;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 import org.osgi.resource.Capability;
@@ -200,5 +202,34 @@ public class Logger
      */
     public void logPermutationProcessed(ResolutionError error) {
 
+    }
+
+    void logCandidates(ResolveSession session, Candidates candidates) {
+        Collection<Resource> mandatoryResources = session.getMandatoryResources();
+        Collection<Resource> optionalResources = session.getOptionalResources();
+        for (Resource resource : mandatoryResources) {
+            logCandidates(resource, candidates);
+        }
+        for (Resource resource : optionalResources) {
+            logCandidates(resource, candidates);
+        }
+    }
+
+    private void logCandidates(Resource resource, Candidates candidates) {
+        logCandidates(resource, req -> {
+            List<Capability> list = candidates.getCandidates(req);
+            if (list == null) {
+                return Collections.emptyList();
+            }
+            return list;
+        });
+    }
+
+    public String toString(Requirement requirement) {
+        return String.valueOf(requirement);
+    }
+
+    public String toString(Capability capability) {
+        return String.valueOf(capability);
     }
 }

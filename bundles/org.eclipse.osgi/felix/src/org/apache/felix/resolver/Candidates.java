@@ -21,6 +21,7 @@ package org.apache.felix.resolver;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -30,6 +31,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -409,7 +411,7 @@ class Candidates
                         {
                             if (Util.isOptional(dependent))
                             {
-                                m_candidateMap.put(dependent, CandidateSelector.EMPTY);
+                                m_candidateMap.put(dependent, candidates.intern());
                             }
                             else
                             {
@@ -752,7 +754,7 @@ class Candidates
         Capability cap = candidates.removeCurrentCandidate();
         if (candidates.isEmpty())
         {
-            m_candidateMap.put(req, CandidateSelector.EMPTY);
+            m_candidateMap.put(req, candidates.intern());
         }
         // Update the delta with the removed capability
         CopyOnWriteSet<Capability> capPath = m_delta.getOrCompute(req);
@@ -770,12 +772,11 @@ class Candidates
         }
         List<Capability> remaining = new ArrayList<Capability>(candidates.getRemainingCandidates());
         remaining.removeAll(caps);
-        if (remaining.isEmpty()) {
-            m_candidateMap.put(req, CandidateSelector.EMPTY);
+        candidates = candidates.copyWith(remaining);
+        m_candidateMap.put(req, candidates.intern());
+        if (candidates.isEmpty()) {
             return null;
         }
-        candidates = candidates.copyWith(remaining);
-        m_candidateMap.put(req, candidates);
         return candidates;
     }
 
@@ -990,7 +991,8 @@ class Candidates
 
         m_candidateMap.trim();
         m_dependentMap.trim();
-
+        // perform final computation of values
+        m_candidateMap.forEach((requirement, selector) -> selector.calculate(requirement));
         // mark the selectors as unmodifiable now
         m_candidateSelectorsUnmodifiable.set(true);
         return null;
@@ -1429,6 +1431,10 @@ class Candidates
             }
         }
 
+        public Map<Resource, ResolutionError> getPackageConsitencyErrors() {
+            return packageConsitencyErrors;
+        }
+
         public boolean isBetterThan(FaultyResourcesReport other) {
             if (packageConsitencyErrors.size() < other.packageConsitencyErrors.size()) {
                 return true;
@@ -1484,6 +1490,63 @@ class Candidates
                     optional.values().stream().flatMap(Collection::stream)).collect(Collectors.toList());
         }
 
+    }
+
+    @Override
+    public String toString() {
+        Logger logger = m_session.getLogger();
+        StringBuilder sb = new StringBuilder();
+        Comparator<Resource> cmpS = Comparator.comparing(r -> Util.getSymbolicName(r), String.CASE_INSENSITIVE_ORDER);
+        Comparator<Resource> cmpV = Comparator.comparing(r -> Util.getVersion(r));
+        Stream<Resource> cand = m_candidateMap.keySet().stream().filter(Objects::nonNull).map(r -> r.getResource());
+        Stream<Resource> mand = m_session.getMandatoryResources().stream();
+        Stream<Resource> opt = m_session.getOptionalResources().stream();
+        Stream.concat(cand, Stream.concat(mand, opt)).distinct()
+                .sorted(cmpS.thenComparing(cmpV)).forEach(resource -> {
+                    sb.append("[= " + Util.toString(resource) + " =]\n");
+                    for (Requirement requirement : resource.getRequirements(null)) {
+                        CandidateSelector selector = m_candidateMap.get(requirement);
+                        if (selector != null && !selector.isEmpty()) {
+                            sb.append("   " + logger.toString(requirement) + " ");
+                            if (Util.isOptional(requirement)) {
+                                sb.append("[optional]");
+                            }
+                            if (selector.isSubstitutionPackage()) {
+                                sb.append("[substitution package]");
+                            }
+                            sb.append("\n");
+                            List<Capability> remainingCandidates = selector.getRemainingCandidates();
+                            for (int i = 0; i < remainingCandidates.size(); i++) {
+                                Capability capability = remainingCandidates.get(i);
+                                sb.append("    [" + i + "] " + logger.toString(capability) + "\n");
+                            }
+                        }
+                    }
+                    for (Capability capability : resource.getCapabilities(null)) {
+                        Set<Requirement> dependent = m_dependentMap.get(capability);
+                        if (dependent != null && !dependent.isEmpty()) {
+                            List<Requirement> provider = new ArrayList<>();
+                            for (Requirement requirement : dependent) {
+                                CandidateSelector selector = m_candidateMap.get(requirement);
+                                if (selector != null && selector.getCurrentCandidate() == capability) {
+                                    provider.add(requirement);
+                                }
+                            }
+                            if (!provider.isEmpty()) {
+                                sb.append("   " + logger.toString(capability) + "\n");
+                                for (Requirement requirement : provider) {
+                                    sb.append("      ");
+                                    sb.append(logger.toString(requirement));
+                                    sb.append(" of ");
+                                    sb.append(Util.toString(requirement.getResource()));
+                                    sb.append("\n");
+                                }
+                            }
+                        }
+                    }
+                });
+        sb.append("\n");
+        return sb.toString();
     }
 
 }
