@@ -3,9 +3,8 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Test Plug-in
 Bundle-Vendor: Eclipse.org - Equinox
 Bundle-SymbolicName: org.eclipse.equinox.cm.test
-Bundle-Version: 1.2.0.qualifier
-Import-Package: org.eclipse.core.runtime,
- org.eclipse.equinox.log,
+Bundle-Version: 1.2.100.qualifier
+Import-Package: org.eclipse.equinox.log,
  org.junit;version="4.12.0",
  org.junit.function;version="4.12.0",
  org.junit.runner;version="4.12.0",
@@ -17,4 +16,5 @@ Import-Package: org.eclipse.core.runtime,
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Automatic-Module-Name: org.eclipse.equinox.cm.test
-Require-Bundle: org.eclipse.equinox.cm
+Require-Bundle: org.eclipse.equinox.cm,
+ org.eclipse.core.runtime
