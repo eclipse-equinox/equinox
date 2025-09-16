@@ -82,6 +82,13 @@ public class Adapters {
 
 		String adapterId = adapter.getName();
 		Object result = queryAdapterManager(sourceObject, adapterId, allowActivation);
+		if (result == null) {
+			// Last resort, this object is maybe using a different adaption technique
+			if (queryAdapterManager(sourceObject, AdapterProxy.class.getName(),
+					allowActivation) instanceof AdapterProxy proxy) {
+				result = proxy.getAdapter(adapter);
+			}
+		}
 		if (result != null) {
 			// Sanity-check
 			if (!adapter.isInstance(result)) {
