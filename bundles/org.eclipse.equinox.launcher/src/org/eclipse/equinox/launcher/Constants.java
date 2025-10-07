@@ -38,25 +38,37 @@ class Constants {
 	/**
 	 * Constant string (value "aix") indicating the platform is running on an
 	 * AIX-based operating system.
+	 * 
+	 * @deprecated AIX support has been removed
 	 */
+	@Deprecated(forRemoval = true, since = "2025-12")
 	public static final String OS_AIX = "aix";//$NON-NLS-1$
 
 	/**
 	 * Constant string (value "solaris") indicating the platform is running on a
 	 * Solaris-based operating system.
+	 * 
+	 * @deprecated Solaris support has been removed
 	 */
+	@Deprecated(forRemoval = true, since = "2025-12")
 	public static final String OS_SOLARIS = "solaris";//$NON-NLS-1$
 
 	/**
 	 * Constant string (value "hpux") indicating the platform is running on an
 	 * HP/UX-based operating system.
+	 * 
+	 * @deprecated HP/UX support has been removed
 	 */
+	@Deprecated(forRemoval = true, since = "2025-12")
 	public static final String OS_HPUX = "hpux";//$NON-NLS-1$
 
 	/**
 	 * Constant string (value "qnx") indicating the platform is running on a
 	 * QNX-based operating system.
+	 * 
+	 * @deprecated QNX support has been removed
 	 */
+	@Deprecated(forRemoval = true, since = "2025-12")
 	public static final String OS_QNX = "qnx";//$NON-NLS-1$
 
 	/**
@@ -68,19 +80,28 @@ class Constants {
 	/**
 	 * Constant string (value "os/400") indicating the platform is running on a
 	 * OS/400 operating system.
+	 * 
+	 * @deprecated OS/400 support has been removed
 	 */
+	@Deprecated(forRemoval = true, since = "2025-12")
 	public static final String OS_OS400 = "os/400"; //$NON-NLS-1$
 
 	/**
 	 * Constant string (value "os/390") indicating the platform is running on a
 	 * OS/390 operating system.
+	 * 
+	 * @deprecated OS/390 support has been removed
 	 */
+	@Deprecated(forRemoval = true, since = "2025-12")
 	public static final String OS_OS390 = "os/390"; //$NON-NLS-1$
 
 	/**
 	 * Constant string (value "z/os") indicating the platform is running on a
 	 * z/OS operating system.
+	 * 
+	 * @deprecated z/OS support has been removed
 	 */
+	@Deprecated(forRemoval = true, since = "2025-12")
 	public static final String OS_ZOS = "z/os"; //$NON-NLS-1$
 
 	/**
@@ -104,7 +125,10 @@ class Constants {
 	/**
 	 * Constant string (value "photon") indicating the platform is running on a
 	 * machine using the Photon windowing system.
+	 * 
+	 * @deprecated Photon windowing system support has been removed
 	 */
+	@Deprecated(forRemoval = true, since = "2025-12")
 	public static final String WS_PHOTON = "photon";//$NON-NLS-1$
 
 	/**
