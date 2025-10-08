@@ -275,6 +275,9 @@ public class Main {
 	private static final String NO_DEFAULT = "@noDefault"; //$NON-NLS-1$
 	private static final String USER_HOME = "@user.home"; //$NON-NLS-1$
 	private static final String USER_DIR = "@user.dir"; //$NON-NLS-1$
+	private static final String USER_DATA = "@user.data"; //$NON-NLS-1$
+	private static final String USER_DATA_SHARED = "@user.data.shared"; //$NON-NLS-1$
+	private static final String USER_DOCUMENTS = "@user.documents"; //$NON-NLS-1$
 	// Placeholder for hashcode of installation directory
 	private static final String INSTALL_HASH_PLACEHOLDER = "@install.hash"; //$NON-NLS-1$
 	private static final String LAUNCHER_DIR = "@launcher.dir"; //$NON-NLS-1$
@@ -1186,6 +1189,15 @@ public class Main {
 				} else if (location.startsWith(USER_DIR)) {
 					String base = substituteVar(location, USER_DIR, PROP_USER_DIR);
 					location = new File(base).getAbsolutePath();
+				} else if (location.startsWith(USER_DATA)) {
+					String base = substituteUserDataVar(location, USER_DATA);
+					location = new File(base).getAbsolutePath();
+				} else if (location.startsWith(USER_DATA_SHARED)) {
+					String base = substituteUserDataSharedVar(location, USER_DATA_SHARED);
+					location = new File(base).getAbsolutePath();
+				} else if (location.startsWith(USER_DOCUMENTS)) {
+					String base = substituteUserDocumentsVar(location, USER_DOCUMENTS);
+					location = new File(base).getAbsolutePath();
 				}
 				int idx = location.indexOf(INSTALL_HASH_PLACEHOLDER);
 				if (idx == 0) {
@@ -1206,6 +1218,82 @@ public class Main {
 	private String substituteVar(String source, String var, String prop) {
 		String value = System.getProperty(prop, ""); //$NON-NLS-1$
 		return value + source.substring(var.length());
+	}
+
+	private String substituteUserDataVar(String source, String var) {
+		String osDataDir = getOSUserDataDirectory();
+		if (osDataDir == null) {
+			// Fallback to user.home if OS-specific directory is not available
+			osDataDir = System.getProperty(PROP_USER_HOME, ""); //$NON-NLS-1$
+		}
+		String suffix = source.substring(var.length());
+		// On Linux/Unix, prefix the first path segment with '.' to make it hidden
+		if (!Constants.OS_WIN32.equals(os) && !Constants.OS_MACOSX.equals(os) && suffix.startsWith("/")) { //$NON-NLS-1$
+			int nextSlash = suffix.indexOf('/', 1);
+			if (nextSlash > 0) {
+				suffix = "/." + suffix.substring(1, nextSlash) + suffix.substring(nextSlash); //$NON-NLS-1$
+			} else if (suffix.length() > 1) {
+				suffix = "/." + suffix.substring(1); //$NON-NLS-1$
+			}
+		}
+		return osDataDir + suffix;
+	}
+
+	private String substituteUserDataSharedVar(String source, String var) {
+		String osSharedDir = getOSUserDataSharedDirectory();
+		if (osSharedDir == null) {
+			// Fallback to /srv on Linux/Unix, C:\ProgramData on Windows
+			if (Constants.OS_WIN32.equals(os)) {
+				osSharedDir = "C:\\ProgramData"; //$NON-NLS-1$
+			} else {
+				osSharedDir = "/srv"; //$NON-NLS-1$
+			}
+		}
+		return osSharedDir + source.substring(var.length());
+	}
+
+	private String substituteUserDocumentsVar(String source, String var) {
+		String osDocumentsDir = getOSUserDocumentsDirectory();
+		if (osDocumentsDir == null) {
+			// Fallback to user.home
+			osDocumentsDir = System.getProperty(PROP_USER_HOME, ""); //$NON-NLS-1$
+		}
+		return osDocumentsDir + source.substring(var.length());
+	}
+
+	private String getOSUserDataDirectory() {
+		if (bridge != null) {
+			return bridge.getOSUserDataDirectory();
+		}
+		// Fallback if native library is not available
+		if (Constants.OS_WIN32.equals(os)) {
+			String appData = System.getenv("APPDATA"); //$NON-NLS-1$
+			if (appData != null) {
+				return appData;
+			}
+		}
+		return null;
+	}
+
+	private String getOSUserDataSharedDirectory() {
+		if (bridge != null) {
+			return bridge.getOSUserDataSharedDirectory();
+		}
+		// Fallback if native library is not available
+		if (Constants.OS_WIN32.equals(os)) {
+			String programData = System.getenv("PROGRAMDATA"); //$NON-NLS-1$
+			if (programData != null) {
+				return programData;
+			}
+		}
+		return null;
+	}
+
+	private String getOSUserDocumentsDirectory() {
+		if (bridge != null) {
+			return bridge.getOSUserDocumentsDirectory();
+		}
+		return null;
 	}
 
 	/**
