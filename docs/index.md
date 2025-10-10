@@ -25,6 +25,24 @@ Github: [https://github.com/eclipse-equinox/equinox](https://github.com/eclipse-
 </table>
 
 
+## Equinox Launcher
+
+<table class="property-index">
+    <thead>
+        <th>page</th>
+        <th>Description</th>
+    </thead>
+    <tbody>
+        {% for page in site.launcher %}
+        <tr>
+            <td><a href="{{ page.url | prepend: site.baseurl }}">{{page.title | escape}}</a></td>
+            <td>{{page.summary | escape}}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
 ## Console Commands
 
 <table class="property-index">
