@@ -8,6 +8,8 @@ collections:
     output: true
   commands:
     output: true
+  launcher:
+    output: true
 
 exclude:
   - 'Gemfile'
