@@ -15,7 +15,12 @@
 package org.eclipse.osgi.internal.debug;
 
 import java.io.PrintStream;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
+import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.osgi.service.debug.DebugOptionsListener;
 import org.osgi.service.log.LogService;
@@ -49,10 +54,21 @@ public class Debug implements DebugOptionsListener {
 	 * Bundle start time Debug option key.
 	 */
 	public static final String OPTION_DEBUG_BUNDLE_START_TIME = ECLIPSE_OSGI + "/debug/bundleStartTime"; //$NON-NLS-1$
+
 	/**
 	 * Loader Debug option key.
 	 */
 	public static final String OPTION_DEBUG_LOADER = ECLIPSE_OSGI + "/debug/loader"; //$NON-NLS-1$
+
+	/**
+	 * Loader Debug option key.
+	 */
+	public static final String OPTION_DEBUG_LOADER_PACKAGES = ECLIPSE_OSGI + "/debug/loader/packages"; //$NON-NLS-1$
+
+	/**
+	 * Loader Debug option key.
+	 */
+	public static final String OPTION_DEBUG_LOADER_DYAMIC_IMPORT = ECLIPSE_OSGI + "/debug/loader/dynamicImport"; //$NON-NLS-1$
 
 	/**
 	 * Loader Debug option key.
@@ -119,12 +135,24 @@ public class Debug implements DebugOptionsListener {
 	 * Bundle time debug flag.
 	 */
 	public boolean DEBUG_BUNDLE_TIME = false; // "debug.bundleTime"
+
 	/**
 	 * Loader debug flag.
 	 */
 	public boolean DEBUG_LOADER = false; // "debug.loader"
+
 	/**
 	 * Loader debug flag.
+	 */
+	public boolean DEBUG_LOADER_PACKAGES = false;
+	public Set<String> DEBUG_LOADER_PACKAGES_SET = Collections.emptySet();
+
+	/**
+	 * Loader dynamic import debug flag.
+	 */
+	public boolean DEBUG_LOADER_DYNAMIC_IMPORT = false;
+	/**
+	 * Loader CDS debug flag.
 	 */
 	public boolean DEBUG_LOADER_CDS = false; // "debug.loader"
 	/**
@@ -179,6 +207,13 @@ public class Debug implements DebugOptionsListener {
 		DEBUG_BUNDLE_TIME = dbgOptions.getBooleanOption(OPTION_DEBUG_BUNDLE_TIME, false)
 				|| dbgOptions.getBooleanOption("org.eclipse.core.runtime/timing/startup", false); //$NON-NLS-1$
 		DEBUG_LOADER = dbgOptions.getBooleanOption(OPTION_DEBUG_LOADER, false);
+		DEBUG_LOADER_DYNAMIC_IMPORT = dbgOptions.getBooleanOption(OPTION_DEBUG_LOADER_DYAMIC_IMPORT, false);
+
+		String pkgsValue = dbgOptions.getOption(OPTION_DEBUG_LOADER_PACKAGES, ""); //$NON-NLS-1$
+		Set<String> packages = new HashSet<>(Arrays.asList(pkgsValue.split(","))); //$NON-NLS-1$
+		DEBUG_LOADER_PACKAGES = !packages.isEmpty();
+		DEBUG_LOADER_PACKAGES_SET = packages.isEmpty() ? Collections.emptySet() : Collections.unmodifiableSet(packages);
+
 		DEBUG_LOADER_CDS = dbgOptions.getBooleanOption(OPTION_DEBUG_LOADER_CDS, false);
 		DEBUG_STORAGE = dbgOptions.getBooleanOption(OPTION_DEBUG_STORAGE, false);
 		DEBUG_EVENTS = dbgOptions.getBooleanOption(OPTION_DEBUG_EVENTS, false);
@@ -227,10 +262,46 @@ public class Debug implements DebugOptionsListener {
 			// non-blocking read lock. Any caching here
 			// will need to be proven to be faster than
 			// the LogService logger cache.
-			current.getLogger(topic).trace(message);
+			current.getLogger(topic).debug(message);
 		} else {
 			out.println(message);
 		}
+	}
+
+	public String loaderWithPackage(String packageName) {
+		if (DEBUG_LOADER) {
+			return OPTION_DEBUG_LOADER;
+		}
+		if (DEBUG_LOADER_PACKAGES && DEBUG_LOADER_PACKAGES_SET.contains(packageName)) {
+			return OPTION_DEBUG_LOADER_PACKAGES;
+		}
+		return null;
+	}
+
+	public String loaderWithClass(String className) {
+		if (DEBUG_LOADER) {
+			return OPTION_DEBUG_LOADER;
+		}
+		if (DEBUG_LOADER_PACKAGES) {
+			String packageName = BundleLoader.getPackageName(className);
+			if (DEBUG_LOADER_PACKAGES_SET.contains(packageName)) {
+				return OPTION_DEBUG_LOADER_PACKAGES;
+			}
+		}
+		return null;
+	}
+
+	public String dynamicPackage(String packageName) {
+		if (DEBUG_LOADER) {
+			return OPTION_DEBUG_LOADER;
+		}
+		if (DEBUG_LOADER_DYNAMIC_IMPORT) {
+			return OPTION_DEBUG_LOADER_DYAMIC_IMPORT;
+		}
+		if (DEBUG_LOADER_PACKAGES && DEBUG_LOADER_PACKAGES_SET.contains(packageName)) {
+			return OPTION_DEBUG_LOADER_PACKAGES;
+		}
+		return null;
 	}
 
 	/**

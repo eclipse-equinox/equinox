@@ -15,14 +15,18 @@ package org.eclipse.equinox.log.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.eclipse.equinox.log.SynchronousLogListener;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.launch.Equinox;
@@ -225,5 +229,65 @@ public class LogEquinoxTraceTest extends AbstractBundleTests {
 		ServiceReference<StartLevel> ref = equinox.getBundleContext().getServiceReference(StartLevel.class);
 		List<LogEntry> traceLogs = testListener.getLogs();
 		assertEquals("Expected to have no trace logs.", 0, traceLogs.size());
+	}
+
+	@Test
+	public void testLoaderPackageTrace() throws IOException, BundleException, ClassNotFoundException {
+		// install another bundle to load classes from
+		File baseBundlesDir = OSGiTestsActivator.getContext().getDataFile(getName());
+
+		Map<String, String> headers = new HashMap<>();
+		headers.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		headers.put(Constants.BUNDLE_SYMBOLICNAME, getName());
+		headers.put(Constants.IMPORT_PACKAGE,
+				"org.osgi.framework, org.osgi.framework.connect, org.osgi.framework.dto, org.osgi.framework.wiring, org.osgi.framework.hooks.bundle");
+
+		baseBundlesDir.mkdirs();
+
+		File bundleFile = SystemBundleTests.createBundle(baseBundlesDir, getName(), headers);
+		Bundle b = equinox.getBundleContext().installBundle(bundleFile.toURI().toASCIIString());
+
+		assertFalse("Expected debug options to be disabled.", debugOptions.isDebugEnabled());
+		assertEquals("Expected no debug Options.", 0, debugOptions.getOptions().size());
+
+		LoggerContext rootContext = loggerAdmin.getLoggerContext(null);
+		Map<String, LogLevel> rootLogLevels = rootContext.getLogLevels();
+
+		// enable service trace
+		rootLogLevels.put(Debug.EQUINOX_TRACE, LogLevel.DEBUG);
+		// Note that the root package list logger is used for all package tracing so it
+		// needs to be enabled
+		// to get any trace from any packages.
+		rootLogLevels.put(Debug.OPTION_DEBUG_LOADER_PACKAGES, LogLevel.DEBUG);
+		rootLogLevels.put(Debug.OPTION_DEBUG_LOADER_PACKAGES + "/+/org.osgi.framework", LogLevel.DEBUG);
+		rootLogLevels.put(Debug.OPTION_DEBUG_LOADER_PACKAGES + "/+/org.osgi.framework.connect", LogLevel.DEBUG);
+		rootLogLevels.put(Debug.OPTION_DEBUG_LOADER_PACKAGES + "/+/org.osgi.framework.dto", LogLevel.DEBUG);
+		rootLogLevels.put(Debug.OPTION_DEBUG_LOADER_PACKAGES + "/+/org.osgi.framework.wiring", LogLevel.DEBUG);
+		rootContext.setLogLevels(rootLogLevels);
+
+		assertTrue("Expected debug to be enabled.", debugOptions.isDebugEnabled());
+		assertEquals("Expected 1 debug Option.", 1, debugOptions.getOptions().size());
+		String tracePackages = debugOptions.getOption(Debug.OPTION_DEBUG_LOADER_PACKAGES);
+		assertNotNull("No trace packages found", tracePackages);
+		Set<String> expected = new HashSet<>(Arrays.asList("org.osgi.framework", "org.osgi.framework.connect",
+				"org.osgi.framework.dto", "org.osgi.framework.wiring"));
+		Set<String> actual = new HashSet<>(Arrays.asList(tracePackages.split(",")));
+		assertEquals("Wrong trace packages", expected, actual);
+
+		b.loadClass("org.osgi.framework.Bundle");
+		b.loadClass("org.osgi.framework.connect.ConnectFrameworkFactory");
+		b.loadClass("org.osgi.framework.dto.BundleDTO");
+		b.loadClass("org.osgi.framework.wiring.FrameworkWiring");
+
+		List<LogEntry> traceLogs = testListener.getLogs();
+		assertNotEquals("Expected to have some trace logs.", 0, traceLogs.size());
+		for (LogEntry logEntry : traceLogs) {
+			assertEquals("Wrong logger name", Debug.OPTION_DEBUG_LOADER_PACKAGES, logEntry.getLoggerName());
+		}
+
+		// not load from another package that is not traced.
+		b.loadClass("org.osgi.framework.hooks.bundle.FindHook");
+		traceLogs = testListener.getLogs();
+		assertEquals("Expected to have some trace logs.", 0, traceLogs.size());
 	}
 }
