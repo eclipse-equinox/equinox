@@ -17,7 +17,6 @@ package org.eclipse.osgi.storage;
 import static org.eclipse.osgi.internal.debug.Debug.OPTION_DEBUG_LOADER;
 
 import java.io.File;
-import java.nio.file.Files;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.ArrayList;
@@ -132,16 +131,8 @@ public class NativeCodeFinder {
 			BundleEntry libEntry = baseBundleFile.getEntry(variant + path);
 			if (libEntry != null) {
 				File libFile = baseBundleFile.getFile(variant + path, true);
-				if (libFile == null)
+				if (libFile == null) {
 					return null;
-				// see bug 88697 - HP requires libraries to have executable permissions
-				if (org.eclipse.osgi.service.environment.Constants.OS_HPUX
-						.equals(generation.getBundleInfo().getStorage().getConfiguration().getOS())) {
-					try {
-						Files.setPosixFilePermissions(libFile.toPath(), PERMISSIONS_755);
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
 				}
 				return libFile.getAbsolutePath();
 			}
