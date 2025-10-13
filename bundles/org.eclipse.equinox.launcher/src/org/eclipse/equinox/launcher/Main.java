@@ -373,10 +373,6 @@ public class Main {
 			case Constants.OS_WIN32 -> Constants.WS_WIN32;
 			case Constants.OS_LINUX -> Constants.WS_GTK;
 			case Constants.OS_MACOSX -> Constants.WS_COCOA;
-			case Constants.OS_HPUX -> Constants.WS_GTK;
-			case Constants.OS_AIX -> Constants.WS_GTK;
-			case Constants.OS_SOLARIS -> Constants.WS_GTK;
-			case Constants.OS_QNX -> Constants.WS_PHOTON;
 			default -> Constants.WS_UNKNOWN;
 		};
 	}
@@ -392,15 +388,7 @@ public class Main {
 		}
 		String osName = System.getProperty("os.name").toLowerCase(Locale.ROOT); //$NON-NLS-1$
 		return switch (osName) {
-			// EXCEPTION: All mappings of SunOS convert to Solaris
-			case Constants.INTERNAL_OS_SUNOS -> Constants.OS_SOLARIS;
 			case Constants.OS_LINUX -> Constants.OS_LINUX;
-			case Constants.OS_QNX -> Constants.OS_QNX;
-			case Constants.OS_AIX -> Constants.OS_AIX;
-			case Constants.INTERNAL_OS_HPUX -> Constants.OS_HPUX;
-			case Constants.OS_OS400 -> Constants.OS_OS400;
-			case Constants.OS_OS390 -> Constants.OS_OS390;
-			case Constants.OS_ZOS -> Constants.OS_ZOS;
 			default -> {
 				if (osName.startsWith(Constants.OS_WIN32.substring(0, 3))) {
 					yield Constants.OS_WIN32;
