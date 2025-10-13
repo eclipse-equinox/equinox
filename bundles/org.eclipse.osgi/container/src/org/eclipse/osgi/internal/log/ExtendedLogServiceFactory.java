@@ -39,6 +39,7 @@ import org.osgi.service.log.admin.LoggerContext;
 
 public class ExtendedLogServiceFactory implements ServiceFactory<ExtendedLogService>, BundleListener {
 	static final SecureAction secureAction = AccessController.doPrivileged(SecureAction.createSecureAction());
+	static final String ADD_LIST_KEY = "/+/"; //$NON-NLS-1$
 	final ReentrantReadWriteLock contextsLock = new ReentrantReadWriteLock();
 	final LoggerContextTargetMap loggerContextTargetMap = new LoggerContextTargetMap();
 	private final Permission logPermission = new LogPermission("*", LogPermission.LOG); //$NON-NLS-1$
@@ -258,14 +259,39 @@ public class ExtendedLogServiceFactory implements ServiceFactory<ExtendedLogServ
 			Map<String, String> options = debugOptions.getOptions();
 			options.clear();
 			boolean enable = false;
-			if (equinoxTrace == LogLevel.TRACE) {
+			if (equinoxTrace.implies(LogLevel.DEBUG)) {
+				Map<String, StringBuilder> lists = new HashMap<>();
 				// enable trace options if the EQUINOX.TRACE is set to trace
 				for (Entry<String, LogLevel> level : logLevels.entrySet()) {
-					if (level.getValue() == LogLevel.TRACE && !(EQUINOX_LOGGER_NAME.equals(level.getKey())
-							|| PERF_LOGGER_NAME.equals(level.getKey()))) {
-						options.put(level.getKey(), Boolean.TRUE.toString());
-						enable = true;
+					if (level.getValue() != null && level.getValue().implies(LogLevel.DEBUG)//
+							&& !(EQUINOX_LOGGER_NAME.equals(level.getKey())
+									|| PERF_LOGGER_NAME.equals(level.getKey()))) {
+						int listIdx = level.getKey().lastIndexOf(ADD_LIST_KEY);
+						if (listIdx != -1) {
+							// If the logger name contains "/+/" then Equinox trace option is a list of
+							// values;
+							// Where the trace logger name is everything upto but not including "/+/... and
+							// the
+							// remaining key after "/+/" becomes a value in the list.
+							String listKey = level.getKey().substring(0, listIdx);
+							String listValue = level.getKey().substring(listIdx + ADD_LIST_KEY.length());
+							StringBuilder current = lists.get(listKey);
+							if (current == null) {
+								current = new StringBuilder(listValue);
+								lists.put(listKey, current);
+							} else {
+								current.append(',').append(listValue);
+							}
+						} else {
+							options.put(level.getKey(), Boolean.TRUE.toString());
+							enable = true;
+						}
 					}
+				}
+				// set all the values for list keys found.
+				for (Entry<String, StringBuilder> list : lists.entrySet()) {
+					options.put(list.getKey(), list.getValue().toString());
+					enable = true;
 				}
 			}
 			debugOptions.setOptions(options);
