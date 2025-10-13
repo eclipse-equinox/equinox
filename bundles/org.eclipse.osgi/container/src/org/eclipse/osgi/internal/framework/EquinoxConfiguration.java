@@ -78,16 +78,8 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	private static final String CONFIG_FILE = "config.ini"; //$NON-NLS-1$
 	// While we recognize the SunOS operating system, we change
 	// this internally to be Solaris.
-	private static final String INTERNAL_OS_SUNOS = "SunOS"; //$NON-NLS-1$
 	private static final String INTERNAL_OS_LINUX = "Linux"; //$NON-NLS-1$
 	private static final String INTERNAL_OS_MACOSX = "Mac OS"; //$NON-NLS-1$
-	private static final String INTERNAL_OS_AIX = "AIX"; //$NON-NLS-1$
-	private static final String INTERNAL_OS_HPUX = "HP-UX"; //$NON-NLS-1$
-	private static final String INTERNAL_OS_QNX = "QNX"; //$NON-NLS-1$
-	private static final String INTERNAL_OS_OS400 = "OS/400"; //$NON-NLS-1$
-	private static final String INTERNAL_OS_OS390 = "OS/390"; //$NON-NLS-1$
-	private static final String INTERNAL_OS_ZOS = "z/OS"; //$NON-NLS-1$
-	private static final String INTERNAL_OS_FREEBSD = "FreeBSD"; //$NON-NLS-1$
 	// While we recognize the i386 architecture, we change
 	// this internally to be x86.
 	private static final String INTERNAL_ARCH_I386 = "i386"; //$NON-NLS-1$
@@ -858,14 +850,6 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 			return Constants.WS_GTK;
 		if (osName.equals(Constants.OS_MACOSX))
 			return Constants.WS_COCOA;
-		if (osName.equals(Constants.OS_HPUX))
-			return Constants.WS_MOTIF;
-		if (osName.equals(Constants.OS_AIX))
-			return Constants.WS_MOTIF;
-		if (osName.equals(Constants.OS_SOLARIS))
-			return Constants.WS_GTK;
-		if (osName.equals(Constants.OS_QNX))
-			return Constants.WS_PHOTON;
 		return Constants.WS_UNKNOWN;
 	}
 
@@ -874,23 +858,8 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		// flavour which should be converted to win32.
 		if (osName.regionMatches(true, 0, Constants.OS_WIN32, 0, 3))
 			return Constants.OS_WIN32;
-		// EXCEPTION: All mappings of SunOS convert to Solaris
-		if (osName.equalsIgnoreCase(INTERNAL_OS_SUNOS))
-			return Constants.OS_SOLARIS;
 		if (osName.equalsIgnoreCase(INTERNAL_OS_LINUX))
 			return Constants.OS_LINUX;
-		if (osName.equalsIgnoreCase(INTERNAL_OS_QNX))
-			return Constants.OS_QNX;
-		if (osName.equalsIgnoreCase(INTERNAL_OS_AIX))
-			return Constants.OS_AIX;
-		if (osName.equalsIgnoreCase(INTERNAL_OS_HPUX))
-			return Constants.OS_HPUX;
-		if (osName.equalsIgnoreCase(INTERNAL_OS_OS400))
-			return Constants.OS_OS400;
-		if (osName.equalsIgnoreCase(INTERNAL_OS_OS390))
-			return Constants.OS_OS390;
-		if (osName.equalsIgnoreCase(INTERNAL_OS_ZOS))
-			return Constants.OS_ZOS;
 		if (osName.equalsIgnoreCase(INTERNAL_OS_FREEBSD))
 			return Constants.OS_FREEBSD;
 		// os.name on Mac OS can be either Mac OS or Mac OS X
