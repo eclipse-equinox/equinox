@@ -17,14 +17,11 @@ package org.eclipse.osgi.storage;
 import static org.eclipse.osgi.internal.debug.Debug.OPTION_DEBUG_LOADER;
 
 import java.io.File;
-import java.nio.file.attribute.PosixFilePermission;
-import java.nio.file.attribute.PosixFilePermissions;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.eclipse.osgi.container.ModuleRevision;
 import org.eclipse.osgi.container.ModuleWire;
 import org.eclipse.osgi.container.ModuleWiring;
@@ -43,7 +40,6 @@ public class NativeCodeFinder {
 	public static final String REQUIREMENT_NATIVE_PATHS_ATTRIBUTE = "native.paths"; //$NON-NLS-1$
 	private static final String[] EMPTY_STRINGS = new String[0];
 	public static final String EXTERNAL_LIB_PREFIX = "external:"; //$NON-NLS-1$
-	private static final Set<PosixFilePermission> PERMISSIONS_755 = PosixFilePermissions.fromString("rwxr-xr-x"); //$NON-NLS-1$
 	private final Generation generation;
 	private final Debug debug;
 	// This is only used to keep track of when the same native library is loaded
