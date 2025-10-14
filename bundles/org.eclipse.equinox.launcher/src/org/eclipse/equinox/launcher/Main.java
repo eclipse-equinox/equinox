@@ -1234,10 +1234,6 @@ public class Main {
 
 		if (Files.isWritable(installDir.toPath())) {
 			return true;
-		} else if (Constants.OS_ZOS.equals(os)) {
-			// For z/OS avoid doing the windows specific .dll check below.
-			// This causes additional alarms on z/OS for unauthorized attempts to write.
-			return false;
 		}
 
 		File fileTest = null;
