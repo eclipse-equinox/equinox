@@ -305,6 +305,18 @@ public interface StateObjectFactory {
 	public BundleDescription createBundleDescription(BundleDescription original);
 
 	/**
+	 * Creates a bundle description that is a copy of the given description. The
+	 * user object of the original bundle description is not copied and the copy
+	 * will use the supplied id as the bundle id
+	 *
+	 * @param id       the new id to assign to the copy
+	 * @param original the bundle description to be copied
+	 * @return the created bundle description
+	 * @since 3.24
+	 */
+	public BundleDescription createBundleDescription(long id, BundleDescription original);
+
+	/**
 	 * Creates a bundle specification from the given parameters.
 	 *
 	 * @param requiredSymbolicName the symbolic name for the required bundle
@@ -723,6 +735,11 @@ public interface StateObjectFactory {
 		}
 
 		@Override
+		public BundleDescription createBundleDescription(long id, BundleDescription original) {
+			return getImplementation().createBundleDescription(id, original);
+		}
+
+		@Override
 		public BundleSpecification createBundleSpecification(String requiredSymbolicName,
 				VersionRange requiredVersionRange, boolean export, boolean optional) {
 			return getImplementation().createBundleSpecification(requiredSymbolicName, requiredVersionRange, export,
@@ -865,5 +882,6 @@ public interface StateObjectFactory {
 		public State readState(File stateDirectory) throws IOException {
 			return getImplementation().readState(stateDirectory);
 		}
+
 	}
 }

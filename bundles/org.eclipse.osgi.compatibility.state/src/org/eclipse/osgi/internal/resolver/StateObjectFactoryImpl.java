@@ -165,6 +165,13 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 	}
 
 	@Override
+	public BundleDescription createBundleDescription(long id, BundleDescription original) {
+		BundleDescriptionImpl bundle = (BundleDescriptionImpl) createBundleDescription(original);
+		bundle.setBundleId(id);
+		return bundle;
+	}
+
+	@Override
 	public BundleDescription createBundleDescription(BundleDescription original) {
 		BundleDescriptionImpl bundle = new BundleDescriptionImpl();
 		bundle.setBundleId(original.getBundleId());
