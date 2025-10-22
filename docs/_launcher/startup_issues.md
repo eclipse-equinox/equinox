@@ -185,6 +185,41 @@ Then start with:
 eclipse -debug /path/to/.options -consoleLog
 ```
 
+### Configure Debug Logging via JVM parameters
+
+If you are using Equinox as the OSGi framework in your OSGi application (e.g. if you are using another way to lauch like the bnd launcher or OSGi Feature launcher) then you might want configure logging via command line properties. 
+
+The following properties can be used:
+
+- `osgi.debug=/path/to/.options` (see above)
+- `eclipse.log.enabled=true/false`
+- `eclipse.consoleLog=true/false`
+
+If you prefer the built-in equinox logger to go to `System.out` also then you can set the framework/system property `eclipse.consoleLog=true`.
+
+By default Equinox writes the framework ERROR to a log file also from [here](https://github.com/eclipse-equinox/equinox/blob/41591b51eec1a02f01daf7069db21f4f9258531f/bundles/org.eclipse.osgi/container/src/org/eclipse/osgi/internal/log/EquinoxLogWriter.java#L769) unless you disabled it with the property `eclipse.log.enabled=false` which gets read [here](https://github.com/eclipse-equinox/equinox/blob/41591b51eec1a02f01daf7069db21f4f9258531f/bundles/org.eclipse.osgi/container/src/org/eclipse/osgi/internal/log/EquinoxLogServices.java#L69)
+
+**Example via a .bndrun***
+
+```
+# launch.bndrun
+-runproperties.debug: \
+	eclipse.consoleLog=true
+```
+
+This enables basic logging of errors.
+
+To use an additional `.options` file for more fine grained logging output do:
+
+```
+# launch.bndrun
+-runproperties.debug: \
+   osgi.debug=${workspace}/my.bundle.foo/debug.options,\
+   eclipse.consoleLog=true
+```
+
+This enables console output 
+
 ### Check Log Files
 
 Always check the workspace log for detailed error information:
