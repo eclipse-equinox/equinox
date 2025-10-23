@@ -21,8 +21,6 @@ import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
-import org.apache.felix.resolver.Logger;
-import org.apache.felix.resolver.ResolverImpl;
 import org.eclipse.equinox.plurl.Plurl;
 import org.eclipse.equinox.plurl.PlurlContentHandlerFactory;
 import org.eclipse.equinox.plurl.PlurlStreamHandlerFactory;
@@ -121,7 +119,8 @@ public class SystemBundleActivator implements BundleActivator {
 
 		props.clear();
 		props.put(Constants.SERVICE_RANKING, Integer.MIN_VALUE);
-		register(bc, Resolver.class, new ResolverImpl(new Logger(0), null), false, props);
+		Resolver resolver = ResolverFactory.createResolverService(equinoxContainer);
+		register(bc, Resolver.class, resolver, false, props);
 
 		register(bc, DebugOptions.class, dbgOptions, null);
 
