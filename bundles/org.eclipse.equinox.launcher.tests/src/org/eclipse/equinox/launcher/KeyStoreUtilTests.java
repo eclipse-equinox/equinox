@@ -24,7 +24,6 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.matchesRegex;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -40,7 +39,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.SSLContext;
@@ -52,11 +50,11 @@ import javax.security.auth.x500.X500Principal;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 
 public class KeyStoreUtilTests {
-
-	private static final String OS = System.getProperty("osgi.os");
 
 	private static final List<String> SYSTEM_PROPERTIES_TO_BACKUP_AND_RESTORE = List.of( //
 			"eclipse.load.os.trust.store.by.default", //
@@ -121,7 +119,7 @@ public class KeyStoreUtilTests {
 						.map(X509Certificate::getSubjectX500Principal).map(X500Principal::getName).toList(),
 				hasItem(matchesRegex("(?i).*digicert.*root.*")));
 
-		if (Constants.OS_WIN32.equals(OS)) {
+		if (OS.WINDOWS.equals(OS.current())) {
 			assertThat(tm.trustManagers, hasSize(2));
 			assertThat(keyStoreUtil.createdTrustManagersAndKeyStores, hasSize(2));
 			assertThat(keyStoreUtil.createdTrustManagersAndKeyStores.get(1).manager(), is(tm.trustManagers.get(1)));
@@ -130,7 +128,7 @@ public class KeyStoreUtilTests {
 					Arrays.stream(tm.trustManagers.get(1).getAcceptedIssuers())
 							.map(X509Certificate::getSubjectX500Principal).map(X500Principal::getName).toList(),
 					hasItem(matchesRegex("(?i).*digicert.*root.*")));
-		} else if (Constants.OS_MACOSX.equals(OS)) {
+		} else if (OS.MAC.equals(OS.current())) {
 			assertThat(tm.trustManagers, hasSize(2));
 			assertThat(keyStoreUtil.createdTrustManagersAndKeyStores, hasSize(2));
 			assertThat(keyStoreUtil.createdTrustManagersAndKeyStores.get(1).manager(), is(tm.trustManagers.get(1)));
@@ -182,12 +180,12 @@ public class KeyStoreUtilTests {
 	}
 
 	@Test
+	@EnabledOnOs({OS.WINDOWS, OS.MAC})
 	public void loadTrustManagers_TrustSystemPropertiesPointToPlatformSpecificKeystore() throws Exception {
-		assumeTrue(Set.of(Constants.OS_WIN32, Constants.OS_MACOSX).contains(OS));
-		if (Constants.OS_WIN32.equals(OS)) {
+		if (OS.WINDOWS.equals(OS.current())) {
 			System.setProperty("javax.net.ssl.trustStore", "NONE");
 			System.setProperty("javax.net.ssl.trustStoreType", "Windows-ROOT");
-		} else if (Constants.OS_MACOSX.equals(OS)) {
+		} else if (OS.MAC.equals(OS.current())) {
 			System.setProperty("javax.net.ssl.trustStore", "NONE");
 			System.setProperty("javax.net.ssl.trustStoreType", "KeychainStore");
 			System.setProperty("javax.net.ssl.trustStoreProvider", "Apple");
@@ -210,12 +208,12 @@ public class KeyStoreUtilTests {
 		assertThat(keyStoreUtil.createdTrustManagersAndKeyStores.get(0).manager(), is(tm.trustManagers.get(0)));
 		assertThat(keyStoreUtil.createdTrustManagersAndKeyStores.get(0).store(), is(nullValue()));
 
-		if (Constants.OS_WIN32.equals(OS)) {
+		if (OS.WINDOWS.equals(OS.current())) {
 			assertThat(
 					Arrays.stream(tm.trustManagers.get(0).getAcceptedIssuers())
 							.map(X509Certificate::getSubjectX500Principal).map(X500Principal::getName).toList(),
 					hasItem(matchesRegex("(?i).*digicert.*root.*")));
-		} else if (Constants.OS_MACOSX.equals(OS)) {
+		} else if (OS.MAC.equals(OS.current())) {
 			// Apple KeychainStore only includes the 'System' certificates
 			// (enterprise/admin managed)
 			// but not the 'System Roots' ones (public CAs).
@@ -282,7 +280,7 @@ public class KeyStoreUtilTests {
 	private static final class TestSpecificKeyStoreUtil extends KeyStoreUtil {
 
 		public TestSpecificKeyStoreUtil() {
-			super(OS);
+			super(System.getProperty("osgi.os"));
 		}
 
 		public static record X509TrustManagerAndKeyStore(X509TrustManager manager, KeyStore store) {
