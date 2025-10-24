@@ -8,3 +8,6 @@ Require-Bundle: junit-jupiter-api;bundle-version="[5.14.0,6.0.0)",
  junit-platform-runner;bundle-version="[1.14.0,2.0.0)"
 Automatic-Module-Name: org.eclipse.launcher.tests
 Bundle-RequiredExecutionEnvironment: JavaSE-17
+Import-Package: org.hamcrest,
+ org.mockito,
+ org.mockito.stubbing
