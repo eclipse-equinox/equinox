@@ -37,11 +37,17 @@ import javax.net.ssl.X509TrustManager;
 
 class KeyStoreUtil {
 
+	private final String os;
+
 	private static final record KeyStoreAndPassword(KeyStore keyStore, char[] password) {
 	}
 
+	public KeyStoreUtil(String os) {
+		this.os = os;
+	}
+
 	@SuppressWarnings("nls")
-	public void setUpSslContext(String os) throws GeneralSecurityException, IOException {
+	public void setUpSslContext() throws GeneralSecurityException, IOException {
 
 		List<KeyStoreAndPassword> keyStores = new ArrayList<>();
 		keyStores.add(new KeyStoreAndPassword(null, null)); // null will loads JVM cacerts OR store indicated by "javax.net.ssl.trustStore" properties

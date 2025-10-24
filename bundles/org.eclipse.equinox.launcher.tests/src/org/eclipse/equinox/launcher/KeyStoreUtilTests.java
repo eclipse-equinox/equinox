@@ -99,7 +99,7 @@ public class KeyStoreUtilTests {
 
 		TestSpecificKeyStoreUtil keyStoreUtil = new TestSpecificKeyStoreUtil();
 
-		keyStoreUtil.setUpSslContext(OS);
+		keyStoreUtil.setUpSslContext();
 
 		assertThat(SSLContext.getDefault(), is(keyStoreUtil.recordedSslContext));
 
@@ -156,7 +156,7 @@ public class KeyStoreUtilTests {
 
 		TestSpecificKeyStoreUtil keyStoreUtil = new TestSpecificKeyStoreUtil();
 
-		keyStoreUtil.setUpSslContext(OS);
+		keyStoreUtil.setUpSslContext();
 
 		assertThat(SSLContext.getDefault(), is(keyStoreUtil.recordedSslContext));
 
@@ -194,7 +194,7 @@ public class KeyStoreUtilTests {
 
 		TestSpecificKeyStoreUtil keyStoreUtil = new TestSpecificKeyStoreUtil();
 
-		keyStoreUtil.setUpSslContext(OS);
+		keyStoreUtil.setUpSslContext();
 
 		assertThat(SSLContext.getDefault(), is(keyStoreUtil.recordedSslContext));
 
@@ -228,7 +228,7 @@ public class KeyStoreUtilTests {
 
 		TestSpecificKeyStoreUtil keyStoreUtil = new TestSpecificKeyStoreUtil();
 
-		keyStoreUtil.setUpSslContext(OS);
+		keyStoreUtil.setUpSslContext();
 
 		assertThat(SSLContext.getDefault(), is(keyStoreUtil.recordedSslContext));
 
@@ -245,7 +245,7 @@ public class KeyStoreUtilTests {
 
 		TestSpecificKeyStoreUtil keyStoreUtil = new TestSpecificKeyStoreUtil();
 
-		keyStoreUtil.setUpSslContext(OS);
+		keyStoreUtil.setUpSslContext();
 
 		assertThat(SSLContext.getDefault(), is(keyStoreUtil.recordedSslContext));
 
@@ -268,6 +268,10 @@ public class KeyStoreUtilTests {
 	}
 
 	private static final class TestSpecificKeyStoreUtil extends KeyStoreUtil {
+
+		public TestSpecificKeyStoreUtil() {
+			super(OS);
+		}
 
 		public static record X509TrustManagerAndKeyStore(X509TrustManager manager, KeyStore store) {
 		}

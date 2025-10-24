@@ -562,7 +562,7 @@ public class Main {
 		handleSplash();
 
 		try {
-			new KeyStoreUtil().setUpSslContext(getOS());
+			new KeyStoreUtil(getOS()).setUpSslContext();
 		} catch (Exception e) {
 			log("Exception setting up SSLContext"); //$NON-NLS-1$
 			log(e);
