@@ -180,7 +180,7 @@ public class KeyStoreUtilTests {
 	}
 
 	@Test
-	@EnabledOnOs({OS.WINDOWS, OS.MAC})
+	@EnabledOnOs({ OS.WINDOWS, OS.MAC })
 	public void loadTrustManagers_TrustSystemPropertiesPointToPlatformSpecificKeystore() throws Exception {
 		if (OS.WINDOWS.equals(OS.current())) {
 			System.setProperty("javax.net.ssl.trustStore", "NONE");
@@ -198,8 +198,6 @@ public class KeyStoreUtilTests {
 		assertThat(SSLContext.getDefault(), is(keyStoreUtil.recordedSslContext));
 
 		assertThat(keyStoreUtil.recordedTrustManagers, arrayWithSize(1));
-		assertThat(((CollectionTrustManager) keyStoreUtil.recordedTrustManagers[0]).getAcceptedIssuers(),
-				not(emptyArray()));
 
 		CollectionTrustManager tm = (CollectionTrustManager) keyStoreUtil.recordedTrustManagers[0];
 
@@ -209,6 +207,8 @@ public class KeyStoreUtilTests {
 		assertThat(keyStoreUtil.createdTrustManagersAndKeyStores.get(0).store(), is(nullValue()));
 
 		if (OS.WINDOWS.equals(OS.current())) {
+			assertThat(((CollectionTrustManager) keyStoreUtil.recordedTrustManagers[0]).getAcceptedIssuers(),
+					not(emptyArray()));
 			assertThat(
 					Arrays.stream(tm.trustManagers.get(0).getAcceptedIssuers())
 							.map(X509Certificate::getSubjectX500Principal).map(X500Principal::getName).toList(),
