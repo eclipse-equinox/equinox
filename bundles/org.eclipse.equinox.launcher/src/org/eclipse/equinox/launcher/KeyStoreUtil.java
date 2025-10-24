@@ -37,6 +37,9 @@ import javax.net.ssl.X509TrustManager;
 
 class KeyStoreUtil {
 
+	@SuppressWarnings("nls")
+	private static final String PROP_LOAD_OS_TRUST_STORE_BY_DEFAULT = "eclipse.load.os.trust.store.by.default";
+
 	private final String os;
 
 	private static final record KeyStoreAndPassword(KeyStore keyStore, char[] password) {
@@ -48,6 +51,10 @@ class KeyStoreUtil {
 
 	@SuppressWarnings("nls")
 	public void setUpSslContext() throws GeneralSecurityException, IOException {
+
+		if (Boolean.FALSE.toString().equals(System.getProperty(PROP_LOAD_OS_TRUST_STORE_BY_DEFAULT, null))) {
+			return;
+		}
 
 		List<KeyStoreAndPassword> keyStores = new ArrayList<>();
 		keyStores.add(new KeyStoreAndPassword(null, null)); // null will loads JVM cacerts OR store indicated by "javax.net.ssl.trustStore" properties

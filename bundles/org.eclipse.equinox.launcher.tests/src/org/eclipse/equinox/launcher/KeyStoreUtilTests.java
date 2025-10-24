@@ -59,6 +59,7 @@ public class KeyStoreUtilTests {
 	private static final String OS = System.getProperty("osgi.os");
 
 	private static final List<String> SYSTEM_PROPERTIES_TO_BACKUP_AND_RESTORE = List.of( //
+			"eclipse.load.os.trust.store.by.default", //
 			"javax.net.ssl.trustStore", //
 			"javax.net.ssl.trustStorePassword", //
 			"javax.net.ssl.trustStoreProvider", //
@@ -259,6 +260,17 @@ public class KeyStoreUtilTests {
 		assertThat(keyStoreUtil.createdKeyManagersAndKeyStores.get(0).store().getType(), is("PKCS12"));
 
 		assertThat(km.getPrivateKey("test.key"), not(nullValue()));
+	}
+
+	@Test
+	public void optOutViaSystemProperty() throws Exception {
+		System.setProperty("eclipse.load.os.trust.store.by.default", "false");
+
+		TestSpecificKeyStoreUtil keyStoreUtil = new TestSpecificKeyStoreUtil();
+
+		keyStoreUtil.setUpSslContext();
+
+		assertThat(SSLContext.getDefault(), is(previousSslContext));
 	}
 
 	private String copyResourceToTempDirAndGetPath(String resourceName) throws IOException {
