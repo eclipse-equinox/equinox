@@ -15,6 +15,7 @@
  *     Ericsson AB (Pascal Rapicault) - bug 304132
  *     Rapicorp, Inc - Default the configuration to Application Support (bug 461725)
  *     Lars Vogel <Lars.Vogel@vogella.com> - Bug 221969
+ *     SAP SE - Load OS trust store in addition to JVM cacerts
  *******************************************************************************/
 package org.eclipse.equinox.launcher;
 
@@ -559,6 +560,13 @@ public class Main {
 		// splash handling is done here, because the default case needs to know
 		// the location of the boot plugin we are going to use
 		handleSplash();
+
+		try {
+			new KeyStoreUtil(getOS()).setUpSslContext();
+		} catch (Exception e) {
+			log("Exception setting up SSLContext"); //$NON-NLS-1$
+			log(e);
+		}
 
 		invokeFramework(passThruArgs, bootPathURLs);
 	}
