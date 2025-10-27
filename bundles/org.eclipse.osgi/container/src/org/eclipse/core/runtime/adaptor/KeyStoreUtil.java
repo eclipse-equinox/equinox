@@ -11,7 +11,7 @@
  * Contributors:
  *     SAP SE - initial API and implementation
  *******************************************************************************/
-package org.eclipse.equinox.launcher;
+package org.eclipse.core.runtime.adaptor;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -26,7 +26,6 @@ import java.security.UnrecoverableKeyException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -34,6 +33,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509KeyManager;
 import javax.net.ssl.X509TrustManager;
+import org.eclipse.osgi.service.environment.Constants;
 
 class KeyStoreUtil {
 
@@ -42,7 +42,14 @@ class KeyStoreUtil {
 
 	private final String os;
 
-	private static final record KeyStoreAndPassword(KeyStore keyStore, char[] password) {
+	private static final class KeyStoreAndPassword {
+		public KeyStore keyStore;
+		public char[] password;
+
+		public KeyStoreAndPassword(KeyStore keyStore, char[] password) {
+			this.keyStore = keyStore;
+			this.password = password;
+		}
 	}
 
 	public KeyStoreUtil(String os) {
@@ -67,14 +74,14 @@ class KeyStoreUtil {
 		}
 		List<X509TrustManager> trustManagers = new ArrayList<>();
 		for (KeyStoreAndPassword storeAndPassword : keyStores) {
-			trustManagers.add(createX509TrustManager(storeAndPassword.keyStore()));
+			trustManagers.add(createX509TrustManager(storeAndPassword.keyStore));
 		}
 		TrustManager[] tm = {new CollectionTrustManager(trustManagers)};
 
 		KeyManager[] km = {};
 		KeyStoreAndPassword keyStore = createKeyStoreFromSystemProperties();
 		if (keyStore != null) {
-			km = new KeyManager[] {createX509KeyManager(keyStore.keyStore(), keyStore.password())};
+			km = new KeyManager[] { createX509KeyManager(keyStore.keyStore, keyStore.password) };
 		}
 
 		SSLContext sslContext = SSLContext.getInstance("TLS");

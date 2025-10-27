@@ -11,7 +11,7 @@
  * Contributors:
  *     SAP SE - initial API and implementation
  *******************************************************************************/
-package org.eclipse.equinox.launcher;
+package org.eclipse.core.runtime.adaptor;
 
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;

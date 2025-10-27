@@ -11,7 +11,7 @@
  * Contributors:
  *     SAP SE - initial API and implementation
  *******************************************************************************/
-package org.eclipse.equinox.launcher;
+package org.eclipse.core.runtime.adaptor;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayWithSize;
@@ -19,15 +19,17 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.emptyArray;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.matchesRegex;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assume.assumeThat;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.security.GeneralSecurityException;
 import java.security.KeyManagementException;
@@ -39,24 +41,24 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import java.util.stream.Collectors;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509KeyManager;
 import javax.net.ssl.X509TrustManager;
 import javax.security.auth.x500.X500Principal;
+import org.eclipse.osgi.service.environment.Constants;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledOnOs;
-import org.junit.jupiter.api.condition.OS;
-import org.junit.jupiter.api.io.TempDir;
-
+@SuppressWarnings("nls")
 public class KeyStoreUtilTests {
 
-	private static final List<String> SYSTEM_PROPERTIES_TO_BACKUP_AND_RESTORE = List.of( //
+	private static final List<String> SYSTEM_PROPERTIES_TO_BACKUP_AND_RESTORE = Arrays.asList( //
 			"eclipse.load.os.trust.store.by.default", //
 			"javax.net.ssl.trustStore", //
 			"javax.net.ssl.trustStorePassword", //
@@ -67,21 +69,33 @@ public class KeyStoreUtilTests {
 			"javax.net.ssl.keyStoreProvider", //
 			"javax.net.ssl.keyStoreType");
 
-	@TempDir
-	private Path tempDir;
+	@Rule
+	public TemporaryFolder tempDir = new TemporaryFolder();
 
+	private String os;
 	private Map<String, String> systemPropertyBackups = new HashMap<>();
 	private SSLContext previousSslContext;
 
-	@BeforeEach
+	@Before
 	public void setup() throws Exception {
 		for (String property : SYSTEM_PROPERTIES_TO_BACKUP_AND_RESTORE) {
 			systemPropertyBackups.put(property, System.getProperty(property, null));
 		}
 		previousSslContext = SSLContext.getDefault();
+
+		String osName = System.getProperty("os.name", "").toLowerCase();
+		if (osName.contains("win")) {
+			this.os = Constants.OS_WIN32;
+		} else if (osName.contains("mac")) {
+			this.os = Constants.OS_MACOSX;
+		} else if (osName.contains("nux") || osName.contains("nix")) {
+			this.os = Constants.OS_LINUX;
+		} else {
+			this.os = Constants.OS_UNKNOWN;
+		}
 	}
 
-	@AfterEach
+	@After
 	public void teardown() {
 		systemPropertyBackups.forEach((property, backupValue) -> {
 			if (backupValue == null) {
@@ -96,7 +110,7 @@ public class KeyStoreUtilTests {
 	@Test
 	public void loadTrustManagers_Default() throws Exception {
 
-		TestSpecificKeyStoreUtil keyStoreUtil = new TestSpecificKeyStoreUtil();
+		TestSpecificKeyStoreUtil keyStoreUtil = new TestSpecificKeyStoreUtil(os);
 
 		keyStoreUtil.setUpSslContext();
 
@@ -112,27 +126,25 @@ public class KeyStoreUtilTests {
 		// jvm
 		assertThat(tm.trustManagers, not(empty()));
 		assertThat(keyStoreUtil.createdTrustManagersAndKeyStores, not(empty()));
-		assertThat(keyStoreUtil.createdTrustManagersAndKeyStores.get(0).manager(), is(tm.trustManagers.get(0)));
-		assertThat(keyStoreUtil.createdTrustManagersAndKeyStores.get(0).store(), is(nullValue()));
-		assertThat(
-				Arrays.stream(tm.trustManagers.get(0).getAcceptedIssuers())
-						.map(X509Certificate::getSubjectX500Principal).map(X500Principal::getName).toList(),
+		assertThat(keyStoreUtil.createdTrustManagersAndKeyStores.get(0).manager, is(tm.trustManagers.get(0)));
+		assertThat(keyStoreUtil.createdTrustManagersAndKeyStores.get(0).store, is(nullValue()));
+		assertThat(Arrays.stream(tm.trustManagers.get(0).getAcceptedIssuers())
+				.map(X509Certificate::getSubjectX500Principal).map(X500Principal::getName).collect(Collectors.toList()),
 				hasItem(matchesRegex("(?i).*digicert.*root.*")));
 
-		if (OS.WINDOWS.equals(OS.current())) {
+		if (Constants.OS_WIN32.equals(os)) {
 			assertThat(tm.trustManagers, hasSize(2));
 			assertThat(keyStoreUtil.createdTrustManagersAndKeyStores, hasSize(2));
-			assertThat(keyStoreUtil.createdTrustManagersAndKeyStores.get(1).manager(), is(tm.trustManagers.get(1)));
-			assertThat(keyStoreUtil.createdTrustManagersAndKeyStores.get(1).store().getType(), is("Windows-ROOT"));
-			assertThat(
-					Arrays.stream(tm.trustManagers.get(1).getAcceptedIssuers())
-							.map(X509Certificate::getSubjectX500Principal).map(X500Principal::getName).toList(),
-					hasItem(matchesRegex("(?i).*digicert.*root.*")));
-		} else if (OS.MAC.equals(OS.current())) {
+			assertThat(keyStoreUtil.createdTrustManagersAndKeyStores.get(1).manager, is(tm.trustManagers.get(1)));
+			assertThat(keyStoreUtil.createdTrustManagersAndKeyStores.get(1).store.getType(), is("Windows-ROOT"));
+			assertThat(Arrays.stream(tm.trustManagers.get(1).getAcceptedIssuers())
+					.map(X509Certificate::getSubjectX500Principal).map(X500Principal::getName)
+					.collect(Collectors.toList()), hasItem(matchesRegex("(?i).*digicert.*root.*")));
+		} else if (Constants.OS_MACOSX.equals(os)) {
 			assertThat(tm.trustManagers, hasSize(2));
 			assertThat(keyStoreUtil.createdTrustManagersAndKeyStores, hasSize(2));
-			assertThat(keyStoreUtil.createdTrustManagersAndKeyStores.get(1).manager(), is(tm.trustManagers.get(1)));
-			assertThat(keyStoreUtil.createdTrustManagersAndKeyStores.get(1).store().getType(), is("KeychainStore"));
+			assertThat(keyStoreUtil.createdTrustManagersAndKeyStores.get(1).manager, is(tm.trustManagers.get(1)));
+			assertThat(keyStoreUtil.createdTrustManagersAndKeyStores.get(1).store.getType(), is("KeychainStore"));
 			// Apple KeychainStore only includes the 'System' certificates
 			// (enterprise/admin managed)
 			// but not the 'System Roots' ones (public CAs).
@@ -153,7 +165,7 @@ public class KeyStoreUtilTests {
 		System.setProperty("javax.net.ssl.trustStore", copyResourceToTempDirAndGetPath("truststore.jks"));
 		System.setProperty("javax.net.ssl.trustStorePassword", "verysecret");
 
-		TestSpecificKeyStoreUtil keyStoreUtil = new TestSpecificKeyStoreUtil();
+		TestSpecificKeyStoreUtil keyStoreUtil = new TestSpecificKeyStoreUtil(os);
 
 		keyStoreUtil.setUpSslContext();
 
@@ -167,31 +179,30 @@ public class KeyStoreUtilTests {
 
 		assertThat(tm.trustManagers, hasSize(1)); // only the properties-based store
 
-		assertThat(
-				Arrays.stream(tm.trustManagers.get(0).getAcceptedIssuers())
-						.map(X509Certificate::getSubjectX500Principal).map(X500Principal::getName).toList(),
+		assertThat(Arrays.stream(tm.trustManagers.get(0).getAcceptedIssuers())
+				.map(X509Certificate::getSubjectX500Principal).map(X500Principal::getName).collect(Collectors.toList()),
 				hasItem("CN=Test,C=DE"));
 		assertThat(keyStoreUtil.createdTrustManagersAndKeyStores, hasSize(1));
-		assertThat(keyStoreUtil.createdTrustManagersAndKeyStores.get(0).manager(), is(tm.trustManagers.get(0)));
+		assertThat(keyStoreUtil.createdTrustManagersAndKeyStores.get(0).manager, is(tm.trustManagers.get(0)));
 		// null caused KeyManagerFactory to load default system properties
-		assertThat(keyStoreUtil.createdTrustManagersAndKeyStores.get(0).store(), is(nullValue()));
+		assertThat(keyStoreUtil.createdTrustManagersAndKeyStores.get(0).store, is(nullValue()));
 
 		assertThat(keyStoreUtil.recordedKeyManagers, emptyArray());
 	}
 
 	@Test
-	@EnabledOnOs({ OS.WINDOWS, OS.MAC })
 	public void loadTrustManagers_TrustSystemPropertiesPointToPlatformSpecificKeystore() throws Exception {
-		if (OS.WINDOWS.equals(OS.current())) {
+		assumeThat(os, in(Arrays.asList(Constants.OS_WIN32, Constants.OS_MACOSX)));
+		if (Constants.OS_WIN32.equals(os)) {
 			System.setProperty("javax.net.ssl.trustStore", "NONE");
 			System.setProperty("javax.net.ssl.trustStoreType", "Windows-ROOT");
-		} else if (OS.MAC.equals(OS.current())) {
+		} else if (Constants.OS_MACOSX.equals(os)) {
 			System.setProperty("javax.net.ssl.trustStore", "NONE");
 			System.setProperty("javax.net.ssl.trustStoreType", "KeychainStore");
 			System.setProperty("javax.net.ssl.trustStoreProvider", "Apple");
 		}
 
-		TestSpecificKeyStoreUtil keyStoreUtil = new TestSpecificKeyStoreUtil();
+		TestSpecificKeyStoreUtil keyStoreUtil = new TestSpecificKeyStoreUtil(os);
 
 		keyStoreUtil.setUpSslContext();
 
@@ -203,17 +214,16 @@ public class KeyStoreUtilTests {
 
 		assertThat(tm.trustManagers, hasSize(1)); // only the properties-based store
 		assertThat(keyStoreUtil.createdTrustManagersAndKeyStores, hasSize(1));
-		assertThat(keyStoreUtil.createdTrustManagersAndKeyStores.get(0).manager(), is(tm.trustManagers.get(0)));
-		assertThat(keyStoreUtil.createdTrustManagersAndKeyStores.get(0).store(), is(nullValue()));
+		assertThat(keyStoreUtil.createdTrustManagersAndKeyStores.get(0).manager, is(tm.trustManagers.get(0)));
+		assertThat(keyStoreUtil.createdTrustManagersAndKeyStores.get(0).store, is(nullValue()));
 
-		if (OS.WINDOWS.equals(OS.current())) {
+		if (Constants.OS_WIN32.equals(os)) {
 			assertThat(((CollectionTrustManager) keyStoreUtil.recordedTrustManagers[0]).getAcceptedIssuers(),
 					not(emptyArray()));
-			assertThat(
-					Arrays.stream(tm.trustManagers.get(0).getAcceptedIssuers())
-							.map(X509Certificate::getSubjectX500Principal).map(X500Principal::getName).toList(),
-					hasItem(matchesRegex("(?i).*digicert.*root.*")));
-		} else if (OS.MAC.equals(OS.current())) {
+			assertThat(Arrays.stream(tm.trustManagers.get(0).getAcceptedIssuers())
+					.map(X509Certificate::getSubjectX500Principal).map(X500Principal::getName)
+					.collect(Collectors.toList()), hasItem(matchesRegex("(?i).*digicert.*root.*")));
+		} else if (Constants.OS_MACOSX.equals(os)) {
 			// Apple KeychainStore only includes the 'System' certificates
 			// (enterprise/admin managed)
 			// but not the 'System Roots' ones (public CAs).
@@ -225,7 +235,7 @@ public class KeyStoreUtilTests {
 	@Test
 	public void loadKeyManagers_Default() throws Exception {
 
-		TestSpecificKeyStoreUtil keyStoreUtil = new TestSpecificKeyStoreUtil();
+		TestSpecificKeyStoreUtil keyStoreUtil = new TestSpecificKeyStoreUtil(os);
 
 		keyStoreUtil.setUpSslContext();
 
@@ -242,7 +252,7 @@ public class KeyStoreUtilTests {
 		System.setProperty("javax.net.ssl.keyStorePassword", "verysecret");
 		System.setProperty("javax.net.ssl.keyStoreType", "PKCS12");
 
-		TestSpecificKeyStoreUtil keyStoreUtil = new TestSpecificKeyStoreUtil();
+		TestSpecificKeyStoreUtil keyStoreUtil = new TestSpecificKeyStoreUtil(os);
 
 		keyStoreUtil.setUpSslContext();
 
@@ -254,8 +264,8 @@ public class KeyStoreUtilTests {
 		X509KeyManager km = (X509KeyManager) keyStoreUtil.recordedKeyManagers[0];
 
 		assertThat(keyStoreUtil.createdKeyManagersAndKeyStores, hasSize(1));
-		assertThat(keyStoreUtil.createdKeyManagersAndKeyStores.get(0).manager(), is(km));
-		assertThat(keyStoreUtil.createdKeyManagersAndKeyStores.get(0).store().getType(), is("PKCS12"));
+		assertThat(keyStoreUtil.createdKeyManagersAndKeyStores.get(0).manager, is(km));
+		assertThat(keyStoreUtil.createdKeyManagersAndKeyStores.get(0).store.getType(), is("PKCS12"));
 
 		assertThat(km.getPrivateKey("test.key"), not(nullValue()));
 	}
@@ -264,7 +274,7 @@ public class KeyStoreUtilTests {
 	public void optOutViaSystemProperty() throws Exception {
 		System.setProperty("eclipse.load.os.trust.store.by.default", "false");
 
-		TestSpecificKeyStoreUtil keyStoreUtil = new TestSpecificKeyStoreUtil();
+		TestSpecificKeyStoreUtil keyStoreUtil = new TestSpecificKeyStoreUtil(os);
 
 		keyStoreUtil.setUpSslContext();
 
@@ -272,21 +282,36 @@ public class KeyStoreUtilTests {
 	}
 
 	private String copyResourceToTempDirAndGetPath(String resourceName) throws IOException {
-		Path file = tempDir.resolve(resourceName);
-		Files.copy(getClass().getResourceAsStream(resourceName), file, StandardCopyOption.REPLACE_EXISTING);
-		return file.toAbsolutePath().toString();
+		File keyStoreFile = this.tempDir.newFile();
+		Files.copy(getClass().getResourceAsStream(resourceName), keyStoreFile.toPath(),
+				StandardCopyOption.REPLACE_EXISTING);
+		return keyStoreFile.getAbsolutePath();
 	}
 
 	private static final class TestSpecificKeyStoreUtil extends KeyStoreUtil {
 
-		public TestSpecificKeyStoreUtil() {
-			super(System.getProperty("osgi.os"));
+		public TestSpecificKeyStoreUtil(String os) {
+			super(os);
 		}
 
-		public static record X509TrustManagerAndKeyStore(X509TrustManager manager, KeyStore store) {
+		public static class X509TrustManagerAndKeyStore {
+			public final X509TrustManager manager;
+			public final KeyStore store;
+
+			public X509TrustManagerAndKeyStore(X509TrustManager manager, KeyStore store) {
+				this.manager = manager;
+				this.store = store;
+			}
 		}
 
-		public static record X509KeyManagerAndKeyStore(X509KeyManager manager, KeyStore store) {
+		public static class X509KeyManagerAndKeyStore {
+			public final X509KeyManager manager;
+			public final KeyStore store;
+
+			public X509KeyManagerAndKeyStore(X509KeyManager manager, KeyStore store) {
+				this.manager = manager;
+				this.store = store;
+			}
 		}
 
 		public TrustManager[] recordedTrustManagers;

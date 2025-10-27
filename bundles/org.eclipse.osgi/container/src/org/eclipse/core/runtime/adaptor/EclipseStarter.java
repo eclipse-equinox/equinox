@@ -366,6 +366,7 @@ public class EclipseStarter {
 		if (running)
 			throw new IllegalStateException(Msg.ECLIPSE_STARTUP_ALREADY_RUNNING);
 		processCommandLine(args);
+
 		framework = new Equinox(getConfiguration());
 		framework.init();
 		context = framework.getBundleContext();
@@ -377,6 +378,13 @@ public class EclipseStarter {
 		equinoxConfig.setAllArgs(allArgs);
 		equinoxConfig.setFrameworkArgs(frameworkArgs);
 		equinoxConfig.setAppArgs(appArgs);
+
+		try {
+			new KeyStoreUtil(getProperty(PROP_OS)).setUpSslContext();
+		} catch (Exception e) {
+			log.log(new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0,
+					"Exception setting up SSLContext", 0, e, null)); //$NON-NLS-1$
+		}
 
 		registerFrameworkShutdownHandlers();
 		publishSplashScreen(endSplashHandler);

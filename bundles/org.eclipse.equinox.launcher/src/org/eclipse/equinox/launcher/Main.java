@@ -561,13 +561,6 @@ public class Main {
 		// the location of the boot plugin we are going to use
 		handleSplash();
 
-		try {
-			new KeyStoreUtil(getOS()).setUpSslContext();
-		} catch (Exception e) {
-			log("Exception setting up SSLContext"); //$NON-NLS-1$
-			log(e);
-		}
-
 		invokeFramework(passThruArgs, bootPathURLs);
 	}
 

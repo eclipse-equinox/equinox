@@ -11,12 +11,12 @@
  * Contributors:
  *     SAP SE - initial API and implementation
  *******************************************************************************/
-package org.eclipse.equinox.launcher;
+package org.eclipse.core.runtime.adaptor;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -26,11 +26,10 @@ import static org.mockito.Mockito.when;
 
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.List;
-
+import java.util.Arrays;
 import javax.net.ssl.X509TrustManager;
+import org.junit.Test;
 
-import org.junit.jupiter.api.Test;
 
 public class CollectionTrustManagerTests {
 
@@ -42,7 +41,7 @@ public class CollectionTrustManagerTests {
 		X509TrustManager mock2 = mock(X509TrustManager.class);
 		when(mock1.getAcceptedIssuers()).thenReturn(acceptedIssuers1);
 		when(mock2.getAcceptedIssuers()).thenReturn(acceptedIssuers2);
-		CollectionTrustManager collectionTrustManager = new CollectionTrustManager(List.of(mock1, mock2));
+		CollectionTrustManager collectionTrustManager = new CollectionTrustManager(Arrays.asList(mock1, mock2));
 
 		X509Certificate[] allAcceptedIssuers = collectionTrustManager.getAcceptedIssuers();
 
@@ -75,7 +74,7 @@ public class CollectionTrustManagerTests {
 		doThrow(exceptionFrom2).when(mock2).checkClientTrusted(eq(chainTrustedBy1), eq(authType));
 		doThrow(exceptionFrom2).when(mock2).checkClientTrusted(eq(chainTrustedByNone), eq(authType));
 
-		CollectionTrustManager collectionTrustManager = new CollectionTrustManager(List.of(mock1, mock2));
+		CollectionTrustManager collectionTrustManager = new CollectionTrustManager(Arrays.asList(mock1, mock2));
 
 		collectionTrustManager.checkClientTrusted(chainTrustedBy1, authType);
 		collectionTrustManager.checkClientTrusted(chainTrustedBy2, authType);
@@ -113,7 +112,7 @@ public class CollectionTrustManagerTests {
 		doThrow(exceptionFrom2).when(mock2).checkServerTrusted(eq(chainTrustedBy1), eq(authType));
 		doThrow(exceptionFrom2).when(mock2).checkServerTrusted(eq(chainTrustedByNone), eq(authType));
 
-		CollectionTrustManager collectionTrustManager = new CollectionTrustManager(List.of(mock1, mock2));
+		CollectionTrustManager collectionTrustManager = new CollectionTrustManager(Arrays.asList(mock1, mock2));
 
 		collectionTrustManager.checkServerTrusted(chainTrustedBy1, authType);
 		collectionTrustManager.checkServerTrusted(chainTrustedBy2, authType);
