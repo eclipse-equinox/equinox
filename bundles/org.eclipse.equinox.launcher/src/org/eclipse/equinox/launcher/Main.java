@@ -15,6 +15,7 @@
  *     Ericsson AB (Pascal Rapicault) - bug 304132
  *     Rapicorp, Inc - Default the configuration to Application Support (bug 461725)
  *     Lars Vogel <Lars.Vogel@vogella.com> - Bug 221969
+ *     SAP SE - Load OS trust store in addition to JVM cacerts
  *******************************************************************************/
 package org.eclipse.equinox.launcher;
 
