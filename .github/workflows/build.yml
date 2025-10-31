@@ -71,7 +71,7 @@ jobs:
         -Dequinox.binaries.loc=${{ github.workspace }}/equinox.binaries
         clean verify
     - name: Upload native artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       if: success()
       with:
         name: ${{ matrix.config.name }} launcher artifacts
@@ -80,7 +80,7 @@ jobs:
           equinox.binaries/org.eclipse.equinox.launcher.${{ matrix.config.ws }}.${{ matrix.config.os }}.x86_64/eclipse_*.${{ matrix.config.native-extension }}
         if-no-files-found: error
     - name: Upload ${{ matrix.config.name }} Test Results
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: test-results-${{ matrix.config.name }}64
         if-no-files-found: error
@@ -121,7 +121,7 @@ jobs:
         -fn
         clean verify
     - name: Upload TCK Results
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       if: always()
       with:
         name: tck-results
@@ -132,7 +132,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Upload
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: Event File
         path: ${{ github.event_path }}
