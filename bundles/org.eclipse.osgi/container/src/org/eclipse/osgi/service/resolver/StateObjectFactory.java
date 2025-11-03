@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2012 IBM Corporation and others.
+ * Copyright (c) 2003, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -734,6 +734,9 @@ public interface StateObjectFactory {
 			return getImplementation().createBundleDescription(original);
 		}
 
+		/**
+		 * @since 3.24
+		 */
 		@Override
 		public BundleDescription createBundleDescription(long id, BundleDescription original) {
 			return getImplementation().createBundleDescription(id, original);
