@@ -66,9 +66,9 @@ public class AbstractRegionSystemTest {
 		BundleContext context = getContext();
 
 		digraphReference = context.getServiceReference(RegionDigraph.class);
-		assertNotNull("No digraph reference found", digraphReference);
+		assertNotNull(digraphReference, "No digraph reference found");
 		digraph = context.getService(digraphReference);
-		assertNotNull("No digraph found", digraph);
+		assertNotNull(digraph, "No digraph found");
 
 		bundleInstaller = new BundleInstaller("bundle_tests", testsBundle); //$NON-NLS-1$
 	}
@@ -87,7 +87,7 @@ public class AbstractRegionSystemTest {
 
 	protected BundleContext getContext() {
 		BundleContext context = testsBundle.getBundleContext();
-		assertNotNull("No context available", context);
+		assertNotNull(context, "No context available");
 		return context;
 	}
 }

@@ -245,7 +245,7 @@ public class RegionServiceEventHookTests {
 		Region region = this.digraph.createRegion(regionName);
 		for (String bundleSymbolicName : bundleSymbolicNames) {
 			Bundle bundle = createBundle(bundleSymbolicName);
-			region.addBundle(stubBundle);
+			region.addBundle(bundle);
 		}
 		this.regions.put(regionName, region);
 		return region;

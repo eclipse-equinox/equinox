@@ -17,6 +17,7 @@ package org.eclipse.equinox.region.internal.tests;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
@@ -54,11 +55,13 @@ public class StandardBundleIdToRegionMappingTests {
 		RegionReflectionUtils.associateBundleWithRegion(this.bundleIdToRegionMapping, TEST_BUNDLE_ID, mockRegion);
 	}
 
-	@Test(expected = BundleException.class)
+	@Test
 	public void testAssociateBundleAlreadyAssociatedWithOtherRegion() {
 		RegionReflectionUtils.associateBundleWithRegion(this.bundleIdToRegionMapping, TEST_BUNDLE_ID, mockRegion);
-		RegionReflectionUtils.associateBundleWithRegion(this.bundleIdToRegionMapping, TEST_BUNDLE_ID,
-				mock(Region.class));
+		assertThrows(BundleException.class, () -> {
+			RegionReflectionUtils.associateBundleWithRegion(this.bundleIdToRegionMapping, TEST_BUNDLE_ID,
+					mock(Region.class));
+		});
 	}
 
 	@Test

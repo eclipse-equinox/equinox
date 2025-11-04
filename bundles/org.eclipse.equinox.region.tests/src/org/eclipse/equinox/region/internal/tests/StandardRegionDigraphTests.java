@@ -17,6 +17,7 @@ package org.eclipse.equinox.region.internal.tests;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
@@ -104,19 +105,23 @@ public class StandardRegionDigraphTests {
 		this.digraph.connect(this.mockRegion1, this.regionFilter2, this.mockRegion3);
 	}
 
-	@Test(expected = BundleException.class)
-	public void testConnectLoop() throws BundleException {
+	@Test
+	public void testConnectLoop() {
 		setDefaultFilters();
 
-		this.digraph.connect(this.mockRegion1, this.regionFilter1, this.mockRegion1);
+		assertThrows(BundleException.class, () -> {
+			this.digraph.connect(this.mockRegion1, this.regionFilter1, this.mockRegion1);
+		});
 	}
 
-	@Test(expected = BundleException.class)
-	public void testDuplicateConnection() throws BundleException {
+	@Test
+	public void testDuplicateConnection() {
 		setDefaultFilters();
 
-		this.digraph.connect(this.mockRegion1, this.regionFilter1, this.mockRegion2);
-		this.digraph.connect(this.mockRegion1, this.regionFilter2, this.mockRegion2);
+		assertThrows(BundleException.class, () -> {
+			this.digraph.connect(this.mockRegion1, this.regionFilter1, this.mockRegion2);
+			this.digraph.connect(this.mockRegion1, this.regionFilter2, this.mockRegion2);
+		});
 	}
 
 	@Test
@@ -393,8 +398,8 @@ public class StandardRegionDigraphTests {
 		for (Region region : expected.toArray(new Region[0])) {
 			testDigraph.visitSubgraph(region, visitor);
 			Collection<Region> visited = visitor.clearVisited();
-			assertEquals("Wrong number of visited: " + region, expected.size(), visited.size());
-			assertTrue("Wrong visited content: " + region, visited.containsAll(expected));
+			assertEquals(expected.size(), visited.size(), "Wrong number of visited: " + region);
+			assertTrue(visited.containsAll(expected), "Wrong visited content: " + region);
 			expected.remove(region);
 		}
 
@@ -405,8 +410,8 @@ public class StandardRegionDigraphTests {
 		for (Region region : expected.toArray(new Region[0])) {
 			testDigraph.visitSubgraph(region, visitor);
 			Collection<Region> visited = visitor.clearVisited();
-			assertEquals("Wrong number of visited: " + region, expected.size(), visited.size());
-			assertTrue("Wrong visited content: " + region, visited.containsAll(expected));
+			assertEquals(expected.size(), visited.size(), "Wrong number of visited: " + region);
+			assertTrue(visited.containsAll(expected), "Wrong visited content: " + region);
 			expected.remove(region);
 		}
 	}
@@ -415,18 +420,18 @@ public class StandardRegionDigraphTests {
 	public void testGetHooks() throws BundleException {
 		setDefaultFilters();
 
-		assertNotNull("Resolver Hook is null", digraph.getResolverHookFactory());
-		assertNotNull("Bundle Event Hook is null", digraph.getBundleEventHook());
-		assertNotNull("Bundle Find Hook is null", digraph.getBundleFindHook());
-		assertNotNull("Servie Event Hook is null", digraph.getServiceEventHook());
-		assertNotNull("Service Find Hook is null", digraph.getServiceFindHook());
+		assertNotNull(digraph.getResolverHookFactory(), "Resolver Hook is null");
+		assertNotNull(digraph.getBundleEventHook(), "Bundle Event Hook is null");
+		assertNotNull(digraph.getBundleFindHook(), "Bundle Find Hook is null");
+		assertNotNull(digraph.getServiceEventHook(), "Servie Event Hook is null");
+		assertNotNull(digraph.getServiceFindHook(), "Service Find Hook is null");
 
 		RegionDigraph copy = digraph.copy();
-		assertNotNull("Resolver Hook is null", copy.getResolverHookFactory());
-		assertNotNull("Bundle Event Hook is null", copy.getBundleEventHook());
-		assertNotNull("Bundle Find Hook is null", copy.getBundleFindHook());
-		assertNotNull("Servie Event Hook is null", copy.getServiceEventHook());
-		assertNotNull("Service Find Hook is null", copy.getServiceFindHook());
+		assertNotNull(copy.getResolverHookFactory(), "Resolver Hook is null");
+		assertNotNull(copy.getBundleEventHook(), "Bundle Event Hook is null");
+		assertNotNull(copy.getBundleFindHook(), "Bundle Find Hook is null");
+		assertNotNull(copy.getServiceEventHook(), "Servie Event Hook is null");
+		assertNotNull(copy.getServiceFindHook(), "Service Find Hook is null");
 	}
 
 }

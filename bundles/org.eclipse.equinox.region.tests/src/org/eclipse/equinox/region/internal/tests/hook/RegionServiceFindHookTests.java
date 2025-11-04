@@ -291,7 +291,7 @@ public class RegionServiceFindHookTests {
 		this.candidates.add(serviceReference(BUNDLE_A));
 
 		Bundle bundle = MockBundleBuilder.createMockBundle(0L, "sys", BUNDLE_VERSION, "");
-		this.bundleFindHook.find(stubBundle.getBundleContext(), "", "", false, this.candidates);
+		this.bundleFindHook.find(bundle.getBundleContext(), "", "", false, this.candidates);
 		assertEquals(1, this.candidates.size());
 		assertTrue(this.candidates.contains(serviceReference(BUNDLE_A)));
 	}
@@ -309,7 +309,7 @@ public class RegionServiceFindHookTests {
 		Region region = this.digraph.createRegion(regionName);
 		for (String bundleSymbolicName : bundleSymbolicNames) {
 			Bundle bundle = createBundle(bundleSymbolicName);
-			region.addBundle(stubBundle);
+			region.addBundle(bundle);
 		}
 		this.regions.put(regionName, region);
 		return region;

@@ -62,8 +62,8 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		// should be able to start pp1 because it depends on nothing
 		pp1.start();
 		// do a sanity check that we have no services available in the isolated region
-		assertNull("Found some services.", pp1.getBundleContext().getAllServiceReferences(null, null));
-		assertEquals("Found extra bundles in region", 1, pp1.getBundleContext().getBundles().length);
+		assertNull(pp1.getBundleContext().getAllServiceReferences(null, null), "Found some services.");
+		assertEquals(1, pp1.getBundleContext().getBundles().length, "Found extra bundles in region");
 		pp1.stop();
 
 		bundles.add(bundleInstaller.installBundle(SP1, testRegion));
@@ -88,7 +88,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 
 		bundleInstaller.resolveBundles(bundles.toArray(new Bundle[bundles.size()]));
 		for (Bundle bundle : bundles) {
-			assertEquals("Bundle did not resolve: " + bundle.getSymbolicName(), Bundle.RESOLVED, bundle.getState());
+			assertEquals(Bundle.RESOLVED, bundle.getState(), "Bundle did not resolve: " + bundle.getSymbolicName());
 			bundle.start();
 		}
 		BundleContext context = getContext();
@@ -100,8 +100,8 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		cp2Tracker.open();
 		sc1Tracker.open();
 
-		assertNotNull("The cp2 bundle never found the service.", cp2Tracker.waitForService(2000));
-		assertNotNull("The sc1 bundle never found the service.", sc1Tracker.waitForService(2000));
+		assertNotNull(cp2Tracker.waitForService(2000), "The cp2 bundle never found the service.");
+		assertNotNull(sc1Tracker.waitForService(2000), "The sc1 bundle never found the service.");
 		cp2Tracker.close();
 		sc1Tracker.close();
 	}
@@ -127,15 +127,15 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		}
 
 		bundleInstaller.resolveBundles(bundles.values().toArray(new Bundle[bundles.size()]));
-		assertEquals(PP1, Bundle.RESOLVED, bundles.get(PP1).getState());
-		assertEquals(SP1, Bundle.INSTALLED, bundles.get(SP1).getState());
-		assertEquals(CP1, Bundle.RESOLVED, bundles.get(CP1).getState());
-		assertEquals(PP2, Bundle.INSTALLED, bundles.get(PP2).getState());
-		assertEquals(SP2, Bundle.INSTALLED, bundles.get(SP2).getState());
-		assertEquals(CP2, Bundle.INSTALLED, bundles.get(CP2).getState());
-		assertEquals(BC1, Bundle.INSTALLED, bundles.get(BC1).getState());
-		assertEquals(SC1, Bundle.INSTALLED, bundles.get(SC1).getState());
-		assertEquals(CC1, Bundle.INSTALLED, bundles.get(CC1).getState());
+		assertEquals(Bundle.RESOLVED, bundles.get(PP1).getState(), PP1);
+		assertEquals(Bundle.INSTALLED, bundles.get(SP1).getState(), SP1);
+		assertEquals(Bundle.RESOLVED, bundles.get(CP1).getState(), CP1);
+		assertEquals(Bundle.INSTALLED, bundles.get(PP2).getState(), PP2);
+		assertEquals(Bundle.INSTALLED, bundles.get(SP2).getState(), SP2);
+		assertEquals(Bundle.INSTALLED, bundles.get(CP2).getState(), CP2);
+		assertEquals(Bundle.INSTALLED, bundles.get(BC1).getState(), BC1);
+		assertEquals(Bundle.INSTALLED, bundles.get(SC1).getState(), SC1);
+		assertEquals(Bundle.INSTALLED, bundles.get(CC1).getState(), CC1);
 
 		// now make the necessary connections
 		// SP1
@@ -195,7 +195,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 
 		bundleInstaller.resolveBundles(bundles.values().toArray(new Bundle[bundles.size()]));
 		for (Bundle bundle : bundles.values()) {
-			assertEquals("Bundle did not resolve: " + bundle.getSymbolicName(), Bundle.RESOLVED, bundle.getState());
+			assertEquals(Bundle.RESOLVED, bundle.getState(), "Bundle did not resolve: " + bundle.getSymbolicName());
 			bundle.start();
 		}
 		BundleContext context = getContext();
@@ -207,8 +207,8 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		cp2Tracker.open();
 		sc1Tracker.open();
 
-		assertNotNull("The cp2 bundle never found the service.", cp2Tracker.waitForService(2000));
-		assertNotNull("The sc1 bundle never found the service.", sc1Tracker.waitForService(2000));
+		assertNotNull(cp2Tracker.waitForService(2000), "The cp2 bundle never found the service.");
+		assertNotNull(sc1Tracker.waitForService(2000), "The sc1 bundle never found the service.");
 		cp2Tracker.close();
 		sc1Tracker.close();
 	}
@@ -290,7 +290,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 	// Bundle cp2 = bundleInstaller.installBundle(CP2, testRegion);
 	//
 	// bundleInstaller.resolveBundles(new Bundle[] {cp2});
-	// assertEquals("Wrong state for pc1.", Bundle.INSTALLED, cp2.getState());
+	// assertEquals(Bundle.INSTALLED, cp2.getState(), "Wrong state for pc1.");
 	//
 	// regionBundle.stop();
 	//
@@ -301,7 +301,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 	// startRegionBundle();
 	//
 	// bundleInstaller.refreshPackages(new Bundle[] {cp2});
-	// assertEquals("Wrong state for pc1.", Bundle.RESOLVED, cp2.getState());
+	// assertEquals(Bundle.RESOLVED, cp2.getState(), "Wrong state for pc1.");
 	//
 	// // stop region bundle to test uninstalling bundles while stopped
 	// regionBundle.stop();
@@ -309,9 +309,9 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 	//
 	// startRegionBundle();
 	// testRegion = digraph.getRegion(getName());
-	// assertNotNull("No test region found.", testRegion);
+	// assertNotNull(testRegion, "No test region found.");
 	// Set<Long> testIds = testRegion.getBundleIds();
-	// assertEquals("Wrong number of test ids.", 0, testIds.size());
+	// assertEquals(0, testIds.size(), "Wrong number of test ids.");
 	// }
 
 	@Test
@@ -396,7 +396,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 
 		bundleInstaller.resolveBundles(bundles.values().toArray(new Bundle[bundles.size()]));
 		for (Bundle bundle : bundles.values()) {
-			assertEquals("Bundle did not resolve: " + bundle.getSymbolicName(), Bundle.RESOLVED, bundle.getState());
+			assertEquals(Bundle.RESOLVED, bundle.getState(), "Bundle did not resolve: " + bundle.getSymbolicName());
 			bundle.start();
 		}
 		BundleContext context = getContext();
@@ -408,8 +408,8 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		cp2Tracker.open();
 		sc1Tracker.open();
 
-		assertNotNull("The cp2 bundle never found the service.", cp2Tracker.waitForService(2000));
-		assertNotNull("The sc1 bundle never found the service.", sc1Tracker.waitForService(2000));
+		assertNotNull(cp2Tracker.waitForService(2000), "The cp2 bundle never found the service.");
+		assertNotNull(sc1Tracker.waitForService(2000), "The sc1 bundle never found the service.");
 		cp2Tracker.close();
 		sc1Tracker.close();
 	}
@@ -457,15 +457,15 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		Bundle singleton1 = bundleInstaller.installBundle(SINGLETON1, region1);
 		Bundle singleton2 = bundleInstaller.installBundle(SINGLETON2, region1);
 		assertFalse(bundleInstaller.resolveBundles(new Bundle[] { singleton1, singleton2 }));
-		assertEquals("singleton1", Bundle.INSTALLED, singleton1.getState());
-		assertEquals("singleton2", Bundle.RESOLVED, singleton2.getState());
+		assertEquals(Bundle.INSTALLED, singleton1.getState(), "singleton1");
+		assertEquals(Bundle.RESOLVED, singleton2.getState(), "singleton2");
 
 		// now install into different regions; both 1 and 2 should resolve
 		singleton2.uninstall();
 		singleton2 = bundleInstaller.installBundle(SINGLETON2, region2);
 		assertTrue(bundleInstaller.resolveBundles(new Bundle[] { singleton1, singleton2 }));
-		assertEquals("singleton1", Bundle.RESOLVED, singleton1.getState());
-		assertEquals("singleton2", Bundle.RESOLVED, singleton2.getState());
+		assertEquals(Bundle.RESOLVED, singleton1.getState(), "singleton1");
+		assertEquals(Bundle.RESOLVED, singleton2.getState(), "singleton2");
 
 		ServiceRegistration<ResolverHookFactory> disableHook = disableAllResolves();
 		try {
@@ -479,8 +479,8 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 			disableHook = null;
 
 			assertFalse(bundleInstaller.resolveBundles(new Bundle[] { singleton1, singleton2 }));
-			assertTrue("One and only singleton bundle should be resolved",
-					(singleton1.getState() == Bundle.RESOLVED) ^ (singleton2.getState() == Bundle.RESOLVED));
+			assertTrue((singleton1.getState() == Bundle.RESOLVED) ^ (singleton2.getState() == Bundle.RESOLVED),
+					"One and only singleton bundle should be resolved");
 
 			singleton2.uninstall();
 			disableHook = disableAllResolves();
@@ -492,10 +492,10 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 
 			// make sure singleton1 is resolved first
 			assertTrue(bundleInstaller.resolveBundles(new Bundle[] { singleton1 }));
-			assertEquals("singleton1", Bundle.RESOLVED, singleton1.getState());
+			assertEquals(Bundle.RESOLVED, singleton1.getState(), "singleton1");
 			singleton2 = bundleInstaller.installBundle(SINGLETON2, region2);
 			assertFalse(bundleInstaller.resolveBundles(new Bundle[] { singleton2 }));
-			assertEquals("singleton2", Bundle.INSTALLED, singleton2.getState());
+			assertEquals(Bundle.INSTALLED, singleton2.getState(), "singleton2");
 
 			singleton1.uninstall();
 			disableHook = disableAllResolves();
@@ -507,10 +507,10 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 
 			// make sure singleton2 is resolved first
 			assertTrue(bundleInstaller.resolveBundles(new Bundle[] { singleton2 }));
-			assertEquals("singleton2", Bundle.RESOLVED, singleton2.getState());
+			assertEquals(Bundle.RESOLVED, singleton2.getState(), "singleton2");
 			singleton1 = bundleInstaller.installBundle(SINGLETON1, region1);
 			assertFalse(bundleInstaller.resolveBundles(new Bundle[] { singleton1 }));
-			assertEquals("singleton1", Bundle.INSTALLED, singleton1.getState());
+			assertEquals(Bundle.INSTALLED, singleton1.getState(), "singleton1");
 		} finally {
 			if (disableHook != null)
 				disableHook.unregister();
@@ -526,9 +526,9 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		ObjectName digraphName = new ObjectName(REGION_DOMAIN_PROP + ":type=RegionDigraph,*");
 		ObjectName regionNameAllQuery = new ObjectName(REGION_DOMAIN_PROP + ":type=Region,name=*,*");
 		Set<ObjectInstance> digraphs = server.queryMBeans(null, digraphName);
-		assertEquals("Expected only one instance of digraph", 1, digraphs.size());
+		assertEquals(1, digraphs.size(), "Expected only one instance of digraph");
 		Set<ObjectInstance> regions = server.queryMBeans(null, regionNameAllQuery);
-		assertEquals("Expected only one instance of region", 1, regions.size());
+		assertEquals(1, regions.size(), "Expected only one instance of region");
 
 		Region pp1Region = digraph.createRegion(PP1);
 		Bundle pp1Bundle = bundleInstaller.installBundle(PP1, pp1Region);
@@ -536,37 +536,37 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		Bundle sp1Bundle = bundleInstaller.installBundle(SP1, sp1Region);
 
 		regions = server.queryMBeans(null, regionNameAllQuery);
-		assertEquals("Wrong number of regions", 3, regions.size());
+		assertEquals(3, regions.size(), "Wrong number of regions");
 
 		Set<ObjectInstance> pp1Query = server.queryMBeans(null,
 				new ObjectName(REGION_DOMAIN_PROP + ":type=Region,name=" + PP1 + ",*"));
-		assertEquals("Expected only one instance of: " + PP1, 1, pp1Query.size());
+		assertEquals(1, pp1Query.size(), "Expected only one instance of: " + PP1);
 		Set<ObjectInstance> sp1Query = server.queryMBeans(null,
 				new ObjectName(REGION_DOMAIN_PROP + ":type=Region,name=" + SP1 + ",*"));
-		assertEquals("Expected only one instance of: " + SP1, 1, sp1Query.size());
+		assertEquals(1, sp1Query.size(), "Expected only one instance of: " + SP1);
 		ObjectName pp1Name = (ObjectName) server.invoke(digraphs.iterator().next().getObjectName(), "getRegion",
 				new Object[] { PP1 }, new String[] { String.class.getName() });
-		assertEquals(PP1 + " regions not equal.", pp1Query.iterator().next().getObjectName(), pp1Name);
+		assertEquals(pp1Query.iterator().next().getObjectName(), pp1Name, PP1 + " regions not equal.");
 		ObjectName sp1Name = (ObjectName) server.invoke(digraphs.iterator().next().getObjectName(), "getRegion",
 				new Object[] { SP1 }, new String[] { String.class.getName() });
-		assertEquals(SP1 + " regions not equal.", sp1Query.iterator().next().getObjectName(), sp1Name);
+		assertEquals(sp1Query.iterator().next().getObjectName(), sp1Name, SP1 + " regions not equal.");
 
 		// test non existing region
 		ObjectName shouldNotExistName = (ObjectName) server.invoke(digraphs.iterator().next().getObjectName(),
 				"getRegion", new Object[] { "ShouldNotExist" }, new String[] { String.class.getName() });
-		assertNull("Should not exist", shouldNotExistName);
+		assertNull(shouldNotExistName, "Should not exist");
 
 		long[] bundleIds = (long[]) server.getAttribute(pp1Name, "BundleIds");
-		assertEquals("Wrong number of bundles", 1, bundleIds.length);
-		assertEquals("Wrong bundle", pp1Bundle.getBundleId(), bundleIds[0]);
+		assertEquals(1, bundleIds.length, "Wrong number of bundles");
+		assertEquals(pp1Bundle.getBundleId(), bundleIds[0], "Wrong bundle");
 		String name = (String) server.getAttribute(pp1Name, "Name");
-		assertEquals("Wrong name", PP1, name);
+		assertEquals(PP1, name, "Wrong name");
 
 		bundleIds = (long[]) server.getAttribute(sp1Name, "BundleIds");
-		assertEquals("Wrong number of bundles", 1, bundleIds.length);
-		assertEquals("Wrong bundle", sp1Bundle.getBundleId(), bundleIds[0]);
+		assertEquals(1, bundleIds.length, "Wrong number of bundles");
+		assertEquals(sp1Bundle.getBundleId(), bundleIds[0], "Wrong bundle");
 		name = (String) server.getAttribute(sp1Name, "Name");
-		assertEquals("Wrong name", SP1, name);
+		assertEquals(SP1, name, "Wrong name");
 	}
 
 	@Test
@@ -594,9 +594,9 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 			}
 		}
 
-		assertEquals("Wrong number of bundles installed", numRegions * ALL.size(), bundles.size());
-		assertTrue("Could not resolve bundles.",
-				bundleInstaller.resolveBundles(bundles.toArray(new Bundle[bundles.size()])));
+		assertEquals(numRegions * ALL.size(), bundles.size(), "Wrong number of bundles installed");
+		assertTrue(bundleInstaller.resolveBundles(bundles.toArray(new Bundle[bundles.size()])),
+				"Could not resolve bundles.");
 
 		// test install of duplicates
 		for (int i = 0; i < numRegions; i++) {
@@ -610,7 +610,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 					fail("Expected a bundle exception on duplicate bundle installation: " + name);
 				} catch (BundleException e) {
 					// expected
-					assertEquals("Wrong exception type.", BundleException.DUPLICATE_BUNDLE_ERROR, e.getType());
+					assertEquals(BundleException.DUPLICATE_BUNDLE_ERROR, e.getType(), "Wrong exception type.");
 				} catch (IOException e) {
 					fail("Failed to open bunldle location: " + e.getMessage());
 				}
@@ -629,7 +629,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 				fail("Expected a bundle exception on duplicate bundle update: " + region);
 			} catch (BundleException e) {
 				// expected
-				assertEquals("Wrong exception type.", BundleException.DUPLICATE_BUNDLE_ERROR, e.getType());
+				assertEquals(BundleException.DUPLICATE_BUNDLE_ERROR, e.getType(), "Wrong exception type.");
 			} catch (IOException e) {
 				fail("Failed to open bunldle location: " + e.getMessage());
 			}
@@ -735,7 +735,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 			fail("Expected a bundle exception on duplicate bundle install: " + region);
 		} catch (BundleException e) {
 			// expected
-			assertEquals("Wrong exception type.", BundleException.DUPLICATE_BUNDLE_ERROR, e.getType());
+			assertEquals(BundleException.DUPLICATE_BUNDLE_ERROR, e.getType(), "Wrong exception type.");
 		}
 	}
 
@@ -748,14 +748,14 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 
 		Bundle pp1Bundle = bundleInstaller.installBundle(PP1, null);
 		Region result = digraph.getRegion(pp1Bundle);
-		assertEquals("Wrong region", systemRegion, result);
+		assertEquals(systemRegion, result, "Wrong region");
 
 		pp1Bundle.uninstall();
 
 		digraph.setDefaultRegion(pp1Region);
 		pp1Bundle = bundleInstaller.installBundle(PP1, null);
 		result = digraph.getRegion(pp1Bundle);
-		assertEquals("Wrong region", pp1Region, result);
+		assertEquals(pp1Region, result, "Wrong region");
 
 		digraph.setDefaultRegion(null);
 	}
@@ -767,7 +767,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		Region pp1Region = digraph.createRegion(PP1);
 		digraph.setDefaultRegion(pp1Region);
 		digraph.removeRegion(pp1Region);
-		assertEquals("DefaultRegion is not null", null, digraph.getDefaultRegion());
+		assertEquals(null, digraph.getDefaultRegion(), "DefaultRegion is not null");
 	}
 
 	@Test
@@ -776,9 +776,9 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		digraph.removeRegion(pp1Region);
 		try {
 			digraph.setDefaultRegion(pp1Region);
-			assertFalse("IllegalArgumentException not thrown for setting non-existing region as default", true);
+			assertFalse(true, "IllegalArgumentException not thrown for setting non-existing region as default");
 		} catch (IllegalStateException e) {
-			assertNull("DefaultRegion is not null", digraph.getDefaultRegion());
+			assertNull(digraph.getDefaultRegion(), "DefaultRegion is not null");
 		}
 	}
 
@@ -786,9 +786,9 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 	public void testRemoveRegion() throws BundleException {
 		Region pp1Region = digraph.createRegion(PP1);
 		pp1Region.addBundle(TEST_BUNDLE_ID);
-		assertEquals("Region not associated with bundle id", pp1Region, digraph.getRegion(TEST_BUNDLE_ID));
+		assertEquals(pp1Region, digraph.getRegion(TEST_BUNDLE_ID), "Region not associated with bundle id");
 		digraph.removeRegion(pp1Region);
-		assertNull("Region still associated with bundle id", digraph.getRegion(TEST_BUNDLE_ID));
+		assertNull(digraph.getRegion(TEST_BUNDLE_ID), "Region still associated with bundle id");
 
 		// Adding a bundle to a removed region should not change the digraph and should
 		// error
@@ -798,7 +798,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		} catch (IllegalStateException e) {
 			// expected
 		}
-		assertNull("Region now associated with bundle id", digraph.getRegion(TEST_BUNDLE_ID));
+		assertNull(digraph.getRegion(TEST_BUNDLE_ID), "Region now associated with bundle id");
 
 		Region pp2Region = digraph.createRegion(PP2);
 		pp2Region.addBundle(TEST_BUNDLE_ID);
@@ -811,7 +811,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		} catch (IllegalStateException e) {
 			// Expected
 		}
-		assertEquals("Wrong region found for the bundle id", pp2Region, digraph.getRegion(TEST_BUNDLE_ID));
+		assertEquals(pp2Region, digraph.getRegion(TEST_BUNDLE_ID), "Wrong region found for the bundle id");
 	}
 
 	@Test
@@ -847,8 +847,8 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 				}
 			}
 		}
-		assertEquals("Wrong location found.", location + ".1#" + r1.getName(), l1);
-		assertEquals("Wrong location found.", location + ".2", l2);
+		assertEquals(location + ".1#" + r1.getName(), l1, "Wrong location found.");
+		assertEquals(location + ".2", l2, "Wrong location found.");
 	}
 
 	@Test
@@ -916,8 +916,8 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 				fail("No events left, expecting event: " + eventType);
 			}
 			BundleEvent event = events.remove(0);
-			assertEquals("Wrong event type.", eventType, event.getType());
-			assertEquals("Wrong bundle.", b, event.getBundle());
+			assertEquals(eventType, event.getType(), "Wrong event type.");
+			assertEquals(b, event.getBundle(), "Wrong bundle.");
 		}
 	}
 
@@ -946,7 +946,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 			bundleEventHook.unregister();
 		}
 
-		assertNull("Found region for uninstalled bundle.", digraph.getRegion(b));
+		assertNull(digraph.getRegion(b), "Found region for uninstalled bundle.");
 	}
 
 	@Test
@@ -970,8 +970,8 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		}
 
 		bundleInstaller.resolveBundles(bundles.values().toArray(new Bundle[bundles.size()]));
-		assertEquals(PP1, Bundle.RESOLVED, bundles.get(PP1).getState());
-		assertEquals(SP1, Bundle.INSTALLED, bundles.get(SP1).getState());
+		assertEquals(Bundle.RESOLVED, bundles.get(PP1).getState(), PP1);
+		assertEquals(Bundle.INSTALLED, bundles.get(SP1).getState(), SP1);
 
 		// now make a connection that does not let the necessary package through
 		RegionFilter badRegionFilter = digraph.createRegionFilterBuilder()
@@ -979,19 +979,19 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 				.build();
 
 		Set<FilteredRegion> edges = digraph.getRegion(SP1).getEdges();
-		assertEquals("Wrong number of edges.", 1, edges.size());
+		assertEquals(1, edges.size(), "Wrong number of edges.");
 
 		// use replace and verify a new edge is added if the connection did not exist
 		// already
-		assertNull("Found existing connection.",
-				digraph.replaceConnection(digraph.getRegion(SP1), badRegionFilter, digraph.getRegion(PP1)));
+		assertNull(digraph.replaceConnection(digraph.getRegion(SP1), badRegionFilter, digraph.getRegion(PP1)),
+				"Found existing connection.");
 		edges = digraph.getRegion(SP1).getEdges();
-		assertEquals("Wrong number of edges.", 2, edges.size());
+		assertEquals(2, edges.size(), "Wrong number of edges.");
 
 		// still should not resolve
 		bundleInstaller.resolveBundles(bundles.values().toArray(new Bundle[bundles.size()]));
-		assertEquals(PP1, Bundle.RESOLVED, bundles.get(PP1).getState());
-		assertEquals(SP1, Bundle.INSTALLED, bundles.get(SP1).getState());
+		assertEquals(Bundle.RESOLVED, bundles.get(PP1).getState(), PP1);
+		assertEquals(Bundle.INSTALLED, bundles.get(SP1).getState(), SP1);
 
 		// reconnect to let the package though
 		RegionFilter goodRegionFilter = digraph.createRegionFilterBuilder()
@@ -1000,30 +1000,30 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 				.build();
 		RegionFilter existingFilter = digraph.replaceConnection(digraph.getRegion(SP1), goodRegionFilter,
 				digraph.getRegion(PP1));
-		assertEquals("Wrong existing filter found.", badRegionFilter, existingFilter);
+		assertEquals(badRegionFilter, existingFilter, "Wrong existing filter found.");
 
 		// number of edges must remain 2 since we use reconnect
 		edges = digraph.getRegion(SP1).getEdges();
-		assertEquals("Wrong number of edges.", 2, edges.size());
+		assertEquals(2, edges.size(), "Wrong number of edges.");
 		// should resolve now
 
 		bundleInstaller.resolveBundles(bundles.values().toArray(new Bundle[bundles.size()]));
 		for (Bundle bundle : bundles.values()) {
-			assertEquals("Bundle did not resolve: " + bundle.getSymbolicName(), Bundle.RESOLVED, bundle.getState());
+			assertEquals(Bundle.RESOLVED, bundle.getState(), "Bundle did not resolve: " + bundle.getSymbolicName());
 			bundle.start();
 		}
 
 		// now remove the connection
 		existingFilter = digraph.replaceConnection(digraph.getRegion(SP1), null, digraph.getRegion(PP1));
-		assertEquals("Wrong existing filter found.", goodRegionFilter, existingFilter);
+		assertEquals(goodRegionFilter, existingFilter, "Wrong existing filter found.");
 		edges = digraph.getRegion(SP1).getEdges();
-		assertEquals("Wrong number of edges.", 1, edges.size());
+		assertEquals(1, edges.size(), "Wrong number of edges.");
 
 		bundleInstaller.refreshPackages(bundles.values().toArray(new Bundle[bundles.size()]));
 		// should not resolve again
 		bundleInstaller.resolveBundles(bundles.values().toArray(new Bundle[bundles.size()]));
-		assertEquals(PP1, Bundle.ACTIVE, bundles.get(PP1).getState());
-		assertEquals(SP1, Bundle.INSTALLED, bundles.get(SP1).getState());
+		assertEquals(Bundle.ACTIVE, bundles.get(PP1).getState(), PP1);
+		assertEquals(Bundle.INSTALLED, bundles.get(SP1).getState(), SP1);
 	}
 
 }

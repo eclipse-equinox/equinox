@@ -17,6 +17,7 @@ package org.eclipse.equinox.region.internal.tests;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -168,25 +169,29 @@ public class StandardRegionDigraphPeristenceTests {
 
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testInvalidPersistentName() throws IOException {
-		ByteArrayOutputStream output = new ByteArrayOutputStream();
-		DataOutputStream dataOut = new DataOutputStream(output);
-		dataOut.writeUTF("test");
-		dataOut.close();
-		byte[] byteArray = output.toByteArray();
-		readDigraph(byteArray);
+	@Test
+	public void testInvalidPersistentName() {
+		assertThrows(IllegalArgumentException.class, () -> {
+			ByteArrayOutputStream output = new ByteArrayOutputStream();
+			DataOutputStream dataOut = new DataOutputStream(output);
+			dataOut.writeUTF("test");
+			dataOut.close();
+			byte[] byteArray = output.toByteArray();
+			readDigraph(byteArray);
+		});
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testInvalidPersistentVersion() throws IOException {
-		ByteArrayOutputStream output = new ByteArrayOutputStream();
-		DataOutputStream dataOut = new DataOutputStream(output);
-		dataOut.writeUTF("virgo region digraph");
-		dataOut.writeInt(-1);
-		dataOut.close();
-		byte[] byteArray = output.toByteArray();
-		readDigraph(byteArray);
+	@Test
+	public void testInvalidPersistentVersion() {
+		assertThrows(IllegalArgumentException.class, () -> {
+			ByteArrayOutputStream output = new ByteArrayOutputStream();
+			DataOutputStream dataOut = new DataOutputStream(output);
+			dataOut.writeUTF("virgo region digraph");
+			dataOut.writeInt(-1);
+			dataOut.close();
+			byte[] byteArray = output.toByteArray();
+			readDigraph(byteArray);
+		});
 	}
 
 	private void readDigraph(byte[] byteArray) throws IOException {
@@ -223,7 +228,7 @@ public class StandardRegionDigraphPeristenceTests {
 		InputStream input = new ByteArrayInputStream(output.toByteArray());
 		for (int i = 0; i < iterations; i++) {
 			RegionDigraph copy = persistence.load(input);
-			assertEquals(digraph, copy);
+			assertDigraphEquals(digraph, copy);
 		}
 		input.close();
 	}
@@ -244,13 +249,13 @@ public class StandardRegionDigraphPeristenceTests {
 		return builder.build();
 	}
 
-	static void assertEquals(RegionDigraph d1, RegionDigraph d2) {
+	static void assertDigraphEquals(RegionDigraph d1, RegionDigraph d2) {
 		int rCnt1 = countRegions(d1);
 		int rCnt2 = countRegions(d2);
 		assertEquals(rCnt1, rCnt2);
 		for (Region r1 : d1) {
 			Region r2 = d2.getRegion(r1.getName());
-			assertEquals(r1, r2);
+			assertRegionEquals(r1, r2);
 		}
 	}
 
@@ -258,7 +263,7 @@ public class StandardRegionDigraphPeristenceTests {
 		return digraph.getRegions().size();
 	}
 
-	static void assertEquals(Region r1, Region r2) {
+	static void assertRegionEquals(Region r1, Region r2) {
 		assertNotNull(r1);
 		assertNotNull(r2);
 		assertEquals("Wrong name", r1.getName(), r2.getName());
@@ -268,10 +273,10 @@ public class StandardRegionDigraphPeristenceTests {
 		for (Long id : r1IDs) {
 			assertTrue("Missing id: " + id, r2IDs.contains(id));
 		}
-		assertEquals(r1.getEdges(), r2.getEdges());
+		assertEdgesEquals(r1.getEdges(), r2.getEdges());
 	}
 
-	static void assertEquals(Set<FilteredRegion> edges1, Set<FilteredRegion> edges2) {
+	static void assertEdgesEquals(Set<FilteredRegion> edges1, Set<FilteredRegion> edges2) {
 		assertEquals(edges1.size(), edges2.size());
 		Map<String, RegionFilter> edges2Map = new HashMap<>();
 		for (FilteredRegion edge2 : edges2) {

@@ -34,7 +34,7 @@ public class Bug395334Test extends AbstractRegionSystemTest {
 		filterBuilder.allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, "(bundle-symbolic-name=org.eclipse.osgi)");
 		RegionFilter filter = filterBuilder.build();
 		Bundle systemBundle = getContext().getBundle(Constants.SYSTEM_BUNDLE_LOCATION);
-		assertTrue("The bundle revision should be allowed by the filter",
-				filter.isAllowed(systemBundle.adapt(BundleRevision.class)));
+		assertTrue(filter.isAllowed(systemBundle.adapt(BundleRevision.class)),
+				"The bundle revision should be allowed by the filter");
 	}
 }

@@ -121,7 +121,7 @@ public class RegionResolverHookTests {
 		Collection<BundleRevision> resolvable = new ArrayList<>(
 				Collections.singleton(new StubBundleRevision(bundle(BUNDLE_X))));
 		this.resolverHook.filterResolvable(resolvable);
-		assertTrue("Resolvable is not empty" + resolvable, resolvable.isEmpty());
+		assertTrue(resolvable.isEmpty(), "Resolvable is not empty" + resolvable);
 	}
 
 	@Test
@@ -185,7 +185,7 @@ public class RegionResolverHookTests {
 		collisionCandidates.add(bundleCapability(BUNDLE_C));
 		collisionCandidates.add(bundleCapability(BUNDLE_D));
 		this.resolverHook.filterSingletonCollisions(bundleCapability(BUNDLE_A), collisionCandidates);
-		assertEquals("Wrong number of collitions", 0, collisionCandidates.size());
+		assertEquals(0, collisionCandidates.size(), "Wrong number of collitions");
 	}
 
 	@Test
@@ -198,7 +198,7 @@ public class RegionResolverHookTests {
 		collisionCandidates.add(bundleCapability(BUNDLE_C));
 		collisionCandidates.add(bundleCapability(BUNDLE_D));
 		this.resolverHook.filterSingletonCollisions(bundleCapability(BUNDLE_A), collisionCandidates);
-		assertEquals("Wrong number of collitions", 1, collisionCandidates.size());
+		assertEquals(1, collisionCandidates.size(), "Wrong number of collitions");
 		collisionCandidates.contains(collision);
 	}
 
@@ -215,7 +215,7 @@ public class RegionResolverHookTests {
 		collisionCandidates.add(bundleCapability(BUNDLE_C));
 		collisionCandidates.add(bundleCapability(BUNDLE_D));
 		this.resolverHook.filterSingletonCollisions(bundleCapability(BUNDLE_A), collisionCandidates);
-		assertEquals("Wrong number of collitions", 2, collisionCandidates.size());
+		assertEquals(2, collisionCandidates.size(), "Wrong number of collitions");
 		collisionCandidates.contains(collisionX);
 		collisionCandidates.contains(collisionB);
 	}
@@ -315,7 +315,7 @@ public class RegionResolverHookTests {
 		this.candidates.add(packageCapability(BUNDLE_A, PACKAGE_A));
 
 		Bundle bundle = MockBundleBuilder.createMockBundle(0L, "sys", BUNDLE_VERSION, "");
-		this.resolverHook.filterMatches(new StubBundleRequirement(stubBundle), this.candidates);
+		this.resolverHook.filterMatches(new StubBundleRequirement(bundle), this.candidates);
 		assertEquals(1, this.candidates.size());
 		assertTrue(this.candidates.contains(packageCapability(BUNDLE_A, PACKAGE_A)));
 	}
@@ -346,7 +346,7 @@ public class RegionResolverHookTests {
 		Region region = this.digraph.createRegion(regionName);
 		for (String bundleSymbolicName : bundleSymbolicNames) {
 			Bundle bundle = createBundle(bundleSymbolicName);
-			region.addBundle(stubBundle);
+			region.addBundle(bundle);
 		}
 		this.regions.put(regionName, region);
 		return region;

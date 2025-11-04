@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
@@ -175,16 +176,16 @@ public class BundleIdBasedRegionTests {
 		r.addBundle(mockBundle2);
 	}
 
-	@Test(expected = BundleException.class)
-	public void testAddBundlePresentInAnotherRegion1() throws BundleException {
+	@Test
+	public void testAddBundlePresentInAnotherRegion1() {
 		Region r = regionForBundlePersentInAnotherRegionTest();
-		r.addBundle(this.mockBundle);
+		assertThrows(BundleException.class, () -> r.addBundle(this.mockBundle));
 	}
 
-	@Test(expected = BundleException.class)
-	public void testAddBundlePresentInAnotherRegion2() throws BundleException {
+	@Test
+	public void testAddBundlePresentInAnotherRegion2() {
 		Region r = regionForBundlePersentInAnotherRegionTest();
-		r.addBundle(this.mockBundle.getBundleId());
+		assertThrows(BundleException.class, () -> r.addBundle(this.mockBundle.getBundleId()));
 	}
 
 	private Region regionForBundlePersentInAnotherRegionTest() {
