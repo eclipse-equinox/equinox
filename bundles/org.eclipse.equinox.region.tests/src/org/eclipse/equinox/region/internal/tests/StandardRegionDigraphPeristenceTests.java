@@ -14,13 +14,20 @@
 
 package org.eclipse.equinox.region.internal.tests;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.io.*;
 import java.util.*;
 import org.eclipse.equinox.region.*;
 import org.eclipse.equinox.region.RegionDigraph.FilteredRegion;
-import org.eclipse.virgo.teststubs.osgi.framework.StubBundle;
-import org.eclipse.virgo.teststubs.osgi.framework.StubBundleContext;
-import org.junit.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.osgi.framework.*;
 
 public class StandardRegionDigraphPeristenceTests {
@@ -29,7 +36,11 @@ public class StandardRegionDigraphPeristenceTests {
 
 	private RegionDigraphPersistence persistence;
 
-	private StubBundleContext systemBundleContext;
+	private BundleContext systemBundleContext;
+
+	private Map<String, Bundle> installedBundles;
+
+	private long bundleIdCounter;
 
 	private ThreadLocal<Region> threadLocal;
 
@@ -37,11 +48,24 @@ public class StandardRegionDigraphPeristenceTests {
 
 	private static final Collection<String> regionNames = Arrays.asList("r0", "r1", "r2", "r3");
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
-		StubBundle stubSystemBundle = new StubBundle(0L, "osgi.framework", new Version("0"), "loc");
-		systemBundleContext = (StubBundleContext) stubSystemBundle.getBundleContext();
-		systemBundleContext.addInstalledBundle(stubSystemBundle);
+		installedBundles = new HashMap<>();
+		bundleIdCounter = 1L;
+		
+		Bundle stubSystemBundle = MockBundleBuilder.createMockBundle(0L, "osgi.framework", new Version("0"), "loc");
+		systemBundleContext = mock(BundleContext.class);
+		when(systemBundleContext.getBundle(0L)).thenReturn(stubSystemBundle);
+		installedBundles.put("osgi.framework", stubSystemBundle);
+		
+		// Mock bundle installation
+		when(systemBundleContext.installBundle(anyString())).thenAnswer(invocation -> {
+			String location = invocation.getArgument(0);
+			Bundle bundle = MockBundleBuilder.createMockBundle(bundleIdCounter++, location, new Version("1.0.0"), location);
+			installedBundles.put(location, bundle);
+			return bundle;
+		});
+		
 		threadLocal = new ThreadLocal<>();
 		this.digraph = RegionReflectionUtils.newStandardRegionDigraph(systemBundleContext, threadLocal);
 		this.persistence = digraph.getRegionDigraphPersistence();
@@ -52,8 +76,7 @@ public class StandardRegionDigraphPeristenceTests {
 			Region region = digraph.createRegion(regionName);
 			for (int i = 0; i < 10; i++) {
 				String bsn = region.getName() + "." + i;
-				StubBundle b = (StubBundle) systemBundleContext.installBundle(bsn);
-				systemBundleContext.addInstalledBundle(b);
+				Bundle b = systemBundleContext.installBundle(bsn);
 				region.addBundle(b);
 			}
 		}
@@ -116,10 +139,8 @@ public class StandardRegionDigraphPeristenceTests {
 		Bundle b = boot.installBundle("dynamic.add.a.1", new ByteArrayInputStream(new byte[0]));
 		// needed because we don't have a bundle hook to add it for us
 		boot.addBundle(b);
-		// needed because StubBundleContext.installBundle does not do this!
-		systemBundleContext.addInstalledBundle((StubBundle) b);
 		Bundle p = boot.getBundle(b.getSymbolicName(), b.getVersion());
-		Assert.assertEquals(b, p);
+		assertEquals(b, p);
 		// TODO seems testing this will require a reference handler to be present
 		// b = boot.installBundle("file:dynamic.add.a.2");
 		// boot.addBundle(b); // needed because we don't have a bundle hook to add it
@@ -128,7 +149,7 @@ public class StandardRegionDigraphPeristenceTests {
 		RegionDigraph copy = copy(digraph);
 		Region bootCopy = copy.getRegion(BOOT_REGION);
 		p = bootCopy.getBundle(b.getSymbolicName(), b.getVersion());
-		Assert.assertNull(p);
+		assertNull(p);
 		try {
 			bootCopy.installBundle("dynamic.add.b.1", new ByteArrayInputStream(new byte[0]));
 		} catch (BundleException e) {
@@ -226,7 +247,7 @@ public class StandardRegionDigraphPeristenceTests {
 	static void assertEquals(RegionDigraph d1, RegionDigraph d2) {
 		int rCnt1 = countRegions(d1);
 		int rCnt2 = countRegions(d2);
-		Assert.assertEquals(rCnt1, rCnt2);
+		assertEquals(rCnt1, rCnt2);
 		for (Region r1 : d1) {
 			Region r2 = d2.getRegion(r1.getName());
 			assertEquals(r1, r2);
@@ -238,28 +259,28 @@ public class StandardRegionDigraphPeristenceTests {
 	}
 
 	static void assertEquals(Region r1, Region r2) {
-		Assert.assertNotNull(r1);
-		Assert.assertNotNull(r2);
-		Assert.assertEquals("Wrong name", r1.getName(), r2.getName());
+		assertNotNull(r1);
+		assertNotNull(r2);
+		assertEquals("Wrong name", r1.getName(), r2.getName());
 		Set<Long> r1IDs = r1.getBundleIds();
 		Set<Long> r2IDs = r2.getBundleIds();
-		Assert.assertEquals(r1IDs.size(), r2IDs.size());
+		assertEquals(r1IDs.size(), r2IDs.size());
 		for (Long id : r1IDs) {
-			Assert.assertTrue("Missing id: " + id, r2IDs.contains(id));
+			assertTrue("Missing id: " + id, r2IDs.contains(id));
 		}
 		assertEquals(r1.getEdges(), r2.getEdges());
 	}
 
 	static void assertEquals(Set<FilteredRegion> edges1, Set<FilteredRegion> edges2) {
-		Assert.assertEquals(edges1.size(), edges2.size());
+		assertEquals(edges1.size(), edges2.size());
 		Map<String, RegionFilter> edges2Map = new HashMap<>();
 		for (FilteredRegion edge2 : edges2) {
 			edges2Map.put(edge2.getRegion().getName(), edge2.getFilter());
 		}
 		for (FilteredRegion edge1 : edges1) {
 			RegionFilter filter2 = edges2Map.get(edge1.getRegion().getName());
-			Assert.assertNotNull("No filter found: " + edge1.getRegion().getName(), filter2);
-			Assert.assertEquals(edge1.getFilter().getSharingPolicy(), filter2.getSharingPolicy());
+			assertNotNull("No filter found: " + edge1.getRegion().getName(), filter2);
+			assertEquals(edge1.getFilter().getSharingPolicy(), filter2.getSharingPolicy());
 		}
 	}
 }

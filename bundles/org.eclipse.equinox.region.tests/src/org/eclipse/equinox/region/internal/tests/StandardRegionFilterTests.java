@@ -14,19 +14,18 @@
 
 package org.eclipse.equinox.region.internal.tests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.*;
 import org.eclipse.equinox.region.RegionFilter;
 import org.eclipse.equinox.region.RegionFilterBuilder;
-import org.eclipse.virgo.teststubs.osgi.framework.*;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.osgi.framework.*;
 import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.BundleRevision;
@@ -37,7 +36,7 @@ public class StandardRegionFilterTests {
 
 	private static final Version BUNDLE_VERSION = new Version("0");
 
-	private StubBundle stubBundle;
+	private Bundle stubBundle;
 
 	private String packageImportPolicy = "(" + BundleRevision.PACKAGE_NAMESPACE + "=foo)";
 
@@ -48,16 +47,21 @@ public class StandardRegionFilterTests {
 	private BundleCapability barPackage;
 
 	private BundleCapability fooServiceCapability;
-	private ServiceRegistration<Object> fooService;
+	private ServiceReference<Object> fooServiceRef;
 
 	private BundleCapability barServiceCapability;
-	private ServiceRegistration<Object> barService;
+	private ServiceReference<Object> barServiceRef;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
-		this.stubBundle = new StubBundle(BUNDLE_SYMBOLIC_NAME, BUNDLE_VERSION);
-		this.fooService = new StubServiceRegistration<>(new StubBundleContext(), "foo.Service");
-		this.barService = new StubServiceRegistration<>(new StubBundleContext(), "bar.Service");
+		this.stubBundle = MockBundleBuilder.createMockBundle(1L, BUNDLE_SYMBOLIC_NAME, BUNDLE_VERSION, "loc");
+		
+		// Create mock service references
+		this.fooServiceRef = mock(ServiceReference.class);
+		when(fooServiceRef.getProperty(Constants.OBJECTCLASS)).thenReturn(new String[] { "foo.Service" });
+		
+		this.barServiceRef = mock(ServiceReference.class);
+		when(barServiceRef.getProperty(Constants.OBJECTCLASS)).thenReturn(new String[] { "bar.Service" });
 
 		this.fooPackage = mock(BundleCapability.class);
 		Map<String, Object> fooAttrs = new HashMap<>();
@@ -162,14 +166,14 @@ public class StandardRegionFilterTests {
 	public void testServiceAllowed() throws InvalidSyntaxException {
 		RegionFilter regionFilter = createRegionFilter(RegionFilter.VISIBLE_SERVICE_NAMESPACE,
 				Arrays.asList(serviceImportPolicy));
-		assertTrue(regionFilter.isAllowed(fooService.getReference()));
+		assertTrue(regionFilter.isAllowed(fooServiceRef));
 		assertTrue(regionFilter.isAllowed(fooServiceCapability));
 		assertEquals(Arrays.asList(serviceImportPolicy),
 				regionFilter.getSharingPolicy().get(RegionFilter.VISIBLE_SERVICE_NAMESPACE));
 
 		regionFilter = createRegionFilter(RegionFilter.VISIBLE_OSGI_SERVICE_NAMESPACE,
 				Arrays.asList(serviceImportPolicy));
-		assertTrue(regionFilter.isAllowed(fooService.getReference()));
+		assertTrue(regionFilter.isAllowed(fooServiceRef));
 		assertTrue(regionFilter.isAllowed(fooServiceCapability));
 		assertNull(regionFilter.getSharingPolicy().get(RegionFilter.VISIBLE_SERVICE_NAMESPACE));
 		assertEquals(Arrays.asList(serviceImportPolicy),
@@ -179,7 +183,7 @@ public class StandardRegionFilterTests {
 	@Test
 	public void testServiceAllNotAllowed() {
 		RegionFilter regionFilter = RegionReflectionUtils.newStandardRegionFilterBuilder().build();
-		assertFalse(regionFilter.isAllowed(fooService.getReference()));
+		assertFalse(regionFilter.isAllowed(fooServiceRef));
 		assertFalse(regionFilter.isAllowed(fooServiceCapability));
 	}
 
@@ -188,12 +192,12 @@ public class StandardRegionFilterTests {
 		@SuppressWarnings("deprecation")
 		RegionFilter regionFilter = RegionReflectionUtils.newStandardRegionFilterBuilder()
 				.allowAll(RegionFilter.VISIBLE_SERVICE_NAMESPACE).build();
-		assertTrue(regionFilter.isAllowed(fooService.getReference()));
+		assertTrue(regionFilter.isAllowed(fooServiceRef));
 		assertTrue(regionFilter.isAllowed(fooServiceCapability));
 
 		regionFilter = RegionReflectionUtils.newStandardRegionFilterBuilder()
 				.allowAll(RegionFilter.VISIBLE_OSGI_SERVICE_NAMESPACE).build();
-		assertTrue(regionFilter.isAllowed(fooService.getReference()));
+		assertTrue(regionFilter.isAllowed(fooServiceRef));
 		assertTrue(regionFilter.isAllowed(fooServiceCapability));
 	}
 
@@ -202,7 +206,7 @@ public class StandardRegionFilterTests {
 	public void testServiceNotAllowed() throws InvalidSyntaxException {
 		RegionFilter regionFilter = createRegionFilter(RegionFilter.VISIBLE_SERVICE_NAMESPACE,
 				Arrays.asList(serviceImportPolicy));
-		assertFalse(regionFilter.isAllowed(barService.getReference()));
+		assertFalse(regionFilter.isAllowed(barServiceRef));
 		assertFalse(regionFilter.isAllowed(barServiceCapability));
 		assertEquals(Arrays.asList(serviceImportPolicy),
 				regionFilter.getSharingPolicy().get(RegionFilter.VISIBLE_SERVICE_NAMESPACE));
@@ -211,7 +215,7 @@ public class StandardRegionFilterTests {
 
 		regionFilter = createRegionFilter(RegionFilter.VISIBLE_OSGI_SERVICE_NAMESPACE,
 				Arrays.asList(serviceImportPolicy));
-		assertFalse(regionFilter.isAllowed(barService.getReference()));
+		assertFalse(regionFilter.isAllowed(barServiceRef));
 		assertFalse(regionFilter.isAllowed(barServiceCapability));
 		assertNull(regionFilter.getSharingPolicy().get(RegionFilter.VISIBLE_SERVICE_NAMESPACE));
 		assertEquals(Arrays.asList(serviceImportPolicy),
@@ -228,9 +232,9 @@ public class StandardRegionFilterTests {
 		assertFalse(negateNonServices.isAllowed(stubBundle));
 		assertFalse(negateNonServices.isAllowed(fooPackage));
 		assertFalse(negateNonServices.isAllowed(barPackage));
-		assertTrue(negateNonServices.isAllowed(fooService.getReference()));
+		assertTrue(negateNonServices.isAllowed(fooServiceRef));
 		assertTrue(negateNonServices.isAllowed(fooServiceCapability));
-		assertTrue(negateNonServices.isAllowed(barService.getReference()));
+		assertTrue(negateNonServices.isAllowed(barServiceRef));
 		assertTrue(negateNonServices.isAllowed(barServiceCapability));
 
 		negateNonServices = RegionReflectionUtils.newStandardRegionFilterBuilder()
@@ -240,9 +244,9 @@ public class StandardRegionFilterTests {
 		assertFalse(negateNonServices.isAllowed(stubBundle));
 		assertFalse(negateNonServices.isAllowed(fooPackage));
 		assertFalse(negateNonServices.isAllowed(barPackage));
-		assertTrue(negateNonServices.isAllowed(fooService.getReference()));
+		assertTrue(negateNonServices.isAllowed(fooServiceRef));
 		assertTrue(negateNonServices.isAllowed(fooServiceCapability));
-		assertTrue(negateNonServices.isAllowed(barService.getReference()));
+		assertTrue(negateNonServices.isAllowed(barServiceRef));
 		assertTrue(negateNonServices.isAllowed(barServiceCapability));
 	}
 
@@ -253,9 +257,9 @@ public class StandardRegionFilterTests {
 		assertFalse(regionFilterNotAllowed.isAllowed(stubBundle));
 		assertFalse(regionFilterNotAllowed.isAllowed(fooPackage));
 		assertFalse(regionFilterNotAllowed.isAllowed(barPackage));
-		assertFalse(regionFilterNotAllowed.isAllowed(fooService.getReference()));
+		assertFalse(regionFilterNotAllowed.isAllowed(fooServiceRef));
 		assertFalse(regionFilterNotAllowed.isAllowed(fooServiceCapability));
-		assertFalse(regionFilterNotAllowed.isAllowed(barService.getReference()));
+		assertFalse(regionFilterNotAllowed.isAllowed(barServiceRef));
 		assertFalse(regionFilterNotAllowed.isAllowed(barServiceCapability));
 
 		RegionFilter regionFilterAllAllowed = RegionReflectionUtils.newStandardRegionFilterBuilder()
@@ -263,9 +267,9 @@ public class StandardRegionFilterTests {
 		assertTrue(regionFilterAllAllowed.isAllowed(stubBundle));
 		assertTrue(regionFilterAllAllowed.isAllowed(fooPackage));
 		assertTrue(regionFilterAllAllowed.isAllowed(barPackage));
-		assertFalse(regionFilterNotAllowed.isAllowed(fooService.getReference()));
+		assertFalse(regionFilterNotAllowed.isAllowed(fooServiceRef));
 		assertFalse(regionFilterNotAllowed.isAllowed(fooServiceCapability));
-		assertFalse(regionFilterNotAllowed.isAllowed(barService.getReference()));
+		assertFalse(regionFilterNotAllowed.isAllowed(barServiceRef));
 		assertFalse(regionFilterNotAllowed.isAllowed(barServiceCapability));
 	}
 
@@ -279,9 +283,9 @@ public class StandardRegionFilterTests {
 		assertTrue(negateServices.isAllowed(stubBundle));
 		assertTrue(negateServices.isAllowed(fooPackage));
 		assertTrue(negateServices.isAllowed(barPackage));
-		assertFalse(negateServices.isAllowed(fooService.getReference()));
+		assertFalse(negateServices.isAllowed(fooServiceRef));
 		assertFalse(negateServices.isAllowed(fooServiceCapability));
-		assertFalse(negateServices.isAllowed(barService.getReference()));
+		assertFalse(negateServices.isAllowed(barServiceRef));
 		assertFalse(negateServices.isAllowed(barServiceCapability));
 
 		negateServices = RegionReflectionUtils.newStandardRegionFilterBuilder()
@@ -291,9 +295,9 @@ public class StandardRegionFilterTests {
 		assertTrue(negateServices.isAllowed(stubBundle));
 		assertTrue(negateServices.isAllowed(fooPackage));
 		assertTrue(negateServices.isAllowed(barPackage));
-		assertFalse(negateServices.isAllowed(fooService.getReference()));
+		assertFalse(negateServices.isAllowed(fooServiceRef));
 		assertFalse(negateServices.isAllowed(fooServiceCapability));
-		assertFalse(negateServices.isAllowed(barService.getReference()));
+		assertFalse(negateServices.isAllowed(barServiceRef));
 		assertFalse(negateServices.isAllowed(barServiceCapability));
 	}
 }

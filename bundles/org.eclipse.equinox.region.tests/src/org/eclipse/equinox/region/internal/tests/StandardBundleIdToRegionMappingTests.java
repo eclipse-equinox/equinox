@@ -14,15 +14,15 @@
 
 package org.eclipse.equinox.region.internal.tests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import org.eclipse.equinox.region.Region;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.osgi.framework.BundleException;
 
 public class StandardBundleIdToRegionMappingTests {
@@ -35,7 +35,7 @@ public class StandardBundleIdToRegionMappingTests {
 
 	private static final long OTHER_TEST_BUNDLE_ID = 2L;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		this.bundleIdToRegionMapping = RegionReflectionUtils.newStandardBundleIdToRegionMapping();
 		this.mockRegion = mock(Region.class);

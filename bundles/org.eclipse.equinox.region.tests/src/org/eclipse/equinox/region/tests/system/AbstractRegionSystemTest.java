@@ -13,15 +13,15 @@
  *******************************************************************************/
 package org.eclipse.equinox.region.tests.system;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.Arrays;
 import java.util.List;
 import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraph;
 import org.eclipse.equinox.region.tests.BundleInstaller;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.osgi.framework.*;
 
 /*
@@ -60,7 +60,7 @@ public class AbstractRegionSystemTest {
 	protected Bundle testsBundle;
 	ServiceReference<RegionDigraph> digraphReference;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		testsBundle = FrameworkUtil.getBundle(this.getClass());
 		BundleContext context = getContext();
@@ -73,7 +73,7 @@ public class AbstractRegionSystemTest {
 		bundleInstaller = new BundleInstaller("bundle_tests", testsBundle); //$NON-NLS-1$
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		for (Region region : digraph) {
 			if (!region.contains(0)) {

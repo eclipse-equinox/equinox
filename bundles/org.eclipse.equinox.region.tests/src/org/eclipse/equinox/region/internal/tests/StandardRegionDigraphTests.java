@@ -14,21 +14,19 @@
 
 package org.eclipse.equinox.region.internal.tests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.*;
 import org.eclipse.equinox.region.*;
 import org.eclipse.equinox.region.RegionDigraph.FilteredRegion;
-import org.eclipse.virgo.teststubs.osgi.framework.StubBundle;
-import org.eclipse.virgo.teststubs.osgi.framework.StubBundleContext;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.osgi.framework.*;
 
 public class StandardRegionDigraphTests {
@@ -45,11 +43,11 @@ public class StandardRegionDigraphTests {
 
 	private RegionFilter regionFilter2;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
-		StubBundle stubSystemBundle = new StubBundle(0L, "osgi.framework", new Version("0"), "loc");
-		StubBundleContext stubBundleContext = new StubBundleContext();
-		stubBundleContext.addInstalledBundle(stubSystemBundle);
+		Bundle stubSystemBundle = MockBundleBuilder.createMockBundle(0L, "osgi.framework", new Version("0"), "loc");
+		BundleContext stubBundleContext = mock(BundleContext.class);
+		when(stubBundleContext.getBundle(0L)).thenReturn(stubSystemBundle);
 		this.digraph = RegionReflectionUtils.newStandardRegionDigraph(stubBundleContext, new ThreadLocal<Region>());
 
 		this.mockRegion1 = mock(Region.class);

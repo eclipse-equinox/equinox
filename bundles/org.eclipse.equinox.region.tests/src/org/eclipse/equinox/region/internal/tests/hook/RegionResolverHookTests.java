@@ -14,16 +14,19 @@
 
 package org.eclipse.equinox.region.internal.tests.hook;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.*;
 import org.eclipse.equinox.region.*;
 import org.eclipse.equinox.region.internal.tests.RegionReflectionUtils;
-import org.eclipse.virgo.teststubs.osgi.framework.StubBundle;
-import org.eclipse.virgo.teststubs.osgi.framework.StubBundleContext;
-import org.junit.*;
+import org.eclipse.equinox.region.internal.tests.MockBundleBuilder;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.resolver.ResolverHook;
 import org.osgi.framework.wiring.*;
@@ -78,15 +81,15 @@ public class RegionResolverHookTests {
 
 	private ThreadLocal<Region> threadLocal;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		this.bundleId = 1L;
 		this.regions = new HashMap<>();
 		this.bundles = new HashMap<>();
 		this.threadLocal = new ThreadLocal<>();
-		StubBundle stubSystemBundle = new StubBundle(0L, "osgi.framework", new Version("0"), "loc");
-		StubBundleContext stubBundleContext = new StubBundleContext();
-		stubBundleContext.addInstalledBundle(stubSystemBundle);
+		Bundle stubSystemBundle = MockBundleBuilder.createMockBundle(0L, "osgi.framework", new Version("0"), "loc");
+		BundleContext stubBundleContext = mock(BundleContext.class);
+		when(stubBundleContext.getBundle(0L)).thenReturn(stubSystemBundle);
 		this.digraph = RegionReflectionUtils.newStandardRegionDigraph(stubBundleContext, this.threadLocal);
 		this.resolverHook = RegionReflectionUtils.newRegionResolverHook(this.digraph);
 		this.candidates = new HashSet<>();
@@ -101,7 +104,7 @@ public class RegionResolverHookTests {
 
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		// nothing
 	}
@@ -311,7 +314,7 @@ public class RegionResolverHookTests {
 	public void testResolveFromSystemBundle() {
 		this.candidates.add(packageCapability(BUNDLE_A, PACKAGE_A));
 
-		Bundle stubBundle = new StubBundle(0L, "sys", BUNDLE_VERSION, "");
+		Bundle bundle = MockBundleBuilder.createMockBundle(0L, "sys", BUNDLE_VERSION, "");
 		this.resolverHook.filterMatches(new StubBundleRequirement(stubBundle), this.candidates);
 		assertEquals(1, this.candidates.size());
 		assertTrue(this.candidates.contains(packageCapability(BUNDLE_A, PACKAGE_A)));
@@ -342,7 +345,7 @@ public class RegionResolverHookTests {
 	private Region createRegion(String regionName, String... bundleSymbolicNames) throws BundleException {
 		Region region = this.digraph.createRegion(regionName);
 		for (String bundleSymbolicName : bundleSymbolicNames) {
-			Bundle stubBundle = createBundle(bundleSymbolicName);
+			Bundle bundle = createBundle(bundleSymbolicName);
 			region.addBundle(stubBundle);
 		}
 		this.regions.put(regionName, region);
@@ -375,10 +378,10 @@ public class RegionResolverHookTests {
 	}
 
 	private Bundle createBundle(String bundleSymbolicName) {
-		Bundle stubBundle = new StubBundle(this.bundleId++, bundleSymbolicName, BUNDLE_VERSION,
+		Bundle bundle = MockBundleBuilder.createMockBundle(this.bundleId++, bundleSymbolicName, BUNDLE_VERSION,
 				"loc:" + bundleSymbolicName);
-		this.bundles.put(bundleSymbolicName, stubBundle);
-		return stubBundle;
+		this.bundles.put(bundleSymbolicName, bundle);
+		return bundle;
 	}
 
 	BundleRequirement bundleRequirement(String bundleSymbolicName) {

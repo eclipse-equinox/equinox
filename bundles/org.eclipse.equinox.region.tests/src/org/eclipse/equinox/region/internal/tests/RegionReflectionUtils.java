@@ -13,7 +13,7 @@
  *******************************************************************************/
 package org.eclipse.equinox.region.internal.tests;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.lang.reflect.*;
 import java.util.Set;

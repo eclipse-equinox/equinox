@@ -14,11 +14,11 @@
 
 package org.eclipse.equinox.region.internal.tests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.mock;
@@ -28,8 +28,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import org.eclipse.equinox.region.*;
 import org.eclipse.equinox.region.RegionDigraph.FilteredRegion;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.osgi.framework.*;
 
 public class BundleIdBasedRegionTests {
@@ -68,7 +68,7 @@ public class BundleIdBasedRegionTests {
 
 	private Object bundleIdToRegionMapping;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		this.threadLocal = new ThreadLocal<>();
 		this.mockBundle = mock(Bundle.class);

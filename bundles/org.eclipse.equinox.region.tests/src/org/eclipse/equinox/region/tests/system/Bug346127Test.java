@@ -13,8 +13,8 @@
  *******************************************************************************/
 package org.eclipse.equinox.region.tests.system;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,8 +22,8 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Hashtable;
 import org.eclipse.equinox.region.Region;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.service.url.*;
@@ -51,7 +51,7 @@ public class Bug346127Test extends AbstractRegionSystemTest {
 		}
 	}
 
-	@Before
+	@BeforeEach
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();

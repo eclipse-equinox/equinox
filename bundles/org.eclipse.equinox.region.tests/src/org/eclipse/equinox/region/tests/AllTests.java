@@ -17,17 +17,16 @@ import org.eclipse.equinox.region.internal.tests.*;
 import org.eclipse.equinox.region.internal.tests.hook.*;
 import org.eclipse.equinox.region.tests.system.Bug346127Test;
 import org.eclipse.equinox.region.tests.system.RegionSystemTests;
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
+import org.junit.platform.suite.api.SelectClasses;
+import org.junit.platform.suite.api.Suite;
 
-@RunWith(Suite.class)
-@SuiteClasses({ RegionBundleCollisionHookTests.class, RegionBundleEventHookTests.class, RegionBundleFindHookTests.class,
+@Suite
+@SelectClasses({ RegionBundleCollisionHookTests.class, RegionBundleEventHookTests.class, RegionBundleFindHookTests.class,
 		RegionResolverHookTests.class, RegionServiceEventHookTests.class, RegionServiceFindHookTests.class,
 		BundleIdBasedRegionTests.class, StandardRegionDigraphPeristenceTests.class, StandardRegionDigraphTests.class,
 		StandardRegionFilterTests.class, RegionSystemTests.class, Bug346127Test.class
 
 })
 public class AllTests {
-	// see @SuiteClasses
+	// see @SelectClasses
 }

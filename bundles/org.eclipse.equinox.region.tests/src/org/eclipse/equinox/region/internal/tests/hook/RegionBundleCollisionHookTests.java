@@ -14,16 +14,19 @@
 
 package org.eclipse.equinox.region.internal.tests.hook;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.*;
 import org.eclipse.equinox.region.*;
+import org.eclipse.equinox.region.internal.tests.MockBundleBuilder;
 import org.eclipse.equinox.region.internal.tests.RegionReflectionUtils;
-import org.eclipse.virgo.teststubs.osgi.framework.StubBundle;
-import org.eclipse.virgo.teststubs.osgi.framework.StubBundleContext;
-import org.junit.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.bundle.CollisionHook;
 
@@ -63,15 +66,15 @@ public class RegionBundleCollisionHookTests {
 
 	private ThreadLocal<Region> threadLocal;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		this.bundleId = 1L;
 		this.regions = new HashMap<>();
 		this.bundles = new HashMap<>();
 
-		StubBundle stubSystemBundle = new StubBundle(0L, "osgi.framework", new Version("0"), "loc");
-		StubBundleContext stubBundleContext = new StubBundleContext();
-		stubBundleContext.addInstalledBundle(stubSystemBundle);
+		Bundle stubSystemBundle = MockBundleBuilder.createMockBundle(0L, "osgi.framework", new Version("0"), "loc");
+		BundleContext stubBundleContext = mock(BundleContext.class);
+		when(stubBundleContext.getBundle(0L)).thenReturn(stubSystemBundle);
 		this.threadLocal = new ThreadLocal<>();
 		this.digraph = RegionReflectionUtils.newStandardRegionDigraph(stubBundleContext, this.threadLocal);
 		this.collisionFindHook = RegionReflectionUtils.newRegionBundleCollisionHook(this.digraph, this.threadLocal);
@@ -87,7 +90,7 @@ public class RegionBundleCollisionHookTests {
 
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		// nothing
 	}
@@ -266,11 +269,11 @@ public class RegionBundleCollisionHookTests {
 	}
 
 	private Bundle createBundle(String bundleSymbolicName, boolean cache) {
-		Bundle stubBundle = new StubBundle(this.bundleId++, bundleSymbolicName, BUNDLE_VERSION,
+		Bundle bundle = MockBundleBuilder.createMockBundle(this.bundleId++, bundleSymbolicName, BUNDLE_VERSION,
 				"loc:" + bundleSymbolicName);
 		if (cache)
-			this.bundles.put(bundleSymbolicName, stubBundle);
-		return stubBundle;
+			this.bundles.put(bundleSymbolicName, bundle);
+		return bundle;
 	}
 
 	private Bundle bundle(String bundleSymbolicName) {
