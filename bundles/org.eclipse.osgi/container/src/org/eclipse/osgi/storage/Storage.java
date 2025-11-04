@@ -55,9 +55,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
-import java.util.jar.Manifest;
 import java.util.stream.Stream;
 import org.eclipse.core.runtime.adaptor.EclipseStarter;
 import org.eclipse.osgi.container.Module;
@@ -746,9 +743,9 @@ public class Storage {
 			generation = info.createGeneration();
 
 			File contentFile = getContentFile(staged, contentType, nextID, generation.getGenerationId());
-			generation.setContent(contentFile, contentType);
+			BundleFile bundleFile = generation.installBundleFile(contentFile, contentType);
 			// Check that we can open the bundle file
-			generation.getBundleFile().open();
+			bundleFile.open();
 			setStorageHooks(generation);
 
 			ModuleRevisionBuilder builder = getBuilder(generation);
@@ -999,9 +996,9 @@ public class Storage {
 
 		try {
 			File contentFile = getContentFile(staged, contentType, bundleInfo.getBundleId(), newGen.getGenerationId());
-			newGen.setContent(contentFile, contentType);
+			BundleFile bundleFile = newGen.installBundleFile(contentFile, contentType);
 			// Check that we can open the bundle file
-			newGen.getBundleFile().open();
+			bundleFile.open();
 			setStorageHooks(newGen);
 
 			ModuleRevisionBuilder builder = getBuilder(newGen);
@@ -1056,26 +1053,12 @@ public class Storage {
 			if (!generationRoot.isDirectory()) {
 				throw new BundleException("Could not create generation directory: " + generationRoot.getAbsolutePath()); //$NON-NLS-1$
 			}
-			
-			// Check if the bundle should be extracted to a directory based on Eclipse-BundleShape header
-			if (shouldExtractToDirectory(staged)) {
-				contentFile = new File(generationRoot, BUNDLE_FILE_NAME);
-				try {
-					extractJarToDirectory(staged, contentFile);
-					// Delete the staged JAR file after successful extraction
-					staged.delete();
-				} catch (IOException e) {
-					throw new BundleException("Error while extracting bundle to directory: " + contentFile, //$NON-NLS-1$
-							BundleException.READ_ERROR, e);
-				}
-			} else {
-				contentFile = new File(generationRoot, BUNDLE_FILE_NAME);
-				try {
-					StorageUtil.move(staged, contentFile, getConfiguration().getDebug());
-				} catch (IOException e) {
-					throw new BundleException("Error while renaming bundle file to final location: " + contentFile, //$NON-NLS-1$
-							BundleException.READ_ERROR, e);
-				}
+			contentFile = new File(generationRoot, BUNDLE_FILE_NAME);
+			try {
+				StorageUtil.move(staged, contentFile, getConfiguration().getDebug());
+			} catch (IOException e) {
+				throw new BundleException("Error while renaming bundle file to final location: " + contentFile, //$NON-NLS-1$
+						BundleException.READ_ERROR, e);
 			}
 		}
 		return contentFile;
@@ -1198,43 +1181,21 @@ public class Storage {
 	}
 
 	/**
-	 * Checks if the staged bundle file has Eclipse-BundleShape header set to "dir".
-	 * 
-	 * @param staged the staged bundle file (must be a JAR file)
-	 * @return true if Eclipse-BundleShape header is set to "dir", false otherwise
-	 */
-	private static boolean shouldExtractToDirectory(File staged) {
-		if (staged == null || !staged.isFile()) {
-			return false;
-		}
-		try (JarFile jarFile = new JarFile(staged)) {
-			Manifest manifest = jarFile.getManifest();
-			if (manifest != null) {
-				String bundleShape = manifest.getMainAttributes().getValue(ECLIPSE_BUNDLESHAPE);
-				return "dir".equalsIgnoreCase(bundleShape); //$NON-NLS-1$
-			}
-		} catch (IOException e) {
-			// If we can't read the manifest, treat it as a normal bundle
-		}
-		return false;
-	}
-
-	/**
-	 * Extracts a JAR file to a directory.
+	 * Extracts a JAR file to a directory. This is used when Eclipse-BundleShape: dir is specified.
 	 * 
 	 * @param jarFile the JAR file to extract
 	 * @param targetDir the target directory to extract to
 	 * @throws IOException if extraction fails
 	 */
-	private void extractJarToDirectory(File jarFile, File targetDir) throws IOException {
+	void extractJarToDirectory(File jarFile, File targetDir) throws IOException {
 		if (!targetDir.exists() && !targetDir.mkdirs()) {
 			throw new IOException("Could not create directory: " + targetDir.getAbsolutePath()); //$NON-NLS-1$
 		}
 		
-		try (JarFile jar = new JarFile(jarFile)) {
-			Enumeration<JarEntry> entries = jar.entries();
+		try (java.util.jar.JarFile jar = new java.util.jar.JarFile(jarFile)) {
+			Enumeration<java.util.jar.JarEntry> entries = jar.entries();
 			while (entries.hasMoreElements()) {
-				JarEntry entry = entries.nextElement();
+				java.util.jar.JarEntry entry = entries.nextElement();
 				File entryFile = new File(targetDir, entry.getName());
 				
 				// Security check: ensure entry doesn't escape target directory
