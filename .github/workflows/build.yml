@@ -17,7 +17,7 @@ jobs:
         config: 
           - { name: Linux, runner-os: ubuntu-latest, ws: gtk, os: linux, native-extension: so }
           - { name: Windows, runner-os: windows-2022, ws: win32, os: win32, native-extension: dll }
-          - { name: MacOS, runner-os: macos-13, ws: cocoa, os: macosx, native-extension: so }
+          - { name: MacOS, runner-os: macos-15-intel, ws: cocoa, os: macosx, native-extension: so }
     name: Build ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.runner-os }}
     defaults:
@@ -38,11 +38,9 @@ jobs:
       uses: actions/setup-java@v5
       with:
         java-version: |
-          8
           17
           21
         mvn-toolchain-id: |
-          JavaSE-1.8
           JavaSE-17
           JavaSE-21
         distribution: 'temurin'
@@ -63,7 +61,6 @@ jobs:
       run: >- 
         mvn
         --batch-mode
-        -Pbree-libs
         -Papi-check
         -Dcompare-version-with-baselines.skip=false
         -Dmaven.test.failure.ignore=true
