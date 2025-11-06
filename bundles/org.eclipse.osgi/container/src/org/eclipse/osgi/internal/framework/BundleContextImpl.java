@@ -309,6 +309,9 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	 */
 	@Override
 	public void removeServiceListener(ServiceListener listener) {
+		if (!isValid()) {
+			return;
+		}
 		if (listener == null) {
 			throw new IllegalArgumentException();
 		}
@@ -355,6 +358,9 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	 */
 	@Override
 	public void removeBundleListener(BundleListener listener) {
+		if (!isValid()) {
+			return;
+		}
 		if (listener == null) {
 			throw new IllegalArgumentException();
 		}
@@ -408,6 +414,9 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	 */
 	@Override
 	public void removeFrameworkListener(FrameworkListener listener) {
+		if (!isValid()) {
+			return;
+		}
 		if (listener == null) {
 			throw new IllegalArgumentException();
 		}
@@ -702,6 +711,9 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	 */
 	@Override
 	public boolean ungetService(ServiceReference<?> reference) {
+		if (!isValid()) {
+			return false;
+		}
 		return container.getServiceRegistry().ungetService(this, (ServiceReferenceImpl<?>) reference);
 	}
 
