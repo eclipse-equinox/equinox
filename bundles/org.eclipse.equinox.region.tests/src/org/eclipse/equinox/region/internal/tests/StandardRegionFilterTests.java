@@ -24,7 +24,7 @@ import static org.mockito.Mockito.when;
 import java.util.*;
 import org.eclipse.equinox.region.RegionFilter;
 import org.eclipse.equinox.region.RegionFilterBuilder;
-import org.eclipse.virgo.teststubs.osgi.framework.*;
+import org.eclipse.equinox.region.tests.stubs.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.*;

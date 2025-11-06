@@ -1,3 +1,0 @@
-The teststubs are built out of the virgo project.  
-Note that the source for this jar is dependent on the org.osgi API and implements stubs for many org.osgi.* types.
-If and when the org.osgi.* types are modified, this jar will have to be updated and recompiled.

@@ -18,8 +18,8 @@ import java.io.*;
 import java.util.*;
 import org.eclipse.equinox.region.*;
 import org.eclipse.equinox.region.RegionDigraph.FilteredRegion;
-import org.eclipse.virgo.teststubs.osgi.framework.StubBundle;
-import org.eclipse.virgo.teststubs.osgi.framework.StubBundleContext;
+import org.eclipse.equinox.region.tests.stubs.StubBundle;
+import org.eclipse.equinox.region.tests.stubs.StubBundleContext;
 import org.junit.*;
 import org.osgi.framework.*;
 

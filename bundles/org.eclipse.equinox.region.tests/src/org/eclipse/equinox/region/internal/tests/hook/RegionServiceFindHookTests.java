@@ -21,7 +21,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.*;
 import org.eclipse.equinox.region.*;
 import org.eclipse.equinox.region.internal.tests.RegionReflectionUtils;
-import org.eclipse.virgo.teststubs.osgi.framework.*;
+import org.eclipse.equinox.region.tests.stubs.*;
 import org.junit.*;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.service.FindHook;
