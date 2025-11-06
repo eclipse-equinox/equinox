@@ -312,7 +312,12 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 		if (listener == null) {
 			throw new IllegalArgumentException();
 		}
-		container.getServiceRegistry().removeServiceListener(this, listener);
+		ServiceRegistry registry = container.getServiceRegistry();
+		if (registry == null) {
+			// Framework is shutting down, safe to ignore service listener removal
+			return;
+		}
+		registry.removeServiceListener(this, listener);
 	}
 
 	/**
