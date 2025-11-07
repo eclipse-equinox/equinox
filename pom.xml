@@ -249,6 +249,7 @@
                   <ignore>felix/src/.*</ignore>
                   <ignore>osgi/src/.*</ignore>
                   <ignore>felix/src_test/.*</ignore>
+                  <ignore>osgi/.*</ignore>
               </ignores>
           </configuration>
       </plugin>
