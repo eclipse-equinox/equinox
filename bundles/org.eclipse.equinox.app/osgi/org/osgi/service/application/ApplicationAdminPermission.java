@@ -323,14 +323,7 @@ public class ApplicationAdminPermission extends Permission {
 
 	private static class SignerWrapper extends Object {
 		private String pattern;
-		private ApplicationDescriptor appDesc;
-
-		/**
-		 * @param pattern
-		 */
-		public SignerWrapper(String pattern) {
-			this.pattern = pattern;
-		}
+		private final ApplicationDescriptor appDesc;
 
 		SignerWrapper(ApplicationDescriptor appDesc) {
 			this.appDesc = appDesc;
