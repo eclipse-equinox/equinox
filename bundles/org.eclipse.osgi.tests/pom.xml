@@ -27,6 +27,7 @@
     <testSuite>${project.artifactId}</testSuite>
     <testClass>org.eclipse.osgi.tests.AutomatedTests</testClass>
     <skipAPIAnalysis>true</skipAPIAnalysis>
+    <surefire.timeout>1500</surefire.timeout><!-- timeout in seconds -->
   </properties>
 
   <build>
@@ -34,7 +35,6 @@
       <plugin>
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>target-platform-configuration</artifactId>
-        <version>${tycho.version}</version>
         <configuration>
           <dependency-resolution>
             <extraRequirements>
