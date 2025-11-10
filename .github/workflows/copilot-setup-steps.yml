@@ -19,17 +19,16 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v5
-        with:
-          fetch-depth: 0 # required for jgit timestamp provider to work
-          path: equinox
       - name: checkout equinox.binaries
         uses: actions/checkout@v5
         with:
           fetch-depth: 1 # only shallow here, we don't have jgit timestamps
           repository: eclipse-equinox/equinox.binaries
           path: equinox.binaries
-
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # required for jgit timestamp provider to work
+          path: equinox
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
