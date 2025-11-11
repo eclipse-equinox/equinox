@@ -76,7 +76,7 @@ public class CertificateImportFileSelectPage extends WizardPage implements Liste
 		final FileDialog certFileDialog = new FileDialog(filePathField.getShell(), SWT.OPEN);
 		certFileDialog.setText(SecurityUIMsg.WIZARD_SELECT_FILE);
 		certFileDialog.setFilterPath(filePathField.getText());
-		certFileDialog.setFilterExtensions(new String[] { "*.cer", "*.p7b", "*.der" }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		certFileDialog.setFilterExtensions("*.cer", "*.p7b", "*.der"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 		String selectedCert = certFileDialog.open();
 		if (selectedCert != null) {
