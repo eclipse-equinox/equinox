@@ -4,7 +4,6 @@ Bundle-Name: Tests
 Bundle-SymbolicName: org.eclipse.equinox.launcher.tests
 Bundle-Version: 1.0.0.qualifier
 Fragment-Host: org.eclipse.equinox.launcher
-Require-Bundle: junit-jupiter-api;bundle-version="[5.14.0,6.0.0)",
- junit-platform-runner;bundle-version="[1.14.0,2.0.0)"
+Require-Bundle: junit-jupiter-api;bundle-version="[5.14.0,6.0.0)"
 Automatic-Module-Name: org.eclipse.launcher.tests
 Bundle-RequiredExecutionEnvironment: JavaSE-17
