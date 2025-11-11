@@ -35,7 +35,7 @@ import org.osgi.service.http.context.ServletContextHelper;
 		/**
 		 * ServletContextAdaptor.createServletContext() creates a proxy and the proxy class references
 		 * JspConfigDescriptor in one of its getter so it is needed here.
-		 * 
+		 *
 		 * As bnd currently does not detect this (see https://github.com/bndtools/bnd/issues/6920)
 		 * we add an explicit reference here
 		 */
