@@ -74,6 +74,7 @@ public final class PluginVersionIdentifier {
 	 * @param minor   minor component of the version identifier
 	 * @param service service update component of the version identifier
 	 */
+	@Deprecated
 	public PluginVersionIdentifier(int major, int minor, int service) {
 		this(major, minor, service, null);
 	}
@@ -87,6 +88,7 @@ public final class PluginVersionIdentifier {
 	 * @param qualifier qualifier component of the version identifier. Qualifier
 	 *                  characters that are not a letter or a digit are replaced.
 	 */
+	@Deprecated
 	public PluginVersionIdentifier(int major, int minor, int service, String qualifier) {
 		// Do the test outside of the assert so that they 'Policy.bind'
 		// will not be evaluated each time (including cases when we would
@@ -123,6 +125,7 @@ public final class PluginVersionIdentifier {
 	 * @param versionId string representation of the version identifier. Qualifier
 	 *                  characters that are not a letter or a digit are replaced.
 	 */
+	@Deprecated
 	public PluginVersionIdentifier(String versionId) {
 		Object[] parts = parseVersion(versionId);
 		version = new Version(((Integer) parts[0]).intValue(), ((Integer) parts[1]).intValue(),
@@ -138,6 +141,7 @@ public final class PluginVersionIdentifier {
 	 *         indicating what is wrong with the string
 	 * @since 2.0
 	 */
+	@Deprecated
 	public static IStatus validateVersion(String version) {
 		try {
 			parseVersion(version);
@@ -241,6 +245,7 @@ public final class PluginVersionIdentifier {
 	 * @param object an object to compare
 	 * @return whether or not the two objects are equal
 	 */
+	@Deprecated
 	@Override
 	public boolean equals(Object object) {
 		if (!(object instanceof PluginVersionIdentifier v)) {
@@ -254,6 +259,7 @@ public final class PluginVersionIdentifier {
 	 *
 	 * @return an integer which is a hash code value for this object.
 	 */
+	@Deprecated
 	@Override
 	public int hashCode() {
 		return version.hashCode();
@@ -264,6 +270,7 @@ public final class PluginVersionIdentifier {
 	 *
 	 * @return the major version
 	 */
+	@Deprecated
 	public int getMajorComponent() {
 		return version.getMajor();
 	}
@@ -273,6 +280,7 @@ public final class PluginVersionIdentifier {
 	 *
 	 * @return the minor version
 	 */
+	@Deprecated
 	public int getMinorComponent() {
 		return version.getMinor();
 	}
@@ -282,6 +290,7 @@ public final class PluginVersionIdentifier {
 	 *
 	 * @return the service level
 	 */
+	@Deprecated
 	public int getServiceComponent() {
 		return version.getMicro();
 	}
@@ -291,6 +300,7 @@ public final class PluginVersionIdentifier {
 	 *
 	 * @return the qualifier
 	 */
+	@Deprecated
 	public String getQualifierComponent() {
 		return version.getQualifier();
 	}
@@ -314,6 +324,7 @@ public final class PluginVersionIdentifier {
 	 *         given version identifier, and <code>false</code> otherwise
 	 * @since 2.0
 	 */
+	@Deprecated
 	public boolean isGreaterOrEqualTo(PluginVersionIdentifier id) {
 		if (id == null) {
 			return false;
@@ -353,6 +364,7 @@ public final class PluginVersionIdentifier {
 	 * @return <code>true</code> is this version identifier is compatible with the
 	 *         given version identifier, and <code>false</code> otherwise
 	 */
+	@Deprecated
 	public boolean isCompatibleWith(PluginVersionIdentifier id) {
 		if (id == null) {
 			return false;
@@ -393,6 +405,7 @@ public final class PluginVersionIdentifier {
 	 * @return <code>true</code> is this version identifier is equivalent to the
 	 *         given version identifier, and <code>false</code> otherwise
 	 */
+	@Deprecated
 	public boolean isEquivalentTo(PluginVersionIdentifier id) {
 		if (id == null) {
 			return false;
@@ -427,6 +440,7 @@ public final class PluginVersionIdentifier {
 	 *         the given version identifier, and <code>false</code> otherwise
 	 * @since 2.0
 	 */
+	@Deprecated
 	public boolean isPerfect(PluginVersionIdentifier id) {
 		if (id == null) {
 			return false;
@@ -446,6 +460,7 @@ public final class PluginVersionIdentifier {
 	 * @return <code>true</code> is this version identifier is greater than the
 	 *         given version identifier, and <code>false</code> otherwise
 	 */
+	@Deprecated
 	public boolean isGreaterThan(PluginVersionIdentifier id) {
 
 		if (id == null) {
@@ -487,6 +502,7 @@ public final class PluginVersionIdentifier {
 	 *
 	 * @return the string representation of this plug-in version identifier
 	 */
+	@Deprecated
 	@Override
 	public String toString() {
 		return version.toString();
