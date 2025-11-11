@@ -28,5 +28,6 @@ public interface ILegacyPreferences {
 	 * @param object - plugin to initialize
 	 * @param name   - ID of the plugin to be initialized
 	 */
+	@Deprecated
 	public Object init(Object object, String name);
 }
