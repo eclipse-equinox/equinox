@@ -22,6 +22,7 @@ import org.junit.Test;
 @Deprecated
 public class PluginVersionIdentifierTest {
 
+	@Deprecated
 	@Test
 	public void testConstructor() {
 
@@ -45,6 +46,7 @@ public class PluginVersionIdentifierTest {
 	}
 
 	// should test the hashcode() method that is currently missing.
+	@Deprecated
 	@Test
 	public void testEqual() {
 
@@ -54,6 +56,7 @@ public class PluginVersionIdentifierTest {
 
 	}
 
+	@Deprecated
 	@Test
 	public void testComparisons() {
 
@@ -75,6 +78,7 @@ public class PluginVersionIdentifierTest {
 
 	}
 
+	@Deprecated
 	@Test
 	public void testValidate() {
 		// success cases
