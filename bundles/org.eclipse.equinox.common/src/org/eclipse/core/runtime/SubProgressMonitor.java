@@ -83,6 +83,7 @@ public class SubProgressMonitor extends ProgressMonitorWrapper {
 	 *
 	 * @see #SubProgressMonitor(IProgressMonitor,int,int)
 	 */
+	@Deprecated
 	public static final int SUPPRESS_SUBTASK_LABEL = 1 << 1;
 	/**
 	 * Style constant indicating that the main task label should be prepended to the
@@ -90,6 +91,7 @@ public class SubProgressMonitor extends ProgressMonitorWrapper {
 	 *
 	 * @see #SubProgressMonitor(IProgressMonitor,int,int)
 	 */
+	@Deprecated
 	public static final int PREPEND_MAIN_LABEL_TO_SUBTASK = 1 << 2;
 
 	private int parentTicks = 0;
@@ -108,6 +110,7 @@ public class SubProgressMonitor extends ProgressMonitorWrapper {
 	 * @param monitor the parent progress monitor
 	 * @param ticks   the number of work ticks allocated from the parent monitor
 	 */
+	@Deprecated
 	public SubProgressMonitor(IProgressMonitor monitor, int ticks) {
 		this(monitor, ticks, 0);
 	}
@@ -126,6 +129,7 @@ public class SubProgressMonitor extends ProgressMonitorWrapper {
 	 * @see #SUPPRESS_SUBTASK_LABEL
 	 * @see #PREPEND_MAIN_LABEL_TO_SUBTASK
 	 */
+	@Deprecated
 	public SubProgressMonitor(IProgressMonitor monitor, int ticks, int style) {
 		super(monitor);
 		this.parentTicks = (ticks > 0) ? ticks : 0;
@@ -141,6 +145,7 @@ public class SubProgressMonitor extends ProgressMonitorWrapper {
 	 * </code> is specified, then the given string will be prepended to every string
 	 * passed to <code>subTask(String)</code>.
 	 */
+	@Deprecated
 	@Override
 	public void beginTask(String name, int totalWork) {
 		nestedBeginTasks++;
@@ -157,6 +162,7 @@ public class SubProgressMonitor extends ProgressMonitorWrapper {
 		}
 	}
 
+	@Deprecated
 	@Override
 	public void done() {
 		// Ignore if more done calls than beginTask calls or if we are still
@@ -176,6 +182,7 @@ public class SubProgressMonitor extends ProgressMonitorWrapper {
 		sentToParent = 0;
 	}
 
+	@Deprecated
 	@Override
 	public void internalWorked(double work) {
 		if (usedUp || nestedBeginTasks != 1) {
@@ -190,6 +197,7 @@ public class SubProgressMonitor extends ProgressMonitorWrapper {
 		}
 	}
 
+	@Deprecated
 	@Override
 	public void subTask(String name) {
 		if ((style & SUPPRESS_SUBTASK_LABEL) != 0) {
@@ -203,6 +211,7 @@ public class SubProgressMonitor extends ProgressMonitorWrapper {
 		super.subTask(label);
 	}
 
+	@Deprecated
 	@Override
 	public void worked(int work) {
 		internalWorked(work);
