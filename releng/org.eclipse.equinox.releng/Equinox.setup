@@ -317,6 +317,18 @@
         </predicate>
       </workingSet>
     </setupTask>
+    <setupTask
+        xsi:type="setup.targlets:TargletTask"
+        targetName="Modular API Baseline Target"
+        activateTarget="false">
+      <targlet
+          name="p2"
+          activeRepositoryList="${eclipse.api.baseline.target.platform}"
+          includeSources="false">
+        <requirement
+            name="org.eclipse.equinox.p2.sdk.feature.group"/>
+      </targlet>
+    </setupTask>
     <stream
         name="master"
         label="Master"/>
