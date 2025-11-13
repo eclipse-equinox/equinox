@@ -87,6 +87,7 @@ public interface ExportedPackage {
 	 *         version information is available.
 	 * @deprecated As of 1.2. Replaced by {@link #getVersion()}.
 	 */
+	@Deprecated(forRemoval = true, since = "2025-12")
 	public String getSpecificationVersion();
 
 	/**

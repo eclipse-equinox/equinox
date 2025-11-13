@@ -94,7 +94,7 @@ public abstract class StateImpl implements State {
 	 * <code>Dictionary</code> object returned by the <code>Bundle.getHeaders</code> method.
 	 * @deprecated
 	 */
-	@Deprecated
+	@Deprecated(forRemoval = true, since = "2025-12")
 	public final static String PROVIDE_PACKAGE = "Provide-Package"; //$NON-NLS-1$
 
 	/**
@@ -114,7 +114,7 @@ public abstract class StateImpl implements State {
 	 * syntax version 2 will not recognize this attribute.
 	 * @deprecated
 	 */
-	@Deprecated
+	@Deprecated(forRemoval = true, since = "2025-12")
 	public final static String REPROVIDE_ATTRIBUTE = "reprovide"; //$NON-NLS-1$
 
 	/**
@@ -136,7 +136,7 @@ public abstract class StateImpl implements State {
 	 * @since 1.3 <b>EXPERIMENTAL</b>
 	 * @deprecated
 	 */
-	@Deprecated
+	@Deprecated(forRemoval = true, since = "2025-12")
 	public final static String OPTIONAL_ATTRIBUTE = "optional"; //$NON-NLS-1$
 
 	public static final String OSGI_RESOLVER_MODE = "osgi.resolverMode"; //$NON-NLS-1$

@@ -156,6 +156,7 @@ public class FrameworkEvent extends EventObject {
 	 * @since 1.5
 	 * @deprecated As of 1.10.
 	 */
+	@Deprecated(forRemoval = true, since = "2025-12")
 	public final static int	STOPPED_BOOTCLASSPATH_MODIFIED	= 0x00000100;
 
 	/**
