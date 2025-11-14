@@ -40,7 +40,7 @@ public class EquinoxBundleAdaptTests extends AbstractBundleTests {
 	}
 
 	@Test
-	@SuppressWarnings({ "deprecation", "removal" }) // SecurityManager
+	@SuppressWarnings({ "removal" }) // SecurityManager
 	public void testAdapt_ProtectionDomain() throws Exception {
 		Assume.assumeTrue("Security-Manager is disallowed", SecurityManagerTests.isSecurityManagerAllowed());
 
