@@ -20,5 +20,6 @@ Provide-Capability:
  osgi.implementation;
   osgi.implementation="osgi.cm";
   uses:="org.osgi.service.cm";
-  version:Version="1.6"
+  version:Version="1.6";
+  provider="equinox"
 Automatic-Module-Name: org.eclipse.equinox.cm
