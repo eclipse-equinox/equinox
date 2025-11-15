@@ -26,7 +26,7 @@ import org.eclipse.equinox.plurl.PlurlStreamHandlerBase;
  * Instead the content of the bundle will be loaded from the reference location
  * specified by the reference URL. The Framework only supports reference URLs
  * that refer to a local file URL. For example:
- * 
+ *
  * <pre>
  *     reference:file:/eclipse/plugins/org.eclipse.myplugin_1.0.0/
  *     reference:file:/eclispe/plugins/org.eclipse.mybundle_1.0.0.jar
