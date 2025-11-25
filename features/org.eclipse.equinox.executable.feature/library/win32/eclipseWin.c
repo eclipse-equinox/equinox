@@ -326,9 +326,6 @@ int showSplash( const _TCHAR* featureImage )
 		case AUTOSCALE_DEFAULT:
 		case AUTOSCALE_INTEGER:
 			dpiX = ((int)((dpiX + 24) / 96 )) * 96;
-			if (autoScaleValue == AUTOSCALE_DEFAULT) {
-				if (dpiX > 192) dpiX = 192;
-			}
 			break;
 		default:
 			dpiX = (96 * autoScaleValue + 50) / 100;
