@@ -695,6 +695,17 @@ public class EquinoxBundle implements Bundle, BundleReference {
 		return new ResolvedModuleClassLoader(cl, report);
 	}
 
+	// This method is only preserved as a temporary workaround for consumers that
+	// reflectively access it until they are adapted, such as Jetty OSGi's
+	// DefaultBundleClassLoaderHelper
+	// (see https://github.com/jetty/jetty.project/pull/14086)
+	@Deprecated
+	protected ModuleClassLoader getModuleClassLoader(boolean unused) {
+		System.err.println(
+				"WARNING: Reflective call to EquinoxBundle#getModuleClassLoader(boolean) detected. This method will be removed soon."); //$NON-NLS-1$
+		return getModuleClassLoader().moduleClassLoader;
+	}
+
 	@Override
 	public Enumeration<URL> getResources(String name) throws IOException {
 		try {
