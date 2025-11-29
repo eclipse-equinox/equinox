@@ -235,7 +235,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	public static final String PROP_LOG_HISTORY_MAX = "equinox.log.history.max"; //$NON-NLS-1$
 	public static final String PROP_LOG_CAPTURE_ENTRY_LOCATION = "equinox.log.capture.entry.location"; //$NON-NLS-1$
 
-	@Deprecated
+	@Deprecated(forRemoval = true, since = "2025-12")
 	public static final String PROP_RESOLVER_THREAD_COUNT = "equinox.resolver.thead.count"; //$NON-NLS-1$
 	public static final String PROP_EQUINOX_RESOLVER_THREAD_COUNT = "equinox.resolver.thread.count"; //$NON-NLS-1$
 	public static final String PROP_EQUINOX_START_LEVEL_THREAD_COUNT = "equinox.start.level.thread.count"; //$NON-NLS-1$
