@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.equinox.cm.test;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
@@ -34,7 +35,9 @@ public abstract class AbstractCMTest {
 
 	@Before
 	public void setUp() throws Exception {
-		getBundle("org.eclipse.equinox.cm").start();
+		Bundle bundle = getBundle("org.eclipse.equinox.cm");
+		assertNotNull("Implementation org.eclipse.equinox.cm not found!", bundle);
+		bundle.start();
 		reference = getBundleContext().getServiceReference(ConfigurationAdmin.class);
 		cm = getBundleContext().getService(reference);
 	}
