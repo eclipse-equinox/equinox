@@ -27,7 +27,7 @@ import org.osgi.framework.BundleException;
  * <p>
  * This interface is not intended to be implemented by clients.
  * </p>
- * 
+ *
  * @since 3.1
  * @noimplement This interface is not intended to be implemented by clients.
  */
@@ -39,7 +39,7 @@ public interface PlatformAdmin {
 	 * This is a convenience method, fully equivalent to
 	 * <code>getState(true)</code>.
 	 * </p>
-	 * 
+	 *
 	 * @return a state representing the current framework.
 	 */
 	public State getState();
@@ -55,7 +55,7 @@ public interface PlatformAdmin {
 	 * <strong>not</strong> be resolved and the user objects from the system state
 	 * bundle descriptions will not be copied.
 	 * </p>
-	 * 
+	 *
 	 * @param mutable whether the returned state should mutable
 	 * @return a state representing the current framework.
 	 */
@@ -89,15 +89,16 @@ public interface PlatformAdmin {
 	/**
 	 * Returns a resolver supplied by the system. The returned resolver will not be
 	 * associated with any state.
-	 * 
+	 *
 	 * @return a system resolver
 	 * @deprecated in favour of {@link #createResolver()}.
 	 */
+	@Deprecated
 	public Resolver getResolver();
 
 	/**
 	 * Creates a new {@link Resolver} that is not associated with any {@link State}.
-	 * 
+	 *
 	 * @return the new <code>Resolver</code>.
 	 * @since 3.5
 	 */
@@ -106,7 +107,7 @@ public interface PlatformAdmin {
 	/**
 	 * Returns a factory that knows how to create state objects, such as bundle
 	 * descriptions and the different types of version constraints.
-	 * 
+	 *
 	 * @return a state object factory
 	 */
 	public StateObjectFactory getFactory();
@@ -115,7 +116,7 @@ public interface PlatformAdmin {
 	 * Adds the disabled info to the state managed by this platform admin. If a
 	 * disable info already exists for the specified policy and the specified bundle
 	 * then it is replaced with the given disabled info.
-	 * 
+	 *
 	 * @param disabledInfo the disabled info to add.
 	 * @throws IllegalArgumentException if the <code>BundleDescription</code> for
 	 *                                  the specified disabled info does not exist
@@ -126,7 +127,7 @@ public interface PlatformAdmin {
 
 	/**
 	 * Removes the disabled info from the state managed by this platform admin.
-	 * 
+	 *
 	 * @param disabledInfo the disabled info to remove
 	 * @since 3.4
 	 */
