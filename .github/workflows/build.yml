@@ -24,12 +24,12 @@ jobs:
       run: # Run on cmd on Windows because powershell interprets dots in arguments differently
         shell: ${{ matrix.config.os == 'win32' && 'cmd' || 'bash' }}
     steps:
-    - uses: actions/checkout@v6.0.0
+    - uses: actions/checkout@v6.0.1
       with:
         fetch-depth: 0 # required for jgit timestamp provider to work
         path: equinox
     - name: checkout equinox.binaries
-      uses: actions/checkout@v6.0.0
+      uses: actions/checkout@v6.0.1
       with:
         fetch-depth: 1 # only shallow here, we don't have jgit timestamps
         repository: eclipse-equinox/equinox.binaries
@@ -86,7 +86,7 @@ jobs:
   tck:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v6.0.0
+    - uses: actions/checkout@v6.0.1
     - name: Set up JDK
       uses: actions/setup-java@v5
       with:

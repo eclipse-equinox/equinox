@@ -30,12 +30,12 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@c2d88d3ecc89a9ef08eebf45d9637801dcee7eb5 # v5.0.1
+      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v5.0.1
       with:
         fetch-depth: 0 # required for jgit timestamp provider to work
         path: equinox
     - name: checkout equinox.binaries
-      uses: actions/checkout@c2d88d3ecc89a9ef08eebf45d9637801dcee7eb5 # v5.0.1
+      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v5.0.1
       with:
        fetch-depth: 1 # only shallow here, we don't have jgit timestamps
        repository: eclipse-equinox/equinox.binaries
