@@ -245,7 +245,7 @@ pipeline {
 												# Sign MacOS launcher executable and library
 												signerUrl='https://cbi.eclipse.org/macos/codesign/sign'
 												fnSignFile eclipse_*.so "${signerUrl}"
-												curl --output 'sdk.entitlement' 'https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.releng.aggregator/refs/heads/master/eclipse.platform.releng.tychoeclipsebuilder/entitlement/sdk.entitlement'
+												curl --output 'sdk.entitlement' --fail 'https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.releng.aggregator/refs/heads/master/products/eclipse.entitlement'
 												fnSignFile eclipse "${signerUrl}" '--form entitlements=@sdk.entitlement'
 											
 											elif [[ ${PLATFORM} == gtk.linux.* ]]; then
