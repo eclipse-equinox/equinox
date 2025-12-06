@@ -33,7 +33,7 @@ import org.osgi.service.resolver.ResolutionException;
  * Additional methods are available on the system module for operations that
  * effect the whole container. For example, initializing the container,
  * restarting and waiting for the container to stop.
- * 
+ *
  * @since 3.10
  */
 public abstract class SystemModule extends Module {
@@ -46,7 +46,7 @@ public abstract class SystemModule extends Module {
 
 	/**
 	 * Initializes the module container
-	 * 
+	 *
 	 * @throws BundleException if an exeption occurred while initializing
 	 */
 	public final void init() throws BundleException {
@@ -61,8 +61,9 @@ public abstract class SystemModule extends Module {
 			lockedStarted = true;
 			getContainer().getAdaptor().initBegin();
 			checkValid();
-			if (ACTIVE_SET.contains(getState()))
+			if (ACTIVE_SET.contains(getState())) {
 				return;
+			}
 			getRevisions().getContainer().open();
 			if (getState().equals(State.INSTALLED)) {
 				// must unlock to avoid out of order locks when multiple unresolved
@@ -84,8 +85,9 @@ public abstract class SystemModule extends Module {
 						throw (BundleException) e.getCause();
 					}
 				}
-				if (ACTIVE_SET.contains(getState()))
+				if (ACTIVE_SET.contains(getState())) {
 					return;
+				}
 				if (getState().equals(State.INSTALLED)) {
 					String reportMessage = report.getResolutionReportMessage(getCurrentRevision());
 					throw new BundleException(Msg.Module_ResolveError + reportMessage, BundleException.RESOLVE_ERROR);
@@ -123,7 +125,7 @@ public abstract class SystemModule extends Module {
 
 	/**
 	 * Waits until the module container has stopped.
-	 * 
+	 *
 	 * @param timeout The amount of time to wait.
 	 * @return The container event indicated why the framework stopped or if there
 	 *         was a time out waiting for stop.
@@ -243,7 +245,7 @@ public abstract class SystemModule extends Module {
 
 	/**
 	 * Restarts the module container.
-	 * 
+	 *
 	 * @see Framework#update()
 	 */
 	public void update() throws BundleException {
