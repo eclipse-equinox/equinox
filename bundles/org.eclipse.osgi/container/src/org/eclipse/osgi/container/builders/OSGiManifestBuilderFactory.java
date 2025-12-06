@@ -52,7 +52,7 @@ import org.osgi.resource.Namespace;
 /**
  * A factory for creating {@link ModuleRevisionBuilder}s based on OSGi bundle
  * manifests.
- * 
+ *
  * @since 3.10
  * @noinstantiate This class is not intended to be instantiated by clients.
  */
@@ -76,7 +76,7 @@ public final class OSGiManifestBuilderFactory {
 
 	/**
 	 * Creates a builder for the specified bundle manifest
-	 * 
+	 *
 	 * @param manifest the bundle manifest
 	 * @return a builder for the specified bundle manifest
 	 * @throws BundleException if the bundle manifest is invalid
@@ -92,7 +92,7 @@ public final class OSGiManifestBuilderFactory {
 	 * useful for creating a builder for the system module which takes into account
 	 * the configuration properties {@link Constants#FRAMEWORK_SYSTEMPACKAGES_EXTRA}
 	 * and {@link Constants#FRAMEWORK_SYSTEMCAPABILITIES_EXTRA}.
-	 * 
+	 *
 	 * @param manifest          the bundle manifest
 	 * @param symbolicNameAlias the symbolic name alias. A <code>null</code> value
 	 *                          is allowed.
@@ -181,8 +181,9 @@ public final class OSGiManifestBuilderFactory {
 	@SuppressWarnings("deprecation")
 	private static void checkImportExportSyntax(String headerKey, ManifestElement[] elements, boolean export,
 			boolean dynamic, boolean allowJavaExports) throws BundleException {
-		if (elements == null)
+		if (elements == null) {
 			return;
+		}
 		int length = elements.length;
 		Set<String> packages = new HashSet<>(length);
 		for (int i = 0; i < length; i++) {
@@ -206,9 +207,10 @@ public final class OSGiManifestBuilderFactory {
 			String version = elements[i].getAttribute(Constants.VERSION_ATTRIBUTE);
 			if (version != null) {
 				String specVersion = elements[i].getAttribute(Constants.PACKAGE_SPECIFICATION_VERSION);
-				if (specVersion != null && !specVersion.equals(version))
+				if (specVersion != null && !specVersion.equals(version)) {
 					throw new BundleException(NLS.bind(Msg.HEADER_VERSION_ERROR, Constants.VERSION_ATTRIBUTE,
 							Constants.PACKAGE_SPECIFICATION_VERSION), BundleException.MANIFEST_ERROR);
+				}
 			}
 			// check for bundle-symbolic-name and bundle-version attributes on exports
 			// (failure)
@@ -263,8 +265,9 @@ public final class OSGiManifestBuilderFactory {
 
 	private static void checkExtensionBundle(String headerKey, ManifestElement[] elements, Map<String, String> manifest)
 			throws BundleException {
-		if (elements.length == 0)
+		if (elements.length == 0) {
 			return;
+		}
 		String hostName = elements[0].getValue();
 		// XXX: The extension bundle check is done against system.bundle and
 		// org.eclipse.osgi
@@ -275,12 +278,14 @@ public final class OSGiManifestBuilderFactory {
 						BundleException.MANIFEST_ERROR);
 			}
 		} else {
-			if (manifest.get(Constants.REQUIRE_BUNDLE) != null)
+			if (manifest.get(Constants.REQUIRE_BUNDLE) != null) {
 				throw new BundleException(Msg.OSGiManifestBuilderFactory_ExtensionReqBundleError,
 						BundleException.MANIFEST_ERROR);
-			if (manifest.get(Constants.BUNDLE_NATIVECODE) != null)
+			}
+			if (manifest.get(Constants.BUNDLE_NATIVECODE) != null) {
 				throw new BundleException(Msg.OSGiManifestBuilderFactory_ExtensionNativeError,
 						BundleException.MANIFEST_ERROR);
+			}
 
 		}
 	}
@@ -367,8 +372,9 @@ public final class OSGiManifestBuilderFactory {
 
 	private static void getPackageExports(ModuleRevisionBuilder builder, ManifestElement[] exportElements,
 			Object symbolicName, Collection<Map<String, Object>> exportedPackages) throws BundleException {
-		if (exportElements == null)
+		if (exportElements == null) {
 			return;
+		}
 		for (ManifestElement exportElement : exportElements) {
 			String[] packageNames = exportElement.getValueComponents();
 			Map<String, Object> attributes = getAttributes(exportElement);
@@ -412,14 +418,16 @@ public final class OSGiManifestBuilderFactory {
 				manifest.get(Constants.DYNAMICIMPORT_PACKAGE));
 		addPackageImports(builder, importElements, importPackageNames, false);
 		addPackageImports(builder, dynamicImportElements, importPackageNames, true);
-		if (manifestVersion < 2)
+		if (manifestVersion < 2) {
 			addImplicitImports(builder, exportedPackages, importPackageNames);
+		}
 	}
 
 	private static void addPackageImports(ModuleRevisionBuilder builder, ManifestElement[] importElements,
 			Collection<String> importPackageNames, boolean dynamic) throws BundleException {
-		if (importElements == null)
+		if (importElements == null) {
 			return;
+		}
 		for (ManifestElement importElement : importElements) {
 			String[] packageNames = importElement.getValueComponents();
 			Map<String, Object> attributes = getAttributes(importElement);
@@ -453,22 +461,27 @@ public final class OSGiManifestBuilderFactory {
 				filter.append('(').append(PackageNamespace.PACKAGE_NAMESPACE).append('=').append(packageName)
 						.append(')');
 				int size = filter.length();
-				for (Map.Entry<String, Object> attribute : attributes.entrySet())
+				for (Map.Entry<String, Object> attribute : attributes.entrySet()) {
 					filter.append('(').append(attribute.getKey()).append('=').append(attribute.getValue()).append(')');
-				if (versionRange != null)
+				}
+				if (versionRange != null) {
 					filter.append(versionRange.toFilterString(PackageNamespace.CAPABILITY_VERSION_ATTRIBUTE));
-				if (bundleVersionRange != null)
+				}
+				if (bundleVersionRange != null) {
 					filter.append(
 							bundleVersionRange.toFilterString(PackageNamespace.CAPABILITY_BUNDLE_VERSION_ATTRIBUTE));
-				if (size != filter.length())
+				}
+				if (size != filter.length()) {
 					// need to add (&...)
 					filter.insert(0, "(&").append(')'); //$NON-NLS-1$
+				}
 				packageDirectives.put(PackageNamespace.REQUIREMENT_FILTER_DIRECTIVE, filter.toString());
 
 				// fill in cardinality for dynamic wild cards
-				if (dynamic && packageName.indexOf('*') >= 0)
+				if (dynamic && packageName.indexOf('*') >= 0) {
 					packageDirectives.put(PackageNamespace.REQUIREMENT_CARDINALITY_DIRECTIVE,
 							PackageNamespace.CARDINALITY_MULTIPLE);
+				}
 
 				// check the old optional attribute
 				if ("true".equals(optionalAttr) //$NON-NLS-1$
@@ -484,8 +497,9 @@ public final class OSGiManifestBuilderFactory {
 			Collection<Map<String, Object>> exportedPackages, Collection<String> importPackageNames) {
 		for (Map<String, Object> exportAttributes : exportedPackages) {
 			String packageName = (String) exportAttributes.get(PackageNamespace.PACKAGE_NAMESPACE);
-			if (importPackageNames.contains(packageName))
+			if (importPackageNames.contains(packageName)) {
 				continue;
+			}
 			importPackageNames.add(packageName);
 			Version packageVersion = (Version) exportAttributes.get(PackageNamespace.CAPABILITY_VERSION_ATTRIBUTE);
 			StringBuilder filter = new StringBuilder();
@@ -501,8 +515,9 @@ public final class OSGiManifestBuilderFactory {
 	private static Map<String, String> getDirectives(ManifestElement element) {
 		Map<String, String> directives = new HashMap<>();
 		Enumeration<String> keys = element.getDirectiveKeys();
-		if (keys == null)
+		if (keys == null) {
 			return directives;
+		}
 		while (keys.hasMoreElements()) {
 			String key = keys.nextElement();
 			directives.put(key, element.getDirective(key));
@@ -512,8 +527,9 @@ public final class OSGiManifestBuilderFactory {
 
 	private static void getRequireBundle(ModuleRevisionBuilder builder, ManifestElement[] requireBundles)
 			throws BundleException {
-		if (requireBundles == null)
+		if (requireBundles == null) {
 			return;
+		}
 		for (ManifestElement requireElement : requireBundles) {
 			String[] bundleNames = requireElement.getValueComponents();
 			Map<String, Object> attributes = getAttributes(requireElement);
@@ -536,13 +552,16 @@ public final class OSGiManifestBuilderFactory {
 				StringBuilder filter = new StringBuilder();
 				filter.append('(').append(BundleNamespace.BUNDLE_NAMESPACE).append('=').append(bundleName).append(')');
 				int size = filter.length();
-				for (Map.Entry<String, Object> attribute : attributes.entrySet())
+				for (Map.Entry<String, Object> attribute : attributes.entrySet()) {
 					filter.append('(').append(attribute.getKey()).append('=').append(attribute.getValue()).append(')');
-				if (versionRange != null)
+				}
+				if (versionRange != null) {
 					filter.append(versionRange.toFilterString(BundleNamespace.CAPABILITY_BUNDLE_VERSION_ATTRIBUTE));
-				if (size != filter.length())
+				}
+				if (size != filter.length()) {
 					// need to add (&...)
 					filter.insert(0, "(&").append(')'); //$NON-NLS-1$
+				}
 				bundleDirectives.put(BundleNamespace.REQUIREMENT_FILTER_DIRECTIVE, filter.toString());
 				// check the old compatibility attributes
 				if ("true".equals(optionalAttr) //$NON-NLS-1$
@@ -561,8 +580,9 @@ public final class OSGiManifestBuilderFactory {
 
 	private static void getFragmentHost(ModuleRevisionBuilder builder, ManifestElement[] fragmentHosts)
 			throws BundleException {
-		if (fragmentHosts == null || fragmentHosts.length == 0)
+		if (fragmentHosts == null || fragmentHosts.length == 0) {
 			return;
+		}
 
 		ManifestElement fragmentHost = fragmentHosts[0];
 		String hostName = fragmentHost.getValue();
@@ -578,13 +598,16 @@ public final class OSGiManifestBuilderFactory {
 		StringBuilder filter = new StringBuilder();
 		filter.append('(').append(HostNamespace.HOST_NAMESPACE).append('=').append(hostName).append(')');
 		int size = filter.length();
-		for (Map.Entry<String, Object> attribute : attributes.entrySet())
+		for (Map.Entry<String, Object> attribute : attributes.entrySet()) {
 			filter.append('(').append(attribute.getKey()).append('=').append(attribute.getValue()).append(')');
-		if (versionRange != null)
+		}
+		if (versionRange != null) {
 			filter.append(versionRange.toFilterString(HostNamespace.CAPABILITY_BUNDLE_VERSION_ATTRIBUTE));
-		if (size != filter.length())
+		}
+		if (size != filter.length()) {
 			// need to add (&...)
 			filter.insert(0, "(&").append(')'); //$NON-NLS-1$
+		}
 		directives.put(BundleNamespace.REQUIREMENT_FILTER_DIRECTIVE, filter.toString());
 		builder.addRequirement(HostNamespace.HOST_NAMESPACE, directives, new HashMap<>(0));
 		// Add a fragment capability to advertise what host this resource is providing a
@@ -597,8 +620,9 @@ public final class OSGiManifestBuilderFactory {
 
 	private static void getProvideCapabilities(ModuleRevisionBuilder builder, ManifestElement[] provideElements,
 			boolean checkSystemCapabilities) throws BundleException {
-		if (provideElements == null)
+		if (provideElements == null) {
 			return;
+		}
 		for (ManifestElement provideElement : provideElements) {
 			String[] namespaces = provideElement.getValueComponents();
 			Map<String, Object> attributes = getAttributes(provideElement);
@@ -618,8 +642,9 @@ public final class OSGiManifestBuilderFactory {
 
 	private static void getRequireCapabilities(ModuleRevisionBuilder builder, ManifestElement[] requireElements)
 			throws BundleException {
-		if (requireElements == null)
+		if (requireElements == null) {
 			return;
+		}
 		for (ManifestElement requireElement : requireElements) {
 			String[] namespaces = requireElement.getValueComponents();
 			Map<String, Object> attributes = getAttributes(requireElement);
@@ -755,8 +780,9 @@ public final class OSGiManifestBuilderFactory {
 	private static Map<String, Object> getAttributes(ManifestElement element) throws BundleException {
 		Enumeration<String> keys = element.getKeys();
 		Map<String, Object> attributes = new HashMap<>();
-		if (keys == null)
+		if (keys == null) {
 			return attributes;
+		}
 		while (keys.hasMoreElements()) {
 			String key = keys.nextElement();
 			String value = element.getAttribute(key);
@@ -799,14 +825,16 @@ public final class OSGiManifestBuilderFactory {
 		// assume list type, anything else will throw an exception
 		Tokenizer listTokenizer = new Tokenizer(type);
 		String listType = listTokenizer.getToken("<"); //$NON-NLS-1$
-		if (!ATTR_TYPE_LIST.equalsIgnoreCase(listType))
+		if (!ATTR_TYPE_LIST.equalsIgnoreCase(listType)) {
 			throw new BundleException("Unsupported type: " + type, BundleException.MANIFEST_ERROR); //$NON-NLS-1$
+		}
 		char c = listTokenizer.getChar();
 		String componentType = ATTR_TYPE_STRING;
 		if (c == '<') {
 			componentType = listTokenizer.getToken(">"); //$NON-NLS-1$
-			if (listTokenizer.getChar() != '>')
+			if (listTokenizer.getChar() != '>') {
 				throw new BundleException("Invalid type, missing ending '>' : " + type, BundleException.MANIFEST_ERROR); //$NON-NLS-1$
+			}
 		}
 		List<String> tokens = new Tokenizer(value).getEscapedTokens(","); //$NON-NLS-1$
 		List<Object> components = new ArrayList<>();
@@ -820,11 +848,13 @@ public final class OSGiManifestBuilderFactory {
 			throws BundleException {
 		@SuppressWarnings("deprecation")
 		String[] brees = ManifestElement.getArrayFromList(manifest.get(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT));
-		if (brees == null || brees.length == 0)
+		if (brees == null || brees.length == 0) {
 			return;
+		}
 		List<String> breeFilters = new ArrayList<>();
-		for (String bree : brees)
+		for (String bree : brees) {
 			breeFilters.add(createOSGiEERequirementFilter(bree));
+		}
 		String filterSpec;
 		if (breeFilters.size() == 1) {
 			filterSpec = breeFilters.get(0);
@@ -876,10 +906,11 @@ public final class OSGiManifestBuilderFactory {
 		String eeName = nameVersion[0];
 		String v = nameVersion[1];
 		String filterSpec;
-		if (v == null)
+		if (v == null) {
 			filterSpec = "(osgi.ee=" + eeName + ")"; //$NON-NLS-1$ //$NON-NLS-2$
-		else
+		} else {
 			filterSpec = "(&(osgi.ee=" + eeName + ")(version=" + v + "))"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		}
 		try {
 			// do a sanity check
 			FilterImpl.newInstance(filterSpec);
@@ -935,18 +966,21 @@ public final class OSGiManifestBuilderFactory {
 			}
 		}
 
-		if (v1 == null)
+		if (v1 == null) {
 			v1 = v2;
+		}
 		if (v1 != null && v2 != null && !v1.equals(v2)) {
 			ee1 = bree;
 			ee2 = null;
 			v1 = null;
 			v2 = null;
 		}
-		if ("J2SE".equals(ee1)) //$NON-NLS-1$
+		if ("J2SE".equals(ee1)) { //$NON-NLS-1$
 			ee1 = "JavaSE"; //$NON-NLS-1$
-		if ("J2SE".equals(ee2)) //$NON-NLS-1$
+		}
+		if ("J2SE".equals(ee2)) { //$NON-NLS-1$
 			ee2 = "JavaSE"; //$NON-NLS-1$
+		}
 
 		String eeName = ee1 + (ee2 == null ? "" : '/' + ee2); //$NON-NLS-1$
 

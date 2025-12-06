@@ -163,8 +163,9 @@ public final class PlurlImpl implements Plurl {
 			protocols = new ArrayList<>(1);
 			creatingProtocols.set(protocols);
 		}
-		if (protocols.contains(protocol))
+		if (protocols.contains(protocol)) {
 			return true;
+		}
 		protocols.add(protocol);
 		return false;
 	}
@@ -269,6 +270,7 @@ public final class PlurlImpl implements Plurl {
 		return true;
 	}
 
+	@Override
 	public synchronized void install(String... forbidden) {
 		if (setFactories == SetFactories.override || setFactories == SetFactories.primordial) {
 			// already installed; no-op
@@ -637,8 +639,9 @@ public final class PlurlImpl implements Plurl {
 		}
 		// now check property
 		String builtInHandlers = System.getProperty(PROTOCOL_HANDLER_PKGS);
-		if (builtInHandlers == null)
+		if (builtInHandlers == null) {
 			return null;
+		}
 
 		StringTokenizer tok = new StringTokenizer(builtInHandlers, "|"); //$NON-NLS-1$
 		while (tok.hasMoreElements()) {

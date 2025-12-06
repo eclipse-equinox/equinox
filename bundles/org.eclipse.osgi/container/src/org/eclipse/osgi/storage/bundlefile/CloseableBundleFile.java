@@ -42,7 +42,7 @@ import org.eclipse.osgi.util.NLS;
 /**
  * A BundleFile that manages the number of open bundle files by using the
  * MRUBundleFileList
- * 
+ *
  * @param <E> a type specified by extending classes to call
  *            {@link #getInputStream(Object)}
  */
@@ -78,7 +78,7 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 
 	/**
 	 * Checks if the bundle file is open
-	 * 
+	 *
 	 * @return true if the bundle file is open and locked
 	 */
 	protected boolean lockOpen() {
@@ -160,14 +160,14 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 
 	/**
 	 * Opens the bundle file
-	 * 
+	 *
 	 * @throws IOException if an error occurs
 	 */
 	protected abstract void doOpen() throws IOException;
 
 	/**
 	 * Extracts a directory and all sub content to disk
-	 * 
+	 *
 	 * @param dirName the directory name to extract
 	 * @return the File used to extract the content to. A value of <code>null</code>
 	 *         is returned if the directory to extract does not exist or if content
@@ -179,8 +179,9 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 		}
 		try {
 			for (String path : getPaths()) {
-				if (path.startsWith(dirName) && !path.endsWith("/")) //$NON-NLS-1$
+				if (path.startsWith(dirName) && !path.endsWith("/")) { //$NON-NLS-1$
 					getFile(path, false);
+				}
 			}
 			return getExtractFile(dirName);
 		} finally {
@@ -191,8 +192,9 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 	protected abstract Iterable<String> getPaths();
 
 	private File getExtractFile(String entryName) {
-		if (generation == null)
+		if (generation == null) {
 			return null;
+		}
 		return generation.getExtractFile(".cp", entryName); //$NON-NLS-1$
 	}
 
@@ -206,34 +208,39 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 		}
 		try {
 			BundleEntry bEntry = getEntry(entry);
-			if (bEntry == null)
+			if (bEntry == null) {
 				return null;
+			}
 
 			try {
 				File nested = getExtractFile(bEntry.getName());
 				if (nested != null) {
 					if (nested.exists()) {
 						/* the entry is already cached */
-						if (debug.DEBUG_BUNDLE_FILE)
+						if (debug.DEBUG_BUNDLE_FILE) {
 							debug.trace(OPTION_DEBUG_BUNDLE_FILE, "File already present: " + nested.getPath()); //$NON-NLS-1$
-						if (nested.isDirectory())
+						}
+						if (nested.isDirectory()) {
 							// must ensure the complete directory is extracted (bug 182585)
 							extractDirectory(bEntry.getName());
+						}
 					} else {
 						if (bEntry.getName().endsWith("/")) { //$NON-NLS-1$
 							nested.mkdirs();
 							if (!nested.isDirectory()) {
-								if (debug.DEBUG_BUNDLE_FILE)
+								if (debug.DEBUG_BUNDLE_FILE) {
 									debug.trace(OPTION_DEBUG_BUNDLE_FILE,
 											"Unable to create directory: " + nested.getPath()); //$NON-NLS-1$
+								}
 								throw new IOException(
 										NLS.bind(Msg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION, nested.getAbsolutePath()));
 							}
 							extractDirectory(bEntry.getName());
 						} else {
 							InputStream in = bEntry.getInputStream();
-							if (in == null)
+							if (in == null) {
 								return null;
+							}
 							generation.storeContent(nested, in, nativeCode);
 						}
 					}
@@ -241,8 +248,9 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 					return nested;
 				}
 			} catch (IOException | StorageException e) {
-				if (debug.DEBUG_BUNDLE_FILE)
+				if (debug.DEBUG_BUNDLE_FILE) {
 					debug.traceThrowable(Debug.OPTION_DEBUG_BUNDLE_FILE, e);
+				}
 				generation.getBundleInfo().getStorage().getLogServices().log(EquinoxContainer.NAME,
 						FrameworkLogEntry.ERROR,
 						"Unable to extract content: " + generation.getRevision() + ": " + entry, e); //$NON-NLS-1$ //$NON-NLS-2$
@@ -259,20 +267,24 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 			return false;
 		}
 		try {
-			if (dir == null)
+			if (dir == null) {
 				return false;
+			}
 
-			if (dir.length() == 0)
+			if (dir.length() == 0) {
 				return true;
+			}
 
 			if (dir.charAt(0) == '/') {
-				if (dir.length() == 1)
+				if (dir.length() == 1) {
 					return true;
+				}
 				dir = dir.substring(1);
 			}
 
-			if (dir.length() > 0 && dir.charAt(dir.length() - 1) != '/')
+			if (dir.length() > 0 && dir.charAt(dir.length() - 1) != '/') {
 				dir = dir + '/';
+			}
 
 			for (String entry : getPaths()) {
 				if (entry.startsWith(dir)) {
@@ -299,7 +311,7 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 
 	/**
 	 * Finds the bundle entry for the specified path
-	 * 
+	 *
 	 * @param path the path of the entry to find
 	 * @return the entry or {@code null} if no entry exists
 	 */
@@ -311,15 +323,18 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 			return null;
 		}
 		try {
-			if (path == null)
+			if (path == null) {
 				throw new NullPointerException();
+			}
 
 			// Strip any leading '/' off of path.
-			if (path.length() > 0 && path.charAt(0) == '/')
+			if (path.length() > 0 && path.charAt(0) == '/') {
 				path = path.substring(1);
+			}
 			// Append a '/', if not already there, to path if not an empty string.
-			if (path.length() > 0 && path.charAt(path.length() - 1) != '/')
+			if (path.length() > 0 && path.charAt(path.length() - 1) != '/') {
 				path = new StringBuilder(path).append("/").toString(); //$NON-NLS-1$
+			}
 
 			LinkedHashSet<String> result = new LinkedHashSet<>();
 			// Get all entries and add the ones of interest.
@@ -342,16 +357,18 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 	}
 
 	private void getEntryPaths(String path, String entry, boolean recurse, LinkedHashSet<String> entries) {
-		if (entry.length() == 0)
+		if (entry.length() == 0) {
 			return;
+		}
 		int slash = entry.indexOf('/');
-		if (slash == -1)
+		if (slash == -1) {
 			entries.add(path + entry);
-		else {
+		} else {
 			path = path + entry.substring(0, slash + 1);
 			entries.add(path);
-			if (recurse)
+			if (recurse) {
 				getEntryPaths(path, entry.substring(slash + 1), true, entries);
+			}
 		}
 	}
 
@@ -369,7 +386,7 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 					} catch (InterruptedException e) {
 						// do nothing for now ...
 					}
-					if (referenceCount != 0 || closed)
+					if (referenceCount != 0 || closed) {
 						// either another thread closed the bundle file or we timed waiting for all the
 						// reference inputstreams to close
 						// If the referenceCount did not reach zero then this bundle file will remain
@@ -377,6 +394,7 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 						// bundle file is closed explicitly (i.e. bundle is updated/uninstalled or
 						// framework is shutdown)
 						return;
+					}
 
 				}
 				closed = true;
@@ -394,7 +412,7 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 
 	/**
 	 * Closes the bundle file
-	 * 
+	 *
 	 * @throws IOException if an error occurs closing
 	 */
 	protected abstract void doClose() throws IOException;
@@ -461,8 +479,9 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 		try {
 			referenceCount = Math.max(0, referenceCount - 1);
 			// only notify if the referenceCount is zero.
-			if (referenceCount == 0)
+			if (referenceCount == 0) {
 				refCondition.signal();
+			}
 		} finally {
 			openLock.unlock();
 		}
@@ -475,7 +494,7 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 	 * input stream in a special input stream that keeps track of active input
 	 * streams to prevent the bundle file from being closed until the stream is
 	 * closed (or a timeout happens).
-	 * 
+	 *
 	 * @param entry the entry to get the input stream for
 	 * @return the input stream for the entry
 	 */
@@ -496,7 +515,7 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 
 	/**
 	 * Gets the input stream for the specified entry.
-	 * 
+	 *
 	 * @param entry the entry to get the input stream for. The type is specified by
 	 *              the extending class.
 	 * @return the input steam for the entry
@@ -530,8 +549,9 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 				throw enrichExceptionWithBaseFile(e);
 			} finally {
 				synchronized (this) {
-					if (streamClosed)
+					if (streamClosed) {
 						return;
+					}
 					streamClosed = true;
 				}
 				decrementReference();

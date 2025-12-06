@@ -26,7 +26,7 @@ import java.util.function.Consumer;
  * {@link URLConnection#setContentHandlerFactory(ContentHandlerFactory)}. Plurl
  * factories may be added and removed using the add and remove methods or using
  * the {@link #PLURL_PROTOCOL plurl} protocol.
- * 
+ *
  * <p>
  * The {@link #PLURL_PROTOCOL plurl} protocol allows factories to be added even
  * if the installed plurl implementation is not using the same
@@ -34,11 +34,11 @@ import java.util.function.Consumer;
  * implementation must handle this case by reflecting on the plurl factories
  * that are added. A plurl factory can be added and removed with the plurl
  * protocol like this:
- * 
+ *
  * <pre>
  * PlurlStreamHandlerFactory myStreamFactory = getStreamFactory();
  * PlurlContentHandlerFactory myContentFactory = getContentFactory();
- * 
+ *
  * ((Consumer&lt;URLStreamHandlerFactory&gt;) ("plurl://op/addURLStreamHandlerFactory").getContent()).accept(myStreamFactory);
  * ((Consumer&lt;ContentHandlerFactory&gt;) ("plurl://op/addContentHandlerFactory").getContent()).accept(myContentFactory);
  *
@@ -46,11 +46,11 @@ import java.util.function.Consumer;
  * 		.accept(myStreamFactory);
  * ((Consumer&lt;ContentHandlerFactory&gt;) ("plurl://op/removeContentHandlerFactory").getContent()).accept(myContentFactory);
  * </pre>
- * 
+ *
  * The content provided by the plurl protocol is of type {@link Consumer} which
  * can take either an {@link URLStreamHandlerFactory} or a
  * {@link ContentHandlerFactory} depending on the operation.
- * 
+ *
  * <p>
  * A plurl implementation delegates to the added {@link PlurlFactory} objects.
  * To select which {@code PlurlFactory} to delegate the
@@ -65,7 +65,7 @@ import java.util.function.Consumer;
  * factory is selected, it is used to create the requested handler. If the
  * selected factory returns a {@code null} handler then no other factory is
  * asked to create the handler.
- * 
+ *
  * @see #PLURL_ADD_URL_STREAM_HANDLER_FACTORY
  * @see #PLURL_ADD_CONTENT_HANDLER_FACTORY
  * @see #PLURL_REMOVE_URL_STREAM_HANDLER_FACTORY
@@ -167,7 +167,7 @@ public interface Plurl {
 	 * <li>If plurl factories are already installed then this plurl implementation
 	 * is registered as a delegate with the already installed plurl instance.</li>
 	 * </ol>
-	 * 
+	 *
 	 * @param forbidden builtin JVM protocols that cannot be overridden by plurl. If
 	 *                  no forbidden protocols are specified then the default
 	 *                  forbidden protocols are 'jar', 'jmod', 'file', and 'jrt'. To
@@ -217,11 +217,11 @@ public interface Plurl {
 	 * {@link #remove(PlurlStreamHandlerFactory) removed}.
 	 * <p>
 	 * This is a convenience method for using the plurl protocol like this:
-	 * 
+	 *
 	 * <pre>
 	 * ((Consumer&lt;URLStreamHandlerFactory&gt;) ("plurl://op/addURLStreamHandlerFactory").getContent()).accept(factory);
 	 * </pre>
-	 * 
+	 *
 	 * @param factory the PlurlStreamHandlerFactory to add
 	 * @throws IOException if there is no plurl implementation installed or there
 	 *                     was an error adding the factory
@@ -240,11 +240,11 @@ public interface Plurl {
 	 * {@link IOException} is thrown.
 	 * <p>
 	 * This is a convenience method for using the plurl protocol like this:
-	 * 
+	 *
 	 * <pre>
 	 * ((Consumer&lt;URLStreamHandlerFactory&gt;) ("plurl://op/removeURLStreamHandlerFactory").getContent()).accept(factory);
 	 * </pre>
-	 * 
+	 *
 	 * @param factory the PlurlStreamHandlerFactory to remove
 	 * @throws IOException if there is no plurl implementation installed or there
 	 *                     was an error removing the factory
@@ -266,11 +266,11 @@ public interface Plurl {
 	 * {@link #remove(PlurlContentHandlerFactory) removed}.
 	 * <p>
 	 * This is a convenience method for using the plurl protocol like this:
-	 * 
+	 *
 	 * <pre>
 	 * ((Consumer&lt;ContentHandlerFactory&gt;) ("plurl://op/addContentHandlerFactory").getContent()).accept(factory);
 	 * </pre>
-	 * 
+	 *
 	 * @param factory the PlurlContentHandlerFactory to add
 	 * @throws IOException if there is no plurl implementation installed or there
 	 *                     was an error adding the factory
@@ -289,11 +289,11 @@ public interface Plurl {
 	 * installed then an {@link IOException} is thrown.
 	 * <p>
 	 * This is a convenience method for using the plurl protocol like this:
-	 * 
+	 *
 	 * <pre>
 	 * ((Consumer&lt;ContentHandlerFactory&gt;) ("plurl://op/removeContentHandlerFactory").getContent()).accept(factory);
 	 * </pre>
-	 * 
+	 *
 	 * @param factory the PlurlContentHandlerFactory to remove
 	 * @throws IOException if there is no plurl implementation installed or there
 	 *                     was an error removing the factory
