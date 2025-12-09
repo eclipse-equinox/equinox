@@ -34,7 +34,6 @@ import org.osgi.framework.Bundle;
 /**
  * URLStreamHandler the bundleentry and bundleresource protocols.
  */
-
 public abstract class BundleResourceHandler extends PlurlStreamHandlerBase {
 	// Bundle resource URL protocol
 	public static final String OSGI_RESOURCE_URL_PROTOCOL = "bundleresource"; //$NON-NLS-1$
@@ -57,23 +56,27 @@ public abstract class BundleResourceHandler extends PlurlStreamHandlerBase {
 	 */
 	@Override
 	protected void parseURL(URL url, String str, int start, int end) {
-		if (end < start)
+		if (end < start) {
 			return;
-		if (url.getPath() != null)
+		}
+		if (url.getPath() != null) {
 			// A call to a URL constructor has been made that uses an authorized URL as its
 			// context.
 			// Null out bundleEntry because it will not be valid for the new path
 			bundleEntry = null;
+		}
 		String spec = ""; //$NON-NLS-1$
-		if (start < end)
+		if (start < end) {
 			spec = str.substring(start, end);
+		}
 		end -= start;
 		// Default is to use path and bundleId from context
 		String path = url.getPath();
 		String host = url.getHost();
 		int resIndex = url.getPort();
-		if (resIndex < 0) // -1 indicates port was not set; must default to 0
+		if (resIndex < 0) {// -1 indicates port was not set; must default to 0
 			resIndex = 0;
+		}
 		int pathIdx = 0;
 		if (spec.startsWith("//")) { //$NON-NLS-1$
 			int bundleIdIdx = 2;
@@ -94,51 +97,76 @@ public abstract class BundleResourceHandler extends PlurlStreamHandlerBase {
 				}
 			host = spec.substring(bundleIdIdx, bundleIdEnd);
 		}
-		if (pathIdx < end && spec.charAt(pathIdx) == '/')
-			path = spec.substring(pathIdx, end);
-		else if (end > pathIdx) {
+		// Extract query and fragment from the spec
+		// Per RFC3986: fragment comes after '#' and consumes everything after it
+		// Query comes after '?' and before '#' (if present)
+		String query = url.getQuery();
+		String ref = url.getRef();
+		int queryIdx = spec.indexOf('?', pathIdx);
+		int fragmentIdx = spec.indexOf('#', pathIdx);
+		int pathEnd = end;
+
+		// Fragment comes first - it consumes everything after '#'
+		if (fragmentIdx >= 0 && fragmentIdx < pathEnd) {
+			ref = spec.substring(fragmentIdx + 1, end);
+			pathEnd = fragmentIdx;
+		}
+		// Query comes after '?' but before fragment (if present)
+		if (queryIdx >= 0 && queryIdx < pathEnd) {
+			query = spec.substring(queryIdx + 1, pathEnd);
+			pathEnd = queryIdx;
+		}
+
+		if (pathIdx < pathEnd && spec.charAt(pathIdx) == '/') {
+			path = spec.substring(pathIdx, pathEnd);
+		} else if (pathEnd > pathIdx) {
 			if (path == null || path.equals("")) //$NON-NLS-1$
 				path = "/"; //$NON-NLS-1$
 			int last = path.lastIndexOf('/') + 1;
 			if (last == 0)
-				path = spec.substring(pathIdx, end);
+				path = spec.substring(pathIdx, pathEnd);
 			else
-				path = path.substring(0, last) + spec.substring(pathIdx, end);
+				path = path.substring(0, last) + spec.substring(pathIdx, pathEnd);
 		}
-		if (path == null)
+		if (path == null) {
 			path = ""; //$NON-NLS-1$
+		}
 		// modify path if there's any relative references
 		// see RFC2396 Section 5.2
 		// Note: For ".." references above the root the approach taken is removing them
 		// from the resolved path
-		if (path.endsWith("/.") || path.endsWith("/..")) //$NON-NLS-1$ //$NON-NLS-2$
+		if (path.endsWith("/.") || path.endsWith("/..")) { //$NON-NLS-1$ //$NON-NLS-2$
 			path = path + '/';
+		}
 		int dotIndex;
-		while ((dotIndex = path.indexOf("/./")) >= 0) //$NON-NLS-1$
+		while ((dotIndex = path.indexOf("/./")) >= 0) {//$NON-NLS-1$
 			path = path.substring(0, dotIndex + 1) + path.substring(dotIndex + 3);
+		}
 		while ((dotIndex = path.indexOf("/../")) >= 0) { //$NON-NLS-1$
 			if (dotIndex != 0)
 				path = path.substring(0, path.lastIndexOf('/', dotIndex - 1)) + path.substring(dotIndex + 3);
 			else
 				path = path.substring(dotIndex + 3);
 		}
-		while ((dotIndex = path.indexOf("//")) >= 0) //$NON-NLS-1$
+		while ((dotIndex = path.indexOf("//")) >= 0) {//$NON-NLS-1$
 			path = path.substring(0, dotIndex + 1) + path.substring(dotIndex + 2);
+		}
 
 		// Check the permission of the caller to see if they
 		// are allowed access to the resource.
 		String authorized = SECURITY_UNCHECKED;
 		long bundleId = parseBundleIDFromURLHost(host);
 		Module module = getModule(bundleId);
-		if (checkAuthorization(module))
+		if (checkAuthorization(module)) {
 			authorized = SECURITY_CHECKED;
+		}
 		// Always force the use of the hash from the adaptor
 		host = createURLHostForBundleID(container, bundleId);
 		// Setting the authority portion of the URL to SECURITY_ATHORIZED
 		// ensures that this URL was created by using this parseURL
 		// method. The openConnection method will only open URLs
 		// that have the authority set to this.
-		setURL(url, url.getProtocol(), host, resIndex, authorized, null, path, null, url.getRef());
+		setURL(url, url.getProtocol(), host, resIndex, authorized, null, path, query, ref);
 	}
 
 	private Module getModule(long id) {
@@ -222,6 +250,10 @@ public abstract class BundleResourceHandler extends PlurlStreamHandlerBase {
 				result.append("/"); //$NON-NLS-1$
 			}
 			result.append(path);
+		}
+		String query = url.getQuery();
+		if (query != null && query.length() > 0) {
+			result.append('?').append(query);
 		}
 		String ref = url.getRef();
 		if (ref != null && ref.length() > 0) {
