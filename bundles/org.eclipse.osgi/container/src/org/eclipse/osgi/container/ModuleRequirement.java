@@ -15,7 +15,6 @@ package org.eclipse.osgi.container;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.eclipse.osgi.internal.container.Capabilities;
 import org.eclipse.osgi.internal.framework.FilterImpl;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.namespace.BundleNamespace;
