@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2014 IBM Corporation and others.
+ * Copyright (c) 2004, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,21 +13,9 @@
  *******************************************************************************/
 package org.eclipse.osgi.storagemanager;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.SyncFailedException;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import org.eclipse.osgi.framework.internal.reliablefile.ReliableFile;
-import org.eclipse.osgi.framework.internal.reliablefile.ReliableFileInputStream;
-import org.eclipse.osgi.framework.internal.reliablefile.ReliableFileOutputStream;
+import java.io.*;
+import java.util.*;
+import org.eclipse.osgi.framework.internal.reliablefile.*;
 import org.eclipse.osgi.internal.location.LocationHelper;
 import org.eclipse.osgi.internal.location.Locker;
 import org.eclipse.osgi.internal.messages.Msg;
@@ -336,8 +324,7 @@ public final class StorageManager {
 		if (!open)
 			return null;
 		Set<Object> set = table.keySet();
-		@SuppressWarnings("cast")
-		String[] keys = (String[]) set.toArray(new String[set.size()]);
+		String[] keys = set.toArray(new String[set.size()]);
 		String[] result = new String[keys.length];
 		for (int i = 0; i < keys.length; i++)
 			result[i] = new String(keys[i]);

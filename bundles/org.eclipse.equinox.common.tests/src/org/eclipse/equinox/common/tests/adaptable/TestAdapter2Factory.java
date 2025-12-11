@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2021 Red Hat, Inc. and others.
+ *  Copyright (c) 2021, 2025 Red Hat, Inc. and others.
  *
  *  This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License 2.0
@@ -16,7 +16,7 @@ public class TestAdapter2Factory implements IAdapterFactory {
 
 	@Override
 	public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
-		return (T) new TestAdapter2();
+		return adapterType.cast(new TestAdapter2());
 	}
 
 	@Override

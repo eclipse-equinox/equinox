@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2004, 2018 IBM Corporation and others.
+ *  Copyright (c) 2004, 2025 IBM Corporation and others.
  *
  *  This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License 2.0
@@ -314,7 +314,7 @@ public class IAdapterManagerTest {
 
 			@Override
 			public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
-				return (T) new PrivateAdapter();
+				return adapterType.cast(new PrivateAdapter());
 			}
 		};
 		try {
@@ -349,7 +349,7 @@ public class IAdapterManagerTest {
 
 			@Override
 			public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
-				return (T) new Y();
+				return adapterType.cast(new Y());
 			}
 		};
 		manager.registerAdapters(factory, Object.class);
