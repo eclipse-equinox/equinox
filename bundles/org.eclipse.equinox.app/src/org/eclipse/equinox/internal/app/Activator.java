@@ -189,7 +189,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		if (System.getSecurityManager() == null) {
 			tracker.open(allServices);
 		} else {
-			AccessController.doPrivileged((PrivilegedAction) () -> {
+			AccessController.doPrivileged((PrivilegedAction<?>) () -> {
 				tracker.open(allServices);
 				return null;
 			});
@@ -201,7 +201,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		if (System.getSecurityManager() == null) {
 			return tracker.getService();
 		}
-		return AccessController.doPrivileged((PrivilegedAction) () -> tracker.getService());
+		return AccessController.doPrivileged((PrivilegedAction<?>) () -> tracker.getService());
 	}
 
 	// helper used to protect callers from permission checks when getting locations
@@ -209,7 +209,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		if (System.getSecurityManager() == null) {
 			return bundle.getLocation();
 		}
-		return (String) AccessController.doPrivileged((PrivilegedAction) () -> bundle.getLocation());
+		return (String) AccessController.doPrivileged((PrivilegedAction<?>) () -> bundle.getLocation());
 	}
 
 	// helper method to get a bundle from a contributor.

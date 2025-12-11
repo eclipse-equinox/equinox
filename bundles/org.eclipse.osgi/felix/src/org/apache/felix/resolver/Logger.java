@@ -167,8 +167,6 @@ public class Logger
      * Called whenever a new permutation is added by the resolver.
      * 
      * @param type      the type of the permutation
-     * @param remaining a function that can be used to query the now current number
-     *                  of permutation types
      */
     public void logPermutationAdded(PermutationType type)
     {
@@ -180,8 +178,6 @@ public class Logger
      * resolver.
      * 
      * @param type      the type of permutation that will be processed
-     * @param remaining a function that can be used to query the now current number
-     *                  of permutation types
      */
     public void logProcessPermutation(PermutationType type) 
     {

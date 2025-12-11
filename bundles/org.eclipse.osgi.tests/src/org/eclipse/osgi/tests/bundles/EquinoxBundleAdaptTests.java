@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022, 2022 Hannes Wellmann and others.
+ * Copyright (c) 2022, 2025 Hannes Wellmann and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -40,7 +40,7 @@ public class EquinoxBundleAdaptTests extends AbstractBundleTests {
 	}
 
 	@Test
-	@SuppressWarnings({ "deprecation", "removal" }) // SecurityManager
+	@SuppressWarnings({ "removal" }) // SecurityManager
 	public void testAdapt_ProtectionDomain() throws Exception {
 		Assume.assumeTrue("Security-Manager is disallowed", SecurityManagerTests.isSecurityManagerAllowed());
 
