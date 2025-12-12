@@ -13,11 +13,12 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.services.resolver;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import org.junit.platform.suite.api.SelectClasses;
+import org.junit.platform.suite.api.Suite;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({ SubstitutableExportsTest.class, //
+@Suite
+@SelectClasses({ //
+		SubstitutableExportsTest.class, //
 		DisabledInfoTest.class, //
 		PlatformAdminTest.class, //
 		StateResolverTest.class, //
