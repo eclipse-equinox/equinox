@@ -13,11 +13,11 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.bundles;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import org.junit.platform.suite.api.SelectClasses;
+import org.junit.platform.suite.api.Suite;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({ //
+@Suite
+@SelectClasses({ //
 		ConnectTests.class, //
 		ExceptionMessageTest.class, //
 		ImportJavaSEPackagesTests.class, //
