@@ -1089,13 +1089,18 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 			testURL = new URL(url, "/g"); //$NON-NLS-1$
 			assertEquals("/g", "/g", testURL.getPath()); //$NON-NLS-1$ //$NON-NLS-2$
 			testURL = new URL(url, "?y"); //$NON-NLS-1$
-			assertEquals("?y", "/a/b/c/?y", testURL.getPath()); //$NON-NLS-1$ //$NON-NLS-2$
+			assertEquals("?y", "/a/b/c/", testURL.getPath()); //$NON-NLS-1$ //$NON-NLS-2$
+			assertEquals("?y query", "y", testURL.getQuery()); //$NON-NLS-1$ //$NON-NLS-2$
 			testURL = new URL(url, "g?y"); //$NON-NLS-1$
-			assertEquals("g?y", "/a/b/c/g?y", testURL.getPath()); //$NON-NLS-1$ //$NON-NLS-2$
+			assertEquals("g?y", "/a/b/c/g", testURL.getPath()); //$NON-NLS-1$ //$NON-NLS-2$
+			assertEquals("g?y query", "y", testURL.getQuery()); //$NON-NLS-1$ //$NON-NLS-2$
 			testURL = new URL(url, "g#s"); //$NON-NLS-1$
-			assertEquals("g#s", "/a/b/c/g#s", testURL.getPath() + "#s"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			assertEquals("g#s", "/a/b/c/g", testURL.getPath()); //$NON-NLS-1$ //$NON-NLS-2$
+			assertEquals("g#s fragment", "s", testURL.getRef()); //$NON-NLS-1$ //$NON-NLS-2$
 			testURL = new URL(url, "g?y#s"); //$NON-NLS-1$
-			assertEquals("g?y#s", "/a/b/c/g?y#s", testURL.getPath() + "#s"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			assertEquals("g?y#s", "/a/b/c/g", testURL.getPath()); //$NON-NLS-1$ //$NON-NLS-2$
+			assertEquals("g?y#s query", "y", testURL.getQuery()); //$NON-NLS-1$ //$NON-NLS-2$
+			assertEquals("g?y#s fragment", "s", testURL.getRef()); //$NON-NLS-1$ //$NON-NLS-2$
 			testURL = new URL(url, ";x"); //$NON-NLS-1$
 			assertEquals(";x", "/a/b/c/;x", testURL.getPath()); //$NON-NLS-1$ //$NON-NLS-2$
 			testURL = new URL(url, "g;x"); //$NON-NLS-1$
