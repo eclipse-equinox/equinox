@@ -47,11 +47,11 @@ import org.eclipse.osgi.tests.resolver.TestRFC79_007;
 import org.eclipse.osgi.tests.resolver.TestVersion_001;
 import org.eclipse.osgi.tests.resolver.TestVersion_002;
 import org.eclipse.osgi.tests.resolver.TestVersion_003;
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import org.junit.platform.suite.api.SelectClasses;
+import org.junit.platform.suite.api.Suite;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({ //
+@Suite
+@SelectClasses({ //
 		TestAttributes_001.class, //
 		TestBSN_001.class, //
 		TestCycle_001.class, //
