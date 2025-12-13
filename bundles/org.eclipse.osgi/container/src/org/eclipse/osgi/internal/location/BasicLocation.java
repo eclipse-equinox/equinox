@@ -119,6 +119,7 @@ public class BasicLocation implements Location {
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
 	@Override
 	public boolean setURL(URL value, boolean lock) throws IllegalStateException {
 		try {
@@ -138,8 +139,9 @@ public class BasicLocation implements Location {
 			throws IllegalStateException, IOException {
 		boolean gotLock = false;
 		synchronized (this) {
-			if (location != null)
+			if (location != null) {
 				throw new IllegalStateException(Msg.ECLIPSE_CANNOT_CHANGE_LOCATION);
+			}
 			File file = null;
 			if (value.getProtocol().equalsIgnoreCase("file")) { //$NON-NLS-1$
 				try {
@@ -194,15 +196,17 @@ public class BasicLocation implements Location {
 
 	@Override
 	public synchronized boolean lock() throws IOException {
-		if (!isSet())
+		if (!isSet()) {
 			throw new IOException(Msg.location_notSet);
+		}
 		return lock(lockFile, location);
 	}
 
 	@Override
 	public synchronized boolean isLocked() throws IOException {
-		if (!isSet())
+		if (!isSet()) {
 			return false;
+		}
 		return isLocked(lockFile);
 	}
 
@@ -210,31 +214,37 @@ public class BasicLocation implements Location {
 	 * This must be called while holding the synchronization lock for (this)
 	 */
 	private boolean lock(File lock, URL locationValue) throws IOException {
-		if (isReadOnly)
+		if (isReadOnly) {
 			throw new IOException(NLS.bind(Msg.location_folderReadOnly, lock));
+		}
 		if (lock == null) {
-			if (locationValue != null && !"file".equalsIgnoreCase(locationValue.getProtocol())) //$NON-NLS-1$
+			if (locationValue != null && !"file".equalsIgnoreCase(locationValue.getProtocol())) { //$NON-NLS-1$
 				throw new IOException(NLS.bind(Msg.location_notFileProtocol, locationValue));
+			}
 			throw new IllegalStateException(Msg.location_noLockFile); // this is really unexpected
 		}
-		if (isLocked())
+		if (isLocked()) {
 			return false;
+		}
 		File parentFile = new File(lock.getParent());
 		if (!parentFile.isDirectory()) {
 			parentFile.mkdirs();
-			if (!parentFile.isDirectory())
+			if (!parentFile.isDirectory()) {
 				throw new IOException(NLS.bind(Msg.location_folderReadOnly, parentFile));
+			}
 		}
 		setLocker(lock);
-		if (locker == null)
+		if (locker == null) {
 			return true;
+		}
 		boolean locked = false;
 		try {
 			locked = locker.lock();
 			return locked;
 		} finally {
-			if (!locked)
+			if (!locked) {
 				locker = null;
+			}
 		}
 	}
 
@@ -242,10 +252,12 @@ public class BasicLocation implements Location {
 	 * This must be called while holding the synchronization lock for (this)
 	 */
 	private boolean isLocked(File lock) throws IOException {
-		if (lock == null || isReadOnly)
+		if (lock == null || isReadOnly) {
 			return true;
-		if (!lock.exists())
+		}
+		if (!lock.exists()) {
 			return false;
+		}
 		setLocker(lock);
 		return locker.isLocked();
 	}
@@ -254,16 +266,18 @@ public class BasicLocation implements Location {
 	 * This must be called while holding the synchronization lock for (this)
 	 */
 	private void setLocker(File lock) {
-		if (locker != null)
+		if (locker != null) {
 			return;
+		}
 		String lockMode = configValues.getConfiguration(LocationHelper.PROP_OSGI_LOCKING, LocationHelper.LOCKING_NIO);
 		locker = LocationHelper.createLocker(lock, lockMode, debug.get());
 	}
 
 	@Override
 	public synchronized void release() {
-		if (locker != null)
+		if (locker != null) {
 			locker.release();
+		}
 	}
 
 	@Override
@@ -277,14 +291,17 @@ public class BasicLocation implements Location {
 	@Override
 	public URL getDataArea(String filename) throws IOException {
 		URL base = getURL();
-		if (base == null)
+		if (base == null) {
 			throw new IOException(Msg.location_notSet);
+		}
 		String prefix = base.toExternalForm();
-		if (prefix.length() > 0 && prefix.charAt(prefix.length() - 1) != '/')
+		if (prefix.length() > 0 && prefix.charAt(prefix.length() - 1) != '/') {
 			prefix += '/';
+		}
 		filename = filename.replace('\\', '/');
-		if (filename.length() > 0 && filename.charAt(0) == '/')
+		if (filename.length() > 0 && filename.charAt(0) == '/') {
 			filename = filename.substring(1);
+		}
 		String spec = prefix + dataAreaPrefix + filename;
 		boolean trailingSlash = spec.length() > 0 && spec.charAt(spec.length() - 1) == '/';
 		return LocationHelper.buildURL(spec, trailingSlash);
