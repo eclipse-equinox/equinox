@@ -153,6 +153,7 @@ public final class HostNamespace extends AbstractWiringNamespace {
 	 * @see #REQUIREMENT_EXTENSION_DIRECTIVE
 	 * @deprecated As of 1.2.
 	 */
+	@Deprecated(forRemoval = true, since = "2025-12")
 	public final static String	EXTENSION_BOOTCLASSPATH						= "bootclasspath";
 
 	/**

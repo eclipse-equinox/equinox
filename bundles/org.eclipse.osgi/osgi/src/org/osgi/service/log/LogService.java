@@ -36,7 +36,7 @@ public interface LogService extends LoggerFactory {
 	 * 
 	 * @deprecated Since 1.4. Replaced by {@link LogLevel#ERROR}.
 	 */
-	@Deprecated
+	@Deprecated(forRemoval = true, since = "2025-12")
 	int	LOG_ERROR	= 1;
 	/**
 	 * A warning message (Value 2).
@@ -46,7 +46,7 @@ public interface LogService extends LoggerFactory {
 	 * 
 	 * @deprecated Since 1.4. Replaced by {@link LogLevel#WARN}.
 	 */
-	@Deprecated
+	@Deprecated(forRemoval = true, since = "2025-12")
 	int	LOG_WARNING	= 2;
 	/**
 	 * An informational message (Value 3).
@@ -56,7 +56,7 @@ public interface LogService extends LoggerFactory {
 	 * 
 	 * @deprecated Since 1.4. Replaced by {@link LogLevel#INFO}.
 	 */
-	@Deprecated
+	@Deprecated(forRemoval = true, since = "2025-12")
 	int	LOG_INFO	= 3;
 	/**
 	 * A debugging message (Value 4).
@@ -66,7 +66,7 @@ public interface LogService extends LoggerFactory {
 	 * 
 	 * @deprecated Since 1.4. Replaced by {@link LogLevel#DEBUG}.
 	 */
-	@Deprecated
+	@Deprecated(forRemoval = true, since = "2025-12")
 	int	LOG_DEBUG	= 4;
 
 	/**
