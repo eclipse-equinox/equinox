@@ -15,22 +15,28 @@ package org.eclipse.osgi.tests.services.datalocation;
 
 import static org.eclipse.osgi.tests.OSGiTestsActivator.PI_OSGI_TESTS;
 import static org.eclipse.osgi.tests.OSGiTestsActivator.addRequiredOSGiTestsBundles;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
 import java.io.IOException;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-import org.eclipse.core.tests.session.ConfigurationSessionTestSuite;
-import org.eclipse.core.tests.session.SetupManager.SetupException;
+import org.eclipse.core.tests.harness.session.CustomSessionConfiguration;
+import org.eclipse.core.tests.harness.session.ExecuteInHost;
+import org.eclipse.core.tests.harness.session.SessionTestExtension;
 import org.eclipse.osgi.internal.location.LocationHelper;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.environment.Constants;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
-public class LocationAreaSessionTest extends TestCase {
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+public class LocationAreaSessionTest {
 	private static final String JAVA_NIO = "java.nio"; //$NON-NLS-1$
 	private static final String JAVA_IO = "java.io"; //$NON-NLS-1$
 	private static final String TEST_LOCATION_DIR = "osgi.test.location.dir"; //$NON-NLS-1$
@@ -38,102 +44,82 @@ public class LocationAreaSessionTest extends TestCase {
 	private static Location lockedTestLocation;
 	static String testLocationLockDir = OSGiTestsActivator.getContext().getDataFile("testLocation").getAbsolutePath();
 
-	public static Test suite() {
-		TestSuite suite = new TestSuite(LocationAreaSessionTest.class.getName());
+	private static CustomSessionConfiguration sessionConfiguration = createSessionConfiguration();
 
-		// first lock with java.nio
-		suite.addTest(new TestCase("testLockJavaNIO") {
-			@Override
-			public void runBare() throws Throwable {
-				doLock(testLocationLockDir, JAVA_NIO, false, true);
-			}
-		});
+	@RegisterExtension
+	static SessionTestExtension extension = SessionTestExtension.forPlugin(PI_OSGI_TESTS)
+			.withCustomization(sessionConfiguration).create();
 
-		// attempt to lock same location with a session
-		ConfigurationSessionTestSuite sessionLock = new ConfigurationSessionTestSuite(PI_OSGI_TESTS,
-				LocationAreaSessionTest.class.getName());
-		addRequiredOSGiTestsBundles(sessionLock);
-		try {
-			sessionLock.getSetup().setSystemProperty(TEST_LOCATION_DIR, testLocationLockDir);
-		} catch (SetupException e) {
-			// what can we do; just fail the testcase later when the prop is not set.
-			e.printStackTrace();
-		}
-		sessionLock.addTest(new LocationAreaSessionTest("testSessionFailLockJavaNIO"));
-		suite.addTest(sessionLock);
-
-		// now release lock
-		suite.addTest(new TestCase("testReleaseJavaNIO") {
-			@Override
-			public void runBare() throws Throwable {
-				doRelease();
-			}
-		});
-
-		// attempt to lock the location with a session
-		sessionLock = new ConfigurationSessionTestSuite(PI_OSGI_TESTS, LocationAreaSessionTest.class.getName());
-		addRequiredOSGiTestsBundles(sessionLock);
-		try {
-			sessionLock.getSetup().setSystemProperty(TEST_LOCATION_DIR, testLocationLockDir);
-		} catch (SetupException e) {
-			// what can we do; just fail the testcase later when the prop is not set.
-			e.printStackTrace();
-		}
-		sessionLock.addTest(new LocationAreaSessionTest("testSessionSuccessLockJavaNIO"));
-		suite.addTest(sessionLock);
-
-		// now test with java.io
-		suite.addTest(new TestCase("testLockJavaIO") {
-			@Override
-			public void runBare() throws Throwable {
-				// Note that java.io locking only seems to work reliably on windows
-				if (!Constants.OS_WIN32.equals(System.getProperty("osgi.os"))) {
-					return;
-				}
-				doLock(testLocationLockDir, JAVA_IO, false, true);
-			}
-		});
-
-		// attempt to lock same location with a session
-		sessionLock = new ConfigurationSessionTestSuite(PI_OSGI_TESTS, LocationAreaSessionTest.class.getName());
-		addRequiredOSGiTestsBundles(sessionLock);
-		try {
-			sessionLock.getSetup().setSystemProperty(TEST_LOCATION_DIR, testLocationLockDir);
-		} catch (SetupException e) {
-			// what can we do; just fail the testcase later when the prop is not set.
-			e.printStackTrace();
-		}
-		sessionLock.addTest(new LocationAreaSessionTest("testSessionFailLockJavaIO"));
-		suite.addTest(sessionLock);
-
-		// now release lock
-		suite.addTest(new TestCase("testReleaseJavaIO") {
-			@Override
-			public void runBare() throws Throwable {
-				if (!Constants.OS_WIN32.equals(System.getProperty("osgi.os"))) {
-					return;
-				}
-				doRelease();
-			}
-		});
-
-		// attempt to lock the location with a session
-		sessionLock = new ConfigurationSessionTestSuite(PI_OSGI_TESTS, LocationAreaSessionTest.class.getName());
-		addRequiredOSGiTestsBundles(sessionLock);
-		try {
-			sessionLock.getSetup().setSystemProperty(TEST_LOCATION_DIR, testLocationLockDir);
-		} catch (SetupException e) {
-			// what can we do; just fail the testcase later when the prop is not set.
-			e.printStackTrace();
-		}
-		sessionLock.addTest(new LocationAreaSessionTest("testSessionSuccessLockJavaIO"));
-		suite.addTest(sessionLock);
-		return suite;
-
+	private static CustomSessionConfiguration createSessionConfiguration() {
+		CustomSessionConfiguration configuration = SessionTestExtension.createCustomConfiguration().setReadOnly();
+		configuration.setSystemProperty(TEST_LOCATION_DIR, testLocationLockDir);
+		addRequiredOSGiTestsBundles(configuration);
+		return configuration;
 	}
 
-	public LocationAreaSessionTest(String name) {
-		super(name);
+	@Test
+	@Order(1)
+	@ExecuteInHost
+	public void initializeLockWithNIO() throws InvalidSyntaxException, IOException {
+		doLock(testLocationLockDir, JAVA_NIO, false, true);
+	}
+
+	@Test
+	@Order(2)
+	public void attempLockSameLocationWithSessionNIO() throws InvalidSyntaxException, IOException {
+		doLock(System.getProperty(TEST_LOCATION_DIR), JAVA_NIO, true, false);
+	}
+
+	@Test
+	@Order(3)
+	@ExecuteInHost
+	public void releaseLockNIO() throws IOException {
+		doRelease();
+	}
+
+	@Test
+	@Order(4)
+	public void attempLockSameLocationWithSessionAgainNIO() throws InvalidSyntaxException, IOException {
+		doLock(System.getProperty(TEST_LOCATION_DIR), JAVA_NIO, true, true);
+	}
+
+	@Test
+	@Order(5)
+	@ExecuteInHost
+	public void initializeLockWithIO() throws IOException, InvalidSyntaxException {
+		// Note that java.io locking only seems to work reliably on windows
+		if (!Constants.OS_WIN32.equals(System.getProperty("osgi.os"))) {
+			return;
+		}
+		doLock(testLocationLockDir, JAVA_IO, false, true);
+	}
+
+	@Test
+	@Order(6)
+	public void attempLockSameLocationWithSessionIO() throws InvalidSyntaxException, IOException {
+		if (!Constants.OS_WIN32.equals(System.getProperty("osgi.os"))) {
+			return;
+		}
+		doLock(System.getProperty(TEST_LOCATION_DIR), JAVA_IO, true, false);
+	}
+
+	@Test
+	@Order(7)
+	@ExecuteInHost
+	public void releaseLockIO() throws IOException {
+		if (!Constants.OS_WIN32.equals(System.getProperty("osgi.os"))) {
+			return;
+		}
+		doRelease();
+	}
+
+	@Test
+	@Order(7)
+	public void attempLockSameLocationWithSessionAgainIO() throws InvalidSyntaxException, IOException {
+		if (!Constants.OS_WIN32.equals(System.getProperty("osgi.os"))) {
+			return;
+		}
+		doLock(System.getProperty(TEST_LOCATION_DIR), JAVA_IO, true, true);
 	}
 
 	static void doLock(String testLocationDir, String type, boolean release, boolean succeed)
@@ -201,25 +187,5 @@ public class LocationAreaSessionTest extends TestCase {
 		}
 	}
 
-	public void testSessionFailLockJavaNIO() throws Exception {
-		doLock(System.getProperty(TEST_LOCATION_DIR), JAVA_NIO, true, false);
-	}
 
-	public void testSessionSuccessLockJavaNIO() throws Exception {
-		doLock(System.getProperty(TEST_LOCATION_DIR), JAVA_NIO, true, true);
-	}
-
-	public void testSessionFailLockJavaIO() throws Exception {
-		if (!Constants.OS_WIN32.equals(System.getProperty("osgi.os"))) {
-			return;
-		}
-		doLock(System.getProperty(TEST_LOCATION_DIR), JAVA_IO, true, false);
-	}
-
-	public void testSessionSuccessLockJavaIO() throws Exception {
-		if (!Constants.OS_WIN32.equals(System.getProperty("osgi.os"))) {
-			return;
-		}
-		doLock(System.getProperty(TEST_LOCATION_DIR), JAVA_IO, true, true);
-	}
 }
