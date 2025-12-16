@@ -26,7 +26,7 @@ import org.osgi.framework.startlevel.FrameworkStartLevel;
 
 /**
  * Adapts the behavior of a container.
- * 
+ *
  * @since 3.10
  */
 public abstract class ModuleContainerAdaptor {
@@ -152,14 +152,14 @@ public abstract class ModuleContainerAdaptor {
 
 	/**
 	 * Returns the collision hook the container will use.
-	 * 
+	 *
 	 * @return the collision hook the container will use.
 	 */
 	public abstract ModuleCollisionHook getModuleCollisionHook();
 
 	/**
 	 * Returns the resolver hook factory the container will use.
-	 * 
+	 *
 	 * @return the resolver hook factory the container will use.
 	 */
 	public abstract ResolverHookFactory getResolverHookFactory();
@@ -167,7 +167,7 @@ public abstract class ModuleContainerAdaptor {
 	/**
 	 * Publishes the specified container event. No locks are held by the container
 	 * when this method is called
-	 * 
+	 *
 	 * @param type      the type of event
 	 * @param module    the module associated with the event
 	 * @param error     the error associated with the event, may be {@code null}
@@ -179,7 +179,7 @@ public abstract class ModuleContainerAdaptor {
 	/**
 	 * Publishes the specified module event type for the specified module. No locks
 	 * are held by the container when this method is called
-	 * 
+	 *
 	 * @param type   the event type to publish
 	 * @param module the module the event is associated with
 	 * @param origin the module which is the origin of the event. For the event type
@@ -192,7 +192,7 @@ public abstract class ModuleContainerAdaptor {
 
 	/**
 	 * Returns the specified configuration property value
-	 * 
+	 *
 	 * @param key the key of the configuration property
 	 * @return the configuration property value
 	 */
@@ -202,7 +202,7 @@ public abstract class ModuleContainerAdaptor {
 
 	/**
 	 * Creates a new {@link ModuleLoader} for the specified wiring.
-	 * 
+	 *
 	 * @param wiring the module wiring to create a module loader for
 	 * @return a new {@link ModuleLoader} for the specified wiring.
 	 */
@@ -214,7 +214,7 @@ public abstract class ModuleContainerAdaptor {
 	 * Creates a new module. This gets called when a new module is installed or when
 	 * {@link ModuleDatabase#load(DataInputStream) loading} persistent data into
 	 * this database.
-	 * 
+	 *
 	 * @param location   the location for the module
 	 * @param id         the id for the module
 	 * @param settings   the settings for the module. May be {@code null} if there
@@ -231,7 +231,7 @@ public abstract class ModuleContainerAdaptor {
 	 * <p>
 	 * The returned system module must have an {@link Module#getId() id} of zero and
 	 * a location of {@link Constants#SYSTEM_BUNDLE_LOCATION System Bundle}.
-	 * 
+	 *
 	 * @return the system module
 	 */
 	public abstract SystemModule createSystemModule();
@@ -239,7 +239,7 @@ public abstract class ModuleContainerAdaptor {
 	/**
 	 * Returns the current revision info for a module with the specified location
 	 * and id
-	 * 
+	 *
 	 * @param location the location of the module
 	 * @param id       the id of the module
 	 * @return the revision info, may be {@code null}
@@ -251,7 +251,7 @@ public abstract class ModuleContainerAdaptor {
 	/**
 	 * After a revision is created this method is called with the specified revision
 	 * info.
-	 * 
+	 *
 	 * @param revision     the newly created revision
 	 * @param revisionInfo the revision info that got associated with the revision
 	 */
@@ -264,7 +264,7 @@ public abstract class ModuleContainerAdaptor {
 	 * to this. This method is called while holding state change lock for the module
 	 * as well as for the module database. Care must be taken not to introduce
 	 * deadlock.
-	 * 
+	 *
 	 * @param moduleWiring the module wiring being invalidated
 	 * @param current      the current module loader associated with the wiring, may
 	 *                     be <code>null</code>.
@@ -306,7 +306,7 @@ public abstract class ModuleContainerAdaptor {
 
 	/**
 	 * Returns the debug options for the module container.
-	 * 
+	 *
 	 * @return the debug options for the module container, or null if there are no
 	 *         debug options.
 	 */
@@ -317,7 +317,7 @@ public abstract class ModuleContainerAdaptor {
 
 	/**
 	 * Log a trace message.
-	 * 
+	 *
 	 * @param topic   the topic of the trace message
 	 * @param message the trace message
 	 * @since 3.23
@@ -328,7 +328,7 @@ public abstract class ModuleContainerAdaptor {
 
 	/**
 	 * Log a trace exception
-	 * 
+	 *
 	 * @param topic the topic of the trace exception
 	 * @param t     the exception to trace
 	 * @since 3.23
@@ -342,7 +342,7 @@ public abstract class ModuleContainerAdaptor {
 
 	/**
 	 * Returns the executor used to perform resolve operations
-	 * 
+	 *
 	 * @return the executor used to perform resolve operations
 	 * @since 3.11
 	 */
@@ -355,7 +355,7 @@ public abstract class ModuleContainerAdaptor {
 	 * {@link ModuleContainer#getFrameworkStartLevel() FrameworkStartLevel}
 	 * implementation to start bundles that have the same start level. This allows
 	 * bundles to be started in parallel.
-	 * 
+	 *
 	 * @return the executor used by the {@link FrameworkStartLevel} implementation.
 	 * @since 3.14
 	 */
@@ -371,7 +371,7 @@ public abstract class ModuleContainerAdaptor {
 	 * {@link ModuleContainer#update(Module, ModuleRevisionBuilder, Object) updated}
 	 * with a new revision. The container does not call any methods on the builder
 	 * before calling this method.
-	 * 
+	 *
 	 * @param operation    The lifecycle operation event that is in progress using
 	 *                     the supplied builder. This will be either
 	 *                     {@link ModuleEvent#INSTALLED installed} or
@@ -403,7 +403,7 @@ public abstract class ModuleContainerAdaptor {
 	/**
 	 * Returns the scheduled executor that may be used by the container to schedule
 	 * background tasks.
-	 * 
+	 *
 	 * @return the scheduled executor, or null if background tasks are not supported
 	 * @since 3.13
 	 */

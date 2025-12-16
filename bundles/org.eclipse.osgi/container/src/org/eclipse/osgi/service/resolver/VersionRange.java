@@ -17,7 +17,7 @@ import org.osgi.framework.Version;
 
 /**
  * This class represents a version range.
- * 
+ *
  * @since 3.1
  * @noextend This class is not intended to be subclassed by clients.
  */
@@ -36,7 +36,7 @@ public class VersionRange extends org.osgi.framework.VersionRange {
 
 	/**
 	 * Constructs a VersionRange with the specified minVersion and maxVersion.
-	 * 
+	 *
 	 * @param minVersion the minimum version of the range. If <code>null</code> then
 	 *                   {@link Version#emptyVersion} is used.
 	 * @param maxVersion the maximum version of the range. If <code>null</code> then
@@ -54,7 +54,7 @@ public class VersionRange extends org.osgi.framework.VersionRange {
 	 * <p>
 	 * Here is the grammar for version range strings.
 	 * </p>
-	 * 
+	 *
 	 * <pre>
 	 * version-range ::= interval | atleast
 	 * interval ::= ( include-min | exclude-min ) min-version ',' max-version ( include-max | exclude-max )
@@ -77,7 +77,7 @@ public class VersionRange extends org.osgi.framework.VersionRange {
 
 	/**
 	 * Returns the minimum Version of this VersionRange.
-	 * 
+	 *
 	 * @return the minimum Version of this VersionRange
 	 */
 	public Version getMinimum() {
@@ -86,7 +86,7 @@ public class VersionRange extends org.osgi.framework.VersionRange {
 
 	/**
 	 * Indicates if the minimum version is included in the version range.
-	 * 
+	 *
 	 * @return true if the minimum version is included in the version range;
 	 *         otherwise false is returned
 	 */
@@ -101,10 +101,11 @@ public class VersionRange extends org.osgi.framework.VersionRange {
 	 * incorrectly returns a version equal to
 	 * <code>Version(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE)</code>.
 	 * Use {@link org.osgi.framework.VersionRange#getRight()} instead.
-	 * 
+	 *
 	 * @return the maximum Version of this VersionRange
 	 * @deprecated use {@link org.osgi.framework.VersionRange#getRight()}
 	 */
+	@Deprecated
 	public Version getMaximum() {
 		Version right = getRight();
 		return right == null ? versionMax : right;
@@ -112,7 +113,7 @@ public class VersionRange extends org.osgi.framework.VersionRange {
 
 	/**
 	 * Indicates if the maximum version is included in the version range.
-	 * 
+	 *
 	 * @return true if the maximum version is included in the version range;
 	 *         otherwise false is returned
 	 */
@@ -131,8 +132,9 @@ public class VersionRange extends org.osgi.framework.VersionRange {
 	 *         otherwise
 	 */
 	public boolean isIncluded(Version version) {
-		if (version == null)
+		if (version == null) {
 			version = Version.emptyVersion;
+		}
 		return includes(version);
 	}
 }

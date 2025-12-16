@@ -63,14 +63,17 @@ public abstract class PackageSource {
 	// it is better to get class cast exceptions in split package cases than miss an
 	// event
 	public boolean hasCommonSource(PackageSource other) {
-		if (other == null)
+		if (other == null) {
 			return false;
-		if (this == other)
+		}
+		if (this == other) {
 			return true;
+		}
 		SingleSourcePackage[] suppliers1 = getSuppliers();
 		SingleSourcePackage[] suppliers2 = other.getSuppliers();
-		if (suppliers1 == null || suppliers2 == null)
+		if (suppliers1 == null || suppliers2 == null) {
 			return false;
+		}
 		// This will return true if the specified source has at least one
 		// of the suppliers of this source.
 		for (SingleSourcePackage supplier1 : suppliers1) {
@@ -106,7 +109,7 @@ public abstract class PackageSource {
 
 	/**
 	 * Used by ServiceReferenceImpl for isAssignableTo
-	 * 
+	 *
 	 * @param registrant   Bundle registering service
 	 * @param client       Bundle desiring to use service
 	 * @param className    class name to use

@@ -35,7 +35,7 @@ public abstract class ClassLoaderHook {
 	 * Gets called by a classpath manager before defining a class. This method
 	 * allows a class loading hook to process the bytes of a class that is about to
 	 * be defined and return a transformed byte array.
-	 * 
+	 *
 	 * @param name           the name of the class being defined
 	 * @param classbytes     the bytes of the class being defined
 	 * @param classpathEntry the ClasspathEntry where the class bytes have been read
@@ -57,7 +57,7 @@ public abstract class ClassLoaderHook {
 	 * a
 	 * {@link #processClass(String, byte[], ClasspathEntry, BundleEntry, ClasspathManager)
 	 * processClass} method.
-	 * 
+	 *
 	 * @param name             the name of the class being defined
 	 * @param transformedBytes the transformed bytes of the class being defined
 	 * @param classpathEntry   the ClasspathEntry where the class bytes have been
@@ -77,7 +77,7 @@ public abstract class ClassLoaderHook {
 	 * Gets called by a classpath manager when looking for ClasspathEntry objects.
 	 * This method allows a class loading hook to add additional ClasspathEntry
 	 * objects
-	 * 
+	 *
 	 * @param cpEntries        the list of ClasspathEntry objects currently
 	 *                         available for the requested classpath
 	 * @param cp               the name of the requested classpath
@@ -97,7 +97,7 @@ public abstract class ClassLoaderHook {
 	 * each configured class loading hook until one class loading hook returns a
 	 * non-null value. If no class loading hook returns a non-null value then the
 	 * default behavior will be used.
-	 * 
+	 *
 	 * @param generation the bundle generation to find a native library for.
 	 * @param libName    the name of the native library.
 	 * @return The absolute path name of the native library or null.
@@ -131,7 +131,7 @@ public abstract class ClassLoaderHook {
 	 * Gets called by a classpath manager at the end of
 	 * {@link BundleLoader#getClassLoader()} is called the first time and a class
 	 * loader is created.
-	 * 
+	 *
 	 * @param classLoader the newly created bundle classloader
 	 */
 	public void classLoaderCreated(ModuleClassLoader classLoader) {
@@ -146,7 +146,7 @@ public abstract class ClassLoaderHook {
 	 * returned value is used. If this method throws a
 	 * <code>ClassNotFoundException</code> then the calling
 	 * {@link BundleLoader#findClass(String)} method re-throws the exception.
-	 * 
+	 *
 	 * @param name        the name of the class to find
 	 * @param classLoader the module class loader
 	 * @return the class found by this hook or null if normal delegation should
@@ -162,7 +162,7 @@ public abstract class ClassLoaderHook {
 	 * Called by a {@link BundleLoader#findClass(String)} method after delegating to
 	 * the resolved constraints and local bundle for a class load. This method will
 	 * only be called if no class was found from the normal delegation.
-	 * 
+	 *
 	 * @param name        the name of the class to find
 	 * @param classLoader the bundle class loader
 	 * @return the class found by this hook or null if normal delegation should
@@ -181,7 +181,7 @@ public abstract class ClassLoaderHook {
 	 * non-null value then the rest of the delegation process is skipped and the
 	 * returned value is used. If this method throws an
 	 * <code>FileNotFoundException</code> then the delegation is terminated.
-	 * 
+	 *
 	 * @param name        the name of the resource to find
 	 * @param classLoader the bundle class loader
 	 * @return the resource found by this hook or null if normal delegation should
@@ -196,7 +196,7 @@ public abstract class ClassLoaderHook {
 	 * Called by a {@link BundleLoader#findResource(String)} after delegating to the
 	 * resolved constraints and local bundle for a resource load. This method will
 	 * only be called if no resource was found from the normal delegation.
-	 * 
+	 *
 	 * @param name        the name of the resource to find
 	 * @param classLoader the bundle class loader
 	 * @return the resource found by this hook or null if normal delegation should
@@ -214,7 +214,7 @@ public abstract class ClassLoaderHook {
 	 * non-null value then the rest of the delegation process is skipped and the
 	 * returned value is used. If this method throws an
 	 * <code>FileNotFoundException</code> then the delegation is terminated
-	 * 
+	 *
 	 * @param name        the name of the resource to find
 	 * @param classLoader the bundle class loader
 	 * @return the resources found by this hook or null if normal delegation should
@@ -229,7 +229,7 @@ public abstract class ClassLoaderHook {
 	 * Called by a {@link BundleLoader#findResources(String)} after delegating to
 	 * the resolved constraints and local bundle for a resource load. This method
 	 * will only be called if no resources were found from the normal delegation.
-	 * 
+	 *
 	 * @param name        the name of the resource to find
 	 * @param classLoader the bundle class loader
 	 * @return the resources found by this hook or null if normal delegation should
@@ -244,7 +244,7 @@ public abstract class ClassLoaderHook {
 	 * Called by a {@link ClasspathManager} before normal delegation. If this method
 	 * returns a non-null value then the rest of the delegation process is skipped
 	 * and the returned value is used.
-	 * 
+	 *
 	 * @param name        the name of the library to find
 	 * @param classLoader the bundle class loader
 	 * @return the library found by this hook or null if normal delegation should
@@ -258,7 +258,7 @@ public abstract class ClassLoaderHook {
 	/**
 	 * Called by a {@link ClasspathManager} after normal delegation. This method
 	 * will only be called if no library was found from the normal delegation.
-	 * 
+	 *
 	 * @param name        the name of the library to find
 	 * @param classLoader the bundle class loader
 	 * @return the library found by this hook or null if normal delegation should
@@ -273,7 +273,7 @@ public abstract class ClassLoaderHook {
 	 * {@link ClasspathManager#findLocalClass(String)} before searching the local
 	 * classloader for a class. A classpath manager will call this method for each
 	 * configured class loading hook.
-	 * 
+	 *
 	 * @param name    the name of the requested class
 	 * @param manager the classpath manager used to find and load the requested
 	 *                class
@@ -288,7 +288,7 @@ public abstract class ClassLoaderHook {
 	 * {@link ClasspathManager#findLocalClass(String)} after searching the local
 	 * classloader for a class. A classpath manager will call this method for each
 	 * configured class loading hook.
-	 * 
+	 *
 	 * @param name    the name of the requested class
 	 * @param clazz   the loaded class or null if not found
 	 * @param manager the classpath manager used to find and load the requested
@@ -308,7 +308,7 @@ public abstract class ClassLoaderHook {
 	 * {@link ClasspathManager#findLocalResource(String)} before searching the local
 	 * classloader for a resource. A classpath manager will call this method for
 	 * each configured class loading hook.
-	 * 
+	 *
 	 * @param name    the name of the requested resource
 	 * @param manager the classpath manager used to find the requested resource
 	 * @throws NoSuchElementException will prevent the local resource from loading
@@ -322,7 +322,7 @@ public abstract class ClassLoaderHook {
 	 * {@link ClasspathManager#findLocalResource(String)} after searching the local
 	 * classloader for a resource. A classpath manager will call this method for
 	 * each configured class loading hook.
-	 * 
+	 *
 	 * @param name     the name of the requested resource
 	 * @param resource the URL to the requested resource or null if not found
 	 * @param manager  the classpath manager used to find the requested resource
@@ -336,7 +336,7 @@ public abstract class ClassLoaderHook {
 	 * Gets called by a classpath manager after an attempt is made to define a
 	 * class. This method allows a class loading hook to record data about a class
 	 * definition.
-	 * 
+	 *
 	 * @param name           the name of the class that got defined
 	 * @param clazz          the class object that got defined or null if an error
 	 *                       occurred while defining a class
@@ -355,7 +355,7 @@ public abstract class ClassLoaderHook {
 	 * {@code null} value may be returned if this hook does not supply the parent.
 	 * Only one hook is able to provide the implementation of the parent class
 	 * loader and the first one to return non-null wins.
-	 * 
+	 *
 	 * @param configuration the equinox configuration
 	 * @return the parent class loader to be used by all ModuleClassLoaders
 	 */
@@ -371,7 +371,7 @@ public abstract class ClassLoaderHook {
 	 * a class loading error will occur if recursive class processing is detected.
 	 * <p>
 	 * This method must return a constant boolean value.
-	 * 
+	 *
 	 * @return true if recursing class processing is supported
 	 */
 	public boolean isProcessClassRecursionSupported() {

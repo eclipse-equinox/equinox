@@ -196,16 +196,19 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 	}
 
 	public boolean isBootDelegationPackage(String name) {
-		if (bootDelegateAll)
+		if (bootDelegateAll) {
 			return true;
-		if (bootDelegation.contains(name))
+		}
+		if (bootDelegation.contains(name)) {
 			return true;
-		if (bootDelegationStems != null)
+		}
+		if (bootDelegationStems != null) {
 			for (String bootDelegationStem : bootDelegationStems) {
 				if (name.startsWith(bootDelegationStem)) {
 					return true;
 				}
 			}
+		}
 		return false;
 	}
 
@@ -249,16 +252,17 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 			ClassLoader parent = null;
 			// check property for specified parent
 			String type = equinoxConfig.getConfiguration(EquinoxConfiguration.PROP_CONTEXTCLASSLOADER_PARENT);
-			if (EquinoxConfiguration.CONTEXTCLASSLOADER_PARENT_APP.equals(type))
+			if (EquinoxConfiguration.CONTEXTCLASSLOADER_PARENT_APP.equals(type)) {
 				parent = ClassLoader.getSystemClassLoader();
-			else if (EquinoxConfiguration.CONTEXTCLASSLOADER_PARENT_BOOT.equals(type))
+			} else if (EquinoxConfiguration.CONTEXTCLASSLOADER_PARENT_BOOT.equals(type)) {
 				parent = bootLoader;
-			else if (EquinoxConfiguration.CONTEXTCLASSLOADER_PARENT_FWK.equals(type))
+			} else if (EquinoxConfiguration.CONTEXTCLASSLOADER_PARENT_FWK.equals(type)) {
 				parent = EquinoxContainer.class.getClassLoader();
-			else if (EquinoxConfiguration.CONTEXTCLASSLOADER_PARENT_EXT.equals(type)) {
+			} else if (EquinoxConfiguration.CONTEXTCLASSLOADER_PARENT_EXT.equals(type)) {
 				ClassLoader appCL = ClassLoader.getSystemClassLoader();
-				if (appCL != null)
+				if (appCL != null) {
 					parent = appCL.getParent();
+				}
 			} else { // default is ccl (null or any other value will use ccl)
 				parent = current.getContextClassLoader();
 			}
@@ -300,11 +304,13 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 	}
 
 	void checkAdminPermission(Bundle bundle, String action) {
-		if (bundle == null)
+		if (bundle == null) {
 			return;
+		}
 		SecurityManager sm = System.getSecurityManager();
-		if (sm != null)
+		if (sm != null) {
 			sm.checkPermission(new AdminPermission(bundle, action));
+		}
 	}
 
 	void systemStart(BundleContext bc) {

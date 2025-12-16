@@ -29,7 +29,7 @@ import org.osgi.framework.hooks.resolver.ResolverHookFactory;
  * This interface is not intended to be implemented by clients. The
  * {@link StateObjectFactory} should be used to construct instances.
  * </p>
- * 
+ *
  * @since 3.1
  * @noimplement This interface is not intended to be implemented by clients.
  */
@@ -153,7 +153,7 @@ public interface State {
 
 	/**
 	 * Sets the timestamp for this state
-	 * 
+	 *
 	 * @param newTimeStamp the new timestamp for this state
 	 */
 	public void setTimeStamp(long newTimeStamp);
@@ -208,6 +208,7 @@ public interface State {
 	 * @deprecated use
 	 *             {@link #resolveBundle(BundleDescription, boolean, BundleDescription[], ExportPackageDescription[], ExportPackageDescription[], GenericDescription[], BundleDescription[], ExportPackageDescription[], GenericDescription[], Map)}
 	 */
+	@Deprecated
 	public void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] hosts,
 			ExportPackageDescription[] selectedExports, BundleDescription[] resolvedRequires,
 			ExportPackageDescription[] resolvedImports);
@@ -240,6 +241,7 @@ public interface State {
 	 * @deprecated use
 	 *             {@link #resolveBundle(BundleDescription, boolean, BundleDescription[], ExportPackageDescription[], ExportPackageDescription[], GenericDescription[], BundleDescription[], ExportPackageDescription[], GenericDescription[], Map)}
 	 */
+	@Deprecated
 	public void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] hosts,
 			ExportPackageDescription[] selectedExports, ExportPackageDescription[] substitutedExports,
 			BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports);
@@ -290,7 +292,7 @@ public interface State {
 	 * This method is intended to be used by resolvers in the process of resolving
 	 * bundles.
 	 * </p>
-	 * 
+	 *
 	 * @param bundle the bundle to set a removal complete.
 	 * @throws IllegalStateException if this is not done during a call to
 	 *                               <code>resolve</code>
@@ -329,7 +331,7 @@ public interface State {
 
 	/**
 	 * Returns all <code>ResolverError</code>s for the given bundle
-	 * 
+	 *
 	 * @param bundle the bundle to get all <code>ResolverError</code>s for
 	 * @return all <code>ResolverError</code>s for the given bundle
 	 * @since 3.2
@@ -438,6 +440,7 @@ public interface State {
 	 * @deprecated The exact form of this has never been defined. There is no
 	 *             alternative method available.
 	 */
+	@Deprecated
 	public void setOverrides(Object value);
 
 	/**
@@ -449,7 +452,7 @@ public interface State {
 
 	/**
 	 * Returns descriptions for all bundles in a removal pending state.
-	 * 
+	 *
 	 * @return the descriptions for all bundles in a removal pending state.
 	 * @since 3.7
 	 */
@@ -477,7 +480,7 @@ public interface State {
 
 	/**
 	 * Returns whether this state is empty.
-	 * 
+	 *
 	 * @return <code>true</code> if this state is empty, <code>false</code>
 	 *         otherwise
 	 */
@@ -486,14 +489,14 @@ public interface State {
 	/**
 	 * Returns all exported packages in this state, according to the OSGi rules for
 	 * resolution.
-	 * 
+	 *
 	 * @see org.osgi.service.packageadmin.PackageAdmin#getExportedPackages(org.osgi.framework.Bundle)
 	 */
 	public ExportPackageDescription[] getExportedPackages();
 
 	/**
 	 * Returns all bundle descriptions with the given bundle symbolic name.
-	 * 
+	 *
 	 * @param symbolicName symbolic name of the bundles to query
 	 * @return the descriptors for all bundles known to this state with the
 	 *         specified symbolic name.
@@ -502,7 +505,7 @@ public interface State {
 
 	/**
 	 * Returns the factory that created this state.
-	 * 
+	 *
 	 * @return the state object factory that created this state
 	 */
 	public StateObjectFactory getFactory();
@@ -512,7 +515,7 @@ public interface State {
 	 * import for the specified requestedPackage for the specified importingBundle.
 	 * If no ExportPackageDescription is available that satisfies a dynamic import
 	 * for the importingBundle then <code>null</code> is returned.
-	 * 
+	 *
 	 * @param importingBundle  the BundleDescription that is requesting a dynamic
 	 *                         package
 	 * @param requestedPackage the name of the package that is being requested
@@ -526,7 +529,7 @@ public interface State {
 	 * Adds the specified dynamic imports to the specified importingBundle. The
 	 * added dynamic imports are only valid for the instance of this state and will
 	 * be forgotten if this state is read from a persistent cache.
-	 * 
+	 *
 	 * @param importingBundle the bundle to add the imports to.
 	 * @param dynamicImports  the dynamic imports to add.
 	 * @since 3.7
@@ -574,7 +577,7 @@ public interface State {
 	 * The values used for the supported properties can be <code>String</code> type
 	 * to specify a single value for the property or they can by
 	 * <code>String[]</code> to specify a list of values for the property.
-	 * 
+	 *
 	 * @param platformProperties the platform properties of the state
 	 * @return false if the platformProperties specified do not change any of the
 	 *         supported properties already set. If any of the supported property
@@ -585,7 +588,7 @@ public interface State {
 
 	/**
 	 * Sets the platform properties of the state to a list of platform properties.
-	 * 
+	 *
 	 * @see #setPlatformProperties(Dictionary)
 	 *
 	 * @param platformProperties a set of platform properties for the state
@@ -598,7 +601,7 @@ public interface State {
 
 	/**
 	 * Returns the list of platform properties currently set for this state.
-	 * 
+	 *
 	 * @return the list of platform properties currently set for this state.
 	 */
 	@SuppressWarnings("rawtypes")
@@ -608,7 +611,7 @@ public interface State {
 	 * Returns the list of system packages which are exported by the system bundle.
 	 * The list of system packages is set by the org.osgi.framework.system.packages
 	 * value in the platform properties for this state.
-	 * 
+	 *
 	 * @see #setPlatformProperties(Dictionary)
 	 * @return the list of system packages
 	 */
@@ -634,7 +637,7 @@ public interface State {
 	 * <p>
 	 * Note that this method returns the highest bundle ID the ever existed in this
 	 * this state object. This bundle may have been removed from the state.
-	 * 
+	 *
 	 * @return the highest bundle ID.
 	 * @since 3.3
 	 */
@@ -647,7 +650,7 @@ public interface State {
 	 * The framework, or some other entity which has access to bundle content, will
 	 * call this method to validate or invalidate native code paths.
 	 * </p>
-	 * 
+	 *
 	 * @param nativeCodeDescription the native code description.
 	 * @param hasInvalidNativePaths true if the native code paths are invalid; false
 	 *                              otherwise.
@@ -659,7 +662,7 @@ public interface State {
 	 * Returns an array of BundleDescriptions for the bundles that are disabled in
 	 * the system. Use {@link #getDisabledInfos(BundleDescription)} to interrogate
 	 * the reason that each bundle is disabled.
-	 * 
+	 *
 	 * @return the array of disabled bundles. An empty array is returned if no
 	 *         bundles are disabled.
 	 * @see DisabledInfo
@@ -671,7 +674,7 @@ public interface State {
 	 * Adds the disabled info to this state. If a disable info already exists for
 	 * the specified policy and the specified bundle then it is replaced with the
 	 * given disabled info.
-	 * 
+	 *
 	 * @param disabledInfo the disabled info to add.
 	 * @throws IllegalArgumentException if the <code>BundleDescription</code> for
 	 *                                  the specified disabled info does not exist
@@ -682,7 +685,7 @@ public interface State {
 
 	/**
 	 * Removes the disabled info from the state.
-	 * 
+	 *
 	 * @param disabledInfo the disabled info to remove
 	 * @since 3.4
 	 */
@@ -691,7 +694,7 @@ public interface State {
 	/**
 	 * Returns an array of disabled info for the specified bundle. If no disabled
 	 * info exist then an empty array is returned.
-	 * 
+	 *
 	 * @param bundle the bundle to get the disabled info for.
 	 * @return the array of disabled info.
 	 * @since 3.4
@@ -701,7 +704,7 @@ public interface State {
 	/**
 	 * Returns the disabled info for the specified bundle with the specified policy
 	 * name. If no disabled info exists then <code>null</code> is returned.
-	 * 
+	 *
 	 * @param bundle the bundle to get the disabled info for
 	 * @return the disabled info.
 	 * @since 3.4
@@ -712,7 +715,7 @@ public interface State {
 	 * Sets the resolver hook factory for this state. The resolver hook factory is
 	 * used during resolve operations according to the OSGi specification for the
 	 * resolver hook factory.
-	 * 
+	 *
 	 * @param hookFactory the resolver hook factory
 	 * @since 3.7
 	 * @throws IllegalStateException if the resolver hook factory is already set

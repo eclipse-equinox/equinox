@@ -78,10 +78,12 @@ public class EventAdminLogListener implements SynchronousLogListener {
 			Throwable cause = e.getCause();
 			if (cause instanceof InvocationTargetException) {
 				Throwable t = ((InvocationTargetException) cause).getTargetException();
-				if ((t instanceof RuntimeException))
+				if ((t instanceof RuntimeException)) {
 					throw (RuntimeException) t;
-				if ((t instanceof Error))
+				}
+				if ((t instanceof Error)) {
 					throw (Error) t;
+				}
 				// unexpected
 				throw new RuntimeException(t);
 			}
@@ -127,8 +129,9 @@ public class EventAdminLogListener implements SynchronousLogListener {
 		}
 		properties.put(LOG_ENTRY, entry);
 		properties.put(LOG_LEVEL, Integer.valueOf(entry.getLevel()));
-		if (entry.getMessage() != null)
+		if (entry.getMessage() != null) {
 			properties.put(MESSAGE, entry.getMessage());
+		}
 		properties.put(TIMESTAMP, Long.valueOf(entry.getTime()));
 		return event.newInstance(topic, properties);
 	}

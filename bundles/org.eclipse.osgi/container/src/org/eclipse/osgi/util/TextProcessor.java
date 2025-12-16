@@ -98,8 +98,9 @@ public class TextProcessor {
 	 * @see #getDefaultDelimiters()
 	 */
 	public static String process(String text) {
-		if (!IS_PROCESSING_NEEDED || text == null || text.length() <= 1)
+		if (!IS_PROCESSING_NEEDED || text == null || text.length() <= 1) {
 			return text;
+		}
 		return process(text, getDefaultDelimiters());
 	}
 
@@ -150,8 +151,9 @@ public class TextProcessor {
 	 * @return the processed string
 	 */
 	public static String process(String str, String delimiter) {
-		if (!IS_PROCESSING_NEEDED || str == null || str.length() <= 1)
+		if (!IS_PROCESSING_NEEDED || str == null || str.length() <= 1) {
 			return str;
+		}
 
 		// do not process a string that has already been processed.
 		if (str.charAt(0) == LRE && str.charAt(str.length() - 1) == PDF) {
@@ -231,8 +233,9 @@ public class TextProcessor {
 	 * @since 3.3
 	 */
 	public static String deprocess(String str) {
-		if (!IS_PROCESSING_NEEDED || str == null || str.length() <= 1)
+		if (!IS_PROCESSING_NEEDED || str == null || str.length() <= 1) {
 			return str;
+		}
 
 		StringBuilder buf = new StringBuilder();
 		for (int i = 0; i < str.length(); i++) {

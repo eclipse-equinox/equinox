@@ -20,7 +20,7 @@ package org.eclipse.osgi.service.resolver;
  * <p>
  * This interface is not intended to be implemented by clients.
  * </p>
- * 
+ *
  * @since 3.1
  * @see PlatformAdmin#getStateHelper
  * @noimplement This interface is not intended to be implemented by clients.
@@ -43,7 +43,7 @@ public interface StateHelper {
 	 * 1.4 VM the system bundle will export the javax.xml.parsers package as part of
 	 * the execution environment. When this option is used then any packages from
 	 * the execution environment which the bundle is wired to will be included.
-	 * 
+	 *
 	 * @see StateHelper#getVisiblePackages(BundleDescription, int)
 	 */
 	public static int VISIBLE_INCLUDE_EE_PACKAGES = 0x01;
@@ -54,7 +54,7 @@ public interface StateHelper {
 	 * packages wired to as a result of additional constraints specified by a
 	 * fragment bundle. Using this option with a fragment will cause an empty array
 	 * to be returned.
-	 * 
+	 *
 	 * @see StateHelper#getVisiblePackages(BundleDescription, int)
 	 * @since 3.6
 	 */
@@ -73,7 +73,7 @@ public interface StateHelper {
 	/**
 	 * Returns all the prerequisite bundles in the state for the given bundles. The
 	 * given bundles appear in the returned array.
-	 * 
+	 *
 	 * @param bundles the inital set of bundles
 	 * @return an array containing bundle descriptions for the given leaves and
 	 *         their prerequisite bundles in the state.
@@ -107,7 +107,7 @@ public interface StateHelper {
 	 * has Bundles X and Y installed and Bundles X and Y have the following
 	 * constraints:
 	 * </p>
-	 * 
+	 *
 	 * <pre>
 	 * Bundle X requires Bundle Y
 	 * Bundle Y requires Bundle Z
@@ -191,7 +191,7 @@ public interface StateHelper {
 	 * <p>
 	 * Same as calling getVisiblePackages(bundle, 0)
 	 * </p>
-	 * 
+	 *
 	 * @param bundle a bundle to get the list of packages for.
 	 * @return a list of all packages that the specified bundle has access to which
 	 *         are exported by other bundles.
@@ -220,7 +220,7 @@ public interface StateHelper {
 	/**
 	 * Returns the access code that the specified <code>BundleDescription</code> has
 	 * to the specified <code>ExportPackageDescription</code>.
-	 * 
+	 *
 	 * @param bundle the bundle to find the access code for
 	 * @param export the export to find the access code for
 	 * @return the access code to the export.

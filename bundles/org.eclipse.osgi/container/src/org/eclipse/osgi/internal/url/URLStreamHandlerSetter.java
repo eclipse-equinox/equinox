@@ -29,6 +29,7 @@ public class URLStreamHandlerSetter implements org.osgi.service.url.URLStreamHan
 	 *      int, String, String)
 	 * @deprecated
 	 */
+	@Deprecated
 	@Override
 	public void setURL(URL url, String protocol, String host, int port, String file, String ref) {
 		handlerProxy.setURLInternal(url, protocol, host, port, file, ref);

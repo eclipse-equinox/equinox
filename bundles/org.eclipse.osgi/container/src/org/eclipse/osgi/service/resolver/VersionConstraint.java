@@ -23,7 +23,7 @@ import org.osgi.framework.wiring.BundleRequirement;
  * This interface is not intended to be implemented by clients. The
  * {@link StateObjectFactory} should be used to construct instances.
  * </p>
- * 
+ *
  * @since 3.1
  * @noimplement This interface is not intended to be implemented by clients.
  */
@@ -38,7 +38,7 @@ public interface VersionConstraint extends Cloneable {
 
 	/**
 	 * Returns the version range for this constraint.
-	 * 
+	 *
 	 * @return the version range for this constraint, or <code>null</code>
 	 */
 	public VersionRange getVersionRange();
@@ -83,7 +83,7 @@ public interface VersionConstraint extends Cloneable {
 	 * Returns the requirement represented by this constraint. Some constraint types
 	 * may not be able to represent a requirement. In such cases <code>null</code>
 	 * is returned.
-	 * 
+	 *
 	 * @return the requirement represented by this constraint
 	 * @since 3.7
 	 */

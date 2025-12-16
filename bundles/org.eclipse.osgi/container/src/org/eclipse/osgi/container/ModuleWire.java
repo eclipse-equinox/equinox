@@ -17,7 +17,7 @@ import org.osgi.framework.wiring.BundleWire;
 
 /**
  * An implementation of {@link BundleWire}.
- * 
+ *
  * @since 3.10
  */
 public final class ModuleWire implements BundleWire {

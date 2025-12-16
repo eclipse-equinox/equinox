@@ -43,7 +43,7 @@ public class InternalUtils {
 	 * This method assumes that the given List is immutable and a
 	 * {@link RandomAccess} list.
 	 * </p>
-	 * 
+	 *
 	 * @param list the list to be copied.
 	 * @return an effectively mutable and lazy copy of the given list.
 	 */
@@ -108,7 +108,7 @@ public class InternalUtils {
 
 	/**
 	 * Coerce the generic type of a list from List<? extends T> to List<T>
-	 * 
+	 *
 	 * @param l List to be coerced.
 	 * @return l coerced to List<Capability>
 	 */

@@ -21,7 +21,7 @@ import org.eclipse.osgi.storage.BundleInfo.Generation;
 /**
  * A FragmentClasspath contains all the <code>ClasspathEntry</code> objects for
  * a fragment <code>BaseData</code>.
- * 
+ *
  * @since 3.2
  */
 public class FragmentClasspath {
@@ -36,7 +36,7 @@ public class FragmentClasspath {
 
 	/**
 	 * Returns the fragment Generation for this FragmentClasspath
-	 * 
+	 *
 	 * @return the fragment Generation for this FragmentClasspath
 	 */
 	public Generation getGeneration() {
@@ -45,7 +45,7 @@ public class FragmentClasspath {
 
 	/**
 	 * Returns the fragment classpath entries for this FragmentClasspath
-	 * 
+	 *
 	 * @return the fragment classpath entries for this FragmentClasspath
 	 */
 	public ClasspathEntry[] getEntries() {
