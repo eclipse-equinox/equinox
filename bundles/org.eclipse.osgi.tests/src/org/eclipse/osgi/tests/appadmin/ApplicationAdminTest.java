@@ -71,7 +71,7 @@ public class ApplicationAdminTest {
 			.withApplicationId(testRunnerApp)
 			.withCustomization(configuration)
 			.create();
-	
+
 	@BeforeAll
 	@ExecuteInHost
 	public static void setup() {
