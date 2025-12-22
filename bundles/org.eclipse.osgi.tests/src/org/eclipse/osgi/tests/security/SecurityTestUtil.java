@@ -24,11 +24,8 @@ import java.net.URL;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.cert.Certificate;
-import java.util.ArrayList;
 import java.util.Hashtable;
 import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.core.tests.session.ConfigurationSessionTestSuite;
-import org.eclipse.osgi.internal.provisional.service.security.AuthorizationEngine;
 import org.eclipse.osgi.internal.service.security.KeyStoreTrustEngine;
 import org.eclipse.osgi.service.security.TrustEngine;
 import org.eclipse.osgi.signedcontent.SignedContentFactory;
@@ -62,14 +59,6 @@ public final class SecurityTestUtil {
 
 	static Certificate getTestCertificate(String alias) throws KeyStoreException {
 		return supportStore.getCertificate(alias);
-	}
-
-	static Certificate[] getTestCertificateChain(String[] aliases) throws KeyStoreException {
-		ArrayList certs = new ArrayList(aliases.length);
-		for (String alias : aliases) {
-			certs.add(getTestCertificate(alias));
-		}
-		return (Certificate[]) certs.toArray(new Certificate[] {});
 	}
 
 	static ServiceRegistration registerEclipseTrustEngine() throws Exception {
@@ -117,14 +106,6 @@ public final class SecurityTestUtil {
 		return engine;
 	}
 
-	static AuthorizationEngine getAuthorizationEngine() {
-		ServiceReference ref = OSGiTestsActivator.getContext().getServiceReference(AuthorizationEngine.class.getName());
-		assertNotNull(ref, "No AuthorizationEngine available");
-		AuthorizationEngine engine = (AuthorizationEngine) OSGiTestsActivator.getContext().getService(ref);
-		OSGiTestsActivator.getContext().ungetService(ref);
-		return engine;
-	}
-
 	static Bundle installBundle(String bundlePath) throws BundleException, IOException {
 		URL bundleURL = OSGiTestsActivator.getBundle().getEntry(bundlePath);
 		assertNotNull(bundleURL, "Bundle URL is null " + bundlePath);
@@ -153,19 +134,6 @@ public final class SecurityTestUtil {
 
 	static String getTestJarPath(String jarName) {
 		return "test_files/security/bundles/" + jarName + ".jar";
-	}
-
-	static void setEclipseTrustEngine(ConfigurationSessionTestSuite suite) {
-		try {
-			URL eclipseURL = OSGiTestsActivator.getBundle().getEntry("test_files/security/eclipse.jks");
-			File tempFile = File.createTempFile("keystore", ".jks");
-
-			copy(eclipseURL.openStream(), tempFile);
-
-			suite.getSetup().setSystemProperty("osgi.framework.keystore", tempFile.toURL().toExternalForm()); //$NON-NLS-1$ //$NON-NLS-2$
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
 	}
 
 	static void readFile(InputStream in, File file) throws IOException {

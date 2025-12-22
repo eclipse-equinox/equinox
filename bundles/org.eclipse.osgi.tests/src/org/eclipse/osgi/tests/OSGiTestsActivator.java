@@ -16,7 +16,6 @@ package org.eclipse.osgi.tests;
 
 import java.util.stream.Stream;
 import org.eclipse.core.tests.harness.session.CustomSessionConfiguration;
-import org.eclipse.core.tests.session.ConfigurationSessionTestSuite;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -35,12 +34,6 @@ public class OSGiTestsActivator {
 
 	public static BundleContext getContext() {
 		return getBundle().getBundleContext();
-	}
-
-	public static void addRequiredOSGiTestsBundles(ConfigurationSessionTestSuite suite) {
-		suite.addMinimalBundleSet();
-		suite.addThisBundle();
-		getClassesFromRequiredOSGITestsBundles().forEach(suite::addBundle);
 	}
 
 	public static void addRequiredOSGiTestsBundles(CustomSessionConfiguration sessionConfiguration) {
