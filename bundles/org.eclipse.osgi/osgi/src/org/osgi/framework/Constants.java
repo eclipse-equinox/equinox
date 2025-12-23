@@ -130,6 +130,7 @@ public interface Constants {
 	 * 
 	 * @deprecated As of 1.2.
 	 */
+	@Deprecated(forRemoval = true, since = "2026-03")
 	String	EXPORT_SERVICE							= "Export-Service";
 
 	/**
@@ -163,6 +164,7 @@ public interface Constants {
 	 * 
 	 * @deprecated As of 1.2.
 	 */
+	@Deprecated(forRemoval = true, since = "2026-03")
 	String	IMPORT_SERVICE							= "Import-Service";
 
 	/**
@@ -849,6 +851,7 @@ public interface Constants {
 	 * @since 1.3
 	 * @deprecated As of 1.9.
 	 */
+	@Deprecated(forRemoval = true, since = "2026-03")
 	String	EXTENSION_BOOTCLASSPATH					= "bootclasspath";
 
 	/**
@@ -1036,6 +1039,7 @@ public interface Constants {
 	 * @since 1.3
 	 * @deprecated As of 1.10.
 	 */
+	@Deprecated(forRemoval = true, since = "2026-03")
 	String	SUPPORTS_BOOTCLASSPATH_EXTENSION		= "org.osgi.supports.bootclasspath.extension";
 
 	/**
