@@ -13,13 +13,16 @@
  *******************************************************************************/
 package org.eclipse.equinox.region.tests.system;
 
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import org.eclipse.core.tests.harness.PerformanceTestRunner;
 import org.eclipse.equinox.region.*;
 import org.eclipse.equinox.region.tests.BundleInstaller;
+import org.junit.jupiter.api.*;
 import org.osgi.framework.*;
 
-public class RegionPerformanceTests extends TestCase {
+public class RegionPerformanceTests {
 	Bundle testBundle;
 	private ServiceReference<RegionDigraph> digraphReference;
 	private RegionDigraph digraph;
@@ -27,25 +30,28 @@ public class RegionPerformanceTests extends TestCase {
 	private Bundle testsBundle;
 	private BundleContext context;
 
-	@Override
-	protected void setUp() throws Exception {
+	private TestInfo testInfo;
+
+	@BeforeEach
+	void setUp(TestInfo testInfo) throws Exception {
 		testsBundle = FrameworkUtil.getBundle(this.getClass());
 
 		context = testsBundle.getBundleContext();
 
 		digraphReference = context.getServiceReference(RegionDigraph.class);
-		assertNotNull("No digraph found", digraphReference);
+		assertNotNull(digraphReference, "No digraph found");
 		digraph = context.getService(digraphReference);
-		assertNotNull("No digraph found", digraph);
+		assertNotNull(digraph, "No digraph found");
 
 		bundleInstaller = new BundleInstaller("bundle_tests", testsBundle); //$NON-NLS-1$
 		testBundle = bundleInstaller.installBundle(AbstractRegionSystemTest.PP1);
 		testBundle.start();
 
+		this.testInfo = testInfo;
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@AfterEach
+	void tearDown() throws Exception {
 		for (Region region : digraph) {
 			if (!region.contains(0)) {
 				digraph.removeRegion(region);
@@ -56,7 +62,7 @@ public class RegionPerformanceTests extends TestCase {
 			context.ungetService(digraphReference);
 	}
 
-	private void doTestGetBundles(String fingerPrintName, String degradation) {
+	private void doTestGetBundles() throws Exception {
 		final BundleContext bundleContext = testBundle.getBundleContext();
 		PerformanceTestRunner runner = new PerformanceTestRunner() {
 			protected void test() {
@@ -66,68 +72,79 @@ public class RegionPerformanceTests extends TestCase {
 				}
 			}
 		};
-		runner.setRegressionReason(degradation);
-		runner.run(this, fingerPrintName, 10, 300);
+		runner.run(getClass(), testInfo.getDisplayName(), 10, 300);
 	}
 
-	public void testGetBundlesNoRegions() {
-		doTestGetBundles(null, null);
+	@Test
+	public void testGetBundlesNoRegions() throws Exception {
+		doTestGetBundles();
 	}
 
-	public void testGetBundles10Regions() throws BundleException {
+	@Test
+	public void testGetBundles10Regions() throws Exception {
 		createRegions(10);
-		doTestGetBundles(null, null);
+		doTestGetBundles();
 	}
 
-	public void testGetBundles100Regions() throws BundleException {
+	@Test
+	public void testGetBundles100Regions() throws Exception {
 		createRegions(100);
-		doTestGetBundles(null, null);
+		doTestGetBundles();
 	}
 
-	public void testGetBundles1000Regions() throws BundleException {
+	@Test
+	public void testGetBundles1000Regions() throws Exception {
 		createRegions(1000);
-		doTestGetBundles(null, null);
+		doTestGetBundles();
 	}
 
-	public void testGetServicesNoRegions() {
-		doTestGetServices(null, null);
+	@Test
+	public void testGetServicesNoRegions() throws Exception {
+		doTestGetServices();
 	}
 
-	public void testGetServices10Regions() throws BundleException {
+	@Test
+	public void testGetServices10Regions() throws Exception {
 		createRegions(10);
-		doTestGetServices(null, null);
+		doTestGetServices();
 	}
 
-	public void testGetServices100Regions() throws BundleException {
+	@Test
+	public void testGetServices100Regions() throws Exception {
 		createRegions(100);
-		doTestGetServices(null, null);
+		doTestGetServices();
 	}
 
-	public void testGetServices1000Regions() throws BundleException {
+	@Test
+	public void testGetServices1000Regions() throws Exception {
 		createRegions(1000);
-		doTestGetServices(null, null);
+		doTestGetServices();
 	}
 
-	public void testGetRegionByNameNoRegions() {
-		doTestGetRegionByName(null, null);
+	@Test
+	public void testGetRegionByNameNoRegions() throws Exception {
+		doTestGetRegionByName();
 	}
 
-	public void testGetRegionByName10Regions() throws BundleException {
+	@Test
+	public void testGetRegionByName10Regions() throws Exception {
 		createRegions(10);
-		doTestGetRegionByName(null, null);
+		doTestGetRegionByName();
 	}
 
-	public void testGetRegionByName100Regions() throws BundleException {
+	@Test
+	public void testGetRegionByName100Regions() throws Exception {
 		createRegions(100);
-		doTestGetRegionByName(null, null);
+		doTestGetRegionByName();
 	}
 
-	public void testGetRegionByName1000Regions() throws BundleException {
+	@Test
+	public void testGetRegionByName1000Regions() throws Exception {
 		createRegions(1000);
-		doTestGetRegionByName(null, null);
+		doTestGetRegionByName();
 	}
 
-	private void doTestGetServices(String fingerPrintName, String degradation) {
+	private void doTestGetServices() throws Exception {
 		final BundleContext bundleContext = testBundle.getBundleContext();
 		PerformanceTestRunner runner = new PerformanceTestRunner() {
 			protected void test() {
@@ -138,11 +155,10 @@ public class RegionPerformanceTests extends TestCase {
 				}
 			}
 		};
-		runner.setRegressionReason(degradation);
-		runner.run(this, fingerPrintName, 10, 2000);
+		runner.run(getClass(), testInfo.getDisplayName(), 10, 2000);
 	}
 
-	private void doTestGetRegionByName(String fingerPrintName, String degradation) {
+	private void doTestGetRegionByName() throws Exception {
 		final RegionDigraph current = digraph;
 		final Region[] regions = current.getRegions().toArray(new Region[0]);
 		PerformanceTestRunner runner = new PerformanceTestRunner() {
@@ -152,8 +168,7 @@ public class RegionPerformanceTests extends TestCase {
 				}
 			}
 		};
-		runner.setRegressionReason(degradation);
-		runner.run(this, fingerPrintName, 10, 2000);
+		runner.run(getClass(), testInfo.getDisplayName(), 10, 2000);
 	}
 
 	@SuppressWarnings("deprecation") // VISIBLE_SERVICE_NAMESPACE
@@ -169,7 +184,7 @@ public class RegionPerformanceTests extends TestCase {
 		builder.allowAll(RegionFilter.VISIBLE_SERVICE_NAMESPACE);
 		RegionFilter filter = builder.build();
 		for (int i = 0; i < numRegions; i++) {
-			Region r = digraph.createRegion(getName() + i);
+			Region r = digraph.createRegion(testInfo.getDisplayName() + i);
 			digraph.connect(system, filter, r);
 		}
 		System.out.println("Done creating region: " + (System.currentTimeMillis() - time));
