@@ -48,15 +48,7 @@
          version="0.0.0"/>
 
    <plugin
-         id="org.osgi.service.prefs"
-         version="0.0.0"/>
-
-   <plugin
          id="org.eclipse.equinox.useradmin"
-         version="0.0.0"/>
-
-   <plugin
-         id="org.osgi.service.coordinator"
          version="0.0.0"/>
 
 </feature>
