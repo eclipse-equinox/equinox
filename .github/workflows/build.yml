@@ -48,7 +48,7 @@ jobs:
     - name: Set up Maven
       uses: stCarolas/setup-maven@v5
       with:
-        maven-version: 3.9.11
+        maven-version: 3.9.12
     - name: Install GTK requirements
       if: ${{ matrix.config.ws == 'gtk'}}
       run: |
@@ -103,7 +103,7 @@ jobs:
     - name: Set up Maven
       uses: stCarolas/setup-maven@v5
       with:
-        maven-version: 3.9.11
+        maven-version: 3.9.12
     - name: Run OSGi TCKs
       run: >- 
         mvn
