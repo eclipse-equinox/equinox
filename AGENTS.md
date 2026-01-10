@@ -40,7 +40,7 @@ equinox/
 ## Build System
 
 ### Technology Stack
-- **Build Tool**: Maven 3.9.11+ with Tycho (Eclipse's Maven plugin for OSGi)
+- **Build Tool**: Maven 3.9.12+ with Tycho (Eclipse's Maven plugin for OSGi)
 - **Java Version**: Java 21 (required for building), supports Java 8, 17, 21 runtime via toolchains
 - **Parent POM**: Inherits from `org.eclipse:eclipse-platform-parent`
 - **Module Structure**: Multi-module Maven build with profiles
