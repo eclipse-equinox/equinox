@@ -318,12 +318,12 @@ int showSplash( const _TCHAR* featureImage )
 		case AUTOSCALE_FALSE:
 			dpiX = 96;
 			break;
+		case AUTOSCALE_DEFAULT:
 		case AUTOSCALE_QUARTER:
 			dpiX = ((dpiX + 12) / 24) * 24;
 			break;
 		case AUTOSCALE_EXACT:
 			break;
-		case AUTOSCALE_DEFAULT:
 		case AUTOSCALE_INTEGER:
 			dpiX = ((int)((dpiX + 24) / 96 )) * 96;
 			break;
@@ -699,8 +699,15 @@ static void CALLBACK detectJvmExit( HWND hwnd, UINT uMsg, UINT id, DWORD dwTime 
 void processVMArgs(_TCHAR **vmargs[] ) {
 	_TCHAR** arg;
 	for (arg = *vmargs; *arg != NULL; arg++) {
+		// see org.eclipse.swt.internal.DPIUtil.getZoomForAutoscaleProperty()
+		if (_tcsncmp(*arg, _T("-Dswt.autoScale.updateOnRuntime="), 32) == 0) {
+			_TCHAR* value = *arg + 32;
+			if (_tcsicmp(value, _T("false")) == 0) {
+				/* when monitor-specific scaling is disabled, default is "integer" */
+				autoScaleValue = AUTOSCALE_INTEGER;
+			}
+		}
 		if (_tcsncmp(*arg, _T("-Dswt.autoScale="), 16) == 0) {
-			// see org.eclipse.swt.internal.DPIUtil.getZoomForAutoscaleProperty()
 			_TCHAR* value = *arg + 16;
 			if (_tcsicmp(value, _T("false")) == 0) {
 				autoScaleValue = AUTOSCALE_FALSE;
