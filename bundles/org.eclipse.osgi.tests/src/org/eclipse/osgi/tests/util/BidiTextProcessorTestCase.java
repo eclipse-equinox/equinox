@@ -137,7 +137,7 @@ public class BidiTextProcessorTestCase extends TextProcessorTestCase {
 
 	protected static String defaultDelimiters = TextProcessor.getDefaultDelimiters();
 
-	private CustomSessionConfiguration sessionConfiguration = createSessionConfiguration();
+	private final CustomSessionConfiguration sessionConfiguration = createSessionConfiguration();
 
 	@RegisterExtension
 	SessionTestExtension extension = SessionTestExtension.forPlugin(PI_OSGI_TESTS)
