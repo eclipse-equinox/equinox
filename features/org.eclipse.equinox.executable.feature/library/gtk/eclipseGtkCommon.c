@@ -149,3 +149,23 @@ void * findSymbol( void * handle, char * symbol ){
 	return dlsym(handle, symbol);
 }
 
+_TCHAR* getOSUserDataDirectory() {
+	const char* home = getenv("HOME");
+	if (home != NULL) {
+		return strdup(home);
+	}
+	return NULL;
+}
+
+_TCHAR* getOSUserDataSharedDirectory() {
+	return strdup("/srv");
+}
+
+_TCHAR* getOSUserDocumentsDirectory() {
+	const char* home = getenv("HOME");
+	if (home != NULL) {
+		return strdup(home);
+	}
+	return NULL;
+}
+
