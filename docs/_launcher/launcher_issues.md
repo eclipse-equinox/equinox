@@ -106,12 +106,12 @@ openFile
 
 #### DPI Scaling
 
-**Issue**: On high-DPI displays, Eclipse may appear blurry or have scaling issues.
+**Issue**: On high-DPI displays, Eclipse may have scaling issues when using multiple monitors with different zooms (monitor-specific scaling support).
 
-**Workaround**: Add to `eclipse.ini`:
+**Workaround**: Switch back to previous single-zoom support by disabling monitor-specific scaling. Add to `eclipse.ini`:
 ```
 -vmargs
--Dswt.autoScale=200
+-Dswt.autoScale.updateOnRuntime=false
 ```
 
 ### Linux
