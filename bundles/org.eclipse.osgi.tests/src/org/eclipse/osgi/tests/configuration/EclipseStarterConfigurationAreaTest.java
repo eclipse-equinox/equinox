@@ -40,7 +40,7 @@ import org.osgi.framework.wiring.BundleWiring;
 public class EclipseStarterConfigurationAreaTest {
 	private static final String WITH_COMPATIBILITY_FRAGMENT = "withCompatibilityFragment";
 
-	private CustomSessionConfiguration sessionConfiguration = SessionTestExtension.createCustomConfiguration();
+	private final CustomSessionConfiguration sessionConfiguration = SessionTestExtension.createCustomConfiguration();
 
 	@RegisterExtension
 	SessionTestExtension extension = SessionTestExtension.forPlugin(PI_OSGI_TESTS)
