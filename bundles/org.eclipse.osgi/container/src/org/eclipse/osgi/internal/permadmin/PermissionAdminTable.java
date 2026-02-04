@@ -26,8 +26,9 @@ public class PermissionAdminTable {
 
 	PermissionInfo[] getPermissions(String location) {
 		PermissionInfoCollection collection = locations.get(location);
-		if (collection != null)
+		if (collection != null) {
 			return collection.getPermissionInfos();
+		}
 		return null;
 	}
 
@@ -46,8 +47,9 @@ public class PermissionAdminTable {
 	PermissionInfoCollection[] getCollections() {
 		String[] currentLocations = getLocations();
 		PermissionInfoCollection[] results = new PermissionInfoCollection[currentLocations.length];
-		for (int i = 0; i < results.length; i++)
+		for (int i = 0; i < results.length; i++) {
 			results[i] = getCollection(currentLocations[i]);
+		}
 		return results;
 	}
 }
