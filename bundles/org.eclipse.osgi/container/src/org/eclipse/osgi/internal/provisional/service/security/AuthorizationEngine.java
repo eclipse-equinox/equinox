@@ -24,13 +24,13 @@ import org.osgi.util.tracker.ServiceTracker;
  * An authorization engine is used to grant authorization to
  * {@link SignedContent}. For example, an engine could determine if
  * <code>SignedContent</code> is authorized to enable code from a signed bundle.
- * 
+ *
  * @since 3.4
  */
 public abstract class AuthorizationEngine {
 
-	private EventManager manager = new EventManager();
-	private EventDispatcher<AuthorizationListener, Object, AuthorizationEvent> dispatcher = new AuthEventDispatcher();
+	private final EventManager manager = new EventManager();
+	private final EventDispatcher<AuthorizationListener, Object, AuthorizationEvent> dispatcher = new AuthEventDispatcher();
 	private final ServiceTracker<AuthorizationListener, AuthorizationListener> listenerTracker;
 
 	public AuthorizationEngine(BundleContext context) {
@@ -43,7 +43,7 @@ public abstract class AuthorizationEngine {
 	 * signed content authorization should be granted. The context is the entity
 	 * associated with the signed content. For example, signed content for a bundle
 	 * will have a <code>Bundle</code> object as the context.
-	 * 
+	 *
 	 * @param content the signed content. The value may be <code>null</code>.
 	 * @param context the context associated with the signed content. The value may
 	 *                be <code>null</code>.
@@ -53,11 +53,13 @@ public abstract class AuthorizationEngine {
 	}
 
 	private void fireEvent(AuthorizationEvent event) {
-		if (event == null)
+		if (event == null) {
 			return;
+		}
 		Object[] services = listenerTracker.getServices();
-		if (services == null)
+		if (services == null) {
 			return;
+		}
 		Map<AuthorizationListener, Object> listeners = new HashMap<>();
 		for (Object service : services) {
 			listeners.put((AuthorizationListener) service, service);
@@ -70,7 +72,7 @@ public abstract class AuthorizationEngine {
 	/**
 	 * Authorizes a <code>SignedContent</code> object. The engine determines if the
 	 * signed content authorization should be granted.
-	 * 
+	 *
 	 * @param context the context associated with the signed content
 	 * @return an authorization event which will be fired. A value of
 	 *         <code>null</code> may be returned; in this case no authorization

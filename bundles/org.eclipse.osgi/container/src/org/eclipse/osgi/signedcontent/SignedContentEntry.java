@@ -28,14 +28,14 @@ import java.io.IOException;
  * <p>
  * This interface is not intended to be implemented by clients.
  * </p>
- * 
+ *
  * @since 3.4
  * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface SignedContentEntry {
 	/**
 	 * Returns the name of the entry.
-	 * 
+	 *
 	 * @return the name of the entry.
 	 */
 	public String getName();
@@ -43,7 +43,7 @@ public interface SignedContentEntry {
 	/**
 	 * Returns the signer infos for this <code>SignedContentEntry</code>. If the
 	 * entry is not signed then an empty array is returned.
-	 * 
+	 *
 	 * @return the signer infos for this <code>SignedContentEntry</code>
 	 */
 	public SignerInfo[] getSignerInfos();
@@ -52,7 +52,7 @@ public interface SignedContentEntry {
 	 * Returns true if the entry is signed; false otherwise. This is a convenience
 	 * method equivalent to calling
 	 * <code>{@link #getSignerInfos()}.length &gt; 0</code>
-	 * 
+	 *
 	 * @return true if the content is signed
 	 */
 	public boolean isSigned();
@@ -61,7 +61,7 @@ public interface SignedContentEntry {
 	// TODO: what does this mean in the face of multiple signers
 	/**
 	 * Verifies the content of this this entry is valid.
-	 * 
+	 *
 	 * @throws IOException             if an error occurred reading the entry
 	 *                                 content
 	 * @throws InvalidContentException if the entry content is not valid

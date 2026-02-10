@@ -34,20 +34,24 @@ public class LocationHelper {
 	 */
 	@SuppressWarnings("deprecation")
 	public static URL buildURL(String spec, boolean trailingSlash) {
-		if (spec == null)
+		if (spec == null) {
 			return null;
-		if (File.separatorChar == '\\')
+		}
+		if (File.separatorChar == '\\') {
 			spec = spec.trim();
+		}
 		boolean isFile = spec.startsWith("file:"); //$NON-NLS-1$
 		try {
-			if (isFile)
+			if (isFile) {
 				return adjustTrailingSlash(toFileURL(spec).toURL(), trailingSlash);
+			}
 			return new URL(spec);
 		} catch (MalformedURLException e) {
 			// if we failed and it is a file spec, there is nothing more we can do
 			// otherwise, try to make the spec into a file URL.
-			if (isFile)
+			if (isFile) {
 				return null;
+			}
 			try {
 				return adjustTrailingSlash(new File(spec).toURL(), trailingSlash);
 			} catch (MalformedURLException e1) {
@@ -67,8 +71,9 @@ public class LocationHelper {
 
 	private static URL adjustTrailingSlash(URL url, boolean trailingSlash) throws MalformedURLException {
 		String file = url.getPath();
-		if (trailingSlash == (file.endsWith("/"))) //$NON-NLS-1$
+		if (trailingSlash == (file.endsWith("/"))) { //$NON-NLS-1$
 			return url;
+		}
 		file = trailingSlash ? file + "/" : file.substring(0, file.length() - 1); //$NON-NLS-1$
 		return new URL(url.getProtocol(), url.getHost(), file);
 	}
@@ -145,10 +150,11 @@ public class LocationHelper {
 			StringBuilder buf = new StringBuilder(len);
 			for (int i = 0; i < len; i++) {
 				char c = urlString.charAt(i);
-				if (c == '+')
+				if (c == '+') {
 					buf.append("%2B"); //$NON-NLS-1$
-				else
+				} else {
 					buf.append(c);
+				}
 			}
 			urlString = buf.toString();
 		}

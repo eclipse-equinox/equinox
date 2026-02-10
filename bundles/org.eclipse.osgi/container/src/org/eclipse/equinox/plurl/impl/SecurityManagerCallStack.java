@@ -24,6 +24,7 @@ class SecurityManagerCallStack implements CallStack {
 
 	private static InternalSecurityManager internalSecurityManager = new InternalSecurityManager();
 
+	@Override
 	public Class<?>[] getClassContext() {
 		return internalSecurityManager.getClassContext();
 	}

@@ -158,8 +158,9 @@ class EclipseDebugTrace implements DebugTrace {
 	 *         this bundle; Otherwise false.
 	 */
 	private final boolean isDebuggingEnabled(final String optionPath) {
-		if (optionPath == null)
+		if (optionPath == null) {
 			return true;
+		}
 		boolean debugEnabled = false;
 		if (debugOptions.isDebugEnabled()) {
 			final String option = bundleSymbolicName + optionPath;
@@ -170,7 +171,7 @@ class EclipseDebugTrace implements DebugTrace {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.osgi.framework.debug.FrameworkDebugTrace#trace(java.lang.String,
 	 * java.lang.String)
@@ -187,7 +188,7 @@ class EclipseDebugTrace implements DebugTrace {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.osgi.framework.debug.FrameworkDebugTrace#trace(java.lang.String,
 	 * java.lang.String, java.lang.Throwable)
@@ -204,7 +205,7 @@ class EclipseDebugTrace implements DebugTrace {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.osgi.framework.debug.FrameworkDebugTrace#traceEntry(java.lang.
 	 * String)
@@ -222,7 +223,7 @@ class EclipseDebugTrace implements DebugTrace {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.osgi.framework.debug.FrameworkDebugTrace#traceEntry(java.lang.
 	 * String, java.lang.Object)
@@ -237,7 +238,7 @@ class EclipseDebugTrace implements DebugTrace {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.osgi.framework.debug.FrameworkDebugTrace#traceEntry(java.lang.
 	 * String, java.lang.Object[])
@@ -273,7 +274,7 @@ class EclipseDebugTrace implements DebugTrace {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.osgi.framework.debug.FrameworkDebugTrace#traceExit(java.lang.
 	 * String)
@@ -291,7 +292,7 @@ class EclipseDebugTrace implements DebugTrace {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.osgi.framework.debug.FrameworkDebugTrace#traceExit(java.lang.
 	 * String, java.lang.Object)
@@ -317,7 +318,7 @@ class EclipseDebugTrace implements DebugTrace {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.osgi.framework.debug.FrameworkDebugTrace#traceDumpStack(java.lang
 	 * .String)
@@ -367,7 +368,7 @@ class EclipseDebugTrace implements DebugTrace {
 		} else {
 			argument = ""; //$NON-NLS-1$
 		}
-		return MessageFormat.format(originalMessage, new Object[] { argument });
+		return MessageFormat.format(originalMessage, argument);
 
 	}
 
@@ -683,7 +684,7 @@ class EclipseDebugTrace implements DebugTrace {
 
 	/**
 	 * Returns a Writer for the given OutputStream
-	 * 
+	 *
 	 * @param output an OutputStream to use for the Writer
 	 * @return A Writer for the given OutputStream
 	 */

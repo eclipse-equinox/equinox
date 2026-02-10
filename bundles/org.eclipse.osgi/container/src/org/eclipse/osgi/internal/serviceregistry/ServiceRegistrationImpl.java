@@ -341,7 +341,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 	 * <li>Constants.SERVICE_BUNDLEID</li>
 	 * <li>Constants.SERVICE_SCOPE</li>
 	 * </ul>
-	 * 
+	 *
 	 * @see #createProperties(Dictionary)
 	 */
 	private static final int FRAMEWORK_SET_SERVICE_PROPERTIES_COUNT = 4;
@@ -390,7 +390,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 
 	/**
 	 * Return the properties object. This is for framework internal use only.
-	 * 
+	 *
 	 * @return The service registration's properties.
 	 */
 	public Map<String, Object> getProperties() {
@@ -451,7 +451,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 
 	/**
 	 * Return the service id for this service.
-	 * 
+	 *
 	 * @return The service id for this service.
 	 */
 	long getId() {
@@ -460,7 +460,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 
 	/**
 	 * Return the service ranking for this service.
-	 * 
+	 *
 	 * @return The service ranking for this service.
 	 */
 	int getRanking() {
@@ -501,7 +501,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 	 * This method returns the bundle which registered the service regardless of the
 	 * registration status of this service registration. This is not an OSGi
 	 * specified method.
-	 * 
+	 *
 	 * @return The bundle which registered the service.
 	 */
 	public Bundle getRegisteringBundle() {
@@ -739,17 +739,20 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 	 */
 	Bundle[] getUsingBundles() {
 		synchronized (registrationLock) {
-			if (state == UNREGISTERED) /* service unregistered */
+			if (state == UNREGISTERED) { /* service unregistered */
 				return null;
+			}
 
 			int size = contextsUsing.size();
-			if (size == 0)
+			if (size == 0) {
 				return null;
+			}
 
 			/* Copy list of BundleContext into an array of Bundle. */
 			Bundle[] bundles = new Bundle[size];
-			for (int i = 0; i < size; i++)
+			for (int i = 0; i < size; i++) {
 				bundles[i] = contextsUsing.get(i).getBundleImpl();
+			}
 
 			return bundles;
 		}

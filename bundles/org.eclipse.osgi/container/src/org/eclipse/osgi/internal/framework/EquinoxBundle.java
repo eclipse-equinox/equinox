@@ -116,8 +116,9 @@ public class EquinoxBundle implements Bundle, BundleReference {
 
 			@Override
 			public String get(Object key) {
-				if (!(key instanceof String))
+				if (!(key instanceof String)) {
 					return null;
+				}
 
 				String sKey = (String) key;
 				if (Constants.EXPORT_PACKAGE.equalsIgnoreCase(sKey)
@@ -149,16 +150,18 @@ public class EquinoxBundle implements Bundle, BundleReference {
 				String systemExtraValue = systemExtraProp != null
 						? getEquinoxContainer().getConfiguration().getConfiguration(systemExtraProp)
 						: null;
-				if (systemValue == null)
+				if (systemValue == null) {
 					systemValue = systemExtraValue;
-				else if (systemExtraValue != null && systemExtraValue.trim().length() > 0)
+				} else if (systemExtraValue != null && systemExtraValue.trim().length() > 0) {
 					systemValue += ", " + systemExtraValue; //$NON-NLS-1$
+				}
 				String result = headers.get(header);
 				if (systemValue != null && systemValue.trim().length() > 0) {
-					if (result != null)
+					if (result != null) {
 						result += ", " + systemValue; //$NON-NLS-1$
-					else
+					} else {
 						result = systemValue;
+					}
 				}
 				return result;
 			}
@@ -356,8 +359,9 @@ public class EquinoxBundle implements Bundle, BundleReference {
 		public void update(InputStream input) throws BundleException {
 			getEquinoxContainer().checkAdminPermission(this, AdminPermission.LIFECYCLE);
 			try {
-				if (input != null)
+				if (input != null) {
 					input.close();
+				}
 			} catch (IOException e) {
 				// do nothing
 			}
@@ -803,16 +807,18 @@ public class EquinoxBundle implements Bundle, BundleReference {
 		try {
 			SignedContent current = getSignedContent();
 			SignerInfo[] infos = current == null ? null : current.getSignerInfos();
-			if (infos.length == 0)
+			if (infos.length == 0) {
 				return Collections.emptyMap();
+			}
 			Map<X509Certificate, List<X509Certificate>> results = new HashMap<>(infos.length);
 			for (SignerInfo info : infos) {
 				if (signersType == SIGNERS_TRUSTED && !info.isTrusted()) {
 					continue;
 				}
 				Certificate[] certs = info.getCertificateChain();
-				if (certs == null || certs.length == 0)
+				if (certs == null || certs.length == 0) {
 					continue;
+				}
 				List<X509Certificate> certChain = new ArrayList<>();
 				for (Certificate cert : certs) {
 					certChain.add((X509Certificate) cert);
@@ -1065,8 +1071,9 @@ public class EquinoxBundle implements Bundle, BundleReference {
 	}
 
 	private final void checkValid() {
-		if (module.getState().equals(State.UNINSTALLED))
+		if (module.getState().equals(State.UNINSTALLED)) {
 			throw new IllegalStateException("Bundle has been uninstalled: " + this); //$NON-NLS-1$
+		}
 	}
 
 	public boolean isFragment() {
@@ -1133,8 +1140,9 @@ public class EquinoxBundle implements Bundle, BundleReference {
 	@Override
 	public String toString() {
 		String name = getSymbolicName();
-		if (name == null)
+		if (name == null) {
 			name = "unknown"; //$NON-NLS-1$
+		}
 		return (name + '_' + getVersion() + " [" + getBundleId() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 

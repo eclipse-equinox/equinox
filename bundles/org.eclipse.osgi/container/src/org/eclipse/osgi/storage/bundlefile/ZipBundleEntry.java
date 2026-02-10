@@ -38,7 +38,7 @@ public class ZipBundleEntry extends BundleEntry {
 
 	/**
 	 * Constructs the BundleEntry using a ZipEntry.
-	 * 
+	 *
 	 * @param bundleFile BundleFile object this entry is a member of
 	 * @param zipEntry   ZipEntry object of this entry
 	 */
@@ -107,8 +107,9 @@ public class ZipBundleEntry extends BundleEntry {
 	public URL getFileURL() {
 		try {
 			File file = bundleFile.getFile(zipEntry.getName(), false);
-			if (file != null)
+			if (file != null) {
 				return file.toURL();
+			}
 		} catch (MalformedURLException e) {
 			// This can not happen.
 		}

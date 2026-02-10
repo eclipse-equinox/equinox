@@ -20,7 +20,7 @@ package org.eclipse.osgi.service.resolver;
  * This interface is not intended to be implemented by clients. The
  * {@link StateObjectFactory} should be used to construct instances.
  * </p>
- * 
+ *
  * @since 3.1
  * @noimplement This interface is not intended to be implemented by clients.
  */
@@ -28,7 +28,7 @@ public interface HostSpecification extends VersionConstraint {
 	/**
 	 * Returns the list of host BundleDescriptions that satisfy this
 	 * HostSpecification
-	 * 
+	 *
 	 * @return the list of host BundleDescriptions that satisfy this
 	 *         HostSpecification
 	 */
@@ -36,7 +36,7 @@ public interface HostSpecification extends VersionConstraint {
 
 	/**
 	 * Returns if this HostSpecification is allowed to have multiple hosts
-	 * 
+	 *
 	 * @return true if this HostSpecification is allowed to have multiple hosts
 	 */
 	public boolean isMultiHost();

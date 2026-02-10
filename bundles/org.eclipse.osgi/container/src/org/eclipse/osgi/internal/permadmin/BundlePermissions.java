@@ -56,8 +56,9 @@ public final class BundlePermissions extends PermissionCollection {
 	 *                           action of {@link PackagePermission#IMPORT}.
 	 */
 	public void addWovenPermission(PackagePermission permission) {
-		if (!permission.getActions().equals(PackagePermission.IMPORT))
+		if (!permission.getActions().equals(PackagePermission.IMPORT)) {
 			throw new SecurityException();
+		}
 		wovenPermissions.add(permission);
 	}
 
@@ -72,17 +73,20 @@ public final class BundlePermissions extends PermissionCollection {
 	@Override
 	public boolean implies(Permission permission) {
 		// first check implied permissions
-		if ((impliedPermissions != null) && impliedPermissions.implies(permission))
+		if ((impliedPermissions != null) && impliedPermissions.implies(permission)) {
 			return true;
+		}
 
 		// Now check implied permissions added by weaving hooks.
-		if (wovenPermissions.implies(permission))
+		if (wovenPermissions.implies(permission)) {
 			return true;
+		}
 
 		// We must be allowed by the restricted permissions to have any hope of passing
 		// the check
-		if ((restrictedPermissions != null) && !restrictedPermissions.implies(permission))
+		if ((restrictedPermissions != null) && !restrictedPermissions.implies(permission)) {
 			return false;
+		}
 
 		return securityAdmin.checkPermission(permission, this);
 	}
@@ -92,9 +96,11 @@ public final class BundlePermissions extends PermissionCollection {
 	}
 
 	public void clearPermissionCache() {
-		if (impliedPermissions != null)
+		if (impliedPermissions != null) {
 			impliedPermissions.clearPermissionCache();
-		if (restrictedPermissions != null)
+		}
+		if (restrictedPermissions != null) {
 			restrictedPermissions.clearPermissionCache();
+		}
 	}
 }
