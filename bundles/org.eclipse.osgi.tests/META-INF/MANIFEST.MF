@@ -11,7 +11,6 @@ Require-Bundle:
 Bundle-ActivationPolicy: lazy
 Import-Package: org.junit.jupiter.api;version="[5.14.0,6.0.0)",
  org.junit.jupiter.api.extension;version="[5.14.0,6.0.0)",
- org.junit.jupiter.api.function;version="[5.14.0,6.0.0)",
  org.junit.jupiter.api.io;version="[5.14.0,6.0.0)",
  org.junit.platform.suite.api;version="[1.14.0,2.0.0)",
  org.osgi.service.event,
@@ -20,11 +19,7 @@ Import-Package: org.junit.jupiter.api;version="[5.14.0,6.0.0)",
  org.osgi.util.position,
  org.osgi.util.promise,
  org.osgi.util.xml
-Export-Package: org.eclipse.osgi.tests.appadmin;
-  uses:="junit.framework,
-   org.eclipse.equinox.app,
-   org.osgi.framework,
-   org.osgi.util.tracker",
+Export-Package: org.eclipse.osgi.tests.appadmin;uses:="org.eclipse.equinox.app,org.osgi.framework,org.osgi.util.tracker",
  org.eclipse.osgi.tests.bundles;
   uses:="org.eclipse.osgi.launch,
    org.eclipse.osgi.service.resolver,
