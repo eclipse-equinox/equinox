@@ -71,6 +71,7 @@ public interface BundleDelta extends Comparable<BundleDelta> {
 	 * @see BundleDelta#getType
 	 * @deprecated this type is no longer valid
 	 */
+	@Deprecated(forRemoval = true, since = "2026-03")
 	public static final int LINKAGE_CHANGED = 0x20;
 
 	/**
@@ -80,6 +81,7 @@ public interface BundleDelta extends Comparable<BundleDelta> {
 	 * @see BundleDelta#getType
 	 * @deprecated this type is no longer valid
 	 */
+	@Deprecated(forRemoval = true, since = "2026-03")
 	public static final int OPTIONAL_LINKAGE_CHANGED = 0x40;
 
 	/**
