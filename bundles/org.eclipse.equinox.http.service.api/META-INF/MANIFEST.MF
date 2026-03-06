@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: OSGi service http APIs
 Bundle-SymbolicName: org.eclipse.equinox.http.service.api
-Bundle-Version: 1.2.102.qualifier
+Bundle-Version: 1.2.202.qualifier
 Bundle-Vendor: Eclipse.org - Equinox
 Automatic-Module-Name: org.eclipse.equinox.http.service.api
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
