@@ -92,24 +92,38 @@ class EquinoxLogger extends org.slf4j.helpers.AbstractLogger {
 		}
 
 		if(level == Level.TRACE && logger.isTraceEnabled()) {
-			String formattedMessage = MessageFormatter.basicArrayFormat(messagePattern, arguments);
+			String formattedMessage = safeBasicArrayFormat(messagePattern, arguments);
 			logger.trace(formattedMessage,throwable);
 		}
 		if(level == Level.DEBUG && logger.isDebugEnabled()) {
-			String formattedMessage = MessageFormatter.basicArrayFormat(messagePattern, arguments);
+			String formattedMessage = safeBasicArrayFormat(messagePattern, arguments);
 			logger.debug(formattedMessage,throwable);
 		}
 		if(level == Level.WARN && logger.isWarnEnabled()) {
-			String formattedMessage = MessageFormatter.basicArrayFormat(messagePattern, arguments);
+			String formattedMessage = safeBasicArrayFormat(messagePattern, arguments);
 			logger.warn(formattedMessage,throwable);
 		}
 		if(level == Level.INFO && logger.isInfoEnabled()) {
-			String formattedMessage = MessageFormatter.basicArrayFormat(messagePattern, arguments);
+			String formattedMessage = safeBasicArrayFormat(messagePattern, arguments);
 			logger.info(formattedMessage, throwable);
 		}
 		if(level == Level.ERROR && logger.isInfoEnabled()) {
-			String formattedMessage = MessageFormatter.basicArrayFormat(messagePattern, arguments);
+			String formattedMessage = safeBasicArrayFormat(messagePattern, arguments);
 			logger.info(formattedMessage, throwable);
+		}
+	}
+
+	/**
+	 * Wrapper around SLF4J basicArrayFormat that guards against a null message pattern.
+	 * OSGi does not allow logging a null message
+	 * @param messagePattern
+	 * @param arguments
+	 */
+	private String safeBasicArrayFormat(String messagePattern, Object[] arguments) {
+		if(messagePattern == null) {
+			return String.valueOf(messagePattern);
+		} else {
+			return MessageFormatter.basicArrayFormat(messagePattern, arguments);
 		}
 	}
 
