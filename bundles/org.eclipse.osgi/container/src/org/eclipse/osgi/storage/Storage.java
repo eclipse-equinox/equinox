@@ -151,6 +151,7 @@ public class Storage {
 	public static final String BUNDLE_FILE_NAME = "bundleFile"; //$NON-NLS-1$
 	public static final String FRAMEWORK_INFO = "framework.info"; //$NON-NLS-1$
 	public static final String ECLIPSE_SYSTEMBUNDLE = "Eclipse-SystemBundle"; //$NON-NLS-1$
+	public static final String ECLIPSE_BUNDLESHAPE = "Eclipse-BundleShape"; //$NON-NLS-1$
 	public static final String DELETE_FLAG = ".delete"; //$NON-NLS-1$
 	public static final String LIB_TEMP = "libtemp"; //$NON-NLS-1$
 
@@ -742,9 +743,9 @@ public class Storage {
 			generation = info.createGeneration();
 
 			File contentFile = getContentFile(staged, contentType, nextID, generation.getGenerationId());
-			generation.setContent(contentFile, contentType);
+			BundleFile bundleFile = generation.installBundleFile(contentFile, contentType);
 			// Check that we can open the bundle file
-			generation.getBundleFile().open();
+			bundleFile.open();
 			setStorageHooks(generation);
 
 			ModuleRevisionBuilder builder = getBuilder(generation);
@@ -995,9 +996,9 @@ public class Storage {
 
 		try {
 			File contentFile = getContentFile(staged, contentType, bundleInfo.getBundleId(), newGen.getGenerationId());
-			newGen.setContent(contentFile, contentType);
+			BundleFile bundleFile = newGen.installBundleFile(contentFile, contentType);
 			// Check that we can open the bundle file
-			newGen.getBundleFile().open();
+			bundleFile.open();
 			setStorageHooks(newGen);
 
 			ModuleRevisionBuilder builder = getBuilder(newGen);
@@ -1176,6 +1177,47 @@ public class Storage {
 				outFile.delete();
 			}
 			throw new BundleException(Msg.BUNDLE_READ_EXCEPTION, BundleException.READ_ERROR, e);
+		}
+	}
+
+	/**
+	 * Extracts a JAR file to a directory. This is used when Eclipse-BundleShape: dir is specified.
+	 * 
+	 * @param jarFile the JAR file to extract
+	 * @param targetDir the target directory to extract to
+	 * @throws IOException if extraction fails
+	 */
+	void extractJarToDirectory(File jarFile, File targetDir) throws IOException {
+		if (!targetDir.exists() && !targetDir.mkdirs()) {
+			throw new IOException("Could not create directory: " + targetDir.getAbsolutePath()); //$NON-NLS-1$
+		}
+		
+		try (java.util.jar.JarFile jar = new java.util.jar.JarFile(jarFile)) {
+			Enumeration<java.util.jar.JarEntry> entries = jar.entries();
+			while (entries.hasMoreElements()) {
+				java.util.jar.JarEntry entry = entries.nextElement();
+				File entryFile = new File(targetDir, entry.getName());
+				
+				// Security check: ensure entry doesn't escape target directory
+				if (!entryFile.getCanonicalPath().startsWith(targetDir.getCanonicalPath())) {
+					throw new IOException("Entry is outside of the target directory: " + entry.getName()); //$NON-NLS-1$
+				}
+				
+				if (entry.isDirectory()) {
+					entryFile.mkdirs();
+				} else {
+					// Ensure parent directory exists
+					File parent = entryFile.getParentFile();
+					if (parent != null && !parent.exists()) {
+						parent.mkdirs();
+					}
+					
+					// Extract file
+					try (InputStream in = jar.getInputStream(entry)) {
+						Files.copy(in, entryFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+					}
+				}
+			}
 		}
 	}
 
