@@ -90,26 +90,42 @@ class EquinoxLogger extends org.slf4j.helpers.AbstractLogger {
 		if (logger == null) {
 			return;
 		}
+		//Must not pass a null argument to OSGi Logger
+		Object[] loggerArguments = throwable != null ? new Object[] { throwable } : new Object[0];
 
 		if(level == Level.TRACE && logger.isTraceEnabled()) {
-			String formattedMessage = MessageFormatter.basicArrayFormat(messagePattern, arguments);
-			logger.trace(formattedMessage,throwable);
+			String formattedMessage = safeBasicArrayFormat(messagePattern, arguments);
+			logger.trace(formattedMessage, loggerArguments);
 		}
 		if(level == Level.DEBUG && logger.isDebugEnabled()) {
-			String formattedMessage = MessageFormatter.basicArrayFormat(messagePattern, arguments);
-			logger.debug(formattedMessage,throwable);
+			String formattedMessage = safeBasicArrayFormat(messagePattern, arguments);
+			logger.debug(formattedMessage, loggerArguments);
 		}
 		if(level == Level.WARN && logger.isWarnEnabled()) {
-			String formattedMessage = MessageFormatter.basicArrayFormat(messagePattern, arguments);
-			logger.warn(formattedMessage,throwable);
+			String formattedMessage = safeBasicArrayFormat(messagePattern, arguments);
+			logger.warn(formattedMessage, loggerArguments);
 		}
 		if(level == Level.INFO && logger.isInfoEnabled()) {
-			String formattedMessage = MessageFormatter.basicArrayFormat(messagePattern, arguments);
-			logger.info(formattedMessage, throwable);
+			String formattedMessage = safeBasicArrayFormat(messagePattern, arguments);
+			logger.info(formattedMessage, loggerArguments);
 		}
-		if(level == Level.ERROR && logger.isInfoEnabled()) {
-			String formattedMessage = MessageFormatter.basicArrayFormat(messagePattern, arguments);
-			logger.info(formattedMessage, throwable);
+		if(level == Level.ERROR && logger.isErrorEnabled()) {
+			String formattedMessage = safeBasicArrayFormat(messagePattern, arguments);
+			logger.error(formattedMessage, loggerArguments);
+		}
+	}
+
+	/**
+	 * Wrapper around SLF4J basicArrayFormat that guards against a null message pattern.
+	 * OSGi does not allow logging a null message
+	 * @param messagePattern
+	 * @param arguments
+	 */
+	private String safeBasicArrayFormat(String messagePattern, Object[] arguments) {
+		if(messagePattern == null) {
+			return String.valueOf(messagePattern);
+		} else {
+			return MessageFormatter.basicArrayFormat(messagePattern, arguments);
 		}
 	}
 
