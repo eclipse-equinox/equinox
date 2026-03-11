@@ -109,9 +109,9 @@ class EquinoxLogger extends org.slf4j.helpers.AbstractLogger {
 			String formattedMessage = safeBasicArrayFormat(messagePattern, arguments);
 			logger.info(formattedMessage, loggerArguments);
 		}
-		if(level == Level.ERROR && logger.isInfoEnabled()) {
+		if(level == Level.ERROR && logger.isErrorEnabled()) {
 			String formattedMessage = safeBasicArrayFormat(messagePattern, arguments);
-			logger.info(formattedMessage, loggerArguments);
+			logger.error(formattedMessage, loggerArguments);
 		}
 	}
 
