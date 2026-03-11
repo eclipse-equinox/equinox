@@ -248,7 +248,8 @@
         xsi:type="setup:ResourceCreationTask"
         excludedTriggers="BOOTSTRAP"
         targetURL="${github.clone.equinox.p2.location|uri}/bundles/org.eclipse.equinox.p2.jarprocessor/lib/jarprocessor-ant.jar"
-        encoding="base64">
+        encoding="base64"
+        lastModified="0">
       <description>Create an empty jar as a placeholder for the jar that will eventually be created.  This ensures that PDE will add the jar to the classpath of projects needing the ant jar.</description>
       <content>
         UEsDBAoAAAAAAHtelUw05vp1HAAAABwAAAAFAHAAZW1wdHlTRFsApAAAAAAIAL/UyvdjZGBpEGFg
@@ -262,7 +263,8 @@
         xsi:type="setup:ResourceCreationTask"
         excludedTriggers="BOOTSTRAP"
         targetURL="${github.clone.equinox.p2.location|uri}/bundles/org.eclipse.equinox.p2.repository.tools/lib/repository-tools-ant.jar"
-        encoding="base64">
+        encoding="base64"
+        lastModified="0">
       <description>Create an empty jar as a placeholder for the jar that will eventually be created.  This ensures that PDE will add the jar to the classpath of projects needing the ant jar.</description>
       <content>
         UEsDBAoAAAAAAHtelUw05vp1HAAAABwAAAAFAHAAZW1wdHlTRFsApAAAAAAIAL/UyvdjZGBpEGFg
