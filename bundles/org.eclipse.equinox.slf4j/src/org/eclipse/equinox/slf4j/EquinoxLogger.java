@@ -90,26 +90,28 @@ class EquinoxLogger extends org.slf4j.helpers.AbstractLogger {
 		if (logger == null) {
 			return;
 		}
+		//Must not pass a null argument to OSGi Logger
+		Object[] loggerArguments = throwable != null ? new Object[] { throwable } : new Object[0];
 
 		if(level == Level.TRACE && logger.isTraceEnabled()) {
 			String formattedMessage = safeBasicArrayFormat(messagePattern, arguments);
-			logger.trace(formattedMessage,throwable);
+			logger.trace(formattedMessage, loggerArguments);
 		}
 		if(level == Level.DEBUG && logger.isDebugEnabled()) {
 			String formattedMessage = safeBasicArrayFormat(messagePattern, arguments);
-			logger.debug(formattedMessage,throwable);
+			logger.debug(formattedMessage, loggerArguments);
 		}
 		if(level == Level.WARN && logger.isWarnEnabled()) {
 			String formattedMessage = safeBasicArrayFormat(messagePattern, arguments);
-			logger.warn(formattedMessage,throwable);
+			logger.warn(formattedMessage, loggerArguments);
 		}
 		if(level == Level.INFO && logger.isInfoEnabled()) {
 			String formattedMessage = safeBasicArrayFormat(messagePattern, arguments);
-			logger.info(formattedMessage, throwable);
+			logger.info(formattedMessage, loggerArguments);
 		}
 		if(level == Level.ERROR && logger.isInfoEnabled()) {
 			String formattedMessage = safeBasicArrayFormat(messagePattern, arguments);
-			logger.info(formattedMessage, throwable);
+			logger.info(formattedMessage, loggerArguments);
 		}
 	}
 
