@@ -87,14 +87,30 @@ public class LogEquinoxTraceTest extends AbstractBundleTests {
 		Map<String, Object> configuration = new HashMap<>();
 		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
 		equinox = new Equinox(configuration);
-		equinox.start();
+		equinox.init();
+
 		loggerAdmin = equinox.getBundleContext()
 				.getService(equinox.getBundleContext().getServiceReference(LoggerAdmin.class));
 		LogReaderService logReader = equinox.getBundleContext()
 				.getService(equinox.getBundleContext().getServiceReference(LogReaderService.class));
 
+		LoggerContext rootContext = loggerAdmin.getLoggerContext(null);
+		Map<String, LogLevel> rootLogLevels = rootContext.getLogLevels();
+
+		rootLogLevels.put(Logger.ROOT_LOGGER_NAME, LogLevel.TRACE);
+		rootLogLevels.put(Debug.OPTION_DEBUG_STARTLEVEL, LogLevel.TRACE);
+		rootContext.setLogLevels(rootLogLevels);
+
 		testListener = new TestListener();
 		logReader.addLogListener(testListener);
+
+		equinox.start();
+
+		waitForFrameworkStartEvent(30_000L);
+
+		rootLogLevels.remove(Logger.ROOT_LOGGER_NAME, LogLevel.TRACE);
+		rootLogLevels.remove(Debug.OPTION_DEBUG_STARTLEVEL, LogLevel.TRACE);
+		rootContext.setLogLevels(rootLogLevels);
 
 		BundleContext systemContext = equinox.getBundleContext();
 		debugOptions = systemContext.getService(systemContext.getServiceReference(DebugOptions.class));
@@ -289,5 +305,24 @@ public class LogEquinoxTraceTest extends AbstractBundleTests {
 		b.loadClass("org.osgi.framework.hooks.bundle.FindHook");
 		traceLogs = testListener.getLogs();
 		assertEquals("Expected to have some trace logs.", 0, traceLogs.size());
+	}
+
+	private void waitForFrameworkStartEvent(long timeout) throws InterruptedException {
+		long s = System.currentTimeMillis();
+		while (!frameworkStartEventReceived() && System.currentTimeMillis() - s <= timeout) {
+			Thread.sleep(50);
+		}
+		if (System.currentTimeMillis() - s > timeout) {
+			throw new RuntimeException("timeout occurred while waiting for framework start log entry");
+		}
+	}
+
+	private boolean frameworkStartEventReceived() {
+		List<LogEntry> results;
+		synchronized (testListener.logs) {
+			results = new ArrayList(testListener.logs);
+			testListener.logs.clear();
+		}
+		return results.stream().map(LogEntry::getMessage).anyMatch(m -> "FrameworkEvent STARTED".equals(m));
 	}
 }
