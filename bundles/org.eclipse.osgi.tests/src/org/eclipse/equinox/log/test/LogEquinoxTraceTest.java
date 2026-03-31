@@ -27,6 +27,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import org.eclipse.equinox.log.SynchronousLogListener;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.launch.Equinox;
@@ -39,6 +41,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.condition.Condition;
 import org.osgi.service.log.LogEntry;
@@ -87,16 +90,28 @@ public class LogEquinoxTraceTest extends AbstractBundleTests {
 		Map<String, Object> configuration = new HashMap<>();
 		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
 		equinox = new Equinox(configuration);
-		equinox.start();
-		loggerAdmin = equinox.getBundleContext()
-				.getService(equinox.getBundleContext().getServiceReference(LoggerAdmin.class));
-		LogReaderService logReader = equinox.getBundleContext()
-				.getService(equinox.getBundleContext().getServiceReference(LogReaderService.class));
-
-		testListener = new TestListener();
-		logReader.addLogListener(testListener);
+		equinox.init();
 
 		BundleContext systemContext = equinox.getBundleContext();
+		CountDownLatch frameworkStarted = new CountDownLatch(1);
+		systemContext.addFrameworkListener((e) -> {
+			if (FrameworkEvent.STARTED == e.getType()) {
+				frameworkStarted.countDown();
+			}
+		});
+
+		equinox.start();
+		// Need to wait for the STARTED event before continuing to ensure
+		// all events are flushed before adding the test log listener
+		frameworkStarted.await(1, TimeUnit.MINUTES);
+
+		loggerAdmin = systemContext.getService(systemContext.getServiceReference(LoggerAdmin.class));
+		testListener = new TestListener();
+
+		LogReaderService logReader = systemContext
+				.getService(systemContext.getServiceReference(LogReaderService.class));
+		logReader.addLogListener(testListener);
+
 		debugOptions = systemContext.getService(systemContext.getServiceReference(DebugOptions.class));
 	}
 
