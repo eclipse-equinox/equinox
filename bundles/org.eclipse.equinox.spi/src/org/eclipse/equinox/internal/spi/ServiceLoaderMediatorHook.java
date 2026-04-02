@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -58,6 +59,8 @@ public class ServiceLoaderMediatorHook extends ClassLoaderHook {
 	// TODO: Extend the class that writes the config.ini to automatically add this
 	// framework extension when it is installed?! Check if this is then used in
 	// Tycho and PDE.
+	// Respectively add first-class support for adding framework extensions to the
+	// product, like for auto-started bundles
 
 	private static final String SERVICE_NAME_PREFIX = "META-INF/services/"; //$NON-NLS-1$
 
@@ -66,32 +69,31 @@ public class ServiceLoaderMediatorHook extends ClassLoaderHook {
 
 	static {
 		ClassLoader classLoader = ServiceLoaderMediatorHook.class.getClassLoader();
-		URL tracingDummy = classLoader
-				.getResource(SERVICE_NAME_PREFIX + "org.eclipse.osgi.spi.internal.hooks.ServiceLoaderMediatorHook");
+		URL tracingDummy = classLoader.getResource(SERVICE_NAME_PREFIX + ServiceLoaderMediatorHook.class.getName());
 		@SuppressWarnings("unchecked")
 		Optional<Class<?>>[] resourcesCallers = new Optional[1];
 		@SuppressWarnings("unchecked")
 		Optional<Class<?>>[] classCallers = new Optional[1];
-		ClassLoader tracker = new ClassLoader() {
-			@Override
-			public Enumeration<URL> getResources(String name) throws IOException {
-				resourcesCallers[0] = Callers.walk(callerClasses -> callerClasses
-						.filter(c -> c == ServiceLoader.class || c.getEnclosingClass() == ServiceLoader.class)
-						.findFirst());
-				return Collections.enumeration(Arrays.asList(tracingDummy));
-			}
-
-			@Override
-			public Class<?> loadClass(String name) throws ClassNotFoundException {
-				if ("a.caller.tracing.Dummy".equals(name)) {
-					classCallers[0] = Callers.walk(callerClasses -> callerClasses
+		try {
+			ClassLoader tracker = new ClassLoader() {
+				@Override
+				public Enumeration<URL> getResources(String name) throws IOException {
+					resourcesCallers[0] = Callers.walk(callerClasses -> callerClasses
 							.filter(c -> c == ServiceLoader.class || c.getEnclosingClass() == ServiceLoader.class)
 							.findFirst());
+					return Collections.enumeration(Arrays.asList(tracingDummy));
 				}
-				throw new ClassNotFoundException();
-			}
-		};
-		try {
+
+				@Override
+				public Class<?> loadClass(String name) throws ClassNotFoundException {
+					if ("a.caller.tracing.Dummy".equals(name)) { //$NON-NLS-1$
+						classCallers[0] = Callers.walk(callerClasses -> callerClasses
+								.filter(c -> c == ServiceLoader.class || c.getEnclosingClass() == ServiceLoader.class)
+								.findFirst());
+					}
+					throw new ClassNotFoundException();
+				}
+			};
 			ServiceLoader.load(ServiceLoaderMediatorHook.class, tracker).findFirst();
 		} catch (ServiceConfigurationError e) { // expected
 		}
@@ -110,21 +112,32 @@ public class ServiceLoaderMediatorHook extends ClassLoaderHook {
 		final Map<String, List<String>> providedServices;
 
 		public BundleServices(Bundle bundle, BundleWiring wiring) {
+			this.consumedServices = getConsumedServices(wiring);
 			this.providedServices = getProvidedServices(bundle, wiring);
-			if (hasServiceConsumerRequirement(wiring)) {
-				this.consumedServices = wiring.getRequirements(OSGI_SERVICELOADER_NAMESPACE).stream() // $NON-NLS-1$
-						.map(r -> r.getDirectives().getOrDefault("filter", "")) //$NON-NLS-1$ //$NON-NLS-2$
-						.map(SERVICE_LOADER_FILTER::matcher).filter(Matcher::matches).map(m -> m.group(SERVICE_NAME))
-						.filter(BundleServices::isFullyQualifiedJavaClassName).collect(Collectors.toSet());
-			} else {
-				this.consumedServices = Collections.emptySet();
-			}
 		}
 
-		private Map<String, List<String>> getProvidedServices(Bundle bundle, BundleWiring wiring) {
-			if (hasServiceProviderRequirement(wiring)) {
+		private static Set<String> getConsumedServices(BundleWiring wiring) {
+			// TODO: Or just check if wired to this fragment's host for the
+			// registrar/processor
+			if (hasOSGiExtenderRequirement(wiring, "(osgi.extender=osgi.serviceloader.processor)")) { //$NON-NLS-1$
+				// TODO: Or operate on the resource's requirements to also consider those that
+				// are not wired? But if not wired, it means there's no provider anyways and we
+				// can't do anything...
+				return wiring.getRequirements(OSGI_SERVICELOADER_NAMESPACE).stream()
+						.map(r -> r.getDirectives().getOrDefault(Constants.FILTER_DIRECTIVE, "")) //$NON-NLS-1$
+						.map(SERVICE_LOADER_FILTER::matcher).filter(Matcher::matches).map(m -> m.group(SERVICE_NAME))
+						.filter(BundleServices::isFullyQualifiedJavaClassName).collect(Collectors.toSet());
+			}
+			return Collections.emptySet();
+		}
+
+		private static Map<String, List<String>> getProvidedServices(Bundle bundle, BundleWiring wiring) {
+			// TODO: Or just check if wired to this fragment's host for the
+			// registrar/processor
+			if (hasOSGiExtenderRequirement(wiring, "(osgi.extender=osgi.serviceloader.registrar)")) { //$NON-NLS-1$
 				Map<String, List<String>> provided = new HashMap<>();
 				// TODO: how to treat fragments. They should be considered as part of the host?
+				// But arn't they already considered in the wiring?
 				// If lists are merged, handle fragment removal. Or merge on demand to simplify
 				// tracking?
 				Enumeration<String> serviceProviderEntries = bundle.getEntryPaths(SERVICE_NAME_PREFIX);
@@ -135,24 +148,48 @@ public class ServiceLoaderMediatorHook extends ClassLoaderHook {
 						continue;
 					}
 					String service = path.substring(lastSeparator + 1);
-					URL entry = bundle.getEntry(path);
+					// TODO: Check JDT's issue with this?!
+					URL entry = (URL) (Object) bundle.getEntry(path);
+
 					try (InputStream is = entry.openStream();
-							BufferedReader reader = new BufferedReader(new InputStreamReader(is));) {
-						for (String providerName; (providerName = reader.readLine()) != null;) {
-							String classname = getServiceImplementorName(providerName);
-							if (!classname.isEmpty()) {
-								provided.computeIfAbsent(service, n -> new ArrayList<>()).add(classname);
-							}
-						}
+							BufferedReader reader = new BufferedReader(
+									new InputStreamReader(is, StandardCharsets.UTF_8));) {
+						List<String> providedServices = provided.computeIfAbsent(service, n -> new ArrayList<>());
+						reader.lines().map(BundleServices::getServiceImplementorName).filter(n -> !n.isEmpty())
+						.forEach(providedServices::add);
 					} catch (IOException e) { // TODO: ignore, log?
 					}
+
+					//					try {
+					//						ClassLoader bundleClassLoader = wiring.getClassLoader();
+					//						Class<?> serviceClass = bundleClassLoader.loadClass(service);
+					//						List<Class<?>> collect = ServiceLoader.load(serviceClass, bundleClassLoader).stream()
+					//								.map(Provider::type).collect(Collectors.toList());
+					//						collect.stream().map(Object::getClass).map(Class::getName).collect(Collectors.toList());
+					//					} catch (Exception e) { // TODO: Handle? Rethrow? Log?
+					//						e.printStackTrace();
+					//					}
 				}
+				provided.values().removeIf(List::isEmpty); // Service file might have been empty
 				return provided;
 			}
 			return Collections.emptyMap();
 		}
 
-		private String getServiceImplementorName(String providerName) {
+		private static boolean hasOSGiExtenderRequirement(BundleWiring wiring, String filter) {
+			List<BundleWire> requiredWires = wiring.getRequiredWires("osgi.extender"); //$NON-NLS-1$
+			if (requiredWires.isEmpty()) {
+				return false;
+			}
+			return requiredWires.stream().anyMatch(w -> {
+				Map<String, String> directives = w.getRequirement().getDirectives();
+				return directives.getOrDefault(Constants.FILTER_DIRECTIVE, "").contains(filter) //$NON-NLS-1$
+						// TODO: Why system-bundle? to check this framework-extension SPI is used?
+						&& w.getProvider().getBundle().getBundleId() == Constants.SYSTEM_BUNDLE_ID;
+			});
+		}
+
+		private static String getServiceImplementorName(String providerName) {
 			int commentIndex = providerName.indexOf('#');
 			if (commentIndex >= 0) {
 				providerName = providerName.substring(0, commentIndex);
@@ -160,7 +197,7 @@ public class ServiceLoaderMediatorHook extends ClassLoaderHook {
 			return providerName.trim();
 		}
 
-		static boolean isFullyQualifiedJavaClassName(String service) {
+		private static boolean isFullyQualifiedJavaClassName(String service) {
 			return Character.isJavaIdentifierStart(service.codePointAt(0)) && IntStream.range(1, service.length())
 					.allMatch(i -> Character.isJavaIdentifierPart(service.codePointAt(i)) || service.charAt(i) == '.');
 		}
@@ -190,8 +227,8 @@ public class ServiceLoaderMediatorHook extends ClassLoaderHook {
 					services.providedServices.forEach((service, providers) -> {
 						for (String serviceClassname : providers) {
 							if (allProvidedServices.putIfAbsent(serviceClassname, service) != null) {
-								// TODO: or handle this? Could happen with multiple versions of a bundle
-								// installed
+								// TODO: or handle this? Could e.g. happen with multiple versions of a bundle
+								// installed or if two bundles provide the same service impl name for any reason
 								throw new IllegalStateException("Service provider class available more than once:" //$NON-NLS-1$
 										+ serviceClassname);
 							}
@@ -201,6 +238,12 @@ public class ServiceLoaderMediatorHook extends ClassLoaderHook {
 				}
 			}
 			return null; // Not interesting, don't track
+		}
+
+		@Override
+		public void modifiedBundle(Bundle bundle, BundleEvent event, BundleServices object) {
+			// TODO Just remove and add again?
+			super.modifiedBundle(bundle, event, object);
 		}
 
 		@Override
@@ -229,7 +272,6 @@ public class ServiceLoaderMediatorHook extends ClassLoaderHook {
 					Bundle aBundle = delegate.getWiring().getBundle();
 					Bundle systemBundle = aBundle.getBundleContext().getBundle(Constants.SYSTEM_BUNDLE_ID);
 					BundleContext systemBundleContext = systemBundle.getBundleContext();
-					// TODO: Could this be obtained/pass already upon creation?
 					ServiceBundleTracker tracker = new ServiceBundleTracker(systemBundleContext);
 					// TODO: what is suitable if the framework is restarted. Is this called again?
 					systemBundleContext.addBundleListener(event -> {
@@ -260,7 +302,7 @@ public class ServiceLoaderMediatorHook extends ClassLoaderHook {
 				List<URL> services = searchProviderClassLoaders(serviceName, bundle, classLoader).flatMap(cl -> {
 					try {
 						Enumeration<URL> resources = cl.getResources(name);
-						return Collections.list(resources).stream();
+						return resources.hasMoreElements() ? Collections.list(resources).stream() : Stream.empty();
 					} catch (IOException e) {
 						return Stream.empty();
 					}
@@ -273,11 +315,9 @@ public class ServiceLoaderMediatorHook extends ClassLoaderHook {
 
 	@Override
 	public Class<?> preFindClass(String name, ModuleClassLoader classLoader) throws ClassNotFoundException {
-		// TODO: does this have to be synced somehow? And other calls too?
 		String serviceName = serviceBundleTracker.allProvidedServices.get(name);
 		if (serviceName != null) {
-			Bundle bundle = classLoader.getBundle(); // TODO: get the services from this, when being called
-
+			Bundle bundle = classLoader.getBundle();
 			if (serviceBundleTracker.consumesService(bundle, serviceName)
 					&& Callers.walk(s -> s.anyMatch(c -> c == SERVICE_LOADER_LOAD_CLASS_CALLERS))) {
 				// TODO: index and parse the found service files per bundle and only continue
@@ -287,7 +327,6 @@ public class ServiceLoaderMediatorHook extends ClassLoaderHook {
 				// All non empty line and everything behind a # is a comment and ignored.
 				// No need to check for the correct syntax. The ServiceLoader will do the
 				// failure for us.
-				serviceBundleTracker.getObject(bundle);
 				return searchProviderClassLoaders(serviceName, bundle, classLoader).map(cl -> {
 					try {
 						return cl.loadClass(name);
@@ -303,39 +342,16 @@ public class ServiceLoaderMediatorHook extends ClassLoaderHook {
 	private Stream<ClassLoader> searchProviderClassLoaders(String serviceName, Bundle bundle,
 			ModuleClassLoader classLoader) {
 		BundleWiring wiring = bundle.adapt(BundleWiring.class);
-		return Stream.concat(Stream.of(classLoader), providerClassLoaders(serviceName, wiring));
+		return Stream.concat(Stream.of(classLoader), wiredProviderClassLoaders(serviceName, wiring));
 	}
 
-	private static boolean isCalledFromServiceLoader() {
-		return Callers.walk(classes -> classes
-				.anyMatch(c -> c == ServiceLoader.class || c.getEnclosingClass() == ServiceLoader.class));
-	}
-
-	static boolean hasServiceProviderRequirement(BundleWiring wiring) {
-		return hasOSGiExtenderRequirement(wiring, "(osgi.extender=osgi.serviceloader.registrar)"); //$NON-NLS-1$
-	}
-
-	static boolean hasServiceConsumerRequirement(BundleWiring wiring) {
-		return hasOSGiExtenderRequirement(wiring, "(osgi.extender=osgi.serviceloader.processor)"); //$NON-NLS-1$
-	}
-
-	private static boolean hasOSGiExtenderRequirement(BundleWiring wiring, String filter) {
-		List<BundleWire> requiredWires = wiring.getRequiredWires("osgi.extender"); //$NON-NLS-1$
-		if (requiredWires.isEmpty()) {
-			return false;
-		}
-		return requiredWires.stream()
-				.anyMatch(w -> w.getRequirement().getDirectives().getOrDefault("filter", "").contains(filter) //$NON-NLS-1$ //$NON-NLS-2$
-						&& w.getProvider().getBundle().getBundleId() == Constants.SYSTEM_BUNDLE_ID);
-	}
-
-	private static Stream<ClassLoader> providerClassLoaders(String serviceName, BundleWiring wiring) {
+	private static Stream<ClassLoader> wiredProviderClassLoaders(String serviceName, BundleWiring wiring) {
 		List<BundleWire> requiredWires = wiring.getRequiredWires(OSGI_SERVICELOADER_NAMESPACE);
 		if (!requiredWires.isEmpty()) {
 			return requiredWires.stream().filter(wire -> {
 				Object serviceLoaderAttribute = wire.getCapability().getAttributes().get(OSGI_SERVICELOADER_NAMESPACE);
 				return serviceName.equals(serviceLoaderAttribute);
-			}).map(wire -> wire.getProviderWiring().getClassLoader());
+			}).map(BundleWire::getProviderWiring).map(BundleWiring::getClassLoader);
 
 		}
 		return Stream.empty();
