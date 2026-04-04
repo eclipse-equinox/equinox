@@ -61,7 +61,6 @@ echo "build $defaultOSArch"
 PROGRAM_OUTPUT="$programOutput"
 DEFAULT_OS="$defaultOS"
 DEFAULT_WS="$defaultWS"
-DEPLOYMENT_TARGET=11.0
 if [ "$BINARIES_DIR" = "" ]; then BINARIES_DIR="../../../../../equinox.binaries"; fi
 
 if [ "$defaultOSArch" == "arm64" ] || [ "$defaultOSArch" == "aarch64" ]
@@ -84,7 +83,7 @@ fi
 ARCHS="-arch $defaultOSArch"
 
 export PROGRAM_OUTPUT DEFAULT_OS DEFAULT_OS_ARCH DEFAULT_WS ARCHS JAVA_HEADERS EXE_OUTPUT_DIR LIB_OUTPUT_DIR 
-export MACOSX_DEPLOYMENT_TARGET=$DEPLOYMENT_TARGET
+export MACOSX_DEPLOYMENT_TARGET=11
 
 if [ "$extraArgs" != "" ]; then
 	make -f $makefile $extraArgs

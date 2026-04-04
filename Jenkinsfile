@@ -15,6 +15,7 @@
 
 def runOnNativeBuildAgent(String platform, Closure body) {
 	def final nativeBuildStageName = 'Perform native launcher build'
+	def agentLabel = 'native.builder-' + platform
 	if (platform == 'gtk.linux.x86_64') {
 		podTemplate(inheritFrom: 'basic' /* inherit general configuration */, containers: [
 			containerTemplate(name: 'launcherbuild', image: 'eclipse/platformreleng-debian-swtgtk3nativebuild:10',
@@ -25,12 +26,9 @@ def runOnNativeBuildAgent(String platform, Closure body) {
 			node(POD_LABEL) { stage(nativeBuildStageName) { container('launcherbuild') { body() } } }
 		}
 	} else {
-		if (platform == 'cocoa.macosx.x86_64') {
-			platform = 'cocoa.macosx.aarch64'
-		}
 		// See the Definition of the RelEng Jenkins instance in
 		// https://github.com/eclipse-cbi/jiro/tree/master/instances/eclipse.platform.releng
-		node('native.builder-' + platform) { stage(nativeBuildStageName) { body() } }
+		node(agentLabel) { stage(nativeBuildStageName) { body() } }
 	}
 }
 

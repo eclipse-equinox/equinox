@@ -44,7 +44,8 @@ ifeq ($(ARCHS),-arch x86_64)
 endif
 
 CFLAGS = -O \
-	-Wall \
+	-Wall -Werror \
+	-Wunguarded-availability \
 	-DCOCOA -xobjective-c \
 	$(ARCHS) \
 	-DMACOSX \
