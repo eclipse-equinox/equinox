@@ -128,10 +128,11 @@ public class ConnectBundleFile extends CloseableBundleFile<ConnectEntry> {
 	}
 
 	public Map<String, String> getConnectHeaders() {
-		if (!lockOpen()) {
-			return null;
-		}
+		boolean success = lockAndOpen();
 		try {
+			if (!success) {
+				return null;
+			}
 			return content.getHeaders().orElse(null);
 		} finally {
 			releaseOpen();

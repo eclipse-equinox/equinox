@@ -18,6 +18,7 @@ package org.eclipse.osgi.storage.bundlefile;
 import static org.eclipse.osgi.internal.debug.Debug.OPTION_DEBUG_BUNDLE_FILE;
 import static org.eclipse.osgi.internal.debug.Debug.OPTION_DEBUG_BUNDLE_FILE_CLOSE;
 import static org.eclipse.osgi.internal.debug.Debug.OPTION_DEBUG_BUNDLE_FILE_OPEN;
+import static org.eclipse.osgi.internal.debug.Debug.OPTION_DEBUG_BUNDLE_FILE_OPEN_LOCK;
 
 import java.io.File;
 import java.io.FilterInputStream;
@@ -77,18 +78,39 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 	}
 
 	/**
-	 * Checks if the bundle file is open
+	 * Locks the bundle file and returns true if the bundle file is open. The caller
+	 * must always call releaseOpen to release the lock.
 	 * 
-	 * @return true if the bundle file is open and locked
+	 * @return true if the bundle file is open.
 	 */
+	protected boolean lockAndOpen() {
+		return internalLockOpen(false);
+	}
+
+	/**
+	 * @deprecated use {@link #lockAndOpen()}
+	 */
+	@Deprecated
 	protected boolean lockOpen() {
+		return internalLockOpen(true);
+	}
+
+	protected boolean internalLockOpen(boolean unlockOnError) {
 		openLock.lock();
 		try {
 			internalOpen();
+			if (debug.DEBUG_BUNDLE_FILE_OPEN_LOCK) {
+				debug.trace(OPTION_DEBUG_BUNDLE_FILE_OPEN_LOCK, "lockOpen obtained lock - " + toString()); //$NON-NLS-1$
+			}
 			return true;
 		} catch (Throwable e) {
-			// always unlock on any throwable
-			openLock.unlock();
+			if (debug.DEBUG_BUNDLE_FILE_OPEN_LOCK) {
+				debug.trace(OPTION_DEBUG_BUNDLE_FILE_OPEN_LOCK, "lockOpen failed lock - " + toString()); //$NON-NLS-1$
+			}
+			if (unlockOnError) {
+				// always unlock on any throwable if unlockOnError is set
+				openLock.unlock();
+			}
 			if (generation != null) {
 				ModuleRevision r = generation.getRevision();
 				if (r != null) {
@@ -119,6 +141,9 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 	 * Unlocks the open lock
 	 */
 	protected void releaseOpen() {
+		if (debug.DEBUG_BUNDLE_FILE_OPEN_LOCK) {
+			debug.trace(OPTION_DEBUG_BUNDLE_FILE_OPEN_LOCK, "lockOpen releasing lock - " + toString()); //$NON-NLS-1$
+		}
 		openLock.unlock();
 	}
 
@@ -174,10 +199,11 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 	 *         extraction is not supported.
 	 */
 	File extractDirectory(String dirName) {
-		if (!lockOpen()) {
-			return null;
-		}
+		boolean success = lockAndOpen();
 		try {
+			if (!success) {
+				return null;
+			}
 			for (String path : getPaths()) {
 				if (path.startsWith(dirName) && !path.endsWith("/")) //$NON-NLS-1$
 					getFile(path, false);
@@ -201,10 +227,11 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 		if (generation == null) {
 			return null;
 		}
-		if (!lockOpen()) {
-			return null;
-		}
+		boolean success = lockAndOpen();
 		try {
+			if (!success) {
+				return null;
+			}
 			BundleEntry bEntry = getEntry(entry);
 			if (bEntry == null)
 				return null;
@@ -255,10 +282,11 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 
 	@Override
 	public boolean containsDir(String dir) {
-		if (!lockOpen()) {
-			return false;
-		}
+		boolean success = lockAndOpen();
 		try {
+			if (!success) {
+				return false;
+			}
 			if (dir == null)
 				return false;
 
@@ -287,10 +315,11 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 
 	@Override
 	public BundleEntry getEntry(String path) {
-		if (!lockOpen()) {
-			return null;
-		}
+		boolean success = lockAndOpen();
 		try {
+			if (!success) {
+				return null;
+			}
 			return findEntry(path);
 		} finally {
 			releaseOpen();
@@ -307,10 +336,11 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 
 	@Override
 	public Enumeration<String> getEntryPaths(String path, boolean recurse) {
-		if (!lockOpen()) {
-			return null;
-		}
+		boolean success = lockAndOpen();
 		try {
+			if (!success) {
+				return null;
+			}
 			if (path == null)
 				throw new NullPointerException();
 
@@ -480,10 +510,11 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 	 * @return the input stream for the entry
 	 */
 	public InputStream getInputStream(E entry) throws IOException {
-		if (!lockOpen()) {
-			throw new IOException("Failed to lock bundle file."); //$NON-NLS-1$
-		}
+		boolean success = lockAndOpen();
 		try {
+			if (!success) {
+				throw new IOException("Failed to open bundle file."); //$NON-NLS-1$
+			}
 			InputStream in = doGetInputStream(entry);
 			if (isMruEnabled()) {
 				in = new BundleEntryInputStream(in);

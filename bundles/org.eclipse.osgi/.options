@@ -44,6 +44,8 @@ org.eclipse.osgi/debug/bundleFile=false
 org.eclipse.osgi/debug/bundleFile/open=false
 # Debug the bundle file close calls
 org.eclipse.osgi/debug/bundleFile/close=false
+# Debug the bundle file lockOpen calls
+org.eclipse.osgi/debug/bundleFile/open/lock=false
 
 # Eclipse adaptor options
 org.eclipse.osgi/eclipseadaptor/debug = false

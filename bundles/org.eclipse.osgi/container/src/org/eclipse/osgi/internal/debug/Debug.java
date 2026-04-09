@@ -127,6 +127,8 @@ public class Debug implements DebugOptionsListener {
 
 	public static final String OPTION_DEBUG_BUNDLE_FILE_CLOSE = ECLIPSE_OSGI + "/debug/bundleFile/close"; //$NON-NLS-1$
 
+	public static final String OPTION_DEBUG_BUNDLE_FILE_OPEN_LOCK = ECLIPSE_OSGI + "/debug/bundleFile/open/lock"; //$NON-NLS-1$
+
 	/**
 	 * General debug flag.
 	 */
@@ -197,6 +199,8 @@ public class Debug implements DebugOptionsListener {
 
 	public boolean DEBUG_BUNDLE_FILE_CLOSE = false; // debug/bundleFile/close
 
+	public boolean DEBUG_BUNDLE_FILE_OPEN_LOCK = false; // debug/bundleFile/open/lock
+
 	public Debug(DebugOptions dbgOptions) {
 		optionsChanged(dbgOptions);
 	}
@@ -228,6 +232,7 @@ public class Debug implements DebugOptionsListener {
 		DEBUG_BUNDLE_FILE = dbgOptions.getBooleanOption(OPTION_DEBUG_BUNDLE_FILE, false);
 		DEBUG_BUNDLE_FILE_OPEN = dbgOptions.getBooleanOption(OPTION_DEBUG_BUNDLE_FILE_OPEN, false);
 		DEBUG_BUNDLE_FILE_CLOSE = dbgOptions.getBooleanOption(OPTION_DEBUG_BUNDLE_FILE_CLOSE, false);
+		DEBUG_BUNDLE_FILE_OPEN_LOCK = dbgOptions.getBooleanOption(OPTION_DEBUG_BUNDLE_FILE_OPEN_LOCK, false);
 	}
 
 	/**
