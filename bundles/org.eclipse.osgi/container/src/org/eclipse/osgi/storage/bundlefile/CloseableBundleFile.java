@@ -365,7 +365,7 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 					// wait for them all to close because this is being closed by the
 					// MRUBundleFileList
 					try {
-						refCondition.await(1000, TimeUnit.MICROSECONDS); // timeout after 1 second
+						refCondition.await(1, TimeUnit.SECONDS); // timeout after 1 second
 					} catch (InterruptedException e) {
 						// do nothing for now ...
 					}
