@@ -15,6 +15,10 @@
 
 def runOnNativeBuildAgent(String platform, Closure body) {
 	def final nativeBuildStageName = 'Perform native launcher build'
+	// Use x86 agent for aarch64 build to ensure that the baseline macOS SDK (the oldest) is used consistently for all binary builds
+	if (platform == 'cocoa.macosx.aarch64') {
+		platform = 'cocoa.macosx.x86_64'
+	}
 	def agentLabel = 'native.builder-' + platform
 	if (platform == 'gtk.linux.x86_64') {
 		podTemplate(inheritFrom: 'basic' /* inherit general configuration */, containers: [
