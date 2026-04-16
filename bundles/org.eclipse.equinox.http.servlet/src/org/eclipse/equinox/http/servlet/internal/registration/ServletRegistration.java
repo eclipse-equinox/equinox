@@ -17,14 +17,13 @@
 package org.eclipse.equinox.http.servlet.internal.registration;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.List;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 import org.eclipse.equinox.http.servlet.internal.context.ContextController;
 import org.eclipse.equinox.http.servlet.internal.context.ServiceHolder;
-import org.eclipse.equinox.http.servlet.internal.multipart.MultipartSupport;
-import org.eclipse.equinox.http.servlet.internal.multipart.MultipartSupportFactory;
+import org.eclipse.equinox.http.servlet.internal.multipart.*;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.runtime.dto.ServletDTO;
@@ -35,19 +34,10 @@ public class ServletRegistration extends EndpointRegistration<ServletDTO> {
 	private static MultipartSupportFactory factory;
 
 	static {
-		ServiceLoader<MultipartSupportFactory> loader = ServiceLoader.load(MultipartSupportFactory.class);
-
-		Iterator<MultipartSupportFactory> iterator = loader.iterator();
-
-		while (iterator.hasNext()) {
-			try {
-				// Note: we intentionally trigger next() inside the try/catch block
-				// to fail early if optional imports are missing
-				factory = iterator.next();
-				break;
-			} catch (Throwable t) {
-				// ignore ServiceConfigurationError, it means our optional imports are missing.
-			}
+		try {
+			factory = new MultipartSupportFactoryImpl();
+		} catch (NoClassDefFoundError e) {
+			// ignore NoClassDefFoundError, it means our optional imports are missing.
 		}
 	}
 
