@@ -15,6 +15,10 @@
       %license
    </license>
 
+   <requires>
+      <import plugin="org.apache.commons.commons-fileupload"/>
+   </requires>
+
    <plugin
          id="org.eclipse.equinox.http.jetty"
          version="0.0.0"/>
