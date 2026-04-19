@@ -77,6 +77,7 @@
                         <include name="cocoa/macosx/aarch64/**/*"/>
                         <include name="gtk/linux/ppc64le/**/*"/>
                         <include name="gtk/linux/aarch64/**/*"/>
+                        <include name="gtk/linux/loongarch64/**/*"/>
                         <include name="gtk/linux/riscv64/**/*"/>
                         <include name="gtk/linux/x86_64/**/*"/>
                         <include name="win32/win32/aarch64/**/*"/>
