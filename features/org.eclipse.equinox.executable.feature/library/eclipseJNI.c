@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2009 IBM Corporation and others.
+ * Copyright (c) 2006, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -28,12 +28,9 @@ static _TCHAR* failedCreateVM = _T_ECLIPSE("Failed to create the Java Virtual Ma
 static _TCHAR* internalExpectedVMArgs = _T_ECLIPSE("Internal Error, the JVM argument list is empty.\n");
 static _TCHAR* mainClassNotFound = _T_ECLIPSE("Failed to find a Main Class in \"%s\".\n");
 
-static JNINativeMethod natives[] = {{"_update_splash", "()V", (void *)&update_splash},
-									{"_get_splash_handle", "()J", (void *)&get_splash_handle},
+static JNINativeMethod natives[] = {
 									{"_set_exit_data", "(Ljava/lang/String;Ljava/lang/String;)V", (void *)&set_exit_data},
 									{"_set_launcher_info", "(Ljava/lang/String;Ljava/lang/String;)V", (void *)&set_launcher_info},
-									{"_show_splash", "(Ljava/lang/String;)V", (void *)&show_splash},
-									{"_takedown_splash", "()V", (void *)&takedown_splash},
 									{"_get_os_recommended_folder", "()Ljava/lang/String;", (void *)&get_os_recommended_folder}};
 
 /* local methods */
@@ -43,7 +40,6 @@ static int shouldShutdown(JNIEnv *env);
 static void JNI_ReleaseStringChars(JNIEnv *env, jstring s, const _TCHAR* data);
 static const _TCHAR* JNI_GetStringChars(JNIEnv *env, jstring str);
 static char * getMainClass(JNIEnv *env, _TCHAR * jarFile);
-static void setLibraryLocation(JNIEnv *env, jobject obj);
 
 static JavaVM * jvm = 0;
 static JNIEnv *env = 0;
@@ -108,66 +104,12 @@ JNIEXPORT void JNICALL set_launcher_info(JNIEnv * env, jobject obj, jstring laun
 	}
 }
 
-
-JNIEXPORT void JNICALL update_splash(JNIEnv * env, jobject obj){
-	dispatchMessages();
-}
-
-JNIEXPORT jlong JNICALL get_splash_handle(JNIEnv * env, jobject obj){
-	return getSplashHandle();
-}
-
-JNIEXPORT void JNICALL show_splash(JNIEnv * env, jobject obj, jstring s){
-	const _TCHAR* data = NULL;
-	
-	setLibraryLocation(env, obj);
-	
-	if(s != NULL) {
-		data = JNI_GetStringChars(env, s);
-		if(data != NULL) {
-			showSplash(data);
-			JNI_ReleaseStringChars(env, s, data);
-		} else {
-			(*env)->ExceptionDescribe(env);
-			(*env)->ExceptionClear(env);
-		}
-	}
-}
-
-JNIEXPORT void JNICALL takedown_splash(JNIEnv * env, jobject obj){
-	takeDownSplash();
-}
-
 JNIEXPORT jstring JNICALL get_os_recommended_folder(JNIEnv * env, jobject obj){
 #ifdef MACOSX
 	return newJavaString(env, getFolderForApplicationData());
 #else
 	return NULL;
 #endif
-}
-
-/*
- * On AIX we need the location of the eclipse shared library so that we
- * can find the libeclipse-motif.so library.  Reach into the JNIBridge
- * object to get the "library" field.
- */
-static void setLibraryLocation(JNIEnv * env, jobject obj) {
-	jclass bridge = (*env)->FindClass(env, "org/eclipse/equinox/launcher/JNIBridge");
-	if (bridge != NULL) {
-		jfieldID libraryField = (*env)->GetFieldID(env, bridge, "library", "Ljava/lang/String;");
-		if (libraryField != NULL) {
-			jstring stringObject = (jstring) (*env)->GetObjectField(env, obj, libraryField);
-			if (stringObject != NULL) {
-				const _TCHAR * str = JNI_GetStringChars(env, stringObject);
-				eclipseLibrary = _tcsdup(str);
-				JNI_ReleaseStringChars(env, stringObject, str);
-			}
-		}
-	}
-	if( (*env)->ExceptionOccurred(env) != 0 ){
-		(*env)->ExceptionDescribe(env);
-		(*env)->ExceptionClear(env);
-	}
 }
 
 static void registerNatives(JNIEnv *env) {

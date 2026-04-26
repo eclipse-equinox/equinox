@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -25,9 +25,6 @@
 #define VM_EE_PROPS		4		/* it is a vm .ee properties file */
 
 /* Eclipse Launcher Utility Methods */
-
-/* Is the given Java VM J9 */
-extern int isJ9VM( _TCHAR* vm );
 
 /* Is the given file a shared library? */
 extern int isVMLibrary( _TCHAR* vm );

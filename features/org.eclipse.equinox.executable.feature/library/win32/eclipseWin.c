@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2025 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -52,17 +52,6 @@ static _TCHAR**	openFilePath;
 
 /* Define the window system arguments for the Java VM. */
 static _TCHAR*  argVM[] = { NULL };
-
-/* Define the SWT auto-scale setting for the splash screen. */
-enum {
-	AUTOSCALE_DEFAULT = -1,
-	AUTOSCALE_FALSE = -2,
-	AUTOSCALE_QUARTER = -3,
-	AUTOSCALE_EXACT = -4,
-	AUTOSCALE_INTEGER = -5
-	/* positive values indicate a literal percentage */
-};
-static int autoScaleValue = AUTOSCALE_DEFAULT;
 
 /* Define local variables for running the JVM and detecting its exit. */
 static HANDLE  jvmProcess     = 0;
@@ -204,198 +193,6 @@ int reuseWorkbench(_TCHAR** filePath, int timeout) {
 		SetTimer( topWindow, findWindowTimerId, findWindowTimeout, findWindowProc );
 	
 	return 0;
-}
-
-HBITMAP loadImage(LPCWSTR pszFilename, int targetDpi) {
-	HRESULT hr = S_OK;
-	HBITMAP hBitmap = NULL;
-	IWICImagingFactory *pFactory = NULL;
-	IWICBitmapDecoder *pDecoder = NULL;
-	IWICBitmapFrameDecode *pFrame = NULL;
-	IWICFormatConverter *pConverter = NULL;
-	IWICBitmapScaler *pScaler = NULL;
-	IWICBitmapSource *pSource = NULL; /* borrowed, don't deref */
-
-	hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
-	if (FAILED(hr)) return NULL;
-	hr = CoCreateInstance(&CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, &IID_IWICImagingFactory, &pFactory);
-	if (FAILED(hr)) goto done;
-
-	hr = IWICImagingFactory_CreateDecoderFromFilename(pFactory, pszFilename, NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pDecoder);
-	if (FAILED(hr)) goto done;
-	hr = IWICBitmapDecoder_GetFrame(pDecoder, 0, &pFrame);
-	if (FAILED(hr)) goto done;
-	pSource = (IWICBitmapSource *)pFrame;
-
-	/* Scale the image to the targetDpi, assuming that the source is always 96 dpi. */
-	UINT uiWidth = 0, uiHeight = 0;
-	hr = IWICBitmapSource_GetSize(pFrame, &uiWidth, &uiHeight);
-	if (FAILED(hr)) goto done;
-	if (targetDpi != 96) {
-		uiWidth = uiWidth * targetDpi / 96;
-		uiHeight = uiHeight * targetDpi / 96;
-		hr = IWICImagingFactory_CreateBitmapScaler(pFactory, &pScaler);
-		if (FAILED(hr)) goto done;
-		hr = IWICBitmapScaler_Initialize(pScaler, pSource, uiWidth, uiHeight, WICBitmapInterpolationModeCubic);
-		if (FAILED(hr)) goto done;
-		pSource = (IWICBitmapSource *)pScaler;
-	}
-
-	/* Convert the image to the 24-bit BGR format. */
-	WICPixelFormatGUID format;
-	hr = IWICBitmapSource_GetPixelFormat(pSource, &format);
-	if (FAILED(hr)) goto done;
-	if (!IsEqualGUID(&format, &GUID_WICPixelFormat24bppBGR)) {
-		hr = IWICImagingFactory_CreateFormatConverter(pFactory, &pConverter);
-		if (FAILED(hr)) goto done;
-		hr = IWICFormatConverter_Initialize(pConverter, pSource, &GUID_WICPixelFormat24bppBGR, WICBitmapDitherTypeNone, NULL, 0., WICBitmapPaletteTypeCustom);
-		if (FAILED(hr)) goto done;
-		pSource = (IWICBitmapSource *)pConverter;
-	}
-
-	/* Create a DIB and initialize it from the WIC source. */
-	BITMAPINFO bmi = {{
-		.biSize = sizeof(BITMAPINFOHEADER),
-		.biWidth = (LONG)uiWidth,
-		.biHeight = -(LONG)uiHeight,
-		.biPlanes = 1,
-		.biBitCount = 24,
-		.biCompression = BI_RGB,
-	}};
-	UINT uiStride = (uiWidth * 3 + 3) & ~3; /* rounded up to a multiple of 4 */
-	PVOID pvBits = NULL;
-	hBitmap = CreateDIBSection(NULL, &bmi, DIB_RGB_COLORS, &pvBits, NULL, 0);
-	if (!hBitmap) goto done;
-	hr = IWICBitmapSource_CopyPixels(pSource, NULL, uiStride, uiStride * uiHeight, pvBits);
-	if (FAILED(hr)) {
-		DeleteObject(hBitmap);
-		hBitmap = NULL;
-	}
-
-done:
-	if (pScaler) IUnknown_Release(pScaler);
-	if (pConverter) IUnknown_Release(pConverter);
-	if (pFrame) IUnknown_Release(pFrame);
-	if (pDecoder) IUnknown_Release(pDecoder);
-	if (pFactory) IUnknown_Release(pFactory);
-	CoUninitialize();
-	return hBitmap;
-}
-
-/* Show the Splash Window
- *
- * Open the bitmap, insert into the splash window and display it.
- *
- */
-int showSplash( const _TCHAR* featureImage )
-{
-	static int splashing = 0;
-    HBITMAP hBitmap = 0;
-    BITMAP  bmp;
-    HDC     hDC;
-    int     x, y;
-    int     width, height;
-    int     dpiX;
-
-	if(splashing) {
-		/*splash screen is already showing, do nothing */
-		return 0;
-	}
-	if (featureImage == NULL)
-		return -1;
-	
-	/* if Java was started first and is calling back to show the splash, we might not
-	 * have initialized the window system yet
-	 */
-	initWindowSystem(0, NULL);
-	
-    /* fetch screen DPI and round it according to the swt.autoScale setting, 
-    this implementation needs to be kept in sync with org.eclipse.swt.internal.DPIUtil#setDeviceZoom(int) */
-    hDC = GetDC( NULL);
-	dpiX = GetDeviceCaps ( hDC, LOGPIXELSX );
-	ReleaseDC(NULL, hDC);
-	switch (autoScaleValue) {
-		case AUTOSCALE_FALSE:
-			dpiX = 96;
-			break;
-		case AUTOSCALE_DEFAULT:
-		case AUTOSCALE_QUARTER:
-			dpiX = ((dpiX + 12) / 24) * 24;
-			break;
-		case AUTOSCALE_EXACT:
-			break;
-		case AUTOSCALE_INTEGER:
-			dpiX = ((int)((dpiX + 24) / 96 )) * 96;
-			break;
-		default:
-			dpiX = (96 * autoScaleValue + 50) / 100;
-			break;
-	}
-
-	/* Load the bitmap for the feature. */
-	if (featureImage != NULL)
-		hBitmap = loadImage(featureImage, dpiX);
-
-    /* If the bitmap could not be found, return an error. */
-    if (hBitmap == 0)
-    	return ERROR_FILE_NOT_FOUND;
-    
-	GetObject(hBitmap, sizeof(BITMAP), &bmp);
-
-    /* figure out position */
-    width = GetSystemMetrics (SM_CXSCREEN);
-    height = GetSystemMetrics (SM_CYSCREEN);
-    x = (width - bmp.bmWidth) / 2;
-    y = (height - bmp.bmHeight) / 2;
-
-	/* Centre the splash window and display it. */
-    SetWindowPos (topWindow, 0, x, y, bmp.bmWidth, bmp.bmHeight, SWP_NOZORDER | SWP_NOSIZE | SWP_NOACTIVATE);
-    SendMessage( topWindow, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM) hBitmap );
-    ShowWindow( topWindow, SW_SHOW );
-    BringWindowToTop( topWindow );
-	splashing = 1;
-	
-    /* Process messages */
-	dispatchMessages();
-	return 0;
-}
-
-void dispatchMessages() {
-	MSG     msg;
-	
-	if(topWindow == 0)
-		return;
-	while (PeekMessage( &msg, NULL, 0, 0, PM_REMOVE))
-   	{
-		TranslateMessage( &msg );
-		DispatchMessage( &msg );
-	}
-}
-
-jlong getSplashHandle() {
-	return (jlong)topWindow;
-}
-
-void takeDownSplash() {
-	HWND window = NULL;
-	if(topWindow != NULL) {
-		if (mutex != NULL) {
-			KillTimer(topWindow, findWindowTimerId);
-
-			window = findSWTMessageWindow();
-			if (window != NULL) {
-				sendOpenFileMessage(window);
-			}
-
-			ReleaseMutex(mutex);
-			CloseHandle(mutex);
-			mutex = 0;
-		}
-
-		DestroyWindow(topWindow);
-		dispatchMessages();
-		topWindow = 0;
-	}
 }
 
 /* Get the window system specific VM args */
@@ -697,44 +494,7 @@ static void CALLBACK detectJvmExit( HWND hwnd, UINT uMsg, UINT id, DWORD dwTime 
 }
 
 void processVMArgs(_TCHAR **vmargs[] ) {
-	_TCHAR** arg;
-	for (arg = *vmargs; *arg != NULL; arg++) {
-		// see org.eclipse.swt.internal.DPIUtil.getZoomForAutoscaleProperty()
-		if (_tcsncmp(*arg, _T("-Dswt.autoScale.updateOnRuntime="), 32) == 0) {
-			_TCHAR* value = *arg + 32;
-			if (_tcsicmp(value, _T("false")) == 0) {
-				/* when monitor-specific scaling is disabled, default is "integer" */
-				autoScaleValue = AUTOSCALE_INTEGER;
-			}
-		}
-		if (_tcsncmp(*arg, _T("-Dswt.autoScale="), 16) == 0) {
-			_TCHAR* value = *arg + 16;
-			if (_tcsicmp(value, _T("false")) == 0) {
-				autoScaleValue = AUTOSCALE_FALSE;
-			}
-			else if (_tcsicmp(value, _T("quarter")) == 0) {
-				autoScaleValue = AUTOSCALE_QUARTER;
-			}
-			else if (_tcsicmp(value, _T("exact")) == 0) {
-				autoScaleValue = AUTOSCALE_EXACT;
-			}
-			else if (_tcsicmp(value, _T("integer")) == 0) {
-				autoScaleValue = AUTOSCALE_INTEGER;
-			}
-			else {
-				_TCHAR* end = NULL;
-				autoScaleValue = (int)_tcstol(value, &end, 10);
-				if (end == NULL || *end != _T('\0')) {
-					/* conversion error, reset to default */
-					autoScaleValue = AUTOSCALE_DEFAULT;
-				}
-				else {
-					if (autoScaleValue < 25) autoScaleValue = 25;
-					else if (autoScaleValue > 1600) autoScaleValue = 1600;
-				}
-			}
-		}
-	}
+	/* nothing yet */
 }
 
 JavaResults* startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[], _TCHAR* jarFile )

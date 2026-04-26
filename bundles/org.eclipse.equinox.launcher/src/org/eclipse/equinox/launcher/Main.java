@@ -145,6 +145,7 @@ public class Main {
 	private List<String> extensionPaths = null;
 
 	private JNIBridge bridge = null;
+	private SplashScreen splashScreen = null;
 
 	// splash handling
 	private boolean showSplash = false;
@@ -161,8 +162,8 @@ public class Main {
 
 		//Called reflectively by org.eclipse.core.runtime.internal.adaptor.DefaultStartupMonitor
 		public void updateSplash() {
-			if (bridge != null && !splashDown) {
-				bridge.updateSplash();
+			if (splashScreen != null && !splashDown) {
+				splashScreen.update();
 			}
 		}
 	}
@@ -2017,6 +2018,20 @@ public class Main {
 		return location.openStream();
 	}
 
+	//TODO: Check new doc
+	/*
+	 * To display a splash screen before starting the java vm, the launcher should be started
+	* with the location of the splash bitmap to use:
+	* -showsplash <path/to/splash.bmp>
+	* Otherwise, when the Java program starts, it should determine the location of
+	* the splash bitmap to be used and use the JNI method show_splash.
+	*
+	* When the Java program initialization is complete, the splash window
+	* is brought down by calling the JNI method takedown_splash.
+	*
+	* The Java program can also call the get_splash_handle method to get the handle to the splash
+	* window.  This can be passed to SWT to create SWT widgets in the splash screen.
+	   */
 	/*
 	 * Handle splash screen.
 	 *  The splash screen is displayed natively.  Whether or not the splash screen
@@ -2037,7 +2052,7 @@ public class Main {
 	private void handleSplash() {
 		// run without splash if we are initializing or nosplash
 		// was specified (splashdown = true)
-		if (initialize || splashDown || bridge == null) {
+		if (initialize || splashDown) {
 			showSplash = false;
 			endSplash = null;
 			return;
@@ -2072,14 +2087,14 @@ public class Main {
 		if (splashLocation == null) {
 			return;
 		}
-
-		bridge.setLauncherInfo(System.getProperty(PROP_LAUNCHER), System.getProperty(PROP_LAUNCHER_NAME));
-		bridge.showSplash(splashLocation);
-		long handle = bridge.getSplashHandle();
-		if (handle != 0 && handle != -1) {
-			System.setProperty(SPLASH_HANDLE, String.valueOf(handle));
+		if (bridge != null) {
+			bridge.setLauncherInfo(System.getProperty(PROP_LAUNCHER), System.getProperty(PROP_LAUNCHER_NAME));;
+		}
+		splashScreen = SplashScreen.show(Path.of(splashLocation), configurationLocation, ws + "." + os + "." + arch); //$NON-NLS-1$ //$NON-NLS-2$
+		if (splashScreen != null) {
+			System.setProperty(SPLASH_HANDLE, String.valueOf(splashScreen.getHandle()));
 			System.setProperty(SPLASH_LOCATION, splashLocation);
-			bridge.updateSplash();
+			splashScreen.update();
 		} else {
 			// couldn't show the splash screen for some reason
 			splashDown = true;
@@ -2090,11 +2105,11 @@ public class Main {
 	 * Take down the splash screen.
 	 */
 	private void takeDownSplash() {
-		if (splashDown || bridge == null) { // splash is already down
+		if (splashDown || splashScreen == null) { // splash is already down
 			return;
 		}
 
-		splashDown = bridge.takeDownSplash();
+		splashDown = splashScreen.takeDown();
 		System.clearProperty(SPLASH_HANDLE);
 
 		try {

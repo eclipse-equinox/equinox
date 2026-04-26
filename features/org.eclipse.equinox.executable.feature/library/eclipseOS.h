@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2025 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -62,27 +62,6 @@ extern void displayMessage( _TCHAR* title, _TCHAR* message );
 extern int initWindowSystem( int* argc, _TCHAR* argv[] );
 
 
-/** Show the Splash Window
- *
- * This method is called to display the actual splash window. It will only
- * be called by the splash window process and not the main launcher process.
- * The splash ID passed corresponds to the string returned from initWindowSystem().
- * If possible, this ID should be used to communicate some piece of data back
- * to the main launcher program for two reasons:
- * 1) to detect when the splash window process terminates
- * 2) to terminate the splash window process should the JVM terminate before it
- *    completes its initialization.
- *
- * Two parameters are passed: the install home directory and a specific bitmap image
- * file for a feature. The feature's image file is tried first and if it cannot be
- * displayed, the images from the install directory are used.
- *
- * Return (exit code):
- * 0        - success
- * non-zero - could not find a splash image to display
- */
-extern int showSplash( const _TCHAR* featureImage );
-
 /** Get List of Java VM Arguments
  *
  * A given Java VM might require a special set of arguments in order to
@@ -93,12 +72,6 @@ extern _TCHAR** getArgVM( _TCHAR *vm );
 
 /* Find the vm shared library associated with the given java executable */
 extern _TCHAR * findVMLibrary( _TCHAR * command );
-
-extern void dispatchMessages();
-
-extern jlong getSplashHandle();
-
-extern void takeDownSplash();
 
 extern void restartLauncher( _TCHAR* program, _TCHAR* args[] );
 

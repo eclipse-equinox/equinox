@@ -26,14 +26,6 @@ class JNIBridge {
 
 	private native void _set_launcher_info(String launcher, String name);
 
-	private native void _update_splash();
-
-	private native long _get_splash_handle();
-
-	private native void _show_splash(String bitmap);
-
-	private native void _takedown_splash();
-
 	private native String _get_os_recommended_folder();
 
 	private final String library;
@@ -83,44 +75,6 @@ class JNIBridge {
 		}
 	}
 
-	public boolean showSplash(String bitmap) {
-		try {
-			_show_splash(bitmap);
-			return true;
-		} catch (UnsatisfiedLinkError e) {
-			if (!libraryLoaded) {
-				loadLibrary();
-				return showSplash(bitmap);
-			}
-			return false;
-		}
-	}
-
-	public boolean updateSplash() {
-		try {
-			_update_splash();
-			return true;
-		} catch (UnsatisfiedLinkError e) {
-			if (!libraryLoaded) {
-				loadLibrary();
-				return updateSplash();
-			}
-			return false;
-		}
-	}
-
-	public long getSplashHandle() {
-		try {
-			return _get_splash_handle();
-		} catch (UnsatisfiedLinkError e) {
-			if (!libraryLoaded) {
-				loadLibrary();
-				return getSplashHandle();
-			}
-			return -1;
-		}
-	}
-
 	/**
 	 * Whether or not we loaded the shared library here from java.
 	 * False does not imply the library is not available, it could have
@@ -130,19 +84,6 @@ class JNIBridge {
 	 */
 	boolean isLibraryLoadedByJava() {
 		return libraryLoaded;
-	}
-
-	public boolean takeDownSplash() {
-		try {
-			_takedown_splash();
-			return true;
-		} catch (UnsatisfiedLinkError e) {
-			if (!libraryLoaded) {
-				loadLibrary();
-				return takeDownSplash();
-			}
-			return false;
-		}
 	}
 
 	public String getOSRecommendedFolder() {
