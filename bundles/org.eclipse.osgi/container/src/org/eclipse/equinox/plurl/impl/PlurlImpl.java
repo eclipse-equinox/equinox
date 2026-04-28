@@ -150,8 +150,8 @@ public final class PlurlImpl implements Plurl {
 	List<ContentHandlerFactoryHolder> contentHandlerFactories = Collections.emptyList();
 	List<PlurlImplHolder> plurlImpls = Collections.emptyList();
 
-	final ServiceLoader<URLStreamHandlerFactory> builtinURLStreamHandlerFactoryLoader;
-	final ServiceLoader<ContentHandlerFactory> builtinContentHandlerFactoryLoader;
+	final List<URLStreamHandlerFactory> builtinURLStreamHandlerFactoryLoader;
+	final List<ContentHandlerFactory> builtinContentHandlerFactoryLoader;
 	final CallStack callStack;
 
 	private final ThreadLocal<List<String>> creatingProtocols = new ThreadLocal<>();
@@ -503,8 +503,14 @@ public final class PlurlImpl implements Plurl {
 	}
 
 	public PlurlImpl() {
-		builtinContentHandlerFactoryLoader = ServiceLoader.load(ContentHandlerFactory.class);
-		builtinURLStreamHandlerFactoryLoader = ServiceLoader.load(URLStreamHandlerFactory.class);
+		List<ContentHandlerFactory> serviceLoaderCHFs = new ArrayList<>();
+		ServiceLoader.load(ContentHandlerFactory.class).forEach(serviceLoaderCHFs::add);
+		builtinContentHandlerFactoryLoader = Collections.unmodifiableList(serviceLoaderCHFs);
+
+		List<URLStreamHandlerFactory> serviceLoaderUSHFs = new ArrayList<>();
+		ServiceLoader.load(URLStreamHandlerFactory.class).forEach(serviceLoaderUSHFs::add);
+		builtinURLStreamHandlerFactoryLoader = Collections.unmodifiableList(serviceLoaderUSHFs);
+
 		callStack = createCallStack();
 	}
 
