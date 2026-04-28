@@ -69,7 +69,7 @@
         </property>
       </activation>
       <properties>
-        <natives.source.dir>${project.basedir}/../../features/org.eclipse.equinox.executable.feature/library/${ws}</natives.source.dir>
+        <natives.source.dir>${project.basedir}/../../features/org.eclipse.equinox.executable.feature</natives.source.dir>
       </properties>
       <build>
         <plugins>
@@ -89,17 +89,9 @@
                     <if><equals arg1="${native}" arg2="${ws}.${os}.${arch}"/>
                       <then>
                         <property name="JAVA_HOME" value="${java.home}"/><!-- Not overwritten if already set, e.g. as CLI argument -->
-                        <if><equals arg1="${ws}" arg2="win32" />
-                          <then>
-                            <exec dir="${natives.source.dir}" executable="cmd" failonerror="true">
-                              <arg line="/c build.bat install -ws ${ws} -os ${os} -arch ${arch}"/>
-                            </exec>
-                          </then><else>
-                            <exec dir="${natives.source.dir}" executable="sh" failonerror="true">
-                              <arg line="build.sh install -ws ${ws} -os ${os} -arch ${arch}"/>
-                            </exec>
-                          </else>
-                        </if>
+                        <exec dir="${natives.source.dir}" executable="java" failonerror="true">
+                          <arg line="tools/build.java install -ws ${ws} -os ${os} -arch ${arch}"/>
+                        </exec>
                       </then>
                     </if>
                   </target>
@@ -117,17 +109,9 @@
                     <taskdef resource="net/sf/antcontrib/antlib.xml"/>
                     <if><equals arg1="${native}" arg2="${ws}.${os}.${arch}"/>
                       <then>
-                        <if><equals arg1="${ws}" arg2="win32" />
-                          <then>
-                            <exec dir="${natives.source.dir}" executable="cmd">
-                              <arg line="/c build.bat clean"/>
-                            </exec>
-                          </then><else>
-                            <exec dir="${natives.source.dir}" executable="sh">
-                              <arg line="build.sh clean"/>
-                            </exec>
-                          </else>
-                        </if>
+                        <exec dir="${natives.source.dir}" executable="java">
+                          <arg line="tools/build.java clean"/>
+                        </exec>
                       </then>
                     </if>
                   </target>

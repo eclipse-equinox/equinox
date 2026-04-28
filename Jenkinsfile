@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2024 Red Hat Inc. and others.
+ * Copyright (c) 2021, 2026 Red Hat Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -151,6 +151,7 @@ pipeline {
 							dir("${LAUNCHER_SOURCES_PATH}") {
 								def newVersion = getLauncherVersion('min_ver').toInteger() + 1
 								sh "sed -i -e 's/min_ver=.*/min_ver=${newVersion}/' make_version.mak"
+								sh 'cp -r ../tools/* .'
 								for (ws in BUILD_NATIVES) {
 									stash name:"equinox.launcher.sources.${ws}", includes: "*,${ws}/"
 								}
@@ -209,12 +210,14 @@ pipeline {
 										unstash "jdk.resources.${os}.${arch}"
 									}
 									withEnv(["JAVA_HOME=${WORKSPACE}/jdk.resources", "EXE_OUTPUT_DIR=${WORKSPACE}/libs", "LIB_OUTPUT_DIR=${WORKSPACE}/libs"]) {
-										dir(ws) {
-											if (isUnix()) {
-												sh "sh build.sh -ws ${ws} -os ${os} -arch ${arch} checklibs install"
-											} else {
-												bat "cmd /c build.bat -ws ${ws} -os ${os} -arch ${arch} install"
-											}
+										//TODO: With this we need Java-25 on all native build agents...
+										// We can then just compile against that JDK (if Java-25 is used).
+										// Defining a java tool is probably worth trying.
+										// TODO: Or stick with java-21? Jenkins requires it, so I assume for agents its preinstalled?
+										if (isUnix()) {
+											sh "java build.java -ws ${ws} -os ${os} -arch ${arch} ${ os == 'linux' ? 'checklibs' : '' } install"
+										} else {
+											bat "java build.java -ws ${ws} -os ${os} -arch ${arch} install"
 										}
 									}
 									dir('libs') {
@@ -313,7 +316,7 @@ pipeline {
 		stage('Build') {
 			tools {
 				maven 'apache-maven-latest'
-				jdk 'temurin-jdk21-latest'
+				jdk 'temurin-jdk25-latest'
 			}
 			environment {
 				EQUINOX_BINARIES_LOC = "$WORKSPACE/equinox.binaries"
