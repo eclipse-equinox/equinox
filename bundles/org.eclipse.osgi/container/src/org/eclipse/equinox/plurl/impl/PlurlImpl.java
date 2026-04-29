@@ -150,8 +150,7 @@ public final class PlurlImpl implements Plurl {
 	List<ContentHandlerFactoryHolder> contentHandlerFactories = Collections.emptyList();
 	List<PlurlImplHolder> plurlImpls = Collections.emptyList();
 
-	final List<URLStreamHandlerFactory> builtinURLStreamHandlerFactoryLoader;
-	final List<ContentHandlerFactory> builtinContentHandlerFactoryLoader;
+	final List<ContentHandlerFactory> builtinContentHandlerFactories;
 	final CallStack callStack;
 
 	private final ThreadLocal<List<String>> creatingProtocols = new ThreadLocal<>();
@@ -503,13 +502,19 @@ public final class PlurlImpl implements Plurl {
 	}
 
 	public PlurlImpl() {
+		// IMPLEMENTATION NOTE:
+		// We must do the ServiceLoader lookup for the built-in ContentHandlerFactory
+		// because the Plurl ContentHandlerFactory must never return null;
+		// otherwise the Plurl factory will never be called again for the requested
+		// content type. So a check for built-in handlers must be done before returning
+		// the Plurl handler.
+		// This is not necessary for URLStreamHandlerFactory or the new
+		// URLStreamHandlerProvider that may be available from the JVM because returning
+		// null from that factory still allows us to be called again if the protocol is
+		// requested again later.
 		List<ContentHandlerFactory> serviceLoaderCHFs = new ArrayList<>();
 		ServiceLoader.load(ContentHandlerFactory.class).forEach(serviceLoaderCHFs::add);
-		builtinContentHandlerFactoryLoader = Collections.unmodifiableList(serviceLoaderCHFs);
-
-		List<URLStreamHandlerFactory> serviceLoaderUSHFs = new ArrayList<>();
-		ServiceLoader.load(URLStreamHandlerFactory.class).forEach(serviceLoaderUSHFs::add);
-		builtinURLStreamHandlerFactoryLoader = Collections.unmodifiableList(serviceLoaderUSHFs);
+		builtinContentHandlerFactories = Collections.unmodifiableList(serviceLoaderCHFs);
 
 		callStack = createCallStack();
 	}
@@ -591,7 +596,7 @@ public final class PlurlImpl implements Plurl {
 
 	ContentHandler findBuiltinContentHandlerImpl(String contentType) {
 		// first check service loader
-		for (ContentHandlerFactory f : builtinContentHandlerFactoryLoader) {
+		for (ContentHandlerFactory f : builtinContentHandlerFactories) {
 			ContentHandler h = f.createContentHandler(contentType);
 			if (h != null) {
 				return h;
@@ -634,14 +639,7 @@ public final class PlurlImpl implements Plurl {
 	}
 
 	URLStreamHandler findBuiltinURLStreamHandlerImpl(String protocol) {
-		// first check service loader
-		for (URLStreamHandlerFactory f : builtinURLStreamHandlerFactoryLoader) {
-			URLStreamHandler h = f.createURLStreamHandler(protocol);
-			if (h != null) {
-				return h;
-			}
-		}
-		// now check property
+		// check handlers pkgs property
 		String builtInHandlers = System.getProperty(PROTOCOL_HANDLER_PKGS);
 		if (builtInHandlers == null)
 			return null;
