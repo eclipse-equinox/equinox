@@ -13,33 +13,75 @@
  *******************************************************************************/
 package org.eclipse.equinox.plurl.test;
 
+import static org.eclipse.equinox.plurl.test.PlurlContentHandlerFactoryTest.checkContent;
+import static org.eclipse.equinox.plurl.test.PlurlStreamHandlerFactoryTest.checkProtocol;
+import static org.eclipse.equinox.plurl.test.PlurlTestHandlers.createTestContentHandlerFactory;
+import static org.eclipse.equinox.plurl.test.PlurlTestHandlers.createTestURLStreamHandlerFactory;
+import static org.eclipse.equinox.plurl.test.PlurlTestHandlers.TestFactoryType.PLURL_FACTORY;
 import static org.junit.Assert.assertNull;
 
-import java.net.URL;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import org.eclipse.equinox.plurl.impl.PlurlImpl;
+import org.eclipse.equinox.plurl.test.PlurlTestHandlers.TestContentHandlerFactory;
+import org.eclipse.equinox.plurl.test.PlurlTestHandlers.TestURLStreamHandlerFactory;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.Test;
 
 public class PlurlConcurrencyTest {
-	@Test
-	public void testConcurrentMWERun() throws InterruptedException {
-		new PlurlImpl().install();
+	private static PlurlTestHandlers plurlTestHandlers;
 
-		for (int i = 0; i < 1000; i++) {
+	@Before
+	public synchronized void installPlurl() {
+		if (plurlTestHandlers == null) {
+			plurlTestHandlers = new PlurlTestHandlers();
+		}
+	}
+
+	@After
+	public void cleanupHandlers() {
+		plurlTestHandlers.cleanupHandlers();
+	}
+
+	@AfterClass
+	public static void uninstallPlurl() {
+		plurlTestHandlers.uninstall(true);
+		plurlTestHandlers = null;
+	}
+
+	private static final int CONCURRENCY_TEST_ITERATIONS = 100;
+	private static final int CONCURRENT_THREAD_COUNT = 10;
+	@Test
+	public void testConcurrentGetContentCalls() throws InterruptedException, IOException {
+		// Note that if the test fails it only fails the first iteration because of an
+		// implementation detail in ServiceLoader.
+		for (int i = 0; i < CONCURRENCY_TEST_ITERATIONS; i++) {
+			// install the URL handler, unique to this iteration
+			TestURLStreamHandlerFactory testPlurlFactory = createTestURLStreamHandlerFactory(PLURL_FACTORY,
+					"getcontent" + i); //$NON-NLS-1$
+			testPlurlFactory.shouldHandle.set(true);
+			plurlTestHandlers.add(PLURL_FACTORY, testPlurlFactory);
+			checkProtocol(testPlurlFactory.TYPES, true);
+
+			// install the content factory, unique to this iteration
+			TestContentHandlerFactory testContentFactory = createTestContentHandlerFactory(PLURL_FACTORY,
+					"getcontent" + i); //$NON-NLS-1$
+			testContentFactory.shouldHandle.set(true);
+			plurlTestHandlers.add(PLURL_FACTORY, testContentFactory);
+
 			List<Thread> threads = new ArrayList<>();
 			List<AtomicReference<Throwable>> errors = new ArrayList<>();
 
-			for (int j = 0; j < 10; j++) {
+			for (int j = 0; j < CONCURRENT_THREAD_COUNT; j++) {
 				AtomicReference<Throwable> error = new AtomicReference<>();
 				errors.add(error);
 
 				Thread thread = new Thread(() -> {
 					try {
-						URL url = this.getClass().getClassLoader()
-								.getResource(this.getClass().getName().replace(".", "/") + ".class"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-						url.getContent();
+						checkContent(testContentFactory.TYPES, true);
 					} catch (Throwable t) {
 						error.set(t);
 					}
@@ -51,6 +93,9 @@ public class PlurlConcurrencyTest {
 			for (Thread thread : threads) {
 				thread.join();
 			}
+
+			plurlTestHandlers.remove(PLURL_FACTORY, testContentFactory);
+			plurlTestHandlers.remove(PLURL_FACTORY, testPlurlFactory);
 
 			for (int j = 0; j < errors.size(); j++) {
 				Throwable t = errors.get(j).get();
