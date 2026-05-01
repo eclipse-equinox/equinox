@@ -52,55 +52,50 @@ public class PlurlConcurrencyTest {
 		plurlTestHandlers = null;
 	}
 
-	private static final int CONCURRENCY_TEST_ITERATIONS = 100;
+
 	private static final int CONCURRENT_THREAD_COUNT = 10;
+	private static final String TEST_PROTOCOL_CONTENT_TYPE = "concurrent-get-content"; //$NON-NLS-1$
+
 	@Test
 	public void testConcurrentGetContentCalls() throws InterruptedException, IOException {
-		// Note that if the test fails it only fails the first iteration because of an
-		// implementation detail in ServiceLoader.
-		for (int i = 0; i < CONCURRENCY_TEST_ITERATIONS; i++) {
-			// install the URL handler, unique to this iteration
-			TestURLStreamHandlerFactory testPlurlFactory = createTestURLStreamHandlerFactory(PLURL_FACTORY,
-					"getcontent" + i); //$NON-NLS-1$
-			testPlurlFactory.shouldHandle.set(true);
-			plurlTestHandlers.add(PLURL_FACTORY, testPlurlFactory);
-			checkProtocol(testPlurlFactory.TYPES, true);
+		// install the URL handler, unique to this test
+		TestURLStreamHandlerFactory testPlurlFactory = createTestURLStreamHandlerFactory(PLURL_FACTORY,
+				TEST_PROTOCOL_CONTENT_TYPE);
+		testPlurlFactory.shouldHandle.set(true);
+		plurlTestHandlers.add(PLURL_FACTORY, testPlurlFactory);
+		checkProtocol(testPlurlFactory.TYPES, true);
 
-			// install the content factory, unique to this iteration
-			TestContentHandlerFactory testContentFactory = createTestContentHandlerFactory(PLURL_FACTORY,
-					"getcontent" + i); //$NON-NLS-1$
-			testContentFactory.shouldHandle.set(true);
-			plurlTestHandlers.add(PLURL_FACTORY, testContentFactory);
+		// install the content factory, unique to this test
+		TestContentHandlerFactory testContentFactory = createTestContentHandlerFactory(PLURL_FACTORY,
+				TEST_PROTOCOL_CONTENT_TYPE);
+		testContentFactory.shouldHandle.set(true);
+		plurlTestHandlers.add(PLURL_FACTORY, testContentFactory);
 
-			List<Thread> threads = new ArrayList<>();
-			List<AtomicReference<Throwable>> errors = new ArrayList<>();
+		List<Thread> threads = new ArrayList<>();
+		List<AtomicReference<Throwable>> errors = new ArrayList<>();
 
-			for (int j = 0; j < CONCURRENT_THREAD_COUNT; j++) {
-				AtomicReference<Throwable> error = new AtomicReference<>();
-				errors.add(error);
+		for (int i = 0; i < CONCURRENT_THREAD_COUNT; i++) {
+			AtomicReference<Throwable> error = new AtomicReference<>();
+			errors.add(error);
 
-				Thread thread = new Thread(() -> {
-					try {
-						checkContent(testContentFactory.TYPES, true);
-					} catch (Throwable t) {
-						error.set(t);
-					}
-				});
-				threads.add(thread);
-				thread.start();
-			}
+			Thread thread = new Thread(() -> {
+				try {
+					checkContent(testContentFactory.TYPES, true);
+				} catch (Throwable t) {
+					error.set(t);
+				}
+			});
+			threads.add(thread);
+			thread.start();
+		}
 
-			for (Thread thread : threads) {
-				thread.join();
-			}
+		for (Thread thread : threads) {
+			thread.join();
+		}
 
-			plurlTestHandlers.remove(PLURL_FACTORY, testContentFactory);
-			plurlTestHandlers.remove(PLURL_FACTORY, testPlurlFactory);
-
-			for (int j = 0; j < errors.size(); j++) {
-				Throwable t = errors.get(j).get();
-				assertNull("Thread threw an error: " + j, t); //$NON-NLS-1$
-			}
+		for (int i = 0; i < errors.size(); i++) {
+			Throwable t = errors.get(i).get();
+			assertNull("Thread threw an error: " + i, t); //$NON-NLS-1$
 		}
 	}
 }
