@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<component id="org.eclipse.equinox.http.jetty" version="2">
+    <resource path="META-INF/MANIFEST.MF">
+        <filter comment="See https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/3817" id="924844039">
+            <message_arguments>
+                <message_argument value="3.9.700"/>
+                <message_argument value="3.9.600"/>
+            </message_arguments>
+        </filter>
+        <filter comment="See https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/3817" id="935329855">
+            <message_arguments>
+                <message_argument value="org.eclipse.equinox.http.jetty"/>
+                <message_argument value="1.6.0"/>
+                <message_argument value="1.5.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+</component>
