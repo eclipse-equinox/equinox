@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000, 2025 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -17,8 +17,6 @@
  *    Christian Georgi (SAP SE) - Fix VM path for new file layout (bug 469766)
  */
 
-/* MacOS X Cocoa specific logic for displaying the splash screen. */
-
 #include "eclipseOS.h"
 #include "eclipseCommon.h"
 #include "eclipseJNI.h"
@@ -33,7 +31,6 @@
 #include <mach-o/dyld.h>
 
 #define startupJarName "startup.jar"
-#define SPLASH_LAUNCHER "/Resources/Splash.app/Contents/"
 
 #define DEBUG 0
 
@@ -86,6 +83,8 @@ static NSWindow* window = nil;
 @interface KeyWindow : NSWindow { }
 - (BOOL)canBecomeKeyWindow;
 @end
+
+void dispatchMessages();
 
 @implementation KeyWindow
 - (BOOL)canBecomeKeyWindow {
@@ -253,34 +252,6 @@ int reuseWorkbench(_TCHAR** filePath, int timeout) {
 	return 0;
 }
 
-/* Show the Splash Window
- *
- * Create the splash window, load the bitmap and display the splash window.
- */
-int showSplash( const _TCHAR* featureImage )
-{
-	int result = 0;
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
-	NSString *str = [[NSString stringWithUTF8String: featureImage] retain];
-	if ([NSThread isMainThread]) {
-		result = [KeyWindow show: str];
-	} else {
-		[KeyWindow performSelectorOnMainThread: @selector(show:) withObject: str waitUntilDone: 0];
-	}
-	[pool release];
-	return result;
-}
-
-void takeDownSplash() {
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
-	if ([NSThread isMainThread]) {
-		[KeyWindow shutdown];
-	} else {
-		[KeyWindow performSelectorOnMainThread: @selector(shutdown) withObject: nil waitUntilDone: 0];
-	}
-	[pool release];
-}
-
 void dispatchMessages() {
 	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 	if ([NSThread isMainThread]) {
@@ -306,10 +277,6 @@ void installAppleEventHandler() {
 				  andEventID:kAEGetURL];
 //	[appleEventDelegate release];
 	[pool release];
-}
-
-jlong getSplashHandle() {
-	return (jlong)window;
 }
 
 /* Get the window system specific VM arguments */
