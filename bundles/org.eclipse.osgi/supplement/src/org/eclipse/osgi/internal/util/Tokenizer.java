@@ -61,8 +61,9 @@ public class Tokenizer {
 		int count = cur - begin;
 		if (count > 0) {
 			skipWhiteSpace();
-			while (count > 0 && (val[begin + count - 1] == ' ' || val[begin + count - 1] == '\t'))
+			while (count > 0 && (val[begin + count - 1] == ' ' || val[begin + count - 1] == '\t')) {
 				count--;
+			}
 			return (new String(val, begin, count));
 		}
 		return (null);
@@ -71,8 +72,9 @@ public class Tokenizer {
 	public String getEscapedToken(String terminals) {
 		char[] val = value;
 		int cur = cursor;
-		if (cur >= max)
+		if (cur >= max) {
 			return null;
+		}
 		StringBuilder sb = new StringBuilder();
 		char c;
 		for (; cur < max; cur++) {
@@ -80,8 +82,9 @@ public class Tokenizer {
 			// this is an escaped char
 			if (c == '\\') {
 				cur++; // skip the escape char
-				if (cur == max)
+				if (cur == max) {
 					break;
+				}
 				c = val[cur]; // include the escaped char
 			} else if (terminals.indexOf(c) != -1) {
 				break;
@@ -118,11 +121,13 @@ public class Tokenizer {
 					// this is an escaped char
 					if (c == '\\') {
 						cur++; // skip the escape char
-						if (cur == max)
+						if (cur == max) {
 							break;
+						}
 						c = val[cur]; // include the escaped char
-						if (preserveEscapes != null && preserveEscapes.indexOf(c) != -1)
+						if (preserveEscapes != null && preserveEscapes.indexOf(c) != -1) {
 							sb.append('\\'); // must preserve escapes for c
+						}
 					} else if (c == '\"') {
 						break;
 					}

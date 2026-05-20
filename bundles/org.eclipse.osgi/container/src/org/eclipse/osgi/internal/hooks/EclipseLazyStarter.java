@@ -70,12 +70,14 @@ public class EclipseLazyStarter extends ClassLoaderHook {
 		// If the bundle is active, uninstalled or stopping then the bundle has already
 		// been initialized (though it may have been destroyed) so just return the
 		// class.
-		if (alreadyActive.contains(module.getState()))
+		if (alreadyActive.contains(module.getState())) {
 			return;
+		}
 		// The bundle is not active and does not require activation, just return the
 		// class
-		if (!shouldActivateFor(name, module, revision, manager))
+		if (!shouldActivateFor(name, module, revision, manager)) {
 			return;
+		}
 		Deque<ClasspathManager> stack = activationStack.get();
 		if (stack == null) {
 			stack = new ArrayDeque<>(6);
@@ -92,22 +94,26 @@ public class EclipseLazyStarter extends ClassLoaderHook {
 	@Override
 	public void postFindLocalClass(String name, Class<?> clazz, ClasspathManager manager)
 			throws ClassNotFoundException {
-		if (initiatingClassName.get() != name)
+		if (initiatingClassName.get() != name) {
 			return;
+		}
 		initiatingClassName.set(null);
 		Deque<ClasspathManager> stack = activationStack.get();
-		if (stack == null || stack.isEmpty())
+		if (stack == null || stack.isEmpty()) {
 			return;
+		}
 
 		// if we have a stack we must clear it even if (clazz == null)
 		List<ClasspathManager> managers = new ArrayList<>(stack);
 		stack.clear();
-		if (clazz == null)
+		if (clazz == null) {
 			return;
+		}
 		for (ClasspathManager managerElement : managers) {
 			if (errors.get(managerElement) != null) {
-				if (container.getConfiguration().throwErrorOnFailedStart)
+				if (container.getConfiguration().throwErrorOnFailedStart) {
 					throw errors.get(managerElement);
+				}
 				continue;
 			}
 
@@ -155,8 +161,9 @@ public class EclipseLazyStarter extends ClassLoaderHook {
 				// handle the resolved case where a previous error occurred
 				if (container.getConfiguration().throwErrorOnFailedStart) {
 					ClassNotFoundException error = errors.get(manager);
-					if (error != null)
+					if (error != null) {
 						throw error;
+					}
 				}
 				// The module is persistently started and has the lazy activation policy but has
 				// not entered the LAZY_STARTING state
@@ -193,13 +200,15 @@ public class EclipseLazyStarter extends ClassLoaderHook {
 		List<String> includes = (List<String>) moduleDataAttrs
 				.get(EquinoxModuleDataNamespace.CAPABILITY_LAZY_INCLUDE_ATTRIBUTE);
 		// no exceptions, it is easy to figure it out
-		if (excludes == null && includes == null)
+		if (excludes == null && includes == null) {
 			return true;
+		}
 		// otherwise, we need to check if the package is in the exceptions list
 		int dotPosition = className.lastIndexOf('.');
 		// the class has no package name... no exceptions apply
-		if (dotPosition == -1)
+		if (dotPosition == -1) {
 			return true;
+		}
 		String packageName = className.substring(0, dotPosition);
 		return ((includes == null || includes.contains(packageName))
 				&& (excludes == null || !excludes.contains(packageName)));

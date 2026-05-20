@@ -99,8 +99,9 @@ public class LockSet<T> {
 	public void unlock(T t) {
 		synchronized (locks) {
 			LockHolder lock = locks.get(t);
-			if (lock == null)
+			if (lock == null) {
 				throw new IllegalStateException("No lock found: " + t); //$NON-NLS-1$
+			}
 			lock.unlock();
 			// If, after unlocking, no other thread is using the lock, discard it.
 			if (lock.decremementUseCount() == 0) {
