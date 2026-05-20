@@ -91,7 +91,7 @@ public class ReadOnlyConfigurationAreaTest {
 	 * Tries to install a plug-in that has no manifest. Should fail because by
 	 * default the manifest generation area is under the configuration area (which
 	 * is read-only here)
-	 * 
+	 *
 	 * @throws BundleException
 	 */
 	@Test
