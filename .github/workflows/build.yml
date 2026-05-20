@@ -40,15 +40,17 @@ jobs:
         java-version: |
           17
           21
+          25
         mvn-toolchain-id: |
           JavaSE-17
           JavaSE-21
+          JavaSE-25
         distribution: 'temurin'
         cache: maven
     - name: Set up Maven
       uses: stCarolas/setup-maven@v5
       with:
-        maven-version: 3.9.12
+        maven-version: 3.9.15
     - name: Install GTK requirements
       if: ${{ matrix.config.ws == 'gtk'}}
       run: |
@@ -94,16 +96,18 @@ jobs:
           8
           17
           21
+          25
         mvn-toolchain-id: |
           JavaSE-1.8
           JavaSE-17
           JavaSE-21
+          JavaSE-25
         distribution: 'temurin'
         cache: maven
     - name: Set up Maven
       uses: stCarolas/setup-maven@v5
       with:
-        maven-version: 3.9.12
+        maven-version: 3.9.15
     - name: Run OSGi TCKs
       run: >- 
         mvn
