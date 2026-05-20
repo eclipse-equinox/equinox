@@ -130,6 +130,7 @@ public final class HookRegistry {
 			addClassLoaderHook(new DevClassLoadingHook(container.getConfiguration()));
 			addClassLoaderHook(new EclipseLazyStarter(container));
 			addClassLoaderHook(new WeavingHookConfigurator(container));
+//			addClassLoaderHook(new ServiceLoaderMediatorHook());
 			configurators.add(SignedBundleHook.class.getName());
 			configurators.add(CDSHookConfigurator.class.getName());
 			loadConfigurators(configurators, errors);
@@ -156,16 +157,15 @@ public final class HookRegistry {
 		int curBuiltin = 0;
 		while (hookConfigurators.hasMoreElements()) {
 			URL url = hookConfigurators.nextElement();
-			InputStream input = null;
-			try {
+			try (InputStream input = url.openStream()) {
 				// check each file for a hook.configurators property
 				Properties configuratorProps = new Properties();
-				input = url.openStream();
 				configuratorProps.load(input);
 				String hooksValue = configuratorProps.getProperty(HOOK_CONFIGURATORS);
-				if (hooksValue == null)
+				if (hooksValue == null) {
 					continue;
-				boolean builtin = Boolean.valueOf(configuratorProps.getProperty(BUILTIN_HOOKS)).booleanValue();
+				}
+				boolean builtin = Boolean.parseBoolean(configuratorProps.getProperty(BUILTIN_HOOKS));
 				String[] configurators = ManifestElement.getArrayFromList(hooksValue, ","); //$NON-NLS-1$
 				for (String configurator : configurators) {
 					if (!configuratorList.contains(configurator)) {
@@ -180,13 +180,6 @@ public final class HookRegistry {
 				errors.add(new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0,
 						"error loading: " + url.toExternalForm(), 0, e, null)); //$NON-NLS-1$
 				// ignore and continue to next URL
-			} finally {
-				if (input != null)
-					try {
-						input.close();
-					} catch (IOException e) {
-						// do nothing
-					}
 			}
 		}
 	}
