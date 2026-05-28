@@ -81,6 +81,7 @@ class XMLParsingServiceFactory implements ServiceFactory<Object> {
 			// completely disable external entities declarations:
 			factory.setFeature("http://xml.org/sax/features/external-general-entities", false); //$NON-NLS-1$
 			factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false); //$NON-NLS-1$
+			factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false); //$NON-NLS-1$
 		} catch (ParserConfigurationException e) {
 			throw new IllegalStateException(e.getMessage(), e);
 		}
