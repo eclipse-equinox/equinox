@@ -128,7 +128,7 @@ public class ResponseStateHandler {
 				writer.print(httpStatus.description());
 				writer.println("</small></h1>"); //$NON-NLS-1$
 				writer.print("<p>"); //$NON-NLS-1$
-				writer.print(message);
+				writer.print(escapeHTML(message));
 				writer.println("</p></div></body></html>"); //$NON-NLS-1$
 			}
 
@@ -167,6 +167,14 @@ public class ResponseStateHandler {
 
 	public void setException(Exception exception) {
 		this.exception = exception;
+	}
+
+	private static String escapeHTML(String value) {
+		if (value == null) {
+			return null;
+		}
+		return value.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+				.replace("\"", "&quot;").replace("'", "&#x27;"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	}
 
 	private List<ServletRequestListener> getServletRequestListener() {
