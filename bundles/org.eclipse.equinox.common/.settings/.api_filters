@@ -1,5 +1,21 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <component id="org.eclipse.equinox.common" version="2">
+    <resource path="META-INF/MANIFEST.MF">
+        <filter comment="Removed per API deprecation and removal process." id="926941240">
+            <message_arguments>
+                <message_argument value="3.21.0"/>
+                <message_argument value="3.20.400"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="META-INF/MANIFEST.MF" type="org.eclipse.core.runtime.PluginVersionIdentifier">
+        <filter comment="Removed per API deprecation and removal process." id="305324134">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.PluginVersionIdentifier"/>
+                <message_argument value="org.eclipse.equinox.common_3.21.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="src/org/eclipse/core/runtime/Path.java" type="org.eclipse.core.runtime.Path">
         <filter id="576725006">
             <message_arguments>
