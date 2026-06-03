@@ -490,6 +490,14 @@ static int _run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 			errorMsg = malloc( (_tcslen(gtk2Msg) + _tcslen(officialName) + 10) * sizeof(_TCHAR) );
 			_stprintf( errorMsg, gtk2Msg, officialName );
 			_ftprintf(stderr, _T_ECLIPSE("%s:\n%s\n"), officialName, errorMsg);
+			free( errorMsg );
+			errorMsg = NULL;
+			/* GTK+ 2.x is no longer supported, continue using GTK+ 3.x. */
+			setenv("SWT_GTK4", "0", 1);
+		} else if (gtkVersion == 3) {
+			setenv("SWT_GTK4", "0", 1);
+		} else if (gtkVersion == 4) {
+			setenv("SWT_GTK4", "1", 1);
 		}
 	}
 

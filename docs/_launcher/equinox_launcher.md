@@ -63,6 +63,7 @@ The launcher accepts various command-line arguments to control its behavior:
 
 - `-nosplash`: Disables the splash screen
 - `-showlocation`: Shows the workspace location in the window title
+- `--launcher.GTK_version <version>`: Selects the GTK version on Linux. Supported values are `3` (default) and `4`; passing `4` starts Eclipse with GTK 4. Falls back to GTK 3 if the requested Gtk version is unavailable.
 
 ## Configuration Files
 

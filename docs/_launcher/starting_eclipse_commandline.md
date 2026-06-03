@@ -69,6 +69,7 @@ Control the launcher behavior:
 | `-showlocation` | Show workspace in title | `-showlocation` |
 | `--launcher.defaultAction` | Default file action | `--launcher.defaultAction openFile` |
 | `--launcher.library` | Launcher library path | `--launcher.library plugins/...` |
+| `--launcher.GTK_version` | GTK version to use (Linux only): `3` or `4` | `--launcher.GTK_version 4` |
 
 ### VM Arguments
 
@@ -429,7 +430,10 @@ eclipse.exe > output.txt 2>&1
 ./eclipse -data ~/workspace -clean
 
 # Specify Java
-./eclipse -vm /usr/lib/jvm/java-17/bin/java
+./eclipse -vm /usr/lib/jvm/java-21/bin/java
+
+# Start with GTK 4 (defaults to GTK 3 when omitted)
+./eclipse --launcher.GTK_version 4
 
 # Background execution
 ./eclipse &
@@ -472,7 +476,7 @@ Or:
 Specify Java explicitly:
 
 ```bash
-eclipse -vm /path/to/java17/bin/java
+eclipse -vm /path/to/java21/bin/java
 ```
 
 ### Workspace Locked
