@@ -81,7 +81,8 @@ GTK_LIBS = \
  -DGIO_LIB="\"libgio-2.0.so.0\"" -DGLIB_LIB="\"libglib-2.0.so.0\""
 LFLAGS = ${M_ARCH} -shared -fpic -Wl,--export-dynamic 
 GTK_CFLAGS := $(shell pkg-config --cflags gtk+-3.0)
-CFLAGS = ${M_CFLAGS} ${M_ARCH} -g -s -Wall\
+CFLAGS = ${M_CFLAGS} ${M_ARCH} -g -s \
+	-Wall -Werror \
 	-fpic \
 	-DLINUX \
 	-DDEFAULT_OS="\"$(DEFAULT_OS)\"" \

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2025 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -276,7 +276,7 @@ int showSplash( const char* featureImage ) {
 		if (dlerror() == NULL && func) {
 			shellHandle = (*func)();
 		} else {
-			printf(dlerror());
+			printf("%s\n", dlerror());
 		}
 	}
 	gtk.gtk_window_set_decorated((GtkWindow*)(shellHandle), FALSE);
