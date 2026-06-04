@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2025 IBM Corporation and others.
+ * Copyright (c) 2006, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -44,8 +44,6 @@ void displayMessage( _TCHAR* title, _TCHAR* message )
 /* Initialize Window System
  *
  * Create a pop window to display the bitmap image.
- *
- * Return the window handle as the data for the splash command.
  *
  */
 int initWindowSystem( int* pArgc, _TCHAR* argv[] )
