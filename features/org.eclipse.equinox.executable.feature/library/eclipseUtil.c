@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -32,38 +32,6 @@
 #endif
 
 #include "eclipse-memcpy.h"
-
-#define MAX_LINE_LENGTH 256
-
-/* Is the given VM J9 */
-int isJ9VM( _TCHAR* vm )
-{
-	_TCHAR * ch = NULL, *ch2 = NULL;
-	int res = 0;
-	
-	if (vm == NULL)
-		return 0;
-	
-	ch = lastDirSeparator( vm );
-	if (isVMLibrary(vm)) {
-		/* a library, call it j9 if the parent dir is j9vm */
-		if(ch == NULL)
-			return 0;
-		ch[0] = 0;
-		ch2 = lastDirSeparator(vm);
-		if(ch2 != NULL) {
-			res = (_tcsicmp(ch2 + 1, _T_ECLIPSE("j9vm")) == 0);
-		}
-		ch[0] = dirSeparator;
-		return res;
-	} else {
-		if (ch == NULL)
-		    ch = vm;
-		else
-		    ch++;
-		return (_tcsicmp( ch, _T_ECLIPSE("j9") ) == 0);
-	}
-}
 
 int checkProvidedVMType( _TCHAR* vm ) 
 {

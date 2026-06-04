@@ -338,10 +338,6 @@ void takeDownSplash() {
 /* Get the window system specific VM arguments */
 char** getArgVM( char* vm ) {
     char** result;
-
-/*    if (isJ9VM( vm )) 
-        return argVM_J9;*/
-    
     /* Use the default arguments for a standard Java VM */
     result = argVM_JAVA;
     return result;
