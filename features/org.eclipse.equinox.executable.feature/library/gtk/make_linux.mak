@@ -1,5 +1,5 @@
 #*******************************************************************************
-# Copyright (c) 2000, 2018 IBM Corporation and others.
+# Copyright (c) 2000, 2026 IBM Corporation and others.
 #
 # This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License 2.0
@@ -30,16 +30,13 @@ include ../make_version.mak
 # DEFAULT_OS      - the default value of the "-os" switch
 # DEFAULT_OS_ARCH - the default value of the "-arch" switch
 # DEFAULT_WS      - the default value of the "-ws" switch
-# JAVA_HOME       - JAVA_HOME for jni headers
+# JAVA_HOME       - the location of the JDK for JNI includes
 # M_ARCH & M_CFLAGS - architecture/cflags for gcc command (if relevant)
-# EXE_OUTPUT_DIR  - the location into which the executable is installed (only used in 'install' target)
-# LIB_OUTPUT_DIR  - the location into which the launcher library is installed (only used in 'install' target)
 
 # Environment Variables:
 DEFAULT_OS ?= $(shell uname -s | tr "[:upper:]" "[:lower:]")
 DEFAULT_WS ?= gtk
 DEFAULT_OS_ARCH ?= $(shell uname -m)
-JAVA_HOME ?= $(shell readlink -f /usr/bin/java | sed "s:jre/::" | sed "s:bin/java::")
 PROGRAM_OUTPUT ?= eclipse
 PROGRAM_LIBRARY = $(PROGRAM_OUTPUT)_$(LIB_VERSION).so
 
@@ -51,18 +48,22 @@ M_CFLAGS ?= -fno-builtin-memcpy -fno-builtin-memmove
 endif
 endif
 
-# Determine launch mode.
-ifeq ($(DEFAULT_OS_ARCH),x86_64)
-DEFAULT_JAVA ?= DEFAULT_JAVA_EXEC
+ifeq ($(M_ARCH),)
+ifeq ($(DEFAULT_OS_ARCH),ppc64le)
+M_ARCH = -m64
+endif
 endif
 
-CC ?= gcc
+# Determine launch mode.
+DEFAULT_JAVA ?= DEFAULT_JAVA_EXEC
+
+CC ?= cc
 
 # Useful to figure out if there is any difference between running build.sh and make_linux directly.
+#TODO: Print this in the calling script
 INFO_PROG=CC:$(CC)  PROGRAM_OUTPUT:$(PROGRAM_OUTPUT)  PROGRAM_LIBRARY:$(PROGRAM_LIBRARY) #
 INFO_ARCH=DEFAULT_OS:$(DEFAULT_OS)  DEFAULT_WS:$(DEFAULT_WS)  DEFAULT_OS_ARCH:$(DEFAULT_OS_ARCH)  M_ARCH:$(M_ARCH)  M_CFLAGS:$(M_CFLAGS) #
-INFO_JAVA=JAVA_HOME:$(JAVA_HOME)  DEFAULT_JAVA:$(DEFAULT_JAVA) #
-$(info Input info: $(INFO_PROG) $(INFO_ARCH) $(INFO_JAVA))
+$(info Input info: $(INFO_PROG) $(INFO_ARCH) JAVA_HOME:$(JAVA_HOME)  DEFAULT_JAVA:$(DEFAULT_JAVA))
 
 # Define the object modules to be compiled and flags.
 MAIN_OBJS = eclipseMain.o
@@ -90,7 +91,6 @@ CFLAGS = ${M_CFLAGS} ${M_ARCH} -g -s \
 	-DDEFAULT_WS="\"$(DEFAULT_WS)\"" \
 	-D$(DEFAULT_JAVA) \
 	$(GTK_LIBS) \
-	-I. \
 	-I.. \
 	-I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux \
 	$(GTK_CFLAGS)
@@ -162,17 +162,3 @@ else
 # upper bounds for them too.
 checklibs: all
 endif
-
-
-install: all
-	$(info Install into: EXE_OUTPUT_DIR:$(EXE_OUTPUT_DIR) LIB_OUTPUT_DIR:$(LIB_OUTPUT_DIR))
-	mkdir -p $(EXE_OUTPUT_DIR)
-	mv $(EXEC) $(EXE_OUTPUT_DIR)
-	mkdir -p $(LIB_OUTPUT_DIR)
-	rm -f $(LIB_OUTPUT_DIR)/eclipse_*.so
-	mv $(DLL) $(LIB_OUTPUT_DIR)
-	rm -f $(MAIN_OBJS) $(COMMON_OBJS) $(DLL_OBJS)
-
-clean:
-	$(info Clean up:)
-	rm -f $(EXEC) $(DLL) $(MAIN_OBJS) $(COMMON_OBJS) $(DLL_OBJS)
