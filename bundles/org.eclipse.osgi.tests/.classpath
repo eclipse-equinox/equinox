@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" output="bundle_tests/test" path="bundles_src/test"/>
@@ -132,5 +136,6 @@
 	<classpathentry kind="src" output="bundle_tests/test.bug490902.a" path="bundles_src/test.bug490902.a"/>
 	<classpathentry kind="src" output="bundle_tests/test.bug490902.b" path="bundles_src/test.bug490902.b"/>
 	<classpathentry kind="src" output="bundle_tests/mrBundleInputBase" path="bundles_src/mrBundleInputBase"/>
+	<classpathentry kind="src" path="bundles_src/bundleShapeDir"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

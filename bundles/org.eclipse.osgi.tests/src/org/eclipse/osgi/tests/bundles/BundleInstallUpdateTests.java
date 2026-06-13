@@ -357,4 +357,43 @@ public class BundleInstallUpdateTests extends AbstractBundleTests {
 		assertFalse("File escaped zip root: " + rootEscapedFile3.getCanonicalPath(), rootEscapedFile3.exists());
 
 	}
+
+	@Test
+	public void testBundleShapeDir() throws Exception {
+		// Test installing a bundle with Eclipse-BundleShape: dir header
+		Bundle bundle = installer.installBundle("bundleShapeDir");
+		assertNotNull("Bundle should be installed", bundle);
+		assertEquals("Wrong bundle symbolic name", "test.bundleshape.dir", bundle.getSymbolicName());
+		File file = bundle.adapt(File.class);
+		assertTrue(file.isDirectory());
+		// Start the bundle to ensure it can be activated
+		bundle.start();
+		assertEquals("Bundle should be active", Bundle.ACTIVE, bundle.getState());
+		
+		// Stop and uninstall
+		bundle.stop();
+		bundle.uninstall();
+	}
+
+	@Test
+	public void testBundleShapeDirWithInputStream() throws Exception {
+		// Test installing a bundle with Eclipse-BundleShape: dir header using InputStream
+		String location = installer.getBundleLocation("bundleShapeDir");
+		URL bundleURL = new URL(location);
+		
+		try (InputStream in = bundleURL.openStream()) {
+			Bundle bundle = OSGiTestsActivator.getContext().installBundle("test.location.bundleshape", in);
+			assertNotNull("Bundle should be installed", bundle);
+			assertEquals("Wrong bundle symbolic name", "test.bundleshape.dir", bundle.getSymbolicName());
+			File file = bundle.adapt(File.class);
+			assertTrue(file.isDirectory());
+			// Start the bundle to ensure it can be activated
+			bundle.start();
+			assertEquals("Bundle should be active", Bundle.ACTIVE, bundle.getState());
+			
+			// Stop and uninstall
+			bundle.stop();
+			bundle.uninstall();
+		}
+	}
 }
