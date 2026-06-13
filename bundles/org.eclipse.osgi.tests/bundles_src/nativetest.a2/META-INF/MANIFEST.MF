@@ -31,10 +31,6 @@ Bundle-NativeCode: nativefile2.txt;
  processor=s390x;
  osname=Linux,
  nativefile2.txt;
- processor=loongarch64;
- processor=loongarch;
- osname=Linux,
- nativefile2.txt;
  processor=riscv64;
  processor=riscv;
  osname=Linux,
