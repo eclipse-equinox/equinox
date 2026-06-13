@@ -256,7 +256,7 @@ static _TCHAR* findProgram(_TCHAR* argv[]) {
     if (program == NULL)
     {
 #ifdef _WIN32
-    	program = malloc( MAX_PATH_LENGTH + 1 );
+    	program = malloc( (MAX_PATH_LENGTH + 1) * sizeof(_TCHAR) );
     	GetModuleFileName( NULL, program, MAX_PATH_LENGTH );
     	argv[0] = program;
 #else
