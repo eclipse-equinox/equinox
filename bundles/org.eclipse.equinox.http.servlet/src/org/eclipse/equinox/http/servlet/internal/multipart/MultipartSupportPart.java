@@ -53,8 +53,21 @@ public class MultipartSupportPart implements Part {
 
 	@Override
 	public void write(String fileName) throws IOException {
+		File storeLocation = item.getStoreLocation();
+		File target = new File(storeLocation, fileName);
+		if (storeLocation != null) {
+			// keep the write inside the configured multipart storage area; a
+			// submitted file name may contain ".." segments
+			File root = storeLocation.getCanonicalFile().getParentFile();
+			String rootPath = (root == null) ? null : root.getCanonicalPath();
+			String targetPath = target.getCanonicalPath();
+			if (rootPath == null
+					|| (!targetPath.equals(rootPath) && !targetPath.startsWith(rootPath + File.separator))) {
+				throw new IOException("Invalid file name: " + fileName); //$NON-NLS-1$
+			}
+		}
 		try {
-			item.write(new File(item.getStoreLocation(), fileName));
+			item.write(target);
 		} catch (Exception e) {
 			throw new IOException(e);
 		}
