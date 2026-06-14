@@ -98,10 +98,6 @@ case $defaultOS in
 				defaultOSArch="aarch64"
 				defaultJava=DEFAULT_JAVA_EXEC
 				;;
-			"loongarch64")
-				defaultOSArch="loongarch64"
-				defaultJava=DEFAULT_JAVA_EXEC
-				;;
 			"riscv64")
 				defaultOSArch="riscv64"
 				defaultJava=DEFAULT_JAVA_EXEC
