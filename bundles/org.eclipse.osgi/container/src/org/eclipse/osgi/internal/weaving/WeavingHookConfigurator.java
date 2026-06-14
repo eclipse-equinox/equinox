@@ -60,8 +60,9 @@ public class WeavingHookConfigurator extends ClassLoaderHook {
 	public byte[] processClass(String name, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry,
 			ClasspathManager manager) {
 		ServiceRegistry registry = getRegistry();
-		if (registry == null)
+		if (registry == null) {
 			return null; // no registry somehow we are loading classes before the registry has been
+		}
 							// created
 		ModuleClassLoader classLoader = manager.getClassLoader();
 		BundleLoader loader = classLoader.getBundleLoader();
@@ -105,8 +106,9 @@ public class WeavingHookConfigurator extends ClassLoaderHook {
 		// here we assume the stack contans a woven class with the same name as the
 		// class we are defining.
 		WovenClassContext context = wovenClassContext.get();
-		if (context == null || context.wovenClassStack.size() == 0)
+		if (context == null || context.wovenClassStack.size() == 0) {
 			return;
+		}
 		WovenClassImpl wovenClass = context.wovenClassStack.remove(context.wovenClassStack.size() - 1);
 		// inform the woven class about the class that was defined.
 		wovenClass.setWeavingCompleted(clazz);

@@ -42,8 +42,9 @@ public class ZipBundleFile extends CloseableBundleFile<ZipEntry> {
 			boolean verify) throws IOException {
 		super(basefile, generation, mruList, debug);
 		this.verify = verify;
-		if (!BundleFile.secureAction.exists(basefile))
+		if (!BundleFile.secureAction.exists(basefile)) {
 			throw new IOException(NLS.bind(Msg.ADAPTER_FILEEXIST_EXCEPTION, basefile));
+		}
 	}
 
 	@Override
@@ -55,19 +56,21 @@ public class ZipBundleFile extends CloseableBundleFile<ZipEntry> {
 	 * Returns a ZipEntry for the bundle file. Must be called while holding the open
 	 * lock. This method does not ensure that the ZipFile is opened. Callers may
 	 * need to call getZipfile() prior to calling this method.
-	 * 
+	 *
 	 * @param path the path to an entry
 	 * @return a ZipEntry or null if the entry does not exist
 	 */
 	private ZipEntry getZipEntry(String path) {
-		if (path.length() > 0 && path.charAt(0) == '/')
+		if (path.length() > 0 && path.charAt(0) == '/') {
 			path = path.substring(1);
+		}
 		ZipEntry entry = zipFile.getEntry(path);
 		if (entry != null && entry.getSize() == 0 && !entry.isDirectory()) {
 			// work around the directory bug see bug 83542
 			ZipEntry dirEntry = zipFile.getEntry(path + '/');
-			if (dirEntry != null)
+			if (dirEntry != null) {
 				entry = dirEntry;
+			}
 		}
 		return entry;
 	}
@@ -78,8 +81,9 @@ public class ZipBundleFile extends CloseableBundleFile<ZipEntry> {
 		if (zipEntry == null) {
 			if (path.length() == 0 || path.charAt(path.length() - 1) == '/') {
 				// this is a directory request lets see if any entries exist in this directory
-				if (containsDir(path))
+				if (containsDir(path)) {
 					return new DirZipBundleEntry(this, path);
+				}
 			}
 			return null;
 		}

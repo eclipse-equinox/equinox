@@ -29,9 +29,9 @@ import java.io.*;
 public final class ManagedOutputStream extends FilterOutputStream {
 	static final int ST_OPEN = 0;
 	static final int ST_CLOSED = 1;
-	private String target;
-	private StorageManager manager;
-	private File outputFile;
+	private final String target;
+	private final StorageManager manager;
+	private final File outputFile;
 	private int state;
 	private ManagedOutputStream[] streamSet = null;
 
