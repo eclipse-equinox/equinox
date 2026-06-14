@@ -40,23 +40,26 @@ import org.eclipse.osgi.container.ModuleWire;
  * this internal structure access to the elements of off one or all namespace(s)
  * has always constant runtime regardless of the number of namespaces present.
  * <p>
- * 
+ *
  * @param <E> the type of elements in this list, which have a name-space
  *            associated
  */
 public class NamespaceList<E> {
 
 	public final static Function<ModuleWire, String> WIRE = new Function<ModuleWire, String>() {
+		@Override
 		public String apply(ModuleWire wire) {
 			return wire.getCapability().getNamespace();
 		}
 	};
 	public final static Function<ModuleCapability, String> CAPABILITY = new Function<ModuleCapability, String>() {
+		@Override
 		public String apply(ModuleCapability capability) {
 			return capability.getNamespace();
 		}
 	};
 	public final static Function<ModuleRequirement, String> REQUIREMENT = new Function<ModuleRequirement, String>() {
+		@Override
 		public String apply(ModuleRequirement requirement) {
 			return requirement.getNamespace();
 		}
@@ -68,7 +71,7 @@ public class NamespaceList<E> {
 	 * The required argument is used to derive the type of elements and if a builder
 	 * is created from the returned list.
 	 * </p>
-	 * 
+	 *
 	 * @param <E>          the type of elements in the NamespaceList
 	 * @param getNamespace the function to compute the namespace of an element
 	 * @return an empty NamespaceList
@@ -93,7 +96,7 @@ public class NamespaceList<E> {
 
 	/**
 	 * Returns {@code true} if this NamespaceList contains no elements.
-	 * 
+	 *
 	 * @return {@code true} if this list contains no elements
 	 */
 	public boolean isEmpty() {
@@ -107,7 +110,7 @@ public class NamespaceList<E> {
 	 * namespace. For the {@code null} namespace the elements of all namespaces are
 	 * returned as flat.
 	 * </p>
-	 * 
+	 *
 	 * @param namespace the namespace of the elements to return. May be {@code null}
 	 * @return The list of elements found
 	 */
@@ -125,7 +128,7 @@ public class NamespaceList<E> {
 	 * The returned builder uses the same function to compute the namespace of an
 	 * element like this NamespaceList.
 	 * </p>
-	 * 
+	 *
 	 * @return a new builder containing all elements of this list
 	 */
 	public Builder<E> createBuilder() {
@@ -136,7 +139,7 @@ public class NamespaceList<E> {
 
 	/**
 	 * A reusable builder to create {@link NamespaceList NamespaceLists}.
-	 * 
+	 *
 	 * @param <E> the type of elements in this builder
 	 * @author Hannes Wellmann
 	 */
@@ -145,7 +148,7 @@ public class NamespaceList<E> {
 		/**
 		 * Returns a new {@link Builder NamespaceList.Builder} that uses the specified
 		 * function to compute the namespace of its elements.
-		 * 
+		 *
 		 * @param <E>          the type of elements in this builder
 		 * @param getNamespace the function to compute the namespace of an element
 		 * @return a new builder
@@ -188,6 +191,7 @@ public class NamespaceList<E> {
 					return inner.hasNext();
 				}
 
+				@Override
 				public E next() {
 					if (!hasNext()) {
 						throw new NoSuchElementException();
@@ -221,7 +225,7 @@ public class NamespaceList<E> {
 		 * namespace. For the {@code null} namespace the elements of all namespaces are
 		 * returned as flat.
 		 * </p>
-		 * 
+		 *
 		 * @param namespace the namespace of the elements to return. May be {@code null}
 		 * @return the list of element with the specified namespace
 		 */
@@ -246,7 +250,7 @@ public class NamespaceList<E> {
 		 * namespace, so the namespace of original and transformed element are the same!
 		 * This builder is not modified.
 		 * </p>
-		 * 
+		 *
 		 * @param <R>             the type of elements in the returned builder
 		 * @param transformation  the transformation applied to each element
 		 * @param newGetNamespace the function to compute the namespace of a transformed
@@ -309,7 +313,7 @@ public class NamespaceList<E> {
 
 		/**
 		 * Adds all elements in the specified NamespaceList to this builder.
-		 * 
+		 *
 		 * @param list the NamespaceList containing elements to be added
 		 * @return true if any element was added to this builder
 		 */
@@ -333,6 +337,7 @@ public class NamespaceList<E> {
 
 		private List<E> getNamespaceList(String namespace) {
 			return namespaceElements.computeIfAbsent(namespace, new Function<String, List<E>>() {
+				@Override
 				public List<E> apply(String n) {
 					return new ArrayList<>();
 				}
@@ -346,7 +351,7 @@ public class NamespaceList<E> {
 		 * For an element to be added both predicates, the one for the namespace as well
 		 * as the one for the element itself must be satisfied.
 		 * </p>
-		 * 
+		 *
 		 * @param list            the NamespaceList containing elements to be added
 		 * @param namespaceFilter the predicate that returns true for namespaces whose
 		 *                        elements should not be excluded from being added
@@ -372,7 +377,7 @@ public class NamespaceList<E> {
 		 * last</em> element with the same namespace in this builder that satisfies the
 		 * specified bi-predicate together with the element to add.
 		 * </p>
-		 * 
+		 *
 		 * @param list             the NamespaceList containing elements to be added
 		 * @param namespaceFilter  the predicate that returns true for namespaces whose
 		 *                         elements should not be excluded from being added
@@ -402,6 +407,7 @@ public class NamespaceList<E> {
 								targetList.add(toAdd);
 							} else {
 								addAfterLastMatch(toAdd, targetList, new Predicate<E>() {
+									@Override
 									public boolean test(E e) {
 										return insertionMatcher.test(toAdd, e);
 									}
@@ -448,6 +454,7 @@ public class NamespaceList<E> {
 
 		private void removeNamespaceElement(String namespace, E element) {
 			namespaceElements.computeIfPresent(namespace, new BiFunction<String, List<E>, List<E>>() {
+				@Override
 				public List<E> apply(String n, List<E> es) {
 					if (es.remove(element)) {
 						Builder.this.size--;
@@ -475,13 +482,14 @@ public class NamespaceList<E> {
 		/**
 		 * Removes from this builder all elements of each namespace that satisfies the
 		 * specified predicate.
-		 * 
+		 *
 		 * @param filter the predicate which returns true for a namespace to remove
 		 */
 		public void removeNamespaceIf(Predicate<String> filter) {
 			prepareModification();
 
 			namespaceElements.entrySet().removeIf(new Predicate<Map.Entry<String, List<E>>>() {
+				@Override
 				public boolean test(Map.Entry<String, List<E>> e) {
 					if (filter.test(e.getKey())) {
 						Builder.this.size -= e.getValue().size();
@@ -498,6 +506,7 @@ public class NamespaceList<E> {
 
 			int s = size;
 			namespaceElements.values().removeIf(new Predicate<List<E>>() {
+				@Override
 				public boolean test(List<E> es) {
 					return removeElementsIf(es, filter) == null;
 				}
@@ -508,7 +517,7 @@ public class NamespaceList<E> {
 		/**
 		 * Removes from this builder those elements of the specified namespace that
 		 * satisfy the specified predicate.
-		 * 
+		 *
 		 * @param namespace the namespace of
 		 * @param filter    the predicate which returns true for elements to remove
 		 */
@@ -516,6 +525,7 @@ public class NamespaceList<E> {
 			prepareModification();
 
 			namespaceElements.computeIfPresent(namespace, new BiFunction<String, List<E>, List<E>>() {
+				@Override
 				public List<E> apply(String n, List<E> es) {
 					return removeElementsIf(es, filter);
 				}
@@ -539,7 +549,7 @@ public class NamespaceList<E> {
 		 * modifications to this builder do not reflect into the returned list (the
 		 * returned list is not connected to this builder at all).
 		 * </p>
-		 * 
+		 *
 		 * @return a {@link NamespaceList} reflecting the current state of this builder
 		 */
 		public NamespaceList<E> build() {
@@ -555,6 +565,7 @@ public class NamespaceList<E> {
 
 				int[] start = new int[] { 0 };
 				namespaceElements.replaceAll(new BiFunction<String, List<E>, List<E>>() {
+					@Override
 					public List<E> apply(String n, List<E> es) {
 						int from = start[0];
 						int to = start[0] += es.size();
@@ -571,6 +582,7 @@ public class NamespaceList<E> {
 				// namespace-lists for subsequent modification
 				namespaceElements = new LinkedHashMap<>(namespaceElements);
 				namespaceElements.replaceAll(new BiFunction<String, List<E>, List<E>>() {
+					@Override
 					public List<E> apply(String n, List<E> es) {
 						return new ArrayList<>(es);
 					}

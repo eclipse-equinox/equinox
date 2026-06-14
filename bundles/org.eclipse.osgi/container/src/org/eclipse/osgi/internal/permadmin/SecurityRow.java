@@ -49,22 +49,25 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 
 	public SecurityRow(SecurityAdmin securityAdmin, String name, ConditionInfo[] conditionInfos,
 			PermissionInfo[] permissionInfos, String decision) {
-		if (permissionInfos == null || permissionInfos.length == 0)
+		if (permissionInfos == null || permissionInfos.length == 0) {
 			throw new IllegalArgumentException("It is invalid to have empty permissionInfos"); //$NON-NLS-1$
+		}
 		this.securityAdmin = securityAdmin;
 		this.conditionInfos = conditionInfos == null ? new ConditionInfo[0] : conditionInfos;
 		decision = decision.toLowerCase();
 		boolean d = ConditionalPermissionInfo.DENY.equals(decision);
 		boolean a = ConditionalPermissionInfo.ALLOW.equals(decision);
-		if (!(d | a))
+		if (!(d | a)) {
 			throw new IllegalArgumentException("Invalid decision: " + decision); //$NON-NLS-1$
+		}
 		this.deny = d;
 		this.name = name;
 		this.permissionInfoCollection = new PermissionInfoCollection(permissionInfos);
-		if (conditionInfos == null || conditionInfos.length == 0)
+		if (conditionInfos == null || conditionInfos.length == 0) {
 			bundleConditions = null;
-		else
+		} else {
 			bundleConditions = new HashMap<>();
+		}
 	}
 
 	static SecurityRowSnapShot createSecurityRowSnapShot(String encoded) {
@@ -78,63 +81,72 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 	private static ConditionalPermissionInfo createConditionalPermissionInfo(SecurityAdmin securityAdmin,
 			String encoded) {
 		encoded = encoded.trim();
-		if (encoded.length() == 0)
+		if (encoded.length() == 0) {
 			throw new IllegalArgumentException("Empty encoded string is invalid"); //$NON-NLS-1$
+		}
 		char[] chars = encoded.toCharArray();
 		int end = encoded.length() - 1;
 		char lastChar = chars[end];
-		if (lastChar != '}' && lastChar != '"')
+		if (lastChar != '}' && lastChar != '"') {
 			throw new IllegalArgumentException(encoded);
+		}
 		String encodedName = null;
 		if (lastChar == '"') {
 			// we have a name: an empty name must have at least 2 chars for the quotes
-			if (chars.length < 2)
+			if (chars.length < 2) {
 				throw new IllegalArgumentException(encoded);
+			}
 			int endName = encoded.length() - 1;
 			int startName = endName - 1;
 			while (startName > 0) {
 				if (chars[startName] == '"') {
 					startName--;
-					if (startName > 0 && chars[startName] == '\\')
+					if (startName > 0 && chars[startName] == '\\') {
 						startName--;
-					else {
+					} else {
 						startName++;
 						break;
 					}
 				}
 				startName--;
 			}
-			if (chars[startName] != '"')
+			if (chars[startName] != '"') {
 				throw new IllegalArgumentException(encoded);
+			}
 			encodedName = unescapeString(encoded.substring(startName + 1, endName));
 			end = encoded.lastIndexOf('}', startName);
 		}
 		int start = encoded.indexOf('{');
-		if (start < 0 || end < start)
+		if (start < 0 || end < start) {
 			throw new IllegalArgumentException(encoded);
+		}
 
 		String decision = encoded.substring(0, start);
 		decision = decision.trim();
 		if (decision.length() == 0 || (!ConditionalPermissionInfo.DENY.equalsIgnoreCase(decision)
-				&& !ConditionalPermissionInfo.ALLOW.equalsIgnoreCase(decision)))
+				&& !ConditionalPermissionInfo.ALLOW.equalsIgnoreCase(decision))) {
 			throw new IllegalArgumentException(encoded);
+		}
 
 		List<ConditionInfo> condList = new ArrayList<>();
 		List<PermissionInfo> permList = new ArrayList<>();
 		int pos = start + 1;
 		while (pos < end) {
-			while (pos < end && chars[pos] != '[' && chars[pos] != '(')
+			while (pos < end && chars[pos] != '[' && chars[pos] != '(') {
 				pos++;
-			if (pos == end)
+			}
+			if (pos == end) {
 				break; // no perms or conds left
+			}
 			int startPos = pos;
 			char endChar = chars[startPos] == '[' ? ']' : ')';
 			while (pos < end && chars[pos] != endChar) {
 				if (chars[pos] == '"') {
 					pos++;
 					while (chars[pos] != '"') {
-						if (chars[pos] == '\\')
+						if (chars[pos] == '\\') {
 							pos++;
+						}
 						pos++;
 					}
 				}
@@ -142,24 +154,28 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 			}
 			int endPos = pos;
 			String token = new String(chars, startPos, endPos - startPos + 1);
-			if (endChar == ']')
+			if (endChar == ']') {
 				condList.add(new ConditionInfo(token));
-			else
+			} else {
 				permList.add(new PermissionInfo(token));
+			}
 			pos++;
 		}
-		if (permList.size() == 0)
+		if (permList.size() == 0) {
 			throw new IllegalArgumentException("No Permission infos: " + encoded); //$NON-NLS-1$
+		}
 		ConditionInfo[] conds = condList.toArray(new ConditionInfo[condList.size()]);
 		PermissionInfo[] perms = permList.toArray(new PermissionInfo[permList.size()]);
-		if (securityAdmin == null)
+		if (securityAdmin == null) {
 			return new SecurityRowSnapShot(encodedName, conds, perms, decision);
+		}
 		return new SecurityRow(securityAdmin, encodedName, conds, perms, decision);
 	}
 
 	static Object cloneArray(Object[] array) {
-		if (array == null)
+		if (array == null) {
 			return null;
+		}
 		Object result = Array.newInstance(array.getClass().getComponentType(), array.length);
 		System.arraycopy(array, 0, result, 0, array.length);
 		return result;
@@ -253,6 +269,7 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
 	@Override
 	public void delete() {
 		securityAdmin.delete(this, true);
@@ -290,10 +307,11 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 
 					Object[] args = { bundlePermissions.getBundle(), conditionInfos[i] };
 					try {
-						if (method != null)
+						if (method != null) {
 							conditions[i] = (Condition) method.invoke(null, args);
-						else
+						} else {
 							conditions[i] = (Condition) constructor.newInstance(args);
+						}
 					} catch (Exception e) {
 						// TODO should post a FrameworkEvent of type error here
 						conditions[i] = Condition.FALSE;
@@ -341,47 +359,56 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 	}
 
 	Decision evaluate(BundlePermissions bundlePermissions, Permission permission) {
-		if (bundleConditions == null || bundlePermissions == null)
+		if (bundleConditions == null || bundlePermissions == null) {
 			return evaluatePermission(bundlePermissions, permission);
+		}
 		Condition[] conditions = getConditions(bundlePermissions);
-		if (conditions == ABSTAIN_LIST)
+		if (conditions == ABSTAIN_LIST) {
 			return DECISION_ABSTAIN;
-		if (conditions == SATISFIED_LIST)
+		}
+		if (conditions == SATISFIED_LIST) {
 			return evaluatePermission(bundlePermissions, permission);
+		}
 
 		boolean empty = true;
 		List<Condition> postponedConditions = null;
 		Decision postponedPermCheck = null;
 		for (int i = 0; i < conditions.length; i++) {
 			Condition condition = conditions[i];
-			if (condition == null)
+			if (condition == null) {
 				continue; // this condition must have been satisfied && !mutable in a previous check
+			}
 			if (!isPostponed(condition)) {
 				// must call isMutable before calling isSatisfied according to the
 				// specification.
 				boolean mutable = condition.isMutable();
 				if (condition.isSatisfied()) {
-					if (!mutable)
+					if (!mutable) {
 						conditions[i] = null; // ignore this condition for future checks
+					}
 				} else {
-					if (!mutable)
+					if (!mutable) {
 						// this will cause the row to always abstain; mark this to be ignored in future
 						// checks
 						synchronized (bundleConditionsLock) {
 							bundleConditions.put(bundlePermissions, ABSTAIN_LIST);
 						}
+					}
 					return DECISION_ABSTAIN;
 				}
 			} else { // postponed case
-				if (postponedPermCheck == null)
+				if (postponedPermCheck == null) {
 					// perform a permission check now
 					postponedPermCheck = evaluatePermission(bundlePermissions, permission);
-				if (postponedPermCheck == DECISION_ABSTAIN)
+				}
+				if (postponedPermCheck == DECISION_ABSTAIN) {
 					return postponedPermCheck; // no need to postpone the condition if the row abstains
+				}
 				// this row will deny or allow the permission; must queue the postponed
 				// condition
-				if (postponedConditions == null)
+				if (postponedConditions == null) {
 					postponedConditions = new ArrayList<>(1);
+				}
 				postponedConditions.add(condition);
 			}
 			empty &= conditions[i] == null;
@@ -391,9 +418,10 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 				bundleConditions.put(bundlePermissions, SATISFIED_LIST);
 			}
 		}
-		if (postponedPermCheck != null)
+		if (postponedPermCheck != null) {
 			return new Decision(postponedPermCheck.decision | SecurityTable.POSTPONED,
 					postponedConditions.toArray(new Condition[postponedConditions.size()]), this, bundlePermissions);
+		}
 		return evaluatePermission(bundlePermissions, permission);
 	}
 
@@ -421,10 +449,12 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 	@Override
 	public boolean equals(Object obj) {
 		// doing the simple (slow) thing for now
-		if (obj == this)
+		if (obj == this) {
 			return true;
-		if (!(obj instanceof ConditionalPermissionInfo))
+		}
+		if (!(obj instanceof ConditionalPermissionInfo)) {
 			return false;
+		}
 		// we assume the encoded string provides a canonical (comparable) form
 		return getEncoded().equals(((ConditionalPermissionInfo) obj).getEncoded());
 	}
@@ -442,27 +472,31 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 		for (PermissionInfo perm : perms) {
 			h = 31 * h + perm.hashCode();
 		}
-		if (name != null)
+		if (name != null) {
 			h = 31 * h + name.hashCode();
+		}
 		return h;
 	}
 
 	static String getEncoded(String name, ConditionInfo[] conditionInfos, PermissionInfo[] permissionInfos,
 			boolean deny) {
 		StringBuilder result = new StringBuilder();
-		if (deny)
+		if (deny) {
 			result.append(ConditionalPermissionInfo.DENY);
-		else
+		} else {
 			result.append(ConditionalPermissionInfo.ALLOW);
+		}
 		result.append(" { "); //$NON-NLS-1$
-		if (conditionInfos != null)
+		if (conditionInfos != null) {
 			for (ConditionInfo conditionInfo : conditionInfos) {
 				result.append(conditionInfo.getEncoded()).append(' ');
 			}
-		if (permissionInfos != null)
+		}
+		if (permissionInfos != null) {
 			for (PermissionInfo permissionInfo : permissionInfos) {
 				result.append(permissionInfo.getEncoded()).append(' ');
 			}
+		}
 		result.append('}');
 		if (name != null) {
 			result.append(" \""); //$NON-NLS-1$
@@ -478,10 +512,11 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 
 	void clearCaches() {
 		permissionInfoCollection.clearPermissionCache();
-		if (bundleConditions != null)
+		if (bundleConditions != null) {
 			synchronized (bundleConditionsLock) {
 				bundleConditions.clear();
 			}
+		}
 	}
 
 	static class Decision {
@@ -498,20 +533,24 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 		}
 
 		void handleImmutable(Condition condition, boolean isSatisfied, boolean mutable) {
-			if (mutable || !condition.isPostponed())
+			if (mutable || !condition.isPostponed()) {
 				return; // do nothing
+			}
 			if (isSatisfied) {
 				synchronized (row.bundleConditionsLock) {
 					Condition[] rowConditions = row.bundleConditions.get(bundlePermissions);
 					boolean isEmpty = true;
 					for (int i = 0; i < rowConditions.length; i++) {
-						if (rowConditions[i] == condition)
-							if (isSatisfied)
+						if (rowConditions[i] == condition) {
+							if (isSatisfied) {
 								rowConditions[i] = null;
+							}
+						}
 						isEmpty &= rowConditions[i] == null;
 					}
-					if (isEmpty)
+					if (isEmpty) {
 						row.bundleConditions.put(bundlePermissions, SATISFIED_LIST);
+					}
 				}
 			} else {
 				synchronized (row.bundleConditionsLock) {

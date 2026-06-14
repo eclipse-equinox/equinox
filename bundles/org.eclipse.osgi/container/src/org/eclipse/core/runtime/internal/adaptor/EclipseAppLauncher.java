@@ -88,8 +88,9 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 		// TODO this may be a bad assumption but it works for now because we register
 		// the app launcher as a service and runtime synchronously calls launch on the
 		// service
-		if (failOnNoDefault && runnable == null)
+		if (failOnNoDefault && runnable == null) {
 			throw new IllegalStateException(Msg.ECLIPSE_STARTUP_ERROR_NO_APPLICATION);
+		}
 		Object result = null;
 		boolean doRelaunch;
 		Bundle b = context.getBundle();
@@ -116,11 +117,13 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 				// refresh the allowAppRelaunch setting in case the application changed it
 				relaunch = Boolean.valueOf(equinoxConfig.getConfiguration(EclipseStarter.PROP_ALLOW_APPRELAUNCH));
 			} catch (Exception e) {
-				if (!relaunch || (b.getState() & Bundle.ACTIVE) == 0)
+				if (!relaunch || (b.getState() & Bundle.ACTIVE) == 0) {
 					throw e;
-				if (log != null)
+				}
+				if (log != null) {
 					log.log(new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0,
 							Msg.ECLIPSE_STARTUP_APP_ERROR, 1, e, null));
+				}
 			}
 			doRelaunch = (relaunch && (b.getState() & Bundle.ACTIVE) != 0);
 		} while (doRelaunch);
@@ -164,8 +167,9 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 	@Override
 	public void launch(ParameterizedRunnable app, Object applicationContext) {
 		waitForAppLock.tryAcquire(); // clear out any pending apps notifications
-		if (!runningLock.tryAcquire()) // check to see if an application is currently running
+		if (!runningLock.tryAcquire()) { // check to see if an application is currently running
 			throw new IllegalStateException("An application is aready running."); //$NON-NLS-1$
+		}
 		this.runnable = app;
 		this.appContext = applicationContext;
 		waitForAppLock.release(); // notify the main thread to launch an application.
@@ -176,8 +180,9 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 	public void shutdown() {
 		// this method will aquire and keep the runningLock to prevent
 		// all future application launches.
-		if (runningLock.tryAcquire())
+		if (runningLock.tryAcquire()) {
 			return; // no application is currently running.
+		}
 		ParameterizedRunnable currentRunnable = runnable;
 		if (currentRunnable instanceof ApplicationRunnable) {
 			((ApplicationRunnable) currentRunnable).stop();
@@ -202,7 +207,7 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 				"(eclipse.application.default=true)"); //$NON-NLS-1$
 		if (ref != null && ref.length > 0) {
 			Object defaultApp = context.getService(ref[0]);
-			Method launch = defaultApp.getClass().getMethod("launch", new Class[] { Map.class }); //$NON-NLS-1$
+			Method launch = defaultApp.getClass().getMethod("launch", Map.class); //$NON-NLS-1$
 			launch.invoke(defaultApp, new Object[] { null });
 			return start(argument);
 		}

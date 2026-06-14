@@ -43,8 +43,9 @@ public class DependentPolicy implements IBuddyPolicy {
 		allDependents = new ArrayList<>();
 		basicAddImmediateDependents(requester.getWiring());
 		// If there is no dependent, reset to null
-		if (allDependents.size() == 0)
+		if (allDependents.size() == 0) {
 			allDependents = null;
+		}
 	}
 
 	@Override
@@ -76,8 +77,9 @@ public class DependentPolicy implements IBuddyPolicy {
 
 	@Override
 	public URL loadResource(String name) {
-		if (allDependents == null)
+		if (allDependents == null) {
 			return null;
+		}
 
 		URL result = null;
 		// size may change, so we must check it every time
@@ -96,8 +98,9 @@ public class DependentPolicy implements IBuddyPolicy {
 
 	@Override
 	public Enumeration<URL> loadResources(String name) {
-		if (allDependents == null)
+		if (allDependents == null) {
 			return null;
+		}
 
 		Enumeration<URL> results = null;
 		// size may change, so we must check it every time

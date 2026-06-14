@@ -38,7 +38,7 @@ public interface HookContext<T> {
 
 	/**
 	 * Returns true if the given registration should be skipped.
-	 * 
+	 *
 	 * @param hookRegistration the registration to check
 	 * @return true if the given registration should be skipped.
 	 */
