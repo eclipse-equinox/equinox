@@ -56,7 +56,7 @@ public class LatinTextProcessorTestCase extends TextProcessorTestCase {
 		}
 	}
 
-	private CustomSessionConfiguration sessionConfiguration = createSessionConfiguration();
+	private final CustomSessionConfiguration sessionConfiguration = createSessionConfiguration();
 
 	@RegisterExtension
 	SessionTestExtension extension = SessionTestExtension.forPlugin(PI_OSGI_TESTS)
