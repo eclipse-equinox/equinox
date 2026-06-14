@@ -44,6 +44,7 @@ import org.eclipse.osgi.tests.resolver.TestRFC79_004;
 import org.eclipse.osgi.tests.resolver.TestRFC79_005;
 import org.eclipse.osgi.tests.resolver.TestRFC79_006;
 import org.eclipse.osgi.tests.resolver.TestRFC79_007;
+import org.eclipse.osgi.tests.resolver.TestSubstitution;
 import org.eclipse.osgi.tests.resolver.TestVersion_001;
 import org.eclipse.osgi.tests.resolver.TestVersion_002;
 import org.eclipse.osgi.tests.resolver.TestVersion_003;
@@ -83,6 +84,7 @@ import org.junit.platform.suite.api.Suite;
 		TestRFC79_005.class, //
 		TestRFC79_006.class, //
 		TestRFC79_007.class, //
+		TestSubstitution.class, //
 		TestVersion_001.class, //
 		TestVersion_002.class, //
 		TestVersion_003.class //
