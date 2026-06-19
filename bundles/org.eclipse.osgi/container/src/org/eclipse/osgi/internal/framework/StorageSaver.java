@@ -56,9 +56,10 @@ public final class StorageSaver {
 	}
 
 	public void save() {
-		if (delay != 0)
+		if (delay != 0) {
 			// Periodic saves are enabled or saves are disabled altogether.
 			return;
+		}
 		// Immediately save on request.
 		task.run();
 	}
@@ -79,8 +80,9 @@ public final class StorageSaver {
 
 	private ScheduledFuture<?> scheduleTask() {
 		// Negative delay disables saves. Zero delay results in immediate saves.
-		if (delay <= 0)
+		if (delay <= 0) {
 			return null;
+		}
 		ScheduledExecutorService executor = container.getScheduledExecutor();
 		return executor.scheduleWithFixedDelay(task, delay, delay, TimeUnit.MILLISECONDS);
 	}
@@ -94,7 +96,8 @@ public final class StorageSaver {
 	}
 
 	private void unscheduleTask() {
-		if (future != null)
+		if (future != null) {
 			future.cancel(false);
+		}
 	}
 }

@@ -27,7 +27,7 @@ public interface CertificateTrustAuthority {
 	 * Determines if the certificates are trusted. This method will throw a
 	 * <code>CertificateException</code> if the specified certificate chain is not
 	 * trusted.
-	 * 
+	 *
 	 * @param certChain a chain of certificates
 	 * @throws CertificateException if the certficates are not trusted
 	 */

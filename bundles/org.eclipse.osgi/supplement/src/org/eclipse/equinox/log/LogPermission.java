@@ -38,12 +38,14 @@ public class LogPermission extends Permission {
 	 */
 	public LogPermission(String name, String actions) {
 		super(name);
-		if (!name.equals(ALL))
+		if (!name.equals(ALL)) {
 			throw new IllegalArgumentException("name must be *"); //$NON-NLS-1$
+		}
 
 		actions = actions.trim();
-		if (!actions.equalsIgnoreCase(LOG) && !actions.equals(ALL))
+		if (!actions.equalsIgnoreCase(LOG) && !actions.equals(ALL)) {
 			throw new IllegalArgumentException("actions must be * or log"); //$NON-NLS-1$
+		}
 	}
 
 	@Override

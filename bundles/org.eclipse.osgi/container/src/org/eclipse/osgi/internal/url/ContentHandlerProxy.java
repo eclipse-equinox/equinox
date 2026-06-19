@@ -60,16 +60,18 @@ public class ContentHandlerProxy extends ContentHandler
 	}
 
 	private void setNewHandler(ServiceReference<ContentHandler> reference, int rank) {
-		if (contentHandlerServiceReference != null)
+		if (contentHandlerServiceReference != null) {
 			context.ungetService(contentHandlerServiceReference);
+		}
 
 		contentHandlerServiceReference = reference;
 		ranking = rank;
 
-		if (reference == null)
+		if (reference == null) {
 			realHandler = new DefaultContentHandler();
-		else
+		} else {
 			realHandler = URLStreamHandlerFactoryImpl.secureAction.getService(reference, context);
+		}
 	}
 
 	/**
@@ -91,8 +93,9 @@ public class ContentHandlerProxy extends ContentHandler
 				// If our contentType is registered by another service, check the service
 				// ranking and switch URLStreamHandlers if nessecary.
 				int newServiceRanking = getRank(reference);
-				if (newServiceRanking > ranking || contentHandlerServiceReference == null)
+				if (newServiceRanking > ranking || contentHandlerServiceReference == null) {
 					setNewHandler(reference, newServiceRanking);
+				}
 				return (reference);
 			}
 		}
@@ -136,8 +139,9 @@ public class ContentHandlerProxy extends ContentHandler
 	@Override
 	public void removedService(ServiceReference<ContentHandler> reference, ServiceReference<ContentHandler> service) {
 		// check to see if our URLStreamHandler was unregistered.
-		if (reference != contentHandlerServiceReference)
+		if (reference != contentHandlerServiceReference) {
 			return;
+		}
 		// If so, look for a lower ranking URLHandler
 		// this should get us the highest ranking service left, if available
 		ServiceReference<ContentHandler> newReference = contentHandlerServiceTracker.getServiceReference();
@@ -155,8 +159,9 @@ public class ContentHandlerProxy extends ContentHandler
 	}
 
 	private int getRank(ServiceReference<?> reference) {
-		if (reference == null)
+		if (reference == null) {
 			return Integer.MIN_VALUE;
+		}
 		Object property = reference.getProperty(Constants.SERVICE_RANKING);
 		return (property instanceof Integer) ? ((Integer) property).intValue() : 0;
 	}

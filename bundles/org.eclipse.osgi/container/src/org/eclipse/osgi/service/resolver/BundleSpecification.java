@@ -20,7 +20,7 @@ package org.eclipse.osgi.service.resolver;
  * This interface is not intended to be implemented by clients. The
  * {@link StateObjectFactory} should be used to construct instances.
  * </p>
- * 
+ *
  * @since 3.1
  * @noimplement This interface is not intended to be implemented by clients.
  */

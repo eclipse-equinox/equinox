@@ -21,7 +21,7 @@ import org.osgi.framework.wiring.BundleCapability;
 
 /**
  * An implementation of {@link BundleCapability}.
- * 
+ *
  * @since 3.10
  */
 public final class ModuleCapability implements BundleCapability {
@@ -57,8 +57,9 @@ public final class ModuleCapability implements BundleCapability {
 
 	@Override
 	public Map<String, Object> getAttributes() {
-		if (transientAttrs == null)
+		if (transientAttrs == null) {
 			return attributes;
+		}
 		Map<String, Object> result = new HashMap<>(transientAttrs);
 		result.putAll(attributes);
 		return Collections.unmodifiableMap(result);

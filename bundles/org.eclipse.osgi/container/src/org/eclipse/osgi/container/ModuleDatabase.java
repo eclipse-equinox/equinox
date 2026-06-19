@@ -79,7 +79,7 @@ import org.osgi.service.resolver.Resolver;
  * uninstalling, resolving and unresolving modules. Except for the
  * {@link #load(DataInputStream)}, all other methods that perform write
  * operations are intended to be used by the associated container.
- * 
+ *
  * @since 3.10
  */
 public class ModuleDatabase {
@@ -161,7 +161,7 @@ public class ModuleDatabase {
 
 	/**
 	 * Constructs a new empty database.
-	 * 
+	 *
 	 * @param adaptor the module container adaptor
 	 */
 	public ModuleDatabase(ModuleContainerAdaptor adaptor) {
@@ -184,7 +184,7 @@ public class ModuleDatabase {
 	 * given location.
 	 * <p>
 	 * A read operation protected by the {@link #readLock() read} lock.
-	 * 
+	 *
 	 * @param location the location of the module.
 	 * @return the module at the given location or null.
 	 */
@@ -202,7 +202,7 @@ public class ModuleDatabase {
 	 * location.
 	 * <p>
 	 * A read operation protected by the {@link #readLock() read} lock.
-	 * 
+	 *
 	 * @param id the id of the module.
 	 * @return the module at the given id or null.
 	 */
@@ -219,7 +219,7 @@ public class ModuleDatabase {
 	 * Installs a new revision using the specified builder, location and module.
 	 * <p>
 	 * A write operation protected by the {@link #writeLock() write} lock.
-	 * 
+	 *
 	 * @param location     the location to use for the installation
 	 * @param builder      the builder to use to create the new revision
 	 * @param revisionInfo the revision info for the new revision, may be
@@ -276,10 +276,12 @@ public class ModuleDatabase {
 			EnumSet<Settings> settings, int startlevel) {
 		// sanity check
 		checkWrite();
-		if (modulesByLocations.containsKey(location))
+		if (modulesByLocations.containsKey(location)) {
 			throw new IllegalArgumentException("Location is already used: " + location); //$NON-NLS-1$
-		if (modulesById.containsKey(id))
+		}
+		if (modulesById.containsKey(id)) {
 			throw new IllegalArgumentException("Id is already used: " + id); //$NON-NLS-1$
+		}
 		Module module;
 		if (id == 0) {
 			module = adaptor.createSystemModule();
@@ -289,8 +291,9 @@ public class ModuleDatabase {
 		builder.addRevision(module, revisionInfo);
 		modulesByLocations.put(location, module);
 		modulesById.put(id, module);
-		if (settings != null)
+		if (settings != null) {
 			moduleSettings.put(id, settings);
+		}
 		ModuleRevision newRevision = module.getCurrentRevision();
 		addCapabilities(newRevision);
 		return module;
@@ -301,7 +304,7 @@ public class ModuleDatabase {
 	 * will attempt to clean up any removal pending revisions possible.
 	 * <p>
 	 * A write operation protected by the {@link #writeLock() write} lock.
-	 * 
+	 *
 	 * @param module the module to uninstall
 	 */
 	final void uninstall(Module module) {
@@ -341,7 +344,7 @@ public class ModuleDatabase {
 	 * Updates the specified module with anew revision using the specified builder.
 	 * <p>
 	 * A write operation protected by the {@link #writeLock() write} lock.
-	 * 
+	 *
 	 * @param module       the module for which the revision provides an update for
 	 * @param builder      the builder to use to create the new revision
 	 * @param revisionInfo the revision info for the new revision, may be
@@ -382,8 +385,9 @@ public class ModuleDatabase {
 		checkWrite();
 		Collection<ModuleRevision> removalPending = getRemovalPending();
 		for (ModuleRevision removed : removalPending) {
-			if (wirings.get(removed) == null)
+			if (wirings.get(removed) == null) {
 				continue;
+			}
 			Collection<ModuleRevision> dependencyClosure = ModuleContainer.getDependencyClosure(removed, wirings);
 			boolean allPendingRemoval = true;
 			for (ModuleRevision pendingRemoval : dependencyClosure) {
@@ -438,7 +442,7 @@ public class ModuleDatabase {
 	 * Gets all revisions with a removal pending wiring.
 	 * <p>
 	 * A read operation protected by the {@link #readLock() read} lock.
-	 * 
+	 *
 	 * @return all revisions with a removal pending wiring.
 	 */
 	final Collection<ModuleRevision> getRemovalPending() {
@@ -446,8 +450,9 @@ public class ModuleDatabase {
 		readLock();
 		try {
 			for (ModuleWiring wiring : wirings.values()) {
-				if (!wiring.isCurrent())
+				if (!wiring.isCurrent()) {
 					removalPending.add(wiring.getRevision());
+				}
 			}
 		} finally {
 			readUnlock();
@@ -460,7 +465,7 @@ public class ModuleDatabase {
 	 * exists for the revision.
 	 * <p>
 	 * A read operation protected by the {@link #readLock() read} lock.
-	 * 
+	 *
 	 * @param revision the revision to get the wiring for
 	 * @return the current wiring for the specified revision.
 	 */
@@ -478,7 +483,7 @@ public class ModuleDatabase {
 	 * copy of each entry in the wirings map.
 	 * <p>
 	 * A read operation protected by the {@link #readLock() read} lock.
-	 * 
+	 *
 	 * @return a snapshot of the wirings for all revisions.
 	 */
 	final Map<ModuleRevision, ModuleWiring> getWiringsCopy() {
@@ -506,7 +511,7 @@ public class ModuleDatabase {
 	 * operations without holding the read or write lock on this database.
 	 * <p>
 	 * A read operation protected by the {@link #readLock() read} lock.
-	 * 
+	 *
 	 * @return a cloned snapshot of the wirings of all revisions.
 	 */
 	final Map<ModuleRevision, ModuleWiring> getWiringsClone() {
@@ -514,6 +519,7 @@ public class ModuleDatabase {
 		try {
 			Map<ModuleRevision, ModuleWiring> clonedWirings = new HashMap<>(wirings);
 			clonedWirings.replaceAll(new BiFunction<ModuleRevision, ModuleWiring, ModuleWiring>() {
+				@Override
 				public ModuleWiring apply(ModuleRevision r, ModuleWiring w) {
 					return new ModuleWiring(r, w.getCapabilities(), w.getRequirements(), w.getProvidedWires(),
 							w.getRequiredWires(), w.getSubstitutedNames());
@@ -529,7 +535,7 @@ public class ModuleDatabase {
 	 * Replaces the complete wiring map with the specified wiring
 	 * <p>
 	 * A write operation protected by the {@link #writeLock() write} lock.
-	 * 
+	 *
 	 * @param newWiring the new wiring to take effect. The values from the new
 	 *                  wiring are copied.
 	 */
@@ -549,7 +555,7 @@ public class ModuleDatabase {
 	 * wirings
 	 * <p>
 	 * A write operation protected by the {@link #writeLock() write} lock.
-	 * 
+	 *
 	 * @param deltaWiring the new wiring values to take effect. The values from the
 	 *                    delta wiring are copied.
 	 */
@@ -568,7 +574,7 @@ public class ModuleDatabase {
 	 * increment the timestamps and optionally the revisions timestamps.
 	 * <p>
 	 * A write operation protected by the {@link #writeLock() write} lock.
-	 * 
+	 *
 	 * @param incrementRevision if true the revision timestamps will be incremented
 	 *                          after successfully running the operation
 	 * @param op                the operation to run while holding the write lock.
@@ -587,7 +593,7 @@ public class ModuleDatabase {
 	 * Returns a snapshot of all modules ordered by module ID.
 	 * <p>
 	 * A read operation protected by the {@link #readLock() read} lock.
-	 * 
+	 *
 	 * @return a snapshot of all modules.
 	 */
 	final List<Module> getModules() {
@@ -596,7 +602,7 @@ public class ModuleDatabase {
 
 	/**
 	 * Returns a snapshot of all modules ordered according to the sort options
-	 * 
+	 *
 	 * @param sortOptions options for sorting
 	 * @return a snapshot of all modules ordered according to the sort options
 	 */
@@ -612,8 +618,9 @@ public class ModuleDatabase {
 	}
 
 	final void sortModules(List<Module> modules, Sort... sortOptions) {
-		if (modules.size() < 2)
+		if (modules.size() < 2) {
 			return;
+		}
 		if (sortOptions == null || Sort.BY_ID.isContained(sortOptions) || sortOptions.length == 0) {
 			Collections.sort(modules, new Comparator<Module>() {
 				@Override
@@ -636,8 +643,9 @@ public class ModuleDatabase {
 				for (int i = 0; i < modules.size(); i++) {
 					Module module = modules.get(i);
 					if (currentSL != module.getStartLevel()) {
-						if (lazy)
+						if (lazy) {
 							sortByDependencies(modules.subList(currentSLindex, i));
+						}
 						currentSL = module.getStartLevel();
 						currentSLindex = i;
 						lazy = false;
@@ -645,8 +653,9 @@ public class ModuleDatabase {
 					lazy |= module.isLazyActivate();
 				}
 				// sort the last set of bundles
-				if (lazy)
+				if (lazy) {
 					sortByDependencies(modules.subList(currentSLindex, modules.size()));
+				}
 			} else {
 				// sort the whole list by dependency
 				sortByDependencies(modules);
@@ -691,8 +700,9 @@ public class ModuleDatabase {
 		toSort.clear();
 		toSort.addAll(Arrays.asList(sorted));
 
-		if (cycles.length == 0)
+		if (cycles.length == 0) {
 			return Collections.emptyList();
+		}
 
 		Collection<List<Module>> moduleCycles = new ArrayList<>(cycles.length);
 		for (Object[] cycle : cycles) {
@@ -706,15 +716,16 @@ public class ModuleDatabase {
 	}
 
 	private void checkWrite() {
-		if (monitor.getWriteHoldCount() == 0)
+		if (monitor.getWriteHoldCount() == 0) {
 			throw new IllegalMonitorStateException("Must hold the write lock."); //$NON-NLS-1$
+		}
 	}
 
 	/**
 	 * returns the next module ID.
 	 * <p>
 	 * A read operation protected by the {@link #readLock() read} lock.
-	 * 
+	 *
 	 * @return the next module ID
 	 */
 	public final long getNextId() {
@@ -730,7 +741,7 @@ public class ModuleDatabase {
 	 * Atomically increments by one the next module ID.
 	 * <p>
 	 * A write operation protected by the {@link #writeLock()} lock.
-	 * 
+	 *
 	 * @return the previous module ID
 	 * @since 3.13
 	 */
@@ -755,7 +766,7 @@ public class ModuleDatabase {
 	 * </ul>
 	 * <p>
 	 * A read operation protected by the {@link #readLock() read} lock.
-	 * 
+	 *
 	 * @return the current timestamp of this database.
 	 */
 	final public long getRevisionsTimestamp() {
@@ -779,7 +790,7 @@ public class ModuleDatabase {
 	 * </ul>
 	 * <p>
 	 * A read operation protected by the {@link #readLock() read} lock.
-	 * 
+	 *
 	 * @return the current timestamp of this database.
 	 */
 	final public long getTimestamp() {
@@ -793,7 +804,7 @@ public class ModuleDatabase {
 
 	/**
 	 * Increments the timestamps of this database.
-	 * 
+	 *
 	 * @param incrementRevision indicates if the revision timestamp should change
 	 */
 	private void incrementTimestamps(boolean incrementRevision) {
@@ -817,7 +828,7 @@ public class ModuleDatabase {
 
 	/**
 	 * Acquires the read lock for this database.
-	 * 
+	 *
 	 * @see ReadLock#lock()
 	 */
 	public final void readLock() {
@@ -828,7 +839,7 @@ public class ModuleDatabase {
 	 * Acquires the write lock for this database. Same as {@link WriteLock#lock()}
 	 * except an illegal state exception is thrown if the current thread holds one
 	 * or more read locks.
-	 * 
+	 *
 	 * @see WriteLock#lock()
 	 * @throws IllegalMonitorStateException if the current thread holds one or more
 	 *                                      read locks.
@@ -844,7 +855,7 @@ public class ModuleDatabase {
 
 	/**
 	 * Attempts to release the read lock for this database.
-	 * 
+	 *
 	 * @see ReadLock#unlock()
 	 */
 	public final void readUnlock() {
@@ -853,7 +864,7 @@ public class ModuleDatabase {
 
 	/**
 	 * Attempts to release the write lock for this database.
-	 * 
+	 *
 	 * @see WriteLock#unlock()
 	 */
 	public final void writeUnlock() {
@@ -867,7 +878,7 @@ public class ModuleDatabase {
 	 * {@link ModuleDatabase#findCapabilities(Requirement)} method.
 	 * <p>
 	 * This method must be called while holding the {@link #writeLock() write} lock.
-	 * 
+	 *
 	 * @param revision the revision which has capabilities to add
 	 */
 	final void addCapabilities(ModuleRevision revision) {
@@ -898,7 +909,7 @@ public class ModuleDatabase {
 	 * <p>
 	 * A read operation protected by the {@link #readLock() read} lock. Implementers
 	 * of this method should acquire the read lock while finding capabilities.
-	 * 
+	 *
 	 * @param requirement the requirement
 	 * @return the candidates for the requirement
 	 */
@@ -925,7 +936,7 @@ public class ModuleDatabase {
 	 * <p>
 	 * After this database have been written, the output stream is flushed. The
 	 * output stream remains open after this method returns.
-	 * 
+	 *
 	 * @param out            the data output steam.
 	 * @param persistWirings true if wirings should be persisted. This option will
 	 *                       be ignored if there are {@link #getRemovalPending()
@@ -954,7 +965,7 @@ public class ModuleDatabase {
 	 * information into this database.
 	 * <p>
 	 * The specified stream remains open after this method returns.
-	 * 
+	 *
 	 * @param in the data input stream.
 	 * @throws IOException           if an error occurred when reading from the
 	 *                               input stream.
@@ -963,8 +974,9 @@ public class ModuleDatabase {
 	public final void load(DataInputStream in) throws IOException {
 		writeLock();
 		try {
-			if (allTimeStamp.get() != constructionTime)
+			if (allTimeStamp.get() != constructionTime) {
 				throw new IllegalStateException("Can only load into a empty database."); //$NON-NLS-1$
+			}
 			Persistence.load(this, in);
 		} finally {
 			writeUnlock();
@@ -1035,11 +1047,13 @@ public class ModuleDatabase {
 		private static final byte VALUE_LIST = 8;
 
 		private static int addToWriteTable(Object object, Map<Object, Integer> objectTable) {
-			if (object == null)
+			if (object == null) {
 				throw new NullPointerException();
+			}
 			Integer cur = objectTable.get(object);
-			if (cur != null)
+			if (cur != null) {
 				throw new IllegalStateException("Object is already in the write table: " + object); //$NON-NLS-1$
+			}
 			objectTable.put(object, Integer.valueOf(objectTable.size()));
 			// return the index of the object just added (i.e. size - 1)
 			return (objectTable.size() - 1);
@@ -1141,8 +1155,9 @@ public class ModuleDatabase {
 		private static void getStringsVersionsAndMaps(Module module, ModuleDatabase moduleDatabase,
 				Set<String> allStrings, Set<Version> allVersions, Set<Map<String, ?>> allMaps) {
 			ModuleRevision current = module.getCurrentRevision();
-			if (current == null)
+			if (current == null) {
 				return;
+			}
 
 			allStrings.add(module.getLocation());
 			allStrings.add(current.getSymbolicName());
@@ -1204,9 +1219,10 @@ public class ModuleDatabase {
 
 		public static void load(ModuleDatabase moduleDatabase, DataInputStream in) throws IOException {
 			int version = in.readInt();
-			if (version > VERSION || VERSION / 1000 != version / 1000)
+			if (version > VERSION || VERSION / 1000 != version / 1000) {
 				throw new IllegalArgumentException("The version of the persistent framework data is not compatible: " //$NON-NLS-1$
 						+ version + " expecting: " + VERSION); //$NON-NLS-1$
+			}
 			long revisionsTimeStamp = in.readLong();
 			long allTimeStamp = in.readLong();
 			moduleDatabase.nextId.set(in.readLong());
@@ -1236,8 +1252,9 @@ public class ModuleDatabase {
 
 			moduleDatabase.revisionsTimeStamp.set(revisionsTimeStamp);
 			moduleDatabase.allTimeStamp.set(allTimeStamp);
-			if (!in.readBoolean())
+			if (!in.readBoolean()) {
 				return; // no wires persisted
+			}
 
 			int numWirings = in.readInt();
 			// prime the table with all the required wires
@@ -1270,8 +1287,9 @@ public class ModuleDatabase {
 		private static void writeModule(Module module, ModuleDatabase moduleDatabase, DataOutputStream out,
 				Map<Object, Integer> objectTable) throws IOException {
 			ModuleRevision current = module.getCurrentRevision();
-			if (current == null)
+			if (current == null) {
 				return;
+			}
 			out.writeInt(addToWriteTable(current, objectTable));
 
 			writeString(module.getLocation(), out, objectTable);
@@ -1377,8 +1395,9 @@ public class ModuleDatabase {
 			Integer requirement = objectTable.get(w.getRequirement());
 			Integer requirer = objectTable.get(w.getRequirer());
 
-			if (capability == null || provider == null || requirement == null || requirer == null)
+			if (capability == null || provider == null || requirement == null || requirer == null) {
 				throw new NullPointerException("Could not find the expected indexes"); //$NON-NLS-1$
+			}
 
 			out.writeInt(addToWriteTable(wire, objectTable));
 
@@ -1396,8 +1415,9 @@ public class ModuleDatabase {
 			ModuleRequirement requirement = (ModuleRequirement) objectTable.get(in.readInt());
 			ModuleRevision requirer = (ModuleRevision) objectTable.get(in.readInt());
 
-			if (capability == null || provider == null || requirement == null || requirer == null)
+			if (capability == null || provider == null || requirement == null || requirer == null) {
 				throw new NullPointerException("Could not find the expected indexes"); //$NON-NLS-1$
+			}
 
 			ModuleWire result = new ModuleWire(capability, provider, requirement, requirer);
 
@@ -1407,16 +1427,18 @@ public class ModuleDatabase {
 		private static void writeWiring(ModuleWiring wiring, DataOutputStream out, Map<Object, Integer> objectTable)
 				throws IOException {
 			Integer revisionIndex = objectTable.get(wiring.getRevision());
-			if (revisionIndex == null)
+			if (revisionIndex == null) {
 				throw new NullPointerException("Could not find revision for wiring."); //$NON-NLS-1$
+			}
 			out.writeInt(revisionIndex);
 
 			List<ModuleCapability> capabilities = wiring.getModuleCapabilities(null);
 			out.writeInt(capabilities.size());
 			for (ModuleCapability capability : capabilities) {
 				Integer capabilityIndex = objectTable.get(capability);
-				if (capabilityIndex == null)
+				if (capabilityIndex == null) {
 					throw new NullPointerException("Could not find capability for wiring."); //$NON-NLS-1$
+				}
 				out.writeInt(capabilityIndex);
 			}
 
@@ -1424,8 +1446,9 @@ public class ModuleDatabase {
 			out.writeInt(requirements.size());
 			for (ModuleRequirement requirement : requirements) {
 				Integer requirementIndex = objectTable.get(requirement);
-				if (requirementIndex == null)
+				if (requirementIndex == null) {
 					throw new NullPointerException("Could not find requirement for wiring."); //$NON-NLS-1$
+				}
 				out.writeInt(requirementIndex);
 			}
 
@@ -1433,8 +1456,9 @@ public class ModuleDatabase {
 			out.writeInt(providedWires.size());
 			for (ModuleWire wire : providedWires) {
 				Integer wireIndex = objectTable.get(wire);
-				if (wireIndex == null)
+				if (wireIndex == null) {
 					throw new NullPointerException("Could not find provided wire for wiring."); //$NON-NLS-1$
+				}
 				out.writeInt(wireIndex);
 			}
 
@@ -1442,8 +1466,9 @@ public class ModuleDatabase {
 			out.writeInt(requiredWires.size());
 			for (ModuleWire wire : requiredWires) {
 				Integer wireIndex = objectTable.get(wire);
-				if (wireIndex == null)
+				if (wireIndex == null) {
 					throw new NullPointerException("Could not find required wire for wiring."); //$NON-NLS-1$
+				}
 				out.writeInt(wireIndex);
 			}
 
@@ -1456,8 +1481,9 @@ public class ModuleDatabase {
 
 		private static ModuleWiring readWiring(DataInputStream in, List<Object> objectTable) throws IOException {
 			ModuleRevision revision = (ModuleRevision) objectTable.get(in.readInt());
-			if (revision == null)
+			if (revision == null) {
 				throw new NullPointerException("Could not find revision for wiring."); //$NON-NLS-1$
+			}
 
 			int numCapabilities = in.readInt();
 			NamespaceList.Builder<ModuleCapability> capabilities = Builder.create(NamespaceList.CAPABILITY);
@@ -1500,8 +1526,9 @@ public class ModuleDatabase {
 
 			Integer attributesIndex = objectTable.get(attributes);
 			Integer directivesIndex = objectTable.get(directives);
-			if (attributesIndex == null || directivesIndex == null)
+			if (attributesIndex == null || directivesIndex == null) {
 				throw new NullPointerException("Could not find the expected indexes"); //$NON-NLS-1$
+			}
 			out.writeInt(attributesIndex);
 			out.writeInt(directivesIndex);
 		}
@@ -1514,8 +1541,9 @@ public class ModuleDatabase {
 					: readMap(in, objectTable);
 			Map<String, ?> directives = version >= 2 ? (Map<String, ?>) objectTable.get(in.readInt())
 					: readMap(in, objectTable);
-			if (attributes == null || directives == null)
+			if (attributes == null || directives == null) {
 				throw new NullPointerException("Could not find the expected indexes"); //$NON-NLS-1$
+			}
 			if (isCapability) {
 				builder.basicAddCapability(namespace, (Map<String, String>) directives, attributes);
 			} else {
@@ -1648,24 +1676,30 @@ public class ModuleDatabase {
 		}
 
 		private static byte getListType(List<?> list) {
-			if (list.size() == 0)
+			if (list.size() == 0) {
 				return -1;
+			}
 			Object type = list.get(0);
-			if (type instanceof String)
+			if (type instanceof String) {
 				return VALUE_STRING;
-			if (type instanceof Long)
+			}
+			if (type instanceof Long) {
 				return VALUE_LONG;
-			if (type instanceof Double)
+			}
+			if (type instanceof Double) {
 				return VALUE_DOUBLE;
-			if (type instanceof Version)
+			}
+			if (type instanceof Version) {
 				return VALUE_VERSION;
+			}
 			return -2;
 		}
 
 		private static List<?> readList(DataInputStream in, List<Object> objectTable) throws IOException {
 			int size = in.readInt();
-			if (size == 0)
+			if (size == 0) {
 				return Collections.emptyList();
+			}
 			byte listType = in.readByte();
 			if (size == 1) {
 				return Collections.singletonList(readListValue(listType, in, objectTable));
@@ -1714,8 +1748,9 @@ public class ModuleDatabase {
 
 		private static void writeQualifier(String string, DataOutputStream out, Map<Object, Integer> objectTable)
 				throws IOException {
-			if (string != null && string.length() == 0)
+			if (string != null && string.length() == 0) {
 				string = null;
+			}
 			writeString(string, out, objectTable);
 		}
 
@@ -1736,8 +1771,9 @@ public class ModuleDatabase {
 				int index = in.readInt();
 				return (Version) objectTable.get(index);
 			}
-			if (type == NULL)
+			if (type == NULL) {
 				return Version.emptyVersion;
+			}
 			int majorComponent = in.readInt();
 			int minorComponent = in.readInt();
 			int serviceComponent = in.readInt();
@@ -1755,9 +1791,9 @@ public class ModuleDatabase {
 				return;
 			}
 
-			if (string == null)
+			if (string == null) {
 				out.writeByte(NULL);
-			else {
+			} else {
 				byte[] data = string.getBytes(StandardCharsets.UTF_8);
 
 				if (data.length > 65535) {

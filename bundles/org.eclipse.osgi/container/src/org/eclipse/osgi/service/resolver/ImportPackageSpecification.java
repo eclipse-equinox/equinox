@@ -22,7 +22,7 @@ import java.util.Map;
  * This interface is not intended to be implemented by clients. The
  * {@link StateObjectFactory} should be used to construct instances.
  * </p>
- * 
+ *
  * @since 3.1
  * @noimplement This interface is not intended to be implemented by clients.
  */
@@ -43,7 +43,7 @@ public interface ImportPackageSpecification extends VersionConstraint {
 	/**
 	 * Returns the symbolic name of the bundle this import package must be resolved
 	 * to.
-	 * 
+	 *
 	 * @return the symbolic name of the bundle this import pacakge must be resolved
 	 *         to. A value of <code>null</code> indicates any symbolic name.
 	 */
@@ -51,7 +51,7 @@ public interface ImportPackageSpecification extends VersionConstraint {
 
 	/**
 	 * Returns the version range which this import package may be resolved to.
-	 * 
+	 *
 	 * @return the version range which this import package may be resolved to.
 	 */
 	public VersionRange getBundleVersionRange();
@@ -59,7 +59,7 @@ public interface ImportPackageSpecification extends VersionConstraint {
 	/**
 	 * Returns the arbitrary attributes which this import package may be resolved
 	 * to.
-	 * 
+	 *
 	 * @return the arbitrary attributes which this import package may be resolved
 	 *         to.
 	 */
@@ -67,14 +67,14 @@ public interface ImportPackageSpecification extends VersionConstraint {
 
 	/**
 	 * Returns the directives that control this import package.
-	 * 
+	 *
 	 * @return the directives that control this import package.
 	 */
 	public Map<String, Object> getDirectives();
 
 	/**
 	 * Returns the specified directive that control this import package.
-	 * 
+	 *
 	 * @return the specified directive that control this import package.
 	 */
 	public Object getDirective(String key);
