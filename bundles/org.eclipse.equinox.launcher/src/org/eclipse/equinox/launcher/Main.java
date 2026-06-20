@@ -453,7 +453,7 @@ public class Main {
 			String devPathList = devClassPathProps.getProperty(PLUGIN_ID);
 			List<String> locations = getArrayFromList(devPathList);
 			if (!locations.isEmpty()) {
-				File location = new File(locations.get(0));
+				File location = new File(locations.getFirst());
 				if (location.isAbsolute()) {
 					searchPath = Stream.of(location.getParent());
 				}

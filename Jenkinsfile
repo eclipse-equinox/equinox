@@ -38,30 +38,7 @@ def runOnNativeBuildAgent(String platform, Closure body) {
 
 /** Returns the download URL of the JDK against whose C headers (in the 'include/' folder) and native libraries the natives are compiled.*/
 def getNativeJdkUrl(String os, String arch) { // To update the used JDK version update the URL template below
-	if ('win32'.equals(os) && 'aarch64'.equals(arch)) {
-		// Temporary workaround until there are official Temurin GA releases for Windows on ARM that can be consumed through JustJ
-		dir("${WORKSPACE}/repackage-win32.aarch64-jdk") {
-			sh """
-				curl -L 'https://github.com/adoptium/temurin17-binaries/releases/download/jdk17u-2024-02-07-14-14-beta/OpenJDK17U-jdk_aarch64_windows_hotspot_2024-02-07-14-14.zip' > jdk.zip
-				unzip -q jdk.zip jdk-17.0.11+1/include/** jdk-17.0.11+1/lib/**
-				cd jdk-17.0.11+1
-				tar -czf ../jdk.tar.gz include/ lib/
-			"""
-		}
-		return "file://${WORKSPACE}/repackage-win32.aarch64-jdk/jdk.tar.gz"
-	} else if ('linux'.equals(os) && 'riscv64'.equals(arch)) {
-		// Downloading jdk and renew it for riscv64 architecture on Linux
-		dir("${WORKSPACE}/repackage-linux.riscv64-jdk") {
-				sh """
-				curl -L 'https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.12%2B7/OpenJDK17U-jdk_riscv64_linux_hotspot_17.0.12_7.tar.gz' > jdk.tar.gz
-				tar -xzf jdk.tar.gz jdk-17.0.12+7/include/ jdk-17.0.12+7/lib/
-				cd jdk-17.0.12+7
-				tar -czf ../jdk.tar.gz include/ lib/
-				"""
-		}
-		return "file://${WORKSPACE}/repackage-linux.riscv64-jdk/jdk.tar.gz"
-	}
-	return "https://download.eclipse.org/justj/jres/17/downloads/20230428_1804/org.eclipse.justj.openjdk.hotspot.jre.minimal.stripped-17.0.7-${os}-${arch}.tar.gz"
+	return "https://download.eclipse.org/justj/jres/21/downloads/20260515_1409/org.eclipse.justj.openjdk.hotspot.jre.minimal.stripped-21.0.11-${os}-${arch}.tar.gz"
 }
 
 def isOnMainIshBranch() {
