@@ -74,7 +74,6 @@
 		<id>tck</id>
 		<properties>
 			<!-- Might be overidden in build.properties -->
-			<tck.engine>org.junit.vintage.engine,junit-jupiter-engine</tck.engine>
 			<tck.tester>biz.aQute.tester.junit-platform</tck.tester>
 			<tck.security>false</tck.security>
 			<tck.skip>false</tck.skip>
@@ -84,7 +83,6 @@
 				<plugin>
 					<groupId>org.eclipse.tycho</groupId>
 					<artifactId>target-platform-configuration</artifactId>
-					<version>${tycho.version}</version>
 					<configuration>
 						<target>
 							<file>../../releng/tcks.target</file>
@@ -95,12 +93,49 @@
 							security feature for Java > 17
 						-->
 						<executionEnvironment>JavaSE-17</executionEnvironment>
+							<filters>
+								<filter>
+									<type>p2-installable-unit</type>
+									<id>junit-jupiter-api</id>
+									<versionRange>[6,7)</versionRange>
+									<removeAll />
+								</filter>
+								<filter>
+									<type>p2-installable-unit</type>
+									<id>junit-jupiter-engine</id>
+									<versionRange>[6,7)</versionRange>
+									<removeAll />
+								</filter>
+								<filter>
+									<type>p2-installable-unit</type>
+									<id>junit-platform-commons</id>
+									<versionRange>[6,7)</versionRange>
+									<removeAll />
+								</filter>
+								<filter>
+									<type>p2-installable-unit</type>
+									<id>junit-platform-engine</id>
+									<versionRange>[6,7)</versionRange>
+									<removeAll />
+								</filter>
+								<filter>
+									<type>p2-installable-unit</type>
+									<id>junit-platform-launcher</id>
+									<versionRange>[6,7)</versionRange>
+									<removeAll />
+								</filter>
+								<filter>
+									<type>p2-installable-unit</type>
+									<id>junit-vintage-engine</id>
+									<versionRange>[6,7)</versionRange>
+									<removeAll />
+								</filter>
+							</filters>
 					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.eclipse.tycho</groupId>
 					<artifactId>tycho-surefire-plugin</artifactId>
-					<version>${tycho.version}</version>
 					<executions>
 						<execution>
 							<goals>
@@ -114,7 +149,6 @@
 								<useJDK>BREE</useJDK>
 								<skipTests>${tck.skip}</skipTests>
 								<tester>${tck.tester}</tester>
-								<engine>${tck.engine}</engine>
 								<trace>false</trace>
 								<testerTrace>false</testerTrace>
 								<printBundles>true</printBundles>
@@ -140,9 +174,6 @@
 							</configuration>
 						</execution>
 					</executions>
-					<configuration>
-						<tycho.test.packaging>disabled</tycho.test.packaging>
-					</configuration>
 				</plugin>
 			</plugins>
 		</build>

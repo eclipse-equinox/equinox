@@ -114,8 +114,8 @@ jobs:
         -Pbree-libs
         -Ptck
         -Dskip-default-modules=true
-        -Dtycho.resolver.classic=false
-        -fn
+        -Dmaven.test.failure.ignore
+        -fae
         clean verify
     - name: Upload TCK Results
       uses: actions/upload-artifact@v7
