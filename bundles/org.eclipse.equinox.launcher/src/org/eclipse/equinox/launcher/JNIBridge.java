@@ -36,6 +36,12 @@ class JNIBridge {
 
 	private native String _get_os_recommended_folder();
 
+	private native String _get_os_user_data_directory();
+
+	private native String _get_os_user_data_shared_directory();
+
+	private native String _get_os_user_documents_directory();
+
 	private final String library;
 	private boolean libraryLoaded = false;
 
@@ -152,6 +158,42 @@ class JNIBridge {
 			if (!libraryLoaded) {
 				loadLibrary();
 				return getOSRecommendedFolder();
+			}
+			return null;
+		}
+	}
+
+	public String getOSUserDataDirectory() {
+		try {
+			return _get_os_user_data_directory();
+		} catch (UnsatisfiedLinkError e) {
+			if (!libraryLoaded) {
+				loadLibrary();
+				return getOSUserDataDirectory();
+			}
+			return null;
+		}
+	}
+
+	public String getOSUserDataSharedDirectory() {
+		try {
+			return _get_os_user_data_shared_directory();
+		} catch (UnsatisfiedLinkError e) {
+			if (!libraryLoaded) {
+				loadLibrary();
+				return getOSUserDataSharedDirectory();
+			}
+			return null;
+		}
+	}
+
+	public String getOSUserDocumentsDirectory() {
+		try {
+			return _get_os_user_documents_directory();
+		} catch (UnsatisfiedLinkError e) {
+			if (!libraryLoaded) {
+				loadLibrary();
+				return getOSUserDocumentsDirectory();
 			}
 			return null;
 		}
