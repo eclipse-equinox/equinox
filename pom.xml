@@ -171,6 +171,9 @@
 									</org.osgi.framework.system.capabilities.extra>
 									<org.eclipse.osgi.internal.throw.ise.unregister>true</org.eclipse.osgi.internal.throw.ise.unregister>
 								</properties>
+								<bndRunProperties>
+									<_runpath>org.eclipse.equinox.spi</_runpath>
+								</bndRunProperties>
 							</configuration>
 						</execution>
 					</executions>

@@ -47,6 +47,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.namespace.HostNamespace;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleWire;
 import org.osgi.framework.wiring.BundleWiring;
@@ -196,20 +197,24 @@ public class ServiceLoaderMediatorHook extends ClassLoaderHook implements Bundle
 			// registration as OSGi service as part of the re-registration.
 			// Likewise the transition from active to resolved in a stop process is relevant
 			// to unregister the OSGi services.
-
 			switch (event.getType()) {
 			// TODO: LAZY_ACTIVATION??
 			case BundleEvent.STARTING -> {
-				BundleServices services = trackedBundles.get(bundle);
-				if (services != null) {
-					services.registerOSGiServices(bundle.getBundleContext());
-				}
+				BundleContext bundleContext = bundle.getBundleContext();
+				bundleAndFragments(bundle).forEach(b -> {
+					BundleServices services = trackedBundles.get(b);
+					if (services != null) {
+						services.registerOSGiServices(bundleContext);
+					}
+				});
 			}
 			case BundleEvent.STOPPING -> {
-				BundleServices services = trackedBundles.get(bundle);
-				if (services != null) {
-					services.unregisterOSGiServices();
-				}
+				bundleAndFragments(bundle).forEach(b -> {
+					BundleServices services = trackedBundles.get(b);
+					if (services != null) {
+						services.unregisterOSGiServices();
+					}
+				});
 			}
 			case BundleEvent.STARTED, BundleEvent.STOPPED -> {
 				// The completion of the start and stop process is irrelevant.
@@ -220,6 +225,16 @@ public class ServiceLoaderMediatorHook extends ClassLoaderHook implements Bundle
 			}
 			}
 		}
+	}
+
+	private static Stream<Bundle> bundleAndFragments(Bundle bundle) {
+		List<BundleWire> providedHostWires = bundle.adapt(BundleWiring.class)
+				.getProvidedWires(HostNamespace.HOST_NAMESPACE);
+		if (providedHostWires == null) {
+			return Stream.of(bundle);
+		}
+		return Stream.concat(Stream.of(bundle),
+				providedHostWires.stream().map(w -> w.getRequirer().getBundle()).filter(Objects::nonNull));
 	}
 
 	@Override
@@ -243,6 +258,9 @@ public class ServiceLoaderMediatorHook extends ClassLoaderHook implements Bundle
 							&& Callers.walk(s -> s.anyMatch(c -> c == SERVICE_LOADER_GET_RESOURCES_CALLER))) {
 						List<URL> configFiles = providerClassLoaders(classLoader, services, Set.of(serviceName))
 								.flatMap(cl -> {
+									// TODO: Load it directly as bundle entry from the provider bundles?!
+									// Have to pay attention to fragments! But avoids recursion that is only blocked
+									// by the ClassWalker check.
 									try {
 										return cl.resources(name);
 									} catch (UncheckedIOException e) {
@@ -298,7 +316,7 @@ public class ServiceLoaderMediatorHook extends ClassLoaderHook implements Bundle
 	private static Stream<ClassLoader> providerClassLoaders(ModuleClassLoader classLoader, Set<BundleServices> services,
 			Set<String> serviceNames) {
 
-		Stream<BundleWiring> providerWirings = services.stream().map(BundleServices::bundle).map(b -> {
+		Stream<BundleWiring> providerHostWirings = services.stream().map(BundleServices::bundle).map(b -> {
 			BundleRevision bundleRevision = b.adapt(BundleRevision.class);
 			return BundleServices.getHostingWiring(bundleRevision);
 		});
@@ -322,9 +340,9 @@ public class ServiceLoaderMediatorHook extends ClassLoaderHook implements Bundle
 			}
 			Set<BundleWiring> wiredWirings = wires.map(BundleWire::getProviderWiring).collect(Collectors.toSet());
 			// the wired wirings are always hosts (never from fragments)
-			providerWirings = providerWirings.filter(wiredWirings::contains);
+			providerHostWirings = providerHostWirings.filter(wiredWirings::contains);
 		}
-		return Stream.concat(Stream.of(classLoader), providerWirings.map(BundleWiring::getClassLoader));
+		return Stream.concat(Stream.of(classLoader), providerHostWirings.map(BundleWiring::getClassLoader)).distinct();
 	}
 
 	private interface RuntimeCloseable extends AutoCloseable {

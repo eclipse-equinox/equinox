@@ -14,7 +14,23 @@
 
 package org.eclipse.equinox.spi.tests.impl;
 
+import java.io.IOException;
+import java.net.URL;
+
 import org.eclipse.equinox.spi.tests.service.TestService;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
 
 public class TestServiceImpl implements TestService {
+
+	@Override
+	public String getValue() {
+		Bundle bundle = FrameworkUtil.getBundle(getClass());
+		URL entry = bundle.getEntry("/value.txt");
+		try (var resource = getClass().getClassLoader().getResource("/value.txt").openStream()) {
+			return new String(resource.readAllBytes()).trim();
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
+		}
+	}
 }

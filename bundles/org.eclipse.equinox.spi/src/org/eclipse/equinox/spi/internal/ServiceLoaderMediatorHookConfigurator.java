@@ -14,15 +14,11 @@
 
 package org.eclipse.equinox.spi.internal;
 
-import java.util.List;
-
 import org.eclipse.osgi.internal.hookregistry.HookConfigurator;
 import org.eclipse.osgi.internal.hookregistry.HookRegistry;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.namespace.HostNamespace;
-import org.osgi.framework.wiring.BundleWiring;
 
 public class ServiceLoaderMediatorHookConfigurator implements HookConfigurator {
 	private static ServiceLoaderMediatorHook mediatorHook;
@@ -30,8 +26,8 @@ public class ServiceLoaderMediatorHookConfigurator implements HookConfigurator {
 	@Override
 	public void addHooks(HookRegistry hookRegistry) {
 		ServiceLoaderMediatorHook hook = new ServiceLoaderMediatorHook();
-		mediatorHook = hook;
 		hookRegistry.addClassLoaderHook(hook);
+		mediatorHook = hook;
 	}
 
 	static Bundle spiExtensionBundle;
@@ -40,8 +36,6 @@ public class ServiceLoaderMediatorHookConfigurator implements HookConfigurator {
 
 		@Override
 		public void start(BundleContext context) throws Exception {
-			Bundle systemBundle = context.getBundle();
-			spiExtensionBundle = findFragment(systemBundle, "org.eclipse.equinox.spi"); //$NON-NLS-1$
 			mediatorHook.start(context);
 		}
 
@@ -51,17 +45,6 @@ public class ServiceLoaderMediatorHookConfigurator implements HookConfigurator {
 			spiExtensionBundle = null;
 		}
 
-		private static Bundle findFragment(Bundle bundle, String bundleSymbolicName) {
-			List<Bundle> equinoxSPIExtensions = bundle.adapt(BundleWiring.class)
-					.getProvidedWires(HostNamespace.HOST_NAMESPACE).stream()
-					.map(w -> w.getRequirement().getResource().getBundle())
-					.filter(b -> b.getSymbolicName().equals(bundleSymbolicName)) // $NON-NLS-1$
-					.toList();
-			if (equinoxSPIExtensions.size() != 1) {
-				throw new IllegalStateException("Not exactly one Equinox SPI extension found: " + equinoxSPIExtensions); //$NON-NLS-1$
-			}
-			return equinoxSPIExtensions.get(0);
-		}
 	}
 
 }
