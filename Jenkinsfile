@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2024 Red Hat Inc. and others.
+ * Copyright (c) 2021, 2026 Red Hat Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -34,34 +34,6 @@ def runOnNativeBuildAgent(String platform, Closure body) {
 		// https://github.com/eclipse-cbi/jiro/tree/master/instances/eclipse.platform.releng
 		node(agentLabel) { stage(nativeBuildStageName) { body() } }
 	}
-}
-
-/** Returns the download URL of the JDK against whose C headers (in the 'include/' folder) and native libraries the natives are compiled.*/
-def getNativeJdkUrl(String os, String arch) { // To update the used JDK version update the URL template below
-	if ('win32'.equals(os) && 'aarch64'.equals(arch)) {
-		// Temporary workaround until there are official Temurin GA releases for Windows on ARM that can be consumed through JustJ
-		dir("${WORKSPACE}/repackage-win32.aarch64-jdk") {
-			sh """
-				curl -L 'https://github.com/adoptium/temurin17-binaries/releases/download/jdk17u-2024-02-07-14-14-beta/OpenJDK17U-jdk_aarch64_windows_hotspot_2024-02-07-14-14.zip' > jdk.zip
-				unzip -q jdk.zip jdk-17.0.11+1/include/** jdk-17.0.11+1/lib/**
-				cd jdk-17.0.11+1
-				tar -czf ../jdk.tar.gz include/ lib/
-			"""
-		}
-		return "file://${WORKSPACE}/repackage-win32.aarch64-jdk/jdk.tar.gz"
-	} else if ('linux'.equals(os) && 'riscv64'.equals(arch)) {
-		// Downloading jdk and renew it for riscv64 architecture on Linux
-		dir("${WORKSPACE}/repackage-linux.riscv64-jdk") {
-				sh """
-				curl -L 'https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.12%2B7/OpenJDK17U-jdk_riscv64_linux_hotspot_17.0.12_7.tar.gz' > jdk.tar.gz
-				tar -xzf jdk.tar.gz jdk-17.0.12+7/include/ jdk-17.0.12+7/lib/
-				cd jdk-17.0.12+7
-				tar -czf ../jdk.tar.gz include/ lib/
-				"""
-		}
-		return "file://${WORKSPACE}/repackage-linux.riscv64-jdk/jdk.tar.gz"
-	}
-	return "https://download.eclipse.org/justj/jres/17/downloads/20230428_1804/org.eclipse.justj.openjdk.hotspot.jre.minimal.stripped-17.0.7-${os}-${arch}.tar.gz"
 }
 
 def isOnMainIshBranch() {
@@ -151,6 +123,7 @@ pipeline {
 							dir("${LAUNCHER_SOURCES_PATH}") {
 								def newVersion = getLauncherVersion('min_ver').toInteger() + 1
 								sh "sed -i -e 's/min_ver=.*/min_ver=${newVersion}/' make_version.mak"
+								sh 'cp -r ../tools/* .'
 								for (ws in BUILD_NATIVES) {
 									stash name:"equinox.launcher.sources.${ws}", includes: "*,${ws}/"
 								}
@@ -195,26 +168,23 @@ pipeline {
 									echo "Skip native build for platform ${PLATFORM}"
 									return;
 								}
-								dir("jdk-download-${os}.${arch}") {
-									// Fetch the JDK, which provides the C header files and shared native libraries against which the native code is built.
-									sh "curl ${getNativeJdkUrl(os, arch)} | tar -xzf - include/ lib/"
-									stash name:"jdk.resources.${os}.${arch}", includes: "include/,lib/"
-									deleteDir()
-								}
 								runOnNativeBuildAgent("${PLATFORM}") {
 									cleanWs() // workspace not cleaned by default
 									echo "Build launcher binaries for OS: ${os}, ARCH: ${arch}"
 									unstash "equinox.launcher.sources.${ws}"
-									dir('jdk.resources') {
-										unstash "jdk.resources.${os}.${arch}"
-									}
-									withEnv(["JAVA_HOME=${WORKSPACE}/jdk.resources", "EXE_OUTPUT_DIR=${WORKSPACE}/libs", "LIB_OUTPUT_DIR=${WORKSPACE}/libs"]) {
-										dir(ws) {
-											if (isUnix()) {
-												sh "sh build.sh -ws ${ws} -os ${os} -arch ${arch} checklibs install"
-											} else {
-												bat "cmd /c build.bat -ws ${ws} -os ${os} -arch ${arch} install"
-											}
+									def javaHome = tool(type:'jdk', name: 'temurin-jdk21-latest-auto')
+									def extendedPath = "${javaHome}${isUnix() ? '/' : '\\'}bin${isUnix() ? ':' : ';'}${env.PATH}"
+									withEnv(["JAVA_HOME=${javaHome}", "PATH=${extendedPath}", "EXE_OUTPUT_DIR=${WORKSPACE}/libs", "LIB_OUTPUT_DIR=${WORKSPACE}/libs"]) {
+										if (isUnix()) {
+											sh """
+												java --version
+												java build.java -ws ${ws} -os ${os} -arch ${arch} ${ os == 'linux' ? 'checklibs' : '' } install
+											"""
+										} else {
+											bat """
+												java --version
+												java build.java -ws ${ws} -os ${os} -arch ${arch} install
+											"""
 										}
 									}
 									dir('libs') {
@@ -313,7 +283,7 @@ pipeline {
 		stage('Build') {
 			tools {
 				maven 'apache-maven-latest'
-				jdk 'temurin-jdk21-latest'
+				jdk 'temurin-jdk25-latest'
 			}
 			environment {
 				EQUINOX_BINARIES_LOC = "$WORKSPACE/equinox.binaries"
