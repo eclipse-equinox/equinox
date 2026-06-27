@@ -15,4 +15,5 @@
 package org.eclipse.equinox.spi.tests.service;
 
 public interface TestService {
+	String getValue();
 }

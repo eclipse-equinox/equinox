@@ -14,9 +14,12 @@
 
 package org.eclipse.equinox.spi.tests.service;
 
+import java.util.Iterator;
+import java.util.Optional;
+
 public interface TestServiceConsumer {
 
-	boolean findFirst();
+	Optional<TestService> findFirst();
 
-	Object iterator();
+	Iterator<TestService> iterator();
 }

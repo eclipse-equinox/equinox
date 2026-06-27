@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.eclipse.equinox.spi
 Bundle-Version: 1.0.0.qualifier
-Fragment-Host: system.bundle;extension:=framework
+Fragment-Host: org.eclipse.osgi;bundle-version="[3.24,4)";extension:=framework
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 ExtensionBundle-Activator: org.eclipse.equinox.spi.internal.ServiceLoaderMediatorHookConfigurator$Activator
 Bundle-Name: %bundleName

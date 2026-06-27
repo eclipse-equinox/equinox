@@ -14,8 +14,6 @@
 
 package org.eclipse.equinox.spi.internal;
 
-import static org.eclipse.equinox.spi.internal.ServiceLoaderMediatorHookConfigurator.spiExtensionBundle;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -154,7 +152,7 @@ record BundleServices(Bundle bundle, boolean isProcessedConsumer, Map<String, Li
 			String register = capability.getDirectives().get(ServiceLoaderNamespace.CAPABILITY_REGISTER_DIRECTIVE);
 			attributes = new HashMap<>(attributes);
 			attributes.keySet().removeIf(a -> a.startsWith(".") || SPECIFIED_CAPABILITY_ATTRIBUTES.contains(a)); //$NON-NLS-1$
-			attributes.put("serviceloader.mediator", spiExtensionBundle.getBundleId()); //$NON-NLS-1$
+			attributes.put("serviceloader.mediator", Constants.SYSTEM_BUNDLE_ID); //$NON-NLS-1$
 			return new BundleServices.ServicePublication(serviceType, register, attributes);
 		}
 	}
@@ -186,7 +184,6 @@ record BundleServices(Bundle bundle, boolean isProcessedConsumer, Map<String, Li
 		registeredServices().forEach(ServiceRegistration::unregister);
 		registeredServices.clear();
 	}
-	// TODO: Register services of all fragments upon activation of the host
 
 	/**
 	 * @param bundleContext - a bundle's context of the BundleContext of it's host,
@@ -253,7 +250,7 @@ record BundleServices(Bundle bundle, boolean isProcessedConsumer, Map<String, Li
 			Requirement requirement = w.getRequirement();
 			// Ensure this Mediator extension is resolved as provider
 			return getFilterDirective(requirement).contains(filter)
-					&& w.getCapability().getResource().getBundle() == spiExtensionBundle;
+					&& w.getProvider().getBundle().getBundleId() == Constants.SYSTEM_BUNDLE_ID;
 		});
 	}
 

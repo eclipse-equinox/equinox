@@ -14,6 +14,8 @@
 
 package org.eclipse.equinox.spi.tests.impl;
 
+import java.util.Iterator;
+import java.util.Optional;
 import java.util.ServiceLoader;
 
 import org.eclipse.equinox.spi.tests.service.TestService;
@@ -24,13 +26,13 @@ import org.osgi.service.component.annotations.Component;
 public class TestServiceConsumerImpl implements TestServiceConsumer {
 
 	@Override
-	public boolean findFirst() {
+	public Optional<TestService> findFirst() {
 		ServiceLoader<TestService> serviceLoader = ServiceLoader.load(TestService.class);
-		return serviceLoader.findFirst().isPresent();
+		return serviceLoader.findFirst();
 	}
 
 	@Override
-	public Object iterator() {
+	public Iterator<TestService> iterator() {
 		ServiceLoader<TestService> serviceLoader = ServiceLoader.load(TestService.class);
 		return serviceLoader.iterator();
 	}
