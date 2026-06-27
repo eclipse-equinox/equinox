@@ -47,10 +47,11 @@ public class TrustEngineListener {
 								EquinoxConfiguration.SIGNED_CONTENT_VERIFY_TRUST);
 					} else {
 						SignerInfo tsa = signedContent.getTSASignerInfo(info);
-						if (tsa != null && tsa.getTrustAnchor() == null)
+						if (tsa != null && tsa.getTrustAnchor() == null) {
 							// one of the tsa signers is not trusted
 							signedBundleHook.determineTrust(signedContent,
 									EquinoxConfiguration.SIGNED_CONTENT_VERIFY_TRUST);
+						}
 					}
 				}
 			}
@@ -84,8 +85,9 @@ public class TrustEngineListener {
 			}
 		}
 		// remove trust anchors from untrusted signers
-		for (SignerInfo untrustedSigner : untrustedSigners)
+		for (SignerInfo untrustedSigner : untrustedSigners) {
 			((BaseSignerInfo) untrustedSigner).setTrustAnchor(null);
+		}
 		// re-establish trust
 		for (Bundle bundle : usingAnchor) {
 			SignedContentFromBundleFile signedContent = getSignedContent(bundle);

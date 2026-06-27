@@ -75,8 +75,9 @@ public class ExtendedLogServiceImpl implements ExtendedLogService {
 
 	@Override
 	public Logger getLogger(Bundle logBundle, String name) {
-		if (logBundle == null || logBundle == bundle)
+		if (logBundle == null || logBundle == bundle) {
 			return getLogger(name);
+		}
 		// only check permission if getting another bundles log
 		factory.checkLogPermission();
 		ExtendedLogService bundleLogService = factory.getLogService(logBundle);

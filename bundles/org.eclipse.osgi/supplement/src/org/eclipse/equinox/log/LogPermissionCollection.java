@@ -30,12 +30,15 @@ public final class LogPermissionCollection extends PermissionCollection {
 
 	@Override
 	public void add(Permission permission) {
-		if (!(permission instanceof LogPermission))
+		if (!(permission instanceof LogPermission)) {
 			throw new IllegalArgumentException("invalid permission: " + permission); //$NON-NLS-1$
-		if (isReadOnly())
+		}
+		if (isReadOnly()) {
 			throw new SecurityException("attempt to add a LogPermission to a readonly LogPermissionCollection"); //$NON-NLS-1$
-		if (permission != null)
+		}
+		if (permission != null) {
 			logPermission = (LogPermission) permission;
+		}
 	}
 
 	@Override

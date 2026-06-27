@@ -23,21 +23,21 @@ package org.eclipse.osgi.framework.util;
  * <p>
  * An element of an <code>KeyedHashSet</code>. A KeyedElement privides the key
  * which is used to hash the elements in an <code>KeyedHashSet</code>.
- * 
+ *
  * @since 3.2
  */
 // This class was moved from  /org.eclipse.osgi/core/framework/org/eclipse/osgi/framework/internal/core/KeyedElement.java
 public interface KeyedElement {
 	/**
 	 * Returns the hash code of the key
-	 * 
+	 *
 	 * @return the hash code of the key
 	 */
 	public int getKeyHashCode();
 
 	/**
 	 * Compares this element with a specified element
-	 * 
+	 *
 	 * @param other the element to compare with
 	 * @return returns true if the specified element equals this element
 	 */
@@ -45,7 +45,7 @@ public interface KeyedElement {
 
 	/**
 	 * Returns the key for this element
-	 * 
+	 *
 	 * @return the key for this element
 	 */
 	public Object getKey();

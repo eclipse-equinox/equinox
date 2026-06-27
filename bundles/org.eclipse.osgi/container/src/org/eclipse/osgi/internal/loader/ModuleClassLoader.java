@@ -74,8 +74,9 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 	static {
 		AllPermission allPerm = new AllPermission();
 		ALLPERMISSIONS = allPerm.newPermissionCollection();
-		if (ALLPERMISSIONS != null)
+		if (ALLPERMISSIONS != null) {
 			ALLPERMISSIONS.add(allPerm);
+		}
 	}
 
 	/**
@@ -101,6 +102,7 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 
 	private static final class ClassNameLock {
 		static final Function<String, ClassNameLock> SUPPLIER = new Function<String, ClassNameLock>() {
+			@Override
 			public ClassNameLock apply(String className) {
 				return new ClassNameLock(className);
 			}
@@ -123,7 +125,7 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 
 	/**
 	 * Constructs a new ModuleClassLoader.
-	 * 
+	 *
 	 * @param parent the parent classloader
 	 */
 	public ModuleClassLoader(ClassLoader parent) {
@@ -132,35 +134,35 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 
 	/**
 	 * Returns the generation of the host revision associated with this class loader
-	 * 
+	 *
 	 * @return the generation for this class loader
 	 */
 	protected abstract Generation getGeneration();
 
 	/**
 	 * Returns the Debug object for the Framework instance
-	 * 
+	 *
 	 * @return the Debug object for the Framework instance
 	 */
 	protected abstract Debug getDebug();
 
 	/**
 	 * Returns the classpath manager for this class loader
-	 * 
+	 *
 	 * @return the classpath manager for this class loader
 	 */
 	public abstract ClasspathManager getClasspathManager();
 
 	/**
 	 * Returns the configuration for the Framework instance
-	 * 
+	 *
 	 * @return the configuration for the Framework instance
 	 */
 	protected abstract EquinoxConfiguration getConfiguration();
 
 	/**
 	 * Returns the bundle loader for this class loader
-	 * 
+	 *
 	 * @return the bundle loader for this class loader
 	 */
 	public abstract BundleLoader getBundleLoader();
@@ -169,7 +171,7 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 	 * Returns true if this class loader implementation has been registered with the
 	 * JVM as a parallel class loader. This requires Java 7 or later. This always
 	 * returns true now that Java 8 is required.
-	 * 
+	 *
 	 * @return true if this class loader implementation has been registered with the
 	 *         JVM as a parallel class loader; otherwise false is returned.
 	 */
@@ -182,7 +184,7 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 	 * delegate will query the system class loader, bundle imports, bundle local
 	 * classes, bundle hosts and fragments. The delegate will call
 	 * BundleClassLoader.findLocalClass(name) to find a class local to this bundle.
-	 * 
+	 *
 	 * @param name    the name of the class to load.
 	 * @param resolve indicates whether to resolve the loaded class or not.
 	 * @return The Class object.
@@ -220,7 +222,7 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 	 * resources, bundle hosts and fragments. The delegate will call
 	 * BundleClassLoader.findLocalResource(name) to find a resource local to this
 	 * bundle.
-	 * 
+	 *
 	 * @param name The resource path to get.
 	 * @return The URL of the resource or null if it does not exist.
 	 */
@@ -232,8 +234,9 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 		}
 
 		URL url = getBundleLoader().findResource(name);
-		if (url != null)
+		if (url != null) {
 			return (url);
+		}
 
 		if (getDebug().DEBUG_LOADER) {
 			getDebug().trace(OPTION_DEBUG_LOADER,
@@ -259,7 +262,7 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 	 * resources, bundle hosts and fragments. The delegate will call
 	 * BundleClassLoader.findLocalResources(name) to find a resource local to this
 	 * bundle.
-	 * 
+	 *
 	 * @param name The resource path to get.
 	 * @return The Enumeration of the resource URLs.
 	 */
@@ -287,7 +290,7 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 	/**
 	 * Finds a library for this bundle. Simply calls manager.findLibrary(libname) to
 	 * find the library.
-	 * 
+	 *
 	 * @param libname The library to find.
 	 * @return The absolution path to the library or null if not found
 	 */
@@ -356,7 +359,7 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 	/**
 	 * Creates a ProtectionDomain which uses specified BundleFile and the
 	 * permissions of the baseDomain
-	 * 
+	 *
 	 * @param bundlefile       The source bundlefile the domain is for.
 	 * @param domainGeneration the source generation for the domain
 	 * @return a ProtectionDomain which uses specified BundleFile and the
@@ -422,8 +425,9 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 	public String toString() {
 		Bundle b = getBundle();
 		StringBuilder result = new StringBuilder(super.toString());
-		if (b == null)
+		if (b == null) {
 			return result.toString();
+		}
 		return result.append('[').append(b.getSymbolicName()).append(':').append(b.getVersion()).append("(id=") //$NON-NLS-1$
 				.append(b.getBundleId()).append(")]").toString(); //$NON-NLS-1$
 	}

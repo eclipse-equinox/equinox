@@ -110,8 +110,9 @@ final class ModuleResolver {
 	void setDebugOptions() {
 		DebugOptions options = adaptor.getDebugOptions();
 		// may be null if debugging is not enabled
-		if (options == null)
+		if (options == null) {
 			return;
+		}
 		boolean debugAll = options.getBooleanOption(OPTION_RESOLVER, false);
 		DEBUG_ROOTS = debugAll || options.getBooleanOption(OPTION_ROOTS, false);
 		DEBUG_PROVIDERS = debugAll || options.getBooleanOption(OPTION_PROVIDERS, false);
@@ -134,7 +135,7 @@ final class ModuleResolver {
 	/**
 	 * Constructs the module resolver with the specified resolver hook factory and
 	 * resolver.
-	 * 
+	 *
 	 * @param adaptor the container adaptor
 	 */
 	ModuleResolver(final ModuleContainerAdaptor adaptor) {
@@ -166,7 +167,7 @@ final class ModuleResolver {
 	 * This method only does read operations on the database no wirings are modified
 	 * directly by this method. The returned wirings need to be merged into the
 	 * database.
-	 * 
+	 *
 	 * @param triggers          the triggers that caused the resolver operation to
 	 *                          occur
 	 * @param triggersMandatory true if the triggers must be resolved by the resolve
@@ -362,8 +363,9 @@ final class ModuleResolver {
 	private static void addPayloadContent(List<ModuleWire> hostWires,
 			NamespaceList.Builder<ModuleCapability> capabilities,
 			NamespaceList.Builder<ModuleRequirement> requirements) {
-		if (hostWires == null)
+		if (hostWires == null) {
 			return;
+		}
 		for (ModuleWire hostWire : hostWires) {
 
 			// add fragment capabilities
@@ -401,8 +403,9 @@ final class ModuleResolver {
 
 	private static void addProvidedWires(Map<ModuleCapability, List<ModuleWire>> toAdd,
 			NamespaceList.Builder<ModuleWire> existing, NamespaceList.Builder<ModuleCapability> capabilities) {
-		if (toAdd == null)
+		if (toAdd == null) {
 			return;
+		}
 		for (ModuleCapability capability : capabilities) {
 			List<ModuleWire> newWires = toAdd.get(capability);
 			if (newWires != null) {
@@ -448,8 +451,9 @@ final class ModuleResolver {
 
 	static boolean isSingleton(ModuleRevision revision) {
 		List<Capability> identities = revision.getCapabilities(IdentityNamespace.IDENTITY_NAMESPACE);
-		if (identities.isEmpty())
+		if (identities.isEmpty()) {
 			return false;
+		}
 		return "true".equals(identities.get(0).getDirectives().get(IdentityNamespace.CAPABILITY_SINGLETON_DIRECTIVE)); //$NON-NLS-1$
 	}
 
@@ -508,6 +512,7 @@ final class ModuleResolver {
 				}
 			}
 
+			@Override
 			public void logRequirement(String message, Requirement requirement) {
 				debug(String.format(message, ModuleContainer.toString(requirement)));
 			}
@@ -517,6 +522,7 @@ final class ModuleResolver {
 				return ModuleContainer.toString(requirement);
 			}
 
+			@Override
 			public void logCapability(String message, Capability requirement) {
 				debug(String.format(message, ModuleContainer.toString(requirement)));
 			}
@@ -659,8 +665,8 @@ final class ModuleResolver {
 		private volatile boolean currentlyResolvingMandatory = false;
 		private final Set<Resource> transitivelyResolveFailures = new LinkedHashSet<>();
 		private final Set<Resource> failedToResolve = new HashSet<>();
-		private AtomicBoolean scheduleTimeout = new AtomicBoolean(true);
-		private AtomicReference<ScheduledFuture<?>> timoutFuture = new AtomicReference<>();
+		private final AtomicBoolean scheduleTimeout = new AtomicBoolean(true);
+		private final AtomicReference<ScheduledFuture<?>> timoutFuture = new AtomicReference<>();
 		/*
 		 * Used to generate the UNRESOLVED_PROVIDER resolution report entries.
 		 *
@@ -926,8 +932,9 @@ final class ModuleResolver {
 		@Override
 		public int insertHostedCapability(List<Capability> capabilities, HostedCapability hostedCapability) {
 			int index = Collections.binarySearch(capabilities, hostedCapability, this);
-			if (index < 0)
+			if (index < 0) {
 				index = -index - 1;
+			}
 			capabilities.add(index, hostedCapability);
 			return index;
 		}
@@ -1097,8 +1104,9 @@ final class ModuleResolver {
 							}
 						}
 					}
-					if (hook instanceof ResolutionReport.Listener)
+					if (hook instanceof ResolutionReport.Listener) {
 						((ResolutionReport.Listener) hook).handleResolutionReport(report);
+					}
 					hook.end();
 				}
 				return report;
@@ -1277,16 +1285,18 @@ final class ModuleResolver {
 			// Remove resolved resources, if necessary. The resolution will be
 			// null if the resolver threw an exception because the triggers
 			// were mandatory but didn't resolve.
-			if (resolution != null)
+			if (resolution != null) {
 				shouldHaveResolvedResources.removeAll(resolution.keySet());
+			}
 			// What remains are resources that should have resolved but didn't.
 			// For each resource, add report entries for any unresolved
 			// providers.
 			for (Resource shouldHaveResolvedResource : shouldHaveResolvedResources) {
 				Map<Requirement, Set<Capability>> requirementToCapabilities = unresolvedProviders
 						.get(shouldHaveResolvedResource);
-				if (requirementToCapabilities == null)
+				if (requirementToCapabilities == null) {
 					continue;
+				}
 				// If nothing resolved then there are no resolved resources to
 				// filter out.
 				if (resolution != null) {
@@ -1294,21 +1304,25 @@ final class ModuleResolver {
 					for (Iterator<Set<Capability>> values = requirementToCapabilities.values().iterator(); values
 							.hasNext();) {
 						Set<Capability> value = values.next();
-						for (Iterator<Capability> capabilities = value.iterator(); capabilities.hasNext();)
-							if (resolution.containsKey(capabilities.next().getResource()))
+						for (Iterator<Capability> capabilities = value.iterator(); capabilities.hasNext();) {
+							if (resolution.containsKey(capabilities.next().getResource())) {
 								// Remove the resolved capability provider.
 								capabilities.remove();
-						if (value.isEmpty())
+							}
+						}
+						if (value.isEmpty()) {
 							// Remove the requirement that has no unresolved
 							// capability providers.
 							values.remove();
+						}
 					}
 				}
 				// Add a report entry if there are any remaining requirements
 				// pointing to unresolved capability providers.
-				if (!requirementToCapabilities.isEmpty())
+				if (!requirementToCapabilities.isEmpty()) {
 					reportBuilder.addEntry(shouldHaveResolvedResource, Entry.Type.UNRESOLVED_PROVIDER,
 							requirementToCapabilities);
+				}
 			}
 		}
 
@@ -1331,9 +1345,11 @@ final class ModuleResolver {
 				value = new HashSet<>(capabilities.size());
 				requirementToCapabilities.put(requirement, value);
 			}
-			for (Capability capability : capabilities)
-				if (!wirings.containsKey(capability.getResource()))
+			for (Capability capability : capabilities) {
+				if (!wirings.containsKey(capability.getResource())) {
 					value.add(capability);
+				}
+			}
 		}
 
 		class DynamicFragments {
@@ -1525,12 +1541,14 @@ final class ModuleResolver {
 		private void selectSingletons() {
 			Map<String, Collection<ModuleRevision>> selectedSingletons = new HashMap<>();
 			for (ModuleRevision revision : unresolved) {
-				if (!isSingleton(revision) || disabled.contains(revision))
+				if (!isSingleton(revision) || disabled.contains(revision)) {
 					continue;
+				}
 				String bsn = revision.getSymbolicName();
 				Collection<ModuleRevision> selected = selectedSingletons.get(bsn);
-				if (selected != null)
+				if (selected != null) {
 					continue; // already processed the bsn
+				}
 				selected = new ArrayList<>(1);
 				selectedSingletons.put(bsn, selected);
 
@@ -1541,18 +1559,21 @@ final class ModuleResolver {
 				}
 				// prime selected with resolved singleton bundles
 				for (ModuleRevision singleton : sameBSN) {
-					if (isSingleton(singleton) && wirings.containsKey(singleton))
+					if (isSingleton(singleton) && wirings.containsKey(singleton)) {
 						selected.add(singleton);
+					}
 				}
 				// get the collision map for the BSN
 				Map<ModuleRevision, Collection<ModuleRevision>> collisionMap = getCollisionMap(sameBSN);
 				// process the collision map
 				for (ModuleRevision singleton : sameBSN) {
-					if (selected.contains(singleton))
+					if (selected.contains(singleton)) {
 						continue; // no need to process resolved bundles
+					}
 					Collection<ModuleRevision> collisions = collisionMap.get(singleton);
-					if (collisions == null || disabled.contains(singleton))
+					if (collisions == null || disabled.contains(singleton)) {
 						continue; // not a singleton or not resolvable
+					}
 					Collection<ModuleRevision> pickOneToResolve = new ArrayList<>();
 					for (ModuleRevision collision : collisions) {
 						if (selected.contains(collision)) {
@@ -1562,8 +1583,9 @@ final class ModuleResolver {
 							reportBuilder.addEntry(singleton, Type.SINGLETON_SELECTION, collision);
 							break;
 						}
-						if (!pickOneToResolve.contains(collision))
+						if (!pickOneToResolve.contains(collision)) {
 							pickOneToResolve.add(collision);
+						}
 					}
 					if (!disabled.contains(singleton)) {
 						// need to make sure the bundle does not collide from the POV of another entry
@@ -1578,8 +1600,9 @@ final class ModuleResolver {
 											collisionEntry.getKey());
 									break;
 								}
-								if (!pickOneToResolve.contains(collisionEntry.getKey()))
+								if (!pickOneToResolve.contains(collisionEntry.getKey())) {
 									pickOneToResolve.add(collisionEntry.getKey());
+								}
 							}
 						}
 					}
@@ -1620,11 +1643,13 @@ final class ModuleResolver {
 		private ModuleRevision pickOneToResolve(Collection<ModuleRevision> pickOneToResolve) {
 			ModuleRevision selectedVersion = null;
 			for (ModuleRevision singleton : pickOneToResolve) {
-				if (selectedVersion == null)
+				if (selectedVersion == null) {
 					selectedVersion = singleton;
+				}
 				boolean higherVersion = selectedVersion.getVersion().compareTo(singleton.getVersion()) < 0;
-				if (higherVersion)
+				if (higherVersion) {
 					selectedVersion = singleton;
+				}
 			}
 
 			for (ModuleRevision singleton : pickOneToResolve) {
@@ -1639,12 +1664,14 @@ final class ModuleResolver {
 		private Map<ModuleRevision, Collection<ModuleRevision>> getCollisionMap(Collection<ModuleRevision> sameBSN) {
 			Map<ModuleRevision, Collection<ModuleRevision>> result = new HashMap<>();
 			for (ModuleRevision singleton : sameBSN) {
-				if (!isSingleton(singleton) || disabled.contains(singleton))
+				if (!isSingleton(singleton) || disabled.contains(singleton)) {
 					continue; // ignore non-singleton and non-resolvable
+				}
 				List<BundleCapability> capabilities = new ArrayList<>(sameBSN.size() - 1);
 				for (ModuleRevision collision : sameBSN) {
-					if (collision == singleton || !isSingleton(collision) || disabled.contains(collision))
+					if (collision == singleton || !isSingleton(collision) || disabled.contains(collision)) {
 						continue; // Ignore the bundle we are checking and non-singletons and non-resolvable
+					}
 					capabilities.add(getIdentity(collision));
 				}
 				hook.filterSingletonCollisions(getIdentity(singleton), capabilities);
@@ -1701,14 +1728,16 @@ final class ModuleResolver {
 			// be a subset of the current wirings provided by the ModuleDatabase
 			boolean resolved1 = previouslyResolved.contains(c1.getResource());
 			boolean resolved2 = previouslyResolved.contains(c2.getResource());
-			if (resolved1 != resolved2)
+			if (resolved1 != resolved2) {
 				return resolved1 ? -1 : 1;
+			}
 
 			Version v1 = getVersion(c1);
 			Version v2 = getVersion(c2);
 			int versionCompare = -(v1.compareTo(v2));
-			if (versionCompare != 0)
+			if (versionCompare != 0) {
 				return versionCompare;
+			}
 
 			ModuleRevision m1 = getModuleRevision(c1);
 			ModuleRevision m2 = getModuleRevision(c2);

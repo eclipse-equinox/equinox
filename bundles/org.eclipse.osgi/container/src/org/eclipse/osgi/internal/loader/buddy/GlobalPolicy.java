@@ -39,7 +39,7 @@ import org.osgi.resource.Namespace;
  * with the highest version will be returned.
  */
 public class GlobalPolicy implements IBuddyPolicy {
-	private FrameworkWiring frameworkWiring;
+	private final FrameworkWiring frameworkWiring;
 
 	public GlobalPolicy(FrameworkWiring frameworkWiring) {
 		this.frameworkWiring = frameworkWiring;

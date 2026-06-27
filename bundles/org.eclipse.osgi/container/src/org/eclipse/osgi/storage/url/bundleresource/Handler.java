@@ -40,8 +40,9 @@ public class Handler extends BundleResourceHandler {
 		ModuleRevision current = module.getCurrentRevision();
 		ModuleWiring wiring = current == null ? null : current.getWiring();
 		ModuleClassLoader classloader = (ModuleClassLoader) (current == null ? null : wiring.getClassLoader());
-		if (classloader == null)
+		if (classloader == null) {
 			throw new FileNotFoundException(url.getPath());
+		}
 		BundleEntry entry = classloader.getClasspathManager().findLocalEntry(url.getPath(), url.getPort());
 		if (entry == null) {
 			// this isn't strictly needed but is kept to maintain compatibility
