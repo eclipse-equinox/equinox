@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.framework;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
@@ -71,6 +72,8 @@ class XMLParsingServiceFactory implements ServiceFactory<Object> {
 				factory.setFeature("http://xml.org/sax/features/external-general-entities", false); //$NON-NLS-1$
 				factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false); //$NON-NLS-1$
 				factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false); //$NON-NLS-1$
+				// enable secure processing:
+				factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
 			} catch (Exception e) {
 				throw new IllegalStateException(e);
 			}
@@ -82,6 +85,8 @@ class XMLParsingServiceFactory implements ServiceFactory<Object> {
 			factory.setFeature("http://xml.org/sax/features/external-general-entities", false); //$NON-NLS-1$
 			factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false); //$NON-NLS-1$
 			factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false); //$NON-NLS-1$
+			// enable secure processing:
+			factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
 		} catch (ParserConfigurationException e) {
 			throw new IllegalStateException(e.getMessage(), e);
 		}
