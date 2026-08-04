@@ -52,6 +52,13 @@
          version="0.0.0"/>
 
    <plugin
+         id="org.eclipse.equinox.launcher.gtk.linux.loongarch64"
+         os="linux"
+         ws="gtk"
+         arch="loongarch64"
+         version="0.0.0"/>
+
+   <plugin
          id="org.eclipse.equinox.launcher.gtk.linux.x86_64"
          os="linux"
          ws="gtk"
