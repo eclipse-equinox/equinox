@@ -22,7 +22,7 @@ def runOnNativeBuildAgent(String platform, Closure body) {
 	def agentLabel = 'native.builder-' + platform
 	if (platform == 'gtk.linux.x86_64') {
 		podTemplate(inheritFrom: 'basic' /* inherit general configuration */, containers: [
-			containerTemplate(name: 'launcherbuild', image: 'eclipse/platformreleng-debian-swtgtk3nativebuild:10',
+			containerTemplate(name: 'launcherbuild', image: 'ghcr.io/eclipse-platform/platformreleng-debian-swtgtk3nativebuild:11',
 				resourceRequestCpu:'1000m', resourceRequestMemory:'512Mi',
 				resourceLimitCpu:'2000m', resourceLimitMemory:'4096Mi',
 				alwaysPullImage: true, command: 'cat', ttyEnabled: true)
