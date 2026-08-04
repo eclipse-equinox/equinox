@@ -1,5 +1,5 @@
 #**********************************************************************
-# Copyright (c) 2000, 2015 IBM Corporation and others.
+# Copyright (c) 2000, 2026 IBM Corporation and others.
 #
 # This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License 2.0
@@ -21,8 +21,9 @@ include ../make_version.mak
 # DEFAULT_OS      - the default value of the "-os" switch
 # DEFAULT_OS_ARCH - the default value of the "-arch" switch
 # DEFAULT_WS      - the default value of the "-ws" switch
-# EXE_OUTPUT_DIR  - the location into which the executable is installed (only used in 'install' target)
-# LIB_OUTPUT_DIR  - the location into which the launcher library is installed (only used in 'install' target)
+# JAVA_HOME       - the location of the JDK for JNI includes
+
+export MACOSX_DEPLOYMENT_TARGET := 11
 
 #default value for PROGRAM_OUTPUT
 ifeq ($(PROGRAM_OUTPUT),)
@@ -39,6 +40,12 @@ EXEC = $(PROGRAM_OUTPUT)
 DLL = $(PROGRAM_LIBRARY)
 LIBS = -framework Cocoa
 
+ifeq ($(DEFAULT_OS_ARCH),aarch64)
+	ARCHS = -arch arm64
+else
+	ARCHS = -arch $(DEFAULT_OS_ARCH)
+endif
+
 ifeq ($(ARCHS),-arch x86_64)
   LDFLAGS=-pagezero_size 0x1000
 endif
@@ -52,7 +59,8 @@ CFLAGS = -O \
 	-DDEFAULT_OS="\"$(DEFAULT_OS)\"" \
 	-DDEFAULT_OS_ARCH="\"$(DEFAULT_OS_ARCH)\"" \
 	-DDEFAULT_WS="\"$(DEFAULT_WS)\"" \
-	-I.. $(JAVA_HEADERS)
+	-I.. \
+	-I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/darwin
 
 all: $(EXEC) $(DLL)
 
@@ -85,18 +93,3 @@ $(EXEC): $(MAIN_OBJS) $(COMMON_OBJS)
 
 $(DLL): $(DLL_OBJS) $(COMMON_OBJS)
 	$(CC) -bundle -o $(DLL) $(ARCHS) $(DLL_OBJS) $(COMMON_OBJS) $(LIBS)
-
-# There are no known checks today for macOS to be done here. See make_linux.mak's checklibs for more info.
-checklibs: all
-
-install: all
-	$(info Install into: EXE_OUTPUT_DIR:$(EXE_OUTPUT_DIR) LIB_OUTPUT_DIR:$(LIB_OUTPUT_DIR))
-	mkdir -p $(EXE_OUTPUT_DIR)
-	mv $(EXEC) $(EXE_OUTPUT_DIR)
-	mkdir -p $(LIB_OUTPUT_DIR)
-	rm -f $(LIB_OUTPUT_DIR)/eclipse_*.so
-	mv $(DLL) $(LIB_OUTPUT_DIR)
-	rm -f $(EXEC) $(OBJS)
-
-clean:
-	rm -f $(EXEC) $(DLL) $(MAIN_OBJS) $(COMMON_OBJS) $(DLL_OBJS)

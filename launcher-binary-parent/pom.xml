@@ -69,7 +69,7 @@
         </property>
       </activation>
       <properties>
-        <natives.source.dir>${project.basedir}/../../features/org.eclipse.equinox.executable.feature/library/${ws}</natives.source.dir>
+        <natives.source.dir>${project.basedir}/../../features/org.eclipse.equinox.executable.feature</natives.source.dir>
       </properties>
       <build>
         <plugins>
@@ -87,18 +87,9 @@
                     <condition property="swt.build.natives">
                       <equals arg1="${native}" arg2="${ws}.${os}.${arch}"/>
                     </condition>
-                    <condition property="swt.build.natives.win32">
-                      <and>
-                        <isset property="swt.build.natives"/>
-                        <equals arg1="${ws}" arg2="win32"/>
-                      </and>
-                    </condition>
                     <property name="JAVA_HOME" value="${java.home}"/><!-- Not overwritten if already set, e.g. as CLI argument -->
-                    <exec if:true="${swt.build.natives.win32}" dir="${natives.source.dir}" executable="cmd" failonerror="true">
-                      <arg line="/c build.bat install -ws ${ws} -os ${os} -arch ${arch}"/>
-                    </exec>
-                    <exec if:true="${swt.build.natives}" unless:true="${swt.build.natives.win32}" dir="${natives.source.dir}" executable="sh" failonerror="true">
-                      <arg line="build.sh install -ws ${ws} -os ${os} -arch ${arch}"/>
+                    <exec if:true="${swt.build.natives}" dir="${natives.source.dir}" executable="java" failonerror="true">
+                      <arg line="tools/build.java install -ws ${ws} -os ${os} -arch ${arch}"/>
                     </exec>
                   </target>
                 </configuration>
@@ -114,17 +105,8 @@
                     <condition property="swt.build.natives">
                       <equals arg1="${native}" arg2="${ws}.${os}.${arch}"/>
                     </condition>
-                    <condition property="swt.build.natives.win32">
-                      <and>
-                        <isset property="swt.build.natives"/>
-                        <equals arg1="${ws}" arg2="win32"/>
-                      </and>
-                    </condition>
-                    <exec if:true="${swt.build.natives.win32}" dir="${natives.source.dir}" executable="cmd">
-                      <arg line="/c build.bat clean"/>
-                    </exec>
-                    <exec if:true="${swt.build.natives}" unless:true="${swt.build.natives.win32}" dir="${natives.source.dir}" executable="sh">
-                      <arg line="build.sh clean"/>
+                    <exec if:true="${swt.build.natives}" dir="${natives.source.dir}" executable="java">
+                      <arg line="tools/build.java clean"/>
                     </exec>
                   </target>
                 </configuration>

@@ -11,7 +11,7 @@ The _launcher library_ is the native dynamic/shared library (eclipse.dll, eclips
 The software listed below is required to build the Equinox native binaries on the current platform targeting the same OS and processor arch.
 
 - common
-    - a JDK 1.8 or later. More recent versions can be used too. Equinox itself uses a.t.m a JDK 17 to built the official binaries.
+    - a JDK 1.8 or later. More recent versions can be used too. Equinox itself uses a.t.m a JDK 21 to built the official binaries.
 - Windows:
     - Microsoft `Visual C Compiler 2022` or later (earlier version usually work as well), the `Visual Studio Community Edition` is sufficient.
 - Linux:
@@ -31,9 +31,8 @@ To just build the native binaries for a specific platform navigate to the `libra
 
 For the complete development setup, which is required to run the Maven build or the `equinox.launcher.tests`
 1. Clone the [`equinox.binaries`](https://github.com/eclipse-equinox/equinox.binaries.git) repository co-located to this repository.
-2. Run from the `library/<window-system>` sub-directory matching the platform of interest
-    - `./build.sh install` for Linux or MacOS 
-    - `.\build.bat install` for Windows
+2. Run from the this projects directory
+    - `java tools/build.java install`
 
 The `install` target additionally moves the just built binaries into the `equinox.binaries` repository clone.
 
