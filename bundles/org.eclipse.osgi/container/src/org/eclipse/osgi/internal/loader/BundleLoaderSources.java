@@ -86,8 +86,9 @@ public class BundleLoaderSources {
 			if (pkgSource == null) {
 				pkgSource = getPackageSource(name);
 				// the first export cached may not be a simple single source like we need.
-				if (pkgSource.getClass() != SingleSourcePackage.class)
+				if (pkgSource.getClass() != SingleSourcePackage.class) {
 					return new SingleSourcePackage(name, loader);
+				}
 			}
 		}
 

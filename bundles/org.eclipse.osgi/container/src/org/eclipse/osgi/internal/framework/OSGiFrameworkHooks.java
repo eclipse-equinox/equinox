@@ -162,8 +162,9 @@ class OSGiFrameworkHooks {
 		void handleHookException(Throwable t, Object hook, String method) {
 			if (debug.DEBUG_HOOKS) {
 				debug.trace(OPTION_DEBUG_HOOKS, hook.getClass().getName() + "." + method + "() exception:"); //$NON-NLS-1$ //$NON-NLS-2$
-				if (t != null)
+				if (t != null) {
 					debug.traceThrowable(OPTION_DEBUG_HOOKS, t);
+				}
 			}
 			String message = NLS.bind(Msg.SERVICE_FACTORY_EXCEPTION, hook.getClass().getName(), method);
 			throw new RuntimeException(message, new BundleException(message, BundleException.REJECTED_BY_HOOK, t));
@@ -208,8 +209,9 @@ class OSGiFrameworkHooks {
 					if (factory != null) {
 						try {
 							ResolverHook hook = factory.begin(triggers);
-							if (hook != null)
+							if (hook != null) {
 								hookRefs.add(new HookReference(hookRef, hook, context));
+							}
 						} catch (Throwable t) {
 							// need to force an end call on the ResolverHooks we got and release them
 							try {
@@ -257,8 +259,9 @@ class OSGiFrameworkHooks {
 						// since we removed all the other possible hosts.
 					}
 				}
-				if (hooks.isEmpty())
+				if (hooks.isEmpty()) {
 					return;
+				}
 				candidates = new ShrinkableCollection<>(candidates);
 				for (HookReference hookRef : hooks) {
 					if (hookRef.reference.getBundle() == null) {
@@ -286,8 +289,9 @@ class OSGiFrameworkHooks {
 					debug.trace(OPTION_DEBUG_HOOKS,
 							"ResolverHook.filterSingletonCollisions(" + singleton + ", " + collisionCandidates + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
-				if (hooks.isEmpty())
+				if (hooks.isEmpty()) {
 					return;
+				}
 				collisionCandidates = new ShrinkableCollection<>(collisionCandidates);
 				for (HookReference hookRef : hooks) {
 					if (hookRef.reference.getBundle() == null) {
@@ -308,8 +312,9 @@ class OSGiFrameworkHooks {
 					debug.trace(OPTION_DEBUG_HOOKS,
 							"ResolverHook.filterMatches(" + requirement + ", " + candidates + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
-				if (hooks.isEmpty())
+				if (hooks.isEmpty()) {
 					return;
+				}
 				candidates = new ShrinkableCollection<>(candidates);
 				for (HookReference hookRef : hooks) {
 					if (hookRef.reference.getBundle() == null) {
@@ -329,8 +334,9 @@ class OSGiFrameworkHooks {
 				if (debug.DEBUG_HOOKS) {
 					debug.trace(OPTION_DEBUG_HOOKS, "ResolverHook.end"); //$NON-NLS-1$
 				}
-				if (hooks.isEmpty())
+				if (hooks.isEmpty()) {
 					return;
+				}
 				try {
 					HookReference missingHook = null;
 					Throwable endError = null;
@@ -339,12 +345,14 @@ class OSGiFrameworkHooks {
 						// We do not remove unregistered services here because we are going to remove
 						// all of them at the end
 						if (hookRef.reference.getBundle() == null) {
-							if (missingHook == null)
+							if (missingHook == null) {
 								missingHook = hookRef;
+							}
 						} else {
 							try {
-								if (hookRef.hook instanceof ResolutionReport.Listener)
+								if (hookRef.hook instanceof ResolutionReport.Listener) {
 									((ResolutionReport.Listener) hookRef.hook).handleResolutionReport(resolutionReport);
+								}
 								hookRef.hook.end();
 							} catch (Throwable t) {
 								// Must continue on to the next hook.end method
@@ -356,10 +364,12 @@ class OSGiFrameworkHooks {
 							}
 						}
 					}
-					if (missingHook != null)
+					if (missingHook != null) {
 						handleHookException(null, missingHook.hook, "end"); //$NON-NLS-1$
-					if (endError != null)
+					}
+					if (endError != null) {
 						handleHookException(endError, endBadHook.hook, "end"); //$NON-NLS-1$
+					}
 				} finally {
 					for (HookReference hookRef : hooks) {
 						hookRef.context.ungetService(hookRef.reference);

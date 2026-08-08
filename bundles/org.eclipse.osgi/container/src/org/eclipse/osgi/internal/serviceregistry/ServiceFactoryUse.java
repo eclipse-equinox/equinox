@@ -147,7 +147,7 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 	 * {@link ServiceFactory#ungetService(Bundle, ServiceRegistration, Object)}
 	 * method is called to release the service object for the context bundle.
 	 * </ol>
-	 * 
+	 *
 	 * @return true if the service was ungotten; otherwise false.
 	 */
 	/* @GuardedBy("getLock()") */

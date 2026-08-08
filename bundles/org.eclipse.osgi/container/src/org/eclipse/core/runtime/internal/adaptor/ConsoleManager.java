@@ -58,17 +58,19 @@ public class ConsoleManager {
 
 	@SuppressWarnings("deprecation")
 	public void checkForConsoleBundle() throws BundleException {
-		if ("none".equals(consolePort)) //$NON-NLS-1$
+		if ("none".equals(consolePort)) { //$NON-NLS-1$
 			return;
+		}
 		// otherwise we need to check for the equinox console bundle and start it
 		ServiceReference<org.osgi.service.packageadmin.PackageAdmin> paRef = context
 				.getServiceReference(org.osgi.service.packageadmin.PackageAdmin.class);
 		org.osgi.service.packageadmin.PackageAdmin pa = paRef == null ? null : context.getService(paRef);
 		Bundle[] consoles = pa.getBundles(consoleBundle, null);
 		if (consoles == null || consoles.length == 0) {
-			if (consolePort != null)
+			if (consolePort != null) {
 				throw new BundleException("Could not find bundle: " + consoleBundle, //$NON-NLS-1$
 						BundleException.UNSUPPORTED_OPERATION);
+			}
 			return;
 		}
 		try {

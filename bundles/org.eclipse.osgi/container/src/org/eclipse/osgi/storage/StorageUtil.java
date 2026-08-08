@@ -51,7 +51,7 @@ public class StorageUtil {
 	 * Copies the content of the given path (file or directory) to the specified
 	 * target. If the source is a directory all contained elements are copied
 	 * recursively.
-	 * 
+	 *
 	 * @param inFile  input directory to copy.
 	 * @param outFile output directory to copy to.
 	 * @throws IOException if any error occurs during the copy.
@@ -129,7 +129,7 @@ public class StorageUtil {
 
 	/**
 	 * Register a service object.
-	 * 
+	 *
 	 * @param name    the service class name
 	 * @param service the service object
 	 * @param context the registering bundle context
@@ -166,8 +166,9 @@ public class StorageUtil {
 			// not writable
 			return false;
 		} finally {
-			if (fileTest != null)
+			if (fileTest != null) {
 				fileTest.delete();
+			}
 		}
 		return true;
 	}
@@ -185,8 +186,9 @@ public class StorageUtil {
 				classbytes = new byte[length];
 				for (; bytesread < length; bytesread += readcount) {
 					readcount = in.read(classbytes, bytesread, length - bytesread);
-					if (readcount <= 0) /* if we didn't read anything */
+					if (readcount <= 0) { /* if we didn't read anything */
 						break; /* leave the loop */
+					}
 				}
 			} else /* does not know its own length! */ {
 				length = BUF_SIZE;
@@ -194,8 +196,9 @@ public class StorageUtil {
 				readloop: while (true) {
 					for (; bytesread < length; bytesread += readcount) {
 						readcount = in.read(classbytes, bytesread, length - bytesread);
-						if (readcount <= 0) /* if we didn't read anything */
+						if (readcount <= 0) { /* if we didn't read anything */
 							break readloop; /* leave the loop */
+						}
 					}
 					byte[] oldbytes = classbytes;
 					length += BUF_SIZE;

@@ -45,7 +45,7 @@ import org.osgi.resource.Wire;
 
 /**
  * An implementation of {@link BundleWiring}.
- * 
+ *
  * @since 3.10
  */
 public final class ModuleWiring implements BundleWiring {
@@ -112,7 +112,7 @@ public final class ModuleWiring implements BundleWiring {
 	/**
 	 * Returns the same result as {@link #getCapabilities(String)} except uses type
 	 * ModuleCapability and the returned list is unmodifiable.
-	 * 
+	 *
 	 * @param namespace the namespace
 	 * @return the capabilities
 	 * @see #getCapabilities(String)
@@ -127,7 +127,7 @@ public final class ModuleWiring implements BundleWiring {
 	/**
 	 * Returns the same result as {@link #getRequirements(String)} except uses type
 	 * ModuleRequirement and the returned list is unmodifiable.
-	 * 
+	 *
 	 * @param namespace the namespace
 	 * @return the requirements
 	 * @see #getRequirements(String)
@@ -169,7 +169,7 @@ public final class ModuleWiring implements BundleWiring {
 	/**
 	 * Returns the same result as {@link #getProvidedWires(String)} except uses type
 	 * ModuleWire and the returned list is unmodifiable.
-	 * 
+	 *
 	 * @param namespace the namespace
 	 * @return the wires
 	 * @see #getProvidedWires(String)
@@ -185,7 +185,7 @@ public final class ModuleWiring implements BundleWiring {
 	/**
 	 * Returns the same result as {@link #getRequiredWires(String)} except uses type
 	 * ModuleWire and the returned list is unmodifiable.
-	 * 
+	 *
 	 * @param namespace the namespace
 	 * @return the wires
 	 * @see #getRequiredWires(String)
@@ -257,7 +257,7 @@ public final class ModuleWiring implements BundleWiring {
 	/**
 	 * Returns the module loader for this wiring. If the module loader does not
 	 * exist yet then one will be created
-	 * 
+	 *
 	 * @return the module loader for this wiring.
 	 */
 	public ModuleLoader getModuleLoader() {
@@ -274,8 +274,9 @@ public final class ModuleWiring implements BundleWiring {
 
 	@Override
 	public List<URL> findEntries(String path, String filePattern, int options) {
-		if (!hasResourcePermission())
+		if (!hasResourcePermission()) {
 			return Collections.emptyList();
+		}
 		if (!isValid) {
 			return null;
 		}
@@ -289,8 +290,9 @@ public final class ModuleWiring implements BundleWiring {
 
 	@Override
 	public Collection<String> listResources(String path, String filePattern, int options) {
-		if (!hasResourcePermission())
+		if (!hasResourcePermission()) {
 			return Collections.emptyList();
+		}
 		if (!isValid) {
 			return null;
 		}
@@ -376,7 +378,7 @@ public final class ModuleWiring implements BundleWiring {
 	/**
 	 * Returns true if the specified package name has been substituted in this
 	 * wiring
-	 * 
+	 *
 	 * @param packageName the package name to check
 	 * @return true if the specified package name has been substituted in this
 	 *         wiring
@@ -388,7 +390,7 @@ public final class ModuleWiring implements BundleWiring {
 	/**
 	 * Returns an unmodifiable collection of package names for package capabilities
 	 * that have been substituted.
-	 * 
+	 *
 	 * @return the substituted package names
 	 */
 	public Collection<String> getSubstitutedNames() {
@@ -412,7 +414,7 @@ public final class ModuleWiring implements BundleWiring {
 	 * the specified builder to this wiring. The new requirements must be in the
 	 * {@link PackageNamespace}. These requirements are transient and will not exist
 	 * when loading up persistent wirings.
-	 * 
+	 *
 	 * @param builder the builder that defines the new dynamic imports.
 	 */
 	public void addDynamicImports(ModuleRevisionBuilder builder) {

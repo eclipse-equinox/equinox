@@ -195,12 +195,14 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 			ClassLoader cl = EquinoxContainer.class.getClassLoader();
 			return cl == null ? bootLoader : cl;
 		}
-		if (Constants.FRAMEWORK_BUNDLE_PARENT_APP.equalsIgnoreCase(type))
+		if (Constants.FRAMEWORK_BUNDLE_PARENT_APP.equalsIgnoreCase(type)) {
 			return ClassLoader.getSystemClassLoader();
+		}
 		if (Constants.FRAMEWORK_BUNDLE_PARENT_EXT.equalsIgnoreCase(type)) {
 			ClassLoader appCL = ClassLoader.getSystemClassLoader();
-			if (appCL != null)
+			if (appCL != null) {
 				return appCL.getParent();
+			}
 		}
 		return bootLoader;
 
@@ -382,8 +384,9 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 	@Override
 	public void updatedDatabase() {
 		StorageSaver saver = container.getStorageSaver();
-		if (saver == null)
+		if (saver == null) {
 			return;
+		}
 		saver.save();
 	}
 

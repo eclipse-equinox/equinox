@@ -82,8 +82,9 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction<List<
 					}
 				}
 				// stop at the framework classloader or the first bundle classloader
-				if (tmp == finderClassLoader || tmp instanceof ModuleClassLoader)
+				if (tmp == finderClassLoader || tmp instanceof ModuleClassLoader) {
 					break;
+				}
 			}
 		}
 		return result;
@@ -93,17 +94,21 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction<List<
 	// parent hierachy. A classloader which has the ContextFinder as a parent must
 	// not be used as a delegate, otherwise we endup in endless recursion.
 	private boolean checkClassLoader(ClassLoader classloader) {
-		if (classloader == null || classloader == getParent())
+		if (classloader == null || classloader == getParent()) {
 			return false;
-		for (ClassLoader parent = classloader.getParent(); parent != null; parent = parent.getParent())
-			if (parent == this)
+		}
+		for (ClassLoader parent = classloader.getParent(); parent != null; parent = parent.getParent()) {
+			if (parent == this) {
 				return false;
+			}
+		}
 		return true;
 	}
 
 	private List<ClassLoader> findClassLoaders() {
-		if (System.getSecurityManager() == null)
+		if (System.getSecurityManager() == null) {
 			return basicFindClassLoaders();
+		}
 		return AccessController.doPrivileged(this);
 	}
 
@@ -116,8 +121,9 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction<List<
 	// False is returned when a cycle is being detected
 	private boolean startLoading(String name) {
 		Set<String> classesAndResources = cycleDetector.get();
-		if (classesAndResources != null && classesAndResources.contains(name))
+		if (classesAndResources != null && classesAndResources.contains(name)) {
 			return false;
+		}
 
 		if (classesAndResources == null) {
 			classesAndResources = new HashSet<>(3);
@@ -134,17 +140,19 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction<List<
 	@Override
 	protected Class<?> loadClass(String arg0, boolean arg1) throws ClassNotFoundException {
 		// Shortcut cycle
-		if (startLoading(arg0) == false)
+		if (startLoading(arg0) == false) {
 			throw new ClassNotFoundException(arg0);
+		}
 
 		try {
 			List<ClassLoader> toConsult = findClassLoaders();
-			for (ClassLoader classLoader : toConsult)
+			for (ClassLoader classLoader : toConsult) {
 				try {
 					return classLoader.loadClass(arg0);
 				} catch (ClassNotFoundException e) {
 					// go to the next class loader
 				}
+			}
 			// avoid calling super.loadClass here because it checks the local cache (bug
 			// 127963)
 			return parentContextClassLoader.loadClass(arg0);
@@ -156,15 +164,17 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction<List<
 	@Override
 	public URL getResource(String arg0) {
 		// Shortcut cycle
-		if (startLoading(arg0) == false)
+		if (startLoading(arg0) == false) {
 			return null;
+		}
 		try {
 			List<ClassLoader> toConsult = findClassLoaders();
 			for (ClassLoader classLoader : toConsult) {
 				URL result = classLoader.getResource(arg0);
-				if (result != null)
+				if (result != null) {
 					return result;
 				// go to the next class loader
+				}
 			}
 			return super.getResource(arg0);
 		} finally {

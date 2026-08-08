@@ -322,8 +322,9 @@ public class Storage {
 		int propValue = 100; // enable to 100 open files by default
 		try {
 			String prop = configuration.getConfiguration(EquinoxConfiguration.PROP_FILE_LIMIT);
-			if (prop != null)
+			if (prop != null) {
 				propValue = Integer.parseInt(prop);
+			}
 		} catch (NumberFormatException e) {
 			// use default of 100
 		}
@@ -361,8 +362,9 @@ public class Storage {
 
 		// First uninstall any modules that had their content changed or deleted
 		for (Module module : moduleContainer.getModules()) {
-			if (module.getId() == Constants.SYSTEM_BUNDLE_ID)
+			if (module.getId() == Constants.SYSTEM_BUNDLE_ID) {
 				continue;
+			}
 			ModuleRevision revision = module.getCurrentRevision();
 			Generation generation = (Generation) revision.getRevisionInfo();
 			if (needsDiscarding(generation)) {
@@ -650,8 +652,9 @@ public class Storage {
 	}
 
 	private String getUpdateLocation(final Module module) {
-		if (System.getSecurityManager() == null)
+		if (System.getSecurityManager() == null) {
 			return getUpdateLocation0(module);
+		}
 		return AccessController.doPrivileged((PrivilegedAction<String>) () -> getUpdateLocation0(module));
 	}
 
@@ -676,8 +679,9 @@ public class Storage {
 			return AccessController.doPrivileged(
 					(PrivilegedExceptionAction<URLConnection>) () -> LocationHelper.getConnection(createURL(spec)));
 		} catch (PrivilegedActionException e) {
-			if (e.getException() instanceof IOException)
+			if (e.getException() instanceof IOException) {
 				throw (IOException) e.getException();
+			}
 			throw (RuntimeException) e.getException();
 		}
 	}
@@ -1031,14 +1035,16 @@ public class Storage {
 
 	private File getContentFile(final File staged, Type contentType, final long bundleID, final long generationID)
 			throws BundleException {
-		if (System.getSecurityManager() == null)
+		if (System.getSecurityManager() == null) {
 			return getContentFile0(staged, contentType, bundleID, generationID);
+		}
 		try {
 			return AccessController.doPrivileged((PrivilegedExceptionAction<File>) () -> getContentFile0(staged,
 					contentType, bundleID, generationID));
 		} catch (PrivilegedActionException e) {
-			if (e.getException() instanceof BundleException)
+			if (e.getException() instanceof BundleException) {
 				throw (BundleException) e.getException();
+			}
 			throw (RuntimeException) e.getException();
 		}
 	}
@@ -1071,7 +1077,7 @@ public class Storage {
 	 * Gets a file from storage and conditionally checks the parent storage area if
 	 * the file does not exist in the child configuration. Note, this method does
 	 * not check for escaping of paths from the root storage area.
-	 * 
+	 *
 	 * @param path        the path relative to the root of the storage area
 	 * @param checkParent if true then check the parent storage (if any) when the
 	 *                    file does not exist in the child storage area
@@ -1088,7 +1094,7 @@ public class Storage {
 	 * is appended to the root storage area before looking for the path. If base is
 	 * not null then additional checks are done to make sure the path does not
 	 * escape out of the base path.
-	 * 
+	 *
 	 * @param base        the additional base path to append to the root storage
 	 *                    area. May be {@code null}, in which case no check is done
 	 *                    for escaping out of the base path.
@@ -1142,13 +1148,15 @@ public class Storage {
 	}
 
 	File stageContent(final InputStream in, final URL sourceURL) throws BundleException {
-		if (System.getSecurityManager() == null)
+		if (System.getSecurityManager() == null) {
 			return stageContent0(in, sourceURL);
+		}
 		try {
 			return AccessController.doPrivileged((PrivilegedExceptionAction<File>) () -> stageContent0(in, sourceURL));
 		} catch (PrivilegedActionException e) {
-			if (e.getException() instanceof BundleException)
+			if (e.getException() instanceof BundleException) {
 				throw (BundleException) e.getException();
+			}
 			throw (RuntimeException) e.getException();
 		}
 	}
@@ -1181,15 +1189,17 @@ public class Storage {
 
 	/**
 	 * Attempts to set the permissions of the file in a system dependent way.
-	 * 
+	 *
 	 * @param file the file to set the permissions on
 	 */
 	public void setPermissions(File file) {
 		String commandProp = getConfiguration().getConfiguration(EquinoxConfiguration.PROP_SETPERMS_CMD);
-		if (commandProp == null)
+		if (commandProp == null) {
 			commandProp = getConfiguration().getConfiguration(Constants.FRAMEWORK_EXECPERMISSION);
-		if (commandProp == null)
+		}
+		if (commandProp == null) {
 			return;
+		}
 		String[] commandComponents = ManifestElement.getArrayFromList(commandProp, " "); //$NON-NLS-1$
 		List<String> command = new ArrayList<>(commandComponents.length + 1);
 		boolean foundFullPath = false;
@@ -1201,8 +1211,9 @@ public class Storage {
 				command.add(commandComponent);
 			}
 		}
-		if (!foundFullPath)
+		if (!foundFullPath) {
 			command.add(file.getAbsolutePath());
+		}
 		try {
 			Runtime.getRuntime().exec(command.toArray(new String[command.size()])).waitFor();
 		} catch (Exception e) {
@@ -1254,8 +1265,9 @@ public class Storage {
 				: new BundleFileWrapperChain(bundleFile, null);
 		for (BundleFileWrapperFactoryHook wrapperFactory : wrapperFactories) {
 			BundleFileWrapper wrapperBundle = wrapperFactory.wrapBundleFile(bundleFile, generation, isBase);
-			if (wrapperBundle != null && wrapperBundle != bundleFile)
+			if (wrapperBundle != null && wrapperBundle != bundleFile) {
 				bundleFile = wrapped = new BundleFileWrapperChain(wrapperBundle, wrapped);
+			}
 		}
 
 		return bundleFile;
@@ -1268,20 +1280,24 @@ public class Storage {
 	}
 
 	private void compact(File directory) {
-		if (getConfiguration().getDebug().DEBUG_STORAGE)
+		if (getConfiguration().getDebug().DEBUG_STORAGE) {
 			getConfiguration().getDebug().trace(OPTION_DEBUG_STORAGE, "compact(" + directory.getPath() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
 		String list[] = directory.list();
-		if (list == null)
+		if (list == null) {
 			return;
+		}
 
 		int len = list.length;
 		for (int i = 0; i < len; i++) {
-			if (BUNDLE_DATA_DIR.equals(list[i]))
+			if (BUNDLE_DATA_DIR.equals(list[i])) {
 				continue; /* do not examine the bundles data dir. */
+			}
 			File target = new File(directory, list[i]);
 			// if the file is a directory
-			if (!target.isDirectory())
+			if (!target.isDirectory()) {
 				continue;
+			}
 			File delete = new File(target, DELETE_FLAG);
 			// and the directory is marked for delete
 			if (delete.exists()) {
@@ -1309,8 +1325,9 @@ public class Storage {
 					return null;
 				});
 			} catch (PrivilegedActionException e) {
-				if (e.getException() instanceof IOException)
+				if (e.getException() instanceof IOException) {
 					throw (IOException) e.getException();
+				}
 				throw (RuntimeException) e.getException();
 			}
 		}
@@ -1335,8 +1352,9 @@ public class Storage {
 					return null;
 				});
 			} catch (PrivilegedActionException e) {
-				if (e.getException() instanceof IOException)
+				if (e.getException() instanceof IOException) {
 					throw (IOException) e.getException();
+				}
 				throw (RuntimeException) e.getException();
 			}
 		}
@@ -1350,8 +1368,9 @@ public class Storage {
 		moduleDatabase.readLock();
 		synchronized (this.saveMonitor) {
 			try {
-				if (lastSavedTimestamp == moduleDatabase.getTimestamp())
+				if (lastSavedTimestamp == moduleDatabase.getTimestamp()) {
 					return;
+				}
 				childStorageManager = getChildStorageManager();
 				mos = childStorageManager.getOutputStream(FRAMEWORK_INFO);
 				out = new DataOutputStream(new BufferedOutputStream(mos));
@@ -1729,8 +1748,9 @@ public class Storage {
 		// not already set
 		if (systemExports == null) {
 			systemExports = profileProps.getProperty(Constants.FRAMEWORK_SYSTEMPACKAGES);
-			if (systemExports != null)
+			if (systemExports != null) {
 				equinoxConfig.setConfiguration(Constants.FRAMEWORK_SYSTEMPACKAGES, systemExports);
+			}
 		}
 
 		// set the org.osgi.framework.bootdelegation property according to the java
@@ -1742,15 +1762,17 @@ public class Storage {
 																													// ignore
 		String profileBootDelegation = profileProps.getProperty(Constants.FRAMEWORK_BOOTDELEGATION);
 		if (EquinoxConfiguration.PROP_OSGI_BOOTDELEGATION_OVERRIDE.equals(type)) {
-			if (profileBootDelegation == null)
+			if (profileBootDelegation == null) {
 				equinoxConfig.clearConfiguration(Constants.FRAMEWORK_BOOTDELEGATION); // override with a null value
-			else
+			} else {
 				equinoxConfig.setConfiguration(Constants.FRAMEWORK_BOOTDELEGATION, profileBootDelegation); // override
 																											// with the
 																											// profile
 																											// value
-		} else if (EquinoxConfiguration.PROP_OSGI_BOOTDELEGATION_NONE.equals(type))
+			}
+		} else if (EquinoxConfiguration.PROP_OSGI_BOOTDELEGATION_NONE.equals(type)) {
 			equinoxConfig.clearConfiguration(Constants.FRAMEWORK_BOOTDELEGATION); // remove the bootdelegation property
+		}
 																					// in case it was set
 		// set the org.osgi.framework.executionenvironment property according to the
 		// java profile
@@ -1759,15 +1781,17 @@ public class Storage {
 			// profile name
 			String ee = profileProps.getProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT,
 					profileProps.getProperty(EquinoxConfiguration.PROP_OSGI_JAVA_PROFILE_NAME));
-			if (ee != null)
+			if (ee != null) {
 				equinoxConfig.setConfiguration(Constants.FRAMEWORK_EXECUTIONENVIRONMENT, ee);
+			}
 		}
 		// set the org.osgi.framework.system.capabilities property according to the java
 		// profile
 		if (equinoxConfig.getConfiguration(Constants.FRAMEWORK_SYSTEMCAPABILITIES) == null) {
 			String systemCapabilities = profileProps.getProperty(Constants.FRAMEWORK_SYSTEMCAPABILITIES);
-			if (systemCapabilities != null)
+			if (systemCapabilities != null) {
 				equinoxConfig.setConfiguration(Constants.FRAMEWORK_SYSTEMCAPABILITIES, systemCapabilities);
+			}
 		}
 	}
 
@@ -2004,8 +2028,9 @@ public class Storage {
 
 	private InputStream getNextBestProfile(Generation systemGeneration, String javaEdition, Version javaVersion,
 			String embeddedProfileName) {
-		if (javaVersion == null || javaEdition != JAVASE)
+		if (javaVersion == null || javaEdition != JAVASE) {
 			return null; // we cannot automatically choose the next best profile unless this is a JavaSE
+		}
 							// vm
 		InputStream bestProfile = findNextBestProfile(systemGeneration, javaEdition, javaVersion, embeddedProfileName);
 		if (bestProfile == null && !"-".equals(embeddedProfileName)) { //$NON-NLS-1$
@@ -2062,13 +2087,15 @@ public class Storage {
 	public static Enumeration<URL> findEntries(List<Generation> generations, String path, String filePattern,
 			int options) {
 		List<BundleFile> bundleFiles = new ArrayList<>(generations.size());
-		for (Generation generation : generations)
+		for (Generation generation : generations) {
 			bundleFiles.add(generation.getBundleFile());
+		}
 		// search all the bundle files
 		List<String> pathList = listEntryPaths(bundleFiles, path, filePattern, options);
 		// return null if no entries found
-		if (pathList.size() == 0)
+		if (pathList.size() == 0) {
 			return null;
+		}
 		// create an enumeration to enumerate the pathList (generations must not change)
 		Stream<URL> entries = pathList.stream().flatMap(p -> generations.stream().map(g -> g.getEntry(p)))
 				.filter(Objects::nonNull);
@@ -2078,7 +2105,7 @@ public class Storage {
 	/**
 	 * Returns the names of resources available from a list of bundle files. No
 	 * duplicate resource names are returned, each name is unique.
-	 * 
+	 *
 	 * @param bundleFiles the list of bundle files to search in
 	 * @param path        The path name in which to look.
 	 * @param filePattern The file name pattern for selecting resource names in the
@@ -2102,13 +2129,15 @@ public class Storage {
 			// requested.
 			if ((options & BundleWiring.FINDENTRIES_RECURSE) == 0 && filePattern.indexOf('*') == -1
 					&& filePattern.indexOf('\\') == -1) {
-				if (path.length() == 0)
+				if (path.length() == 0) {
 					path = filePattern;
-				else
+				} else {
 					path += path.charAt(path.length() - 1) == '/' ? filePattern : '/' + filePattern;
+				}
 				for (BundleFile bundleFile : bundleFiles) {
-					if (bundleFile.getEntry(path) != null && !pathList.contains(path))
+					if (bundleFile.getEntry(path) != null && !pathList.contains(path)) {
 						pathList.add(path);
+					}
 				}
 				return new ArrayList<>(pathList);
 			}
@@ -2141,8 +2170,9 @@ public class Storage {
 			case '\\':
 				// we either used the escape found or found a new escape.
 				foundEscape = foundEscape ? false : true;
-				if (buffer != null)
+				if (buffer != null) {
 					buffer.append(c);
+				}
 				break;
 			case '(':
 			case ')':
@@ -2156,19 +2186,22 @@ public class Storage {
 				} else {
 					foundEscape = false; // used the escape found
 				}
-				if (buffer != null)
+				if (buffer != null) {
 					buffer.append(c);
+				}
 				break;
 			default:
 				// if we found an escape it has been used
 				foundEscape = false;
-				if (buffer != null)
+				if (buffer != null) {
 					buffer.append(c);
+				}
 				break;
 			}
 		}
-		if (foundEscape)
+		if (foundEscape) {
 			throw new InvalidSyntaxException("Trailing escape characters must be escaped.", filePattern); //$NON-NLS-1$
+		}
 		return buffer == null ? filePattern : buffer.toString();
 	}
 
@@ -2176,12 +2209,14 @@ public class Storage {
 	// guarantees.
 	private static LinkedHashSet<String> listEntryPaths(BundleFile bundleFile, String path, Filter patternFilter,
 			Hashtable<String, String> patternProps, int options, LinkedHashSet<String> pathList) {
-		if (pathList == null)
+		if (pathList == null) {
 			pathList = new LinkedHashSet<>();
+		}
 		boolean recurse = (options & BundleWiring.FINDENTRIES_RECURSE) != 0;
 		Enumeration<String> entryPaths = bundleFile.getEntryPaths(path, recurse);
-		if (entryPaths == null)
+		if (entryPaths == null) {
 			return pathList;
+		}
 		while (entryPaths.hasMoreElements()) {
 			String entry = entryPaths.nextElement();
 			int lastSlash = entry.lastIndexOf('/');
@@ -2189,24 +2224,26 @@ public class Storage {
 				int secondToLastSlash = entry.lastIndexOf('/', lastSlash - 1);
 				int fileStart;
 				int fileEnd = entry.length();
-				if (lastSlash < 0)
+				if (lastSlash < 0) {
 					fileStart = 0;
-				else if (lastSlash != entry.length() - 1)
+				} else if (lastSlash != entry.length() - 1) {
 					fileStart = lastSlash + 1;
-				else {
+				} else {
 					fileEnd = lastSlash; // leave the lastSlash out
-					if (secondToLastSlash < 0)
+					if (secondToLastSlash < 0) {
 						fileStart = 0;
-					else
+					} else {
 						fileStart = secondToLastSlash + 1;
+					}
 				}
 				String fileName = entry.substring(fileStart, fileEnd);
 				// set the filename to the current entry
 				patternProps.put("filename", fileName); //$NON-NLS-1$
 			}
 			// prevent duplicates and match on the patternFilter
-			if (!pathList.contains(entry) && (patternFilter == null || patternFilter.matchCase(patternProps)))
+			if (!pathList.contains(entry) && (patternFilter == null || patternFilter.matchCase(patternProps))) {
 				pathList.add(entry);
+			}
 		}
 		return pathList;
 	}
@@ -2237,8 +2274,9 @@ public class Storage {
 			bundleTempDir = new File(libTempDir, bundleID + "_" + i); //$NON-NLS-1$
 			libTempFile = new File(bundleTempDir, libName);
 			if (bundleTempDir.exists()) {
-				if (libTempFile.exists())
+				if (libTempFile.exists()) {
 					continue; // to to next temp file
+				}
 				break;
 			}
 			break;

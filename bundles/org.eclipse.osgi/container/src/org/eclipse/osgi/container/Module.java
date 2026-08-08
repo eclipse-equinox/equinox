@@ -38,7 +38,7 @@ import org.osgi.service.resolver.ResolutionException;
 /**
  * A module represents a set of revisions installed in a module
  * {@link ModuleContainer container}.
- * 
+ *
  * @since 3.10
  */
 public abstract class Module implements BundleReference, BundleStartLevel, Comparable<Module> {
@@ -158,7 +158,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		USE_ACTIVATION_POLICY,
 		/**
 		 * The module has been set for parallel activation from start-level
-		 * 
+		 *
 		 * @since 3.15
 		 */
 		PARALLEL_ACTIVATION
@@ -188,7 +188,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 
 	/**
 	 * Constructs a new module with the specified id, location and container.
-	 * 
+	 *
 	 * @param id         the new module id
 	 * @param location   the new module location
 	 * @param container  the container for the new module
@@ -206,7 +206,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 
 	/**
 	 * Returns the module id.
-	 * 
+	 *
 	 * @return the module id.
 	 */
 	public final Long getId() {
@@ -215,7 +215,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 
 	/**
 	 * Returns the module location
-	 * 
+	 *
 	 * @return the module location
 	 */
 	public final String getLocation() {
@@ -224,7 +224,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 
 	/**
 	 * Returns the {@link ModuleRevisions} associated with this module.
-	 * 
+	 *
 	 * @return the {@link ModuleRevisions} associated with this module
 	 */
 	public final ModuleRevisions getRevisions() {
@@ -233,7 +233,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 
 	/**
 	 * Returns the module container this module is contained in.
-	 * 
+	 *
 	 * @return the module container.
 	 */
 	public final ModuleContainer getContainer() {
@@ -244,7 +244,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	 * Returns the current {@link ModuleRevision revision} associated with this
 	 * module. If the module is uninstalled then the last current revision is
 	 * returned.
-	 * 
+	 *
 	 * @return the current {@link ModuleRevision revision} associated with this
 	 *         module.
 	 */
@@ -254,7 +254,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 
 	/**
 	 * Returns the current {@link State state} of this module.
-	 * 
+	 *
 	 * @return the current state of this module.
 	 */
 	public final State getState() {
@@ -298,7 +298,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	 * <p>
 	 * The time value is a the number of milliseconds since January 1, 1970,
 	 * 00:00:00 UTC.
-	 * 
+	 *
 	 * @return the time when this bundle was last modified.
 	 */
 	public final long getLastModified() {
@@ -320,7 +320,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	 * lock may be nested within a started transition event lock. A stopped
 	 * transition lock may be nested within an updated, unresolved or uninstalled
 	 * transition lock.
-	 * 
+	 *
 	 * @param transitionEvent the transition event to acquire the lock for.
 	 */
 	protected final void lockStateChange(ModuleEvent transitionEvent) throws BundleException {
@@ -388,9 +388,10 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	 * Releases the lock for state changes for the specified transition event.
 	 */
 	protected final void unlockStateChange(ModuleEvent transitionEvent) {
-		if (stateChangeLock.getHoldCount() == 0 || !stateTransitionEvents.contains(transitionEvent))
+		if (stateChangeLock.getHoldCount() == 0 || !stateTransitionEvents.contains(transitionEvent)) {
 			throw new IllegalMonitorStateException(
 					"Current thread does not hold the state change lock for: " + transitionEvent); //$NON-NLS-1$
+		}
 		stateTransitionEvents.remove(transitionEvent);
 		stateChangeLock.unlock();
 	}
@@ -398,7 +399,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	/**
 	 * Returns true if the current thread holds the state change lock for the
 	 * specified transition event.
-	 * 
+	 *
 	 * @return true if the current thread holds the state change lock for the
 	 *         specified transition event.
 	 */
@@ -409,7 +410,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	/**
 	 * Returns the thread that currently owns the state change lock for this module,
 	 * or <code>null</code> if not owned.
-	 * 
+	 *
 	 * @return the owner, or <code>null</code> if not owned.
 	 */
 	public final Thread getStateChangeOwner() {
@@ -418,7 +419,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 
 	/**
 	 * Starts this module
-	 * 
+	 *
 	 * @param options the options for starting
 	 * @throws BundleException if an errors occurs while starting
 	 */
@@ -466,8 +467,9 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 				// Do nothing; start level is not met
 				return;
 			}
-			if (State.ACTIVE.equals(getState()))
+			if (State.ACTIVE.equals(getState())) {
 				return;
+			}
 			if (getState().equals(State.INSTALLED)) {
 				ResolutionReport report;
 				// must unlock to avoid out of order locks when multiple unresolved
@@ -488,8 +490,9 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 						throw (BundleException) e.getCause();
 					}
 				}
-				if (State.ACTIVE.equals(getState()))
+				if (State.ACTIVE.equals(getState())) {
 					return;
+				}
 				if (getState().equals(State.INSTALLED)) {
 					String reportMessage = report.getResolutionReportMessage(getCurrentRevision());
 					throw new BundleException(Msg.Module_ResolveError + reportMessage, BundleException.RESOLVE_ERROR);
@@ -513,8 +516,9 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		}
 
 		if (event != null) {
-			if (!EnumSet.of(ModuleEvent.STARTED, ModuleEvent.LAZY_ACTIVATION, ModuleEvent.STOPPED).contains(event))
+			if (!EnumSet.of(ModuleEvent.STARTED, ModuleEvent.LAZY_ACTIVATION, ModuleEvent.STOPPED).contains(event)) {
 				throw new IllegalStateException("Wrong event type: " + event); //$NON-NLS-1$
+			}
 			publishEvent(event);
 			// only print bundleTime information if we actually fired an event for this
 			// bundle
@@ -536,14 +540,15 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 
 	/**
 	 * Stops this module.
-	 * 
+	 *
 	 * @param options options for stopping
 	 * @throws BundleException if an error occurs while stopping
 	 */
 	public void stop(StopOptions... options) throws BundleException {
 		revisions.getContainer().checkAdminPermission(getBundle(), AdminPermission.EXECUTE);
-		if (options == null)
+		if (options == null) {
 			options = new StopOptions[0];
+		}
 		ModuleEvent event;
 		BundleException stopError = null;
 		lockStateChange(ModuleEvent.STOPPED);
@@ -551,8 +556,9 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 			checkValid();
 			checkFragment();
 			persistStopOptions(options);
-			if (!Module.ACTIVE_SET.contains(getState()))
+			if (!Module.ACTIVE_SET.contains(getState())) {
 				return;
+			}
 			try {
 				event = doStop();
 			} catch (BundleException e) {
@@ -565,12 +571,14 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		}
 
 		if (event != null) {
-			if (!ModuleEvent.STOPPED.equals(event))
+			if (!ModuleEvent.STOPPED.equals(event)) {
 				throw new IllegalStateException("Wrong event type: " + event); //$NON-NLS-1$
+			}
 			publishEvent(event);
 		}
-		if (stopError != null)
+		if (stopError != null) {
 			throw stopError;
+		}
 	}
 
 	private void checkFragment() throws BundleException {
@@ -592,8 +600,9 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	}
 
 	final void checkValid() {
-		if (getState().equals(State.UNINSTALLED))
+		if (getState().equals(State.UNINSTALLED)) {
 			throw new IllegalStateException(Msg.Module_UninstalledError + ' ' + this);
+		}
 	}
 
 	private ModuleEvent doStart(StartOptions... options) throws BundleException {
@@ -647,8 +656,9 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 			// must fire stopping event
 			setState(State.STOPPING);
 			publishEvent(ModuleEvent.STOPPING);
-			if (t instanceof BundleException)
+			if (t instanceof BundleException) {
 				throw (BundleException) t;
+			}
 			throw new BundleException(Msg.Module_StartError + ' ' + this, BundleException.ACTIVATOR_ERROR, t);
 		}
 	}
@@ -685,7 +695,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	/**
 	 * Performs any work associated with starting a module. For example, loading and
 	 * calling start on an activator.
-	 * 
+	 *
 	 * @throws BundleException if there was an exception starting the module
 	 */
 	protected void startWorker() throws BundleException {
@@ -699,8 +709,9 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 			stopWorker();
 			return ModuleEvent.STOPPED;
 		} catch (Throwable t) {
-			if (t instanceof BundleException)
+			if (t instanceof BundleException) {
 				throw (BundleException) t;
+			}
 			throw new BundleException(Msg.Module_StopError + ' ' + this, BundleException.ACTIVATOR_ERROR, t);
 		} finally {
 			// must always set the state to stopped
@@ -711,7 +722,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	/**
 	 * Performs any work associated with stopping a module. For example, calling
 	 * stop on an activator.
-	 * 
+	 *
 	 * @throws BundleException if there was an exception stopping the module
 	 */
 	protected void stopWorker() throws BundleException {
@@ -739,8 +750,9 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	}
 
 	private void persistStopOptions(StopOptions... options) {
-		if (StopOptions.TRANSIENT.isContained(options))
+		if (StopOptions.TRANSIENT.isContained(options)) {
 			return;
+		}
 		settings.remove(Settings.USE_ACTIVATION_POLICY);
 		settings.remove(Settings.AUTO_START);
 		revisions.getContainer().moduleDatabase.persistSettings(settings, this);
@@ -749,7 +761,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	/**
 	 * Set if this module should be activated in parallel with other modules that
 	 * have the same {@link #getStartLevel() start level}.
-	 * 
+	 *
 	 * @param parallelActivation true if the module should be started in parallel;
 	 *                           false otherwise
 	 * @since 3.15
@@ -766,7 +778,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	/**
 	 * Returns if this module should be activated in parallel with other modules
 	 * that have the same {@link #getStartLevel() start level}.
-	 * 
+	 *
 	 * @return true if the module should be started in parallel; false otherwise
 	 * @since 3.15
 	 */
@@ -777,7 +789,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	/**
 	 * The container is done with the revision and it has been completely removed.
 	 * This method allows the resources behind the revision to be cleaned up.
-	 * 
+	 *
 	 * @param revision the revision to clean up
 	 */
 	abstract protected void cleanup(ModuleRevision revision);

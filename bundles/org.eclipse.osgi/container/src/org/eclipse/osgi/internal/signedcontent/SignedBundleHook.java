@@ -99,10 +99,11 @@ public class SignedBundleHook implements ActivatorHookFactory, HookConfigurator,
 
 	void frameworkStart(BundleContext bc) {
 		this.context = bc;
-		if ((supportSignedBundles & EquinoxConfiguration.SIGNED_CONTENT_VERIFY_TRUST) != 0)
+		if ((supportSignedBundles & EquinoxConfiguration.SIGNED_CONTENT_VERIFY_TRUST) != 0) {
 			// initialize the trust engine listener only if trust is being established with
 			// a trust engine
 			trustEngineListener = new TrustEngineListener(context, this);
+		}
 		// always register the trust engine
 		Dictionary<String, Object> trustEngineProps = new Hashtable<>(7);
 		trustEngineProps.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MIN_VALUE));
@@ -153,8 +154,9 @@ public class SignedBundleHook implements ActivatorHookFactory, HookConfigurator,
 			systemTrustEngineReg = null;
 		}
 		if (osgiTrustEngineReg != null) {
-			for (ServiceRegistration<?> serviceRegistration : osgiTrustEngineReg)
+			for (ServiceRegistration<?> serviceRegistration : osgiTrustEngineReg) {
 				serviceRegistration.unregister();
+			}
 			osgiTrustEngineReg = null;
 		}
 		if (trustEngineTracker != null) {
@@ -196,23 +198,26 @@ public class SignedBundleHook implements ActivatorHookFactory, HookConfigurator,
 
 	private TrustEngine[] getTrustEngines() {
 		// find all the trust engines available
-		if (context == null)
+		if (context == null) {
 			return new TrustEngine[0];
+		}
 		if (trustEngineTracker == null) {
 			// read the trust provider security property
 			Filter filter = null;
-			if (trustEngineNameProp != null)
+			if (trustEngineNameProp != null) {
 				try {
 					filter = context.createFilter("(&(" + Constants.OBJECTCLASS + "=" + TrustEngine.class.getName() //$NON-NLS-1$ //$NON-NLS-2$
 							+ ")(" + SignedContentConstants.TRUST_ENGINE + "=" + trustEngineNameProp + "))"); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
 				} catch (InvalidSyntaxException e) {
 					log("Invalid trust engine filter", FrameworkLogEntry.WARNING, e); //$NON-NLS-1$
 				}
+			}
 			if (filter != null) {
 				trustEngineTracker = new ServiceTracker<>(context, filter, new TrustEngineCustomizer());
-			} else
+			} else {
 				trustEngineTracker = new ServiceTracker<>(context, TrustEngine.class.getName(),
 						new TrustEngineCustomizer());
+			}
 			trustEngineTracker.open();
 		}
 		Object[] services = trustEngineTracker.getServices();
@@ -261,8 +266,9 @@ public class SignedBundleHook implements ActivatorHookFactory, HookConfigurator,
 			// first check if we need to find an anchor
 			if (signer.getTrustAnchor() == null) {
 				// no anchor set ask the trust engines
-				if (engines == null)
+				if (engines == null) {
 					engines = getTrustEngines();
+				}
 				// check trust of singer certs
 				Certificate[] signerCerts = signer.getCertificateChain();
 				((BaseSignerInfo) signer).setTrustAnchor(findTrustAnchor(signerCerts, engines, supportFlags));
@@ -277,16 +283,18 @@ public class SignedBundleHook implements ActivatorHookFactory, HookConfigurator,
 	}
 
 	private Certificate findTrustAnchor(Certificate[] certs, TrustEngine[] engines, int supportFlags) {
-		if ((supportFlags & EquinoxConfiguration.SIGNED_CONTENT_VERIFY_TRUST) == 0)
+		if ((supportFlags & EquinoxConfiguration.SIGNED_CONTENT_VERIFY_TRUST) == 0) {
 			// we are not searching the engines; in this case we just assume the root cert
 			// is trusted
 			return certs != null && certs.length > 0 ? certs[certs.length - 1] : null;
+		}
 		for (TrustEngine engine : engines) {
 			try {
 				Certificate anchor = engine.findTrustAnchor(certs);
-				if (anchor != null)
+				if (anchor != null) {
 					// found an anchor
 					return anchor;
+				}
 			} catch (IOException e) {
 				// log the exception and continue
 				log("TrustEngine failure: " + engine.getName(), FrameworkLogEntry.WARNING, e); //$NON-NLS-1$

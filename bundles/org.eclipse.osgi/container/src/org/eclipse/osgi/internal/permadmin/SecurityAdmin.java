@@ -69,8 +69,9 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 	static {
 		AllPermission allPerm = new AllPermission();
 		DEFAULT_DEFAULT = allPerm.newPermissionCollection();
-		if (DEFAULT_DEFAULT != null)
+		if (DEFAULT_DEFAULT != null) {
 			DEFAULT_DEFAULT.add(allPerm);
+		}
 	}
 
 	// Base implied permissions for all bundles
@@ -103,8 +104,9 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 				.getPermissionInfos(getClass().getResource(OSGI_BASE_IMPLIED_PERMISSIONS));
 		String[] encodedDefaultInfos = permissionStorage.getPermissionData(null);
 		PermissionInfo[] defaultInfos = getPermissionInfos(encodedDefaultInfos);
-		if (defaultInfos != null)
+		if (defaultInfos != null) {
 			permAdminDefaults = new PermissionInfoCollection(defaultInfos);
+		}
 		String[] locations = permissionStorage.getLocations();
 		if (locations != null) {
 			for (String location : locations) {
@@ -116,13 +118,14 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 			}
 		}
 		String[] encodedCondPermInfos = permissionStorage.getConditionalPermissionInfos();
-		if (encodedCondPermInfos == null)
+		if (encodedCondPermInfos == null) {
 			condAdminTable = new SecurityTable(this, new SecurityRow[0]);
-		else {
+		} else {
 			SecurityRow[] rows = new SecurityRow[encodedCondPermInfos.length];
 			try {
-				for (int i = 0; i < rows.length; i++)
+				for (int i = 0; i < rows.length; i++) {
 					rows[i] = SecurityRow.createSecurityRow(this, encodedCondPermInfos[i]);
+				}
 			} catch (IllegalArgumentException e) {
 				// TODO should log
 				// bad format persisted in storage; start clean
@@ -133,11 +136,13 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 	}
 
 	private static PermissionInfo[] getPermissionInfos(String[] encodedInfos) {
-		if (encodedInfos == null)
+		if (encodedInfos == null) {
 			return null;
+		}
 		PermissionInfo[] results = new PermissionInfo[encodedInfos.length];
-		for (int i = 0; i < results.length; i++)
+		for (int i = 0; i < results.length; i++) {
 			results[i] = new PermissionInfo(encodedInfos[i]);
+		}
 		return results;
 	}
 
@@ -156,28 +161,34 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 			curCondAdminTable = condAdminTable;
 			curPermAdminDefaults = permAdminDefaults;
 		}
-		if (locationCollection != null)
+		if (locationCollection != null) {
 			return locationCollection.implies(bundlePermissions, permission);
+		}
 		// if conditional admin table is empty the fall back to defaults
-		if (curCondAdminTable.isEmpty())
+		if (curCondAdminTable.isEmpty()) {
 			return curPermAdminDefaults != null ? curPermAdminDefaults.implies(permission)
 					: DEFAULT_DEFAULT.implies(permission);
+		}
 		// check the condition table
 		int result = curCondAdminTable.evaluate(bundlePermissions, permission);
-		if ((result & SecurityTable.GRANTED) != 0)
+		if ((result & SecurityTable.GRANTED) != 0) {
 			return true;
-		if ((result & SecurityTable.DENIED) != 0)
+		}
+		if ((result & SecurityTable.DENIED) != 0) {
 			return false;
-		if ((result & SecurityTable.POSTPONED) != 0)
+		}
+		if ((result & SecurityTable.POSTPONED) != 0) {
 			return true;
+		}
 		return false;
 	}
 
 	@Override
 	public PermissionInfo[] getDefaultPermissions() {
 		synchronized (lock) {
-			if (permAdminDefaults == null)
+			if (permAdminDefaults == null) {
 				return null;
+			}
 			return permAdminDefaults.getPermissionInfos();
 		}
 	}
@@ -201,26 +212,30 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 	public void setDefaultPermissions(PermissionInfo[] permissions) {
 		checkAllPermission();
 		synchronized (lock) {
-			if (permissions == null)
+			if (permissions == null) {
 				permAdminDefaults = null;
-			else
+			} else {
 				permAdminDefaults = new PermissionInfoCollection(permissions);
+			}
 			permissionStorage.setPermissionData(null, getEncodedPermissionInfos(permissions));
 		}
 	}
 
 	private static void checkAllPermission() {
 		SecurityManager sm = System.getSecurityManager();
-		if (sm != null)
+		if (sm != null) {
 			sm.checkPermission(new AllPermission());
+		}
 	}
 
 	private static String[] getEncodedPermissionInfos(PermissionInfo[] permissions) {
-		if (permissions == null)
+		if (permissions == null) {
 			return null;
+		}
 		String[] encoded = new String[permissions.length];
-		for (int i = 0; i < encoded.length; i++)
+		for (int i = 0; i < encoded.length; i++) {
 			encoded[i] = permissions[i].getEncoded();
+		}
 		return encoded;
 	}
 
@@ -242,9 +257,10 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 				iRows.remove();
 				synchronized (lock) {
 					if (!update.commit()) {
-						if (firstTry)
+						if (firstTry) {
 							// try again
 							delete(securityRow, false);
+						}
 					}
 				}
 				break;
@@ -255,6 +271,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
 	@Override
 	public ConditionalPermissionInfo addConditionalPermissionInfo(ConditionInfo[] conds, PermissionInfo[] perms) {
 		return setConditionalPermissionInfo(null, conds, perms, true);
@@ -287,6 +304,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
 	@Override
 	public ConditionalPermissionInfo getConditionalPermissionInfo(String name) {
 		synchronized (lock) {
@@ -297,6 +315,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
 	@Override
 	public Enumeration<ConditionalPermissionInfo> getConditionalPermissionInfos() {
 		// could implement our own Enumeration, but we don't care about performance
@@ -312,6 +331,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
 	@Override
 	public ConditionalPermissionInfo setConditionalPermissionInfo(String name, ConditionInfo[] conds,
 			PermissionInfo[] perms) {
@@ -342,9 +362,10 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		}
 		synchronized (lock) {
 			if (!update.commit()) {
-				if (firstTry)
+				if (firstTry) {
 					// try again
 					setConditionalPermissionInfo(name, conds, perms, false);
+				}
 			}
 			return condAdminTable.getRow(index);
 		}
@@ -353,21 +374,25 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 	boolean commit(List<ConditionalPermissionInfo> rows, long updateStamp) {
 		checkAllPermission();
 		synchronized (lock) {
-			if (updateStamp != timeStamp)
+			if (updateStamp != timeStamp) {
 				return false;
+			}
 			SecurityRow[] newRows = new SecurityRow[rows.size()];
 			Collection<String> names = new ArrayList<>();
 			for (int i = 0; i < newRows.length; i++) {
 				Object rowObj = rows.get(i);
-				if (!(rowObj instanceof ConditionalPermissionInfo))
+				if (!(rowObj instanceof ConditionalPermissionInfo)) {
 					throw new IllegalStateException(
 							"Invalid type \"" + rowObj.getClass().getName() + "\" at row: " + i); //$NON-NLS-1$//$NON-NLS-2$
+				}
 				ConditionalPermissionInfo infoBaseRow = (ConditionalPermissionInfo) rowObj;
 				String name = infoBaseRow.getName();
-				if (name == null)
+				if (name == null) {
 					name = generateName();
-				if (names.contains(name))
+				}
+				if (names.contains(name)) {
 					throw new IllegalStateException("Duplicate name \"" + name + "\" at row: " + i); //$NON-NLS-1$//$NON-NLS-2$
+				}
 				names.add(name);
 				newRows[i] = new SecurityRow(this, name, infoBaseRow.getConditionInfos(),
 						infoBaseRow.getPermissionInfos(), infoBaseRow.getAccessDecision());
@@ -405,8 +430,9 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 	}
 
 	private PermissionInfoCollection getImpliedPermission(Bundle bundle) {
-		if (impliedPermissionInfos == null)
+		if (impliedPermissionInfos == null) {
 			return null;
+		}
 		// create the implied AdminPermission actions for this bundle
 		PermissionInfo impliedAdminPermission = new PermissionInfo(AdminPermission.class.getName(),
 				"(id=" + bundle.getBundleId() + ")", ADMIN_IMPLIED_ACTIONS); //$NON-NLS-1$ //$NON-NLS-2$
@@ -417,8 +443,9 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 	}
 
 	private PermissionInfo[] getFileRelativeInfos(PermissionInfo[] permissionInfos, Bundle bundle) {
-		if (permissionInfos == null)
+		if (permissionInfos == null) {
 			return permissionInfos;
+		}
 		PermissionInfo[] results = new PermissionInfo[permissionInfos.length];
 		for (int i = 0; i < permissionInfos.length; i++) {
 			results[i] = permissionInfos[i];
@@ -428,9 +455,10 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 					if (!file.isAbsolute()) { // relative name
 						try {
 							File target = bundle.getDataFile(permissionInfos[i].getName());
-							if (target != null)
+							if (target != null) {
 								results[i] = new PermissionInfo(permissionInfos[i].getType(), target.getPath(),
 										permissionInfos[i].getActions());
+							}
 						} catch (IllegalStateException e) {
 							// can happen if the bundle has been uninstalled;
 							// we just keep the original permission in this case.
@@ -472,8 +500,9 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 	}
 
 	private static PermissionInfo[] getPermissionInfos(URL resource) {
-		if (resource == null)
+		if (resource == null) {
 			return null;
+		}
 		PermissionInfo[] info = EMPTY_PERM_INFO;
 		List<PermissionInfo> permissions = new ArrayList<>();
 		try (DataInputStream in = new DataInputStream(resource.openStream());
@@ -481,11 +510,13 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 
 			while (true) {
 				String line = reader.readLine();
-				if (line == null) /* EOF */
+				if (line == null) { /* EOF */
 					break;
+				}
 				line = line.trim();
-				if ((line.length() == 0) || line.startsWith("#") || line.startsWith("//")) /* comments *///$NON-NLS-1$ //$NON-NLS-2$
+				if ((line.length() == 0) || line.startsWith("#") || line.startsWith("//")) { /* comments */ //$NON-NLS-1$ //$NON-NLS-2$
 					continue;
+				}
 
 				try {
 					permissions.add(new PermissionInfo(line));
@@ -495,8 +526,9 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 				}
 			}
 			int size = permissions.size();
-			if (size > 0)
+			if (size > 0) {
 				info = permissions.toArray(new PermissionInfo[size]);
+			}
 		} catch (IOException e) {
 			// do nothing
 		}
@@ -514,12 +546,14 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 				subject = issuer == null ? new MockPrincipal(iChain.next()) : issuer;
 				issuer = iChain.hasNext() ? new MockPrincipal(iChain.next()) : subject;
 				X509Certificate cert = new MockX509Certificate(subject, issuer);
-				if (first == null)
+				if (first == null) {
 					first = cert;
+				}
 				signersList.add(cert);
 			}
-			if (subject != issuer)
+			if (subject != issuer) {
 				signersList.add(new MockX509Certificate(issuer, issuer));
+			}
 			signersMap.put(first, signersList);
 		}
 		return new MockBundle(signersMap);
@@ -694,11 +728,13 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 
 		@Override
 		public boolean equals(Object obj) {
-			if (this == obj)
+			if (this == obj) {
 				return true;
-			if (obj instanceof MockX509Certificate)
+			}
+			if (obj instanceof MockX509Certificate) {
 				return subject.equals(((MockX509Certificate) obj).subject)
 						&& issuer.equals(((MockX509Certificate) obj).issuer);
+			}
 			return false;
 		}
 
@@ -892,8 +928,9 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 					endIndex++; // skip the escaped char
 					break;
 				case ';':
-					if (!inQuote)
+					if (!inQuote) {
 						break out;
+					}
 				}
 				endIndex++;
 			}

@@ -37,7 +37,7 @@ public class EquinoxClassLoader extends ModuleClassLoader {
 
 	/**
 	 * Constructs a new DefaultClassLoader.
-	 * 
+	 *
 	 * @param parent        the parent classloader
 	 * @param configuration the equinox configuration
 	 * @param delegate      the delegate for this classloader

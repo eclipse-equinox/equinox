@@ -31,7 +31,7 @@ import org.osgi.framework.BundleException;
  * <li>The String keys in the Dictionary are case-preserved, but the get
  * operation is case-insensitive.
  * </ul>
- * 
+ *
  * @since 3.1
  * @deprecated As of 3.13. Replaced by {@link CaseInsensitiveDictionaryMap}.
  */
@@ -47,6 +47,7 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 	 *
 	 * @param initialCapacity The initial capacity of this Headers object.
 	 */
+	@Deprecated
 	public Headers(int initialCapacity) {
 		super();
 		@SuppressWarnings("unchecked")
@@ -64,6 +65,7 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 	 * @exception IllegalArgumentException If a case-variant of the key is in the
 	 *                                     dictionary parameter.
 	 */
+	@Deprecated
 	public Headers(Dictionary<? extends K, ? extends V> values) {
 		this(values.size());
 		/* initialize the headers and values */
@@ -77,6 +79,7 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 	/**
 	 * Case-preserved keys.
 	 */
+	@Deprecated
 	@Override
 	public synchronized Enumeration<K> keys() {
 		return new ArrayEnumeration<>(headers, size);
@@ -85,6 +88,7 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 	/**
 	 * Values.
 	 */
+	@Deprecated
 	@Override
 	public synchronized Enumeration<V> elements() {
 		return new ArrayEnumeration<>(values, size);
@@ -94,11 +98,13 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 		boolean stringKey = key instanceof String;
 		for (int i = 0; i < size; i++) {
 			if (stringKey && (headers[i] instanceof String)) {
-				if (((String) headers[i]).equalsIgnoreCase((String) key))
+				if (((String) headers[i]).equalsIgnoreCase((String) key)) {
 					return i;
+				}
 			} else {
-				if (headers[i].equals(key))
+				if (headers[i].equals(key)) {
 					return i;
+				}
 			}
 		}
 		return -1;
@@ -115,8 +121,9 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 				values[i] = values[i + 1];
 			}
 		}
-		if (remove < size)
+		if (remove < size) {
 			size--;
+		}
 		return removed;
 	}
 
@@ -144,11 +151,13 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 	 *
 	 * @param key name.
 	 */
+	@Deprecated
 	@Override
 	public synchronized V get(Object key) {
 		int i = -1;
-		if ((i = getIndex(key)) != -1)
+		if ((i = getIndex(key)) != -1) {
 			return values[i];
+		}
 		return null;
 	}
 
@@ -168,9 +177,11 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 	 *                                     present.
 	 * @since 3.2
 	 */
+	@Deprecated
 	public synchronized V set(K key, V value, boolean replace) {
-		if (readOnly)
+		if (readOnly) {
 			throw new UnsupportedOperationException();
+		}
 		if (key instanceof String) {
 			@SuppressWarnings("unchecked")
 			K k = (K) ((String) key).intern();
@@ -178,12 +189,14 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 		}
 		int i = getIndex(key);
 		if (value == null) { /* remove */
-			if (i != -1)
+			if (i != -1) {
 				return remove(i);
+			}
 		} else { /* put */
 			if (i != -1) { /* duplicate key */
-				if (!replace)
+				if (!replace) {
 					throw new IllegalArgumentException(NLS.bind(Msg.HEADER_DUPLICATE_KEY_EXCEPTION, key));
+				}
 				V oldVal = values[i];
 				values[i] = value;
 				return oldVal;
@@ -204,10 +217,12 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 	 * @exception IllegalArgumentException If a case-variant of the key is already
 	 *                                     present.
 	 */
+	@Deprecated
 	public synchronized V set(K key, V value) {
 		return set(key, value, false);
 	}
 
+	@Deprecated
 	public synchronized void setReadOnly() {
 		readOnly = true;
 	}
@@ -217,6 +232,7 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 	 *
 	 * @return the number of keys in this dictionary.
 	 */
+	@Deprecated
 	@Override
 	public synchronized int size() {
 		return size;
@@ -230,6 +246,7 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 	 * @return <code>true</code> if this dictionary maps no keys to values;
 	 *         <code>false</code> otherwise.
 	 */
+	@Deprecated
 	@Override
 	public synchronized boolean isEmpty() {
 		return size == 0;
@@ -241,10 +258,12 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 	 * @param key   header name.
 	 * @param value header value.
 	 */
+	@Deprecated
 	@Override
 	public synchronized V put(K key, V value) {
-		if (readOnly)
+		if (readOnly) {
 			throw new UnsupportedOperationException();
+		}
 		return set(key, value, true);
 	}
 
@@ -253,11 +272,13 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 	 *
 	 * @param key header name.
 	 */
+	@Deprecated
 	@Override
 	public V remove(Object key) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Deprecated
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
@@ -286,6 +307,7 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 		return sb.toString();
 	}
 
+	@Deprecated
 	public static Headers<String, String> parseManifest(InputStream in) throws BundleException {
 		Headers<String, String> headers = new Headers<>(10);
 		try {
@@ -298,7 +320,7 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 	}
 
 	private static class ArrayEnumeration<E> implements Enumeration<E> {
-		private E[] array;
+		private final E[] array;
 		int cur = 0;
 
 		public ArrayEnumeration(E[] array, int size) {
@@ -319,37 +341,45 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 		}
 	}
 
+	@Deprecated
 	@Override
 	public synchronized void clear() {
-		if (readOnly)
+		if (readOnly) {
 			throw new UnsupportedOperationException();
+		}
 	}
 
+	@Deprecated
 	@Override
 	public synchronized boolean containsKey(Object key) {
 		return getIndex(key) >= 0;
 	}
 
+	@Deprecated
 	@Override
 	public boolean containsValue(Object value) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Deprecated
 	@Override
 	public Set<Map.Entry<K, V>> entrySet() {
 		throw new UnsupportedOperationException();
 	}
 
+	@Deprecated
 	@Override
 	public Set<K> keySet() {
 		throw new UnsupportedOperationException();
 	}
 
+	@Deprecated
 	@Override
 	public void putAll(Map<? extends K, ? extends V> c) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Deprecated
 	@Override
 	public Collection<V> values() {
 		throw new UnsupportedOperationException();

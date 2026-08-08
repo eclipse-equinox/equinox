@@ -60,8 +60,9 @@ public class NullPackageSource extends PackageSource {
 
 	public static synchronized NullPackageSource getNullPackageSource(String name) {
 		NullPackageSource result = sources.get(name);
-		if (result != null)
+		if (result != null) {
 			return result;
+		}
 		result = new NullPackageSource(name);
 		sources.put(name, result);
 		return result;

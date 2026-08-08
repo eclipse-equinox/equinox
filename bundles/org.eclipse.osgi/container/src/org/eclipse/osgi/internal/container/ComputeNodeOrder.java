@@ -109,14 +109,14 @@ public class ComputeNodeOrder {
 		 *
 		 * Element type: <code>Vertex</code>
 		 */
-		private List<Vertex> vertexList = new ArrayList<>(100);
+		private final List<Vertex> vertexList = new ArrayList<>(100);
 
 		/**
 		 * Map from id to vertex.
 		 *
 		 * Key type: <code>Object</code>; value type: <code>Vertex</code>
 		 */
-		private Map<Object, Vertex> vertexMap = new HashMap<>(100);
+		private final Map<Object, Vertex> vertexMap = new HashMap<>(100);
 
 		/**
 		 * DFS visit time. Non-negative.
@@ -198,8 +198,9 @@ public class ComputeNodeOrder {
 			Vertex fromVertex = vertexMap.get(fromId);
 			Vertex toVertex = vertexMap.get(toId);
 			// ignore edges when one of the vertices is unknown
-			if (fromVertex == null || toVertex == null)
+			if (fromVertex == null || toVertex == null) {
 				return;
+			}
 			fromVertex.adjacent.add(toVertex);
 		}
 
@@ -478,8 +479,9 @@ public class ComputeNodeOrder {
 		final Digraph g2 = new Digraph();
 		// add vertexes
 		List<Object> resortedVertexes = g1.idsByDFSFinishTime(false);
-		for (Object object : resortedVertexes)
+		for (Object object : resortedVertexes) {
 			g2.addVertex(object);
+		}
 		// add edges
 		for (Object[] reference : references) {
 			g2.addEdge(reference[0], reference[1]);
@@ -499,8 +501,9 @@ public class ComputeNodeOrder {
 		} else {
 			knots = new Object[0][];
 		}
-		for (int i = 0; i < orderedNodes.length; i++)
+		for (int i = 0; i < orderedNodes.length; i++) {
 			objects[i] = orderedNodes[i];
+		}
 		return knots;
 	}
 }

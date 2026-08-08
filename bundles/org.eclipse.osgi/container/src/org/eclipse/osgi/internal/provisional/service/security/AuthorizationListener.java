@@ -18,7 +18,7 @@ import java.util.EventListener;
 /**
  * A Listener interface for an authorization handler. Implementors should
  * register as an OSGI service.
- * 
+ *
  * @since 3.4
  */
 public interface AuthorizationListener extends EventListener {

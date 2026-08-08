@@ -38,7 +38,7 @@ public class DirBundleFile extends BundleFile {
 
 	/**
 	 * Constructs a DirBundleFile
-	 * 
+	 *
 	 * @param basefile the base file
 	 */
 	public DirBundleFile(File basefile, boolean enableStrictBundleEntryPath) throws IOException {
@@ -142,8 +142,9 @@ public class DirBundleFile extends BundleFile {
 	@Override
 	public BundleEntry getEntry(String path) {
 		File filePath = getFile(path, false);
-		if (filePath == null)
+		if (filePath == null) {
 			return null;
+		}
 		return new FileBundleEntry(filePath, path);
 	}
 
@@ -155,14 +156,17 @@ public class DirBundleFile extends BundleFile {
 
 	@Override
 	public Enumeration<String> getEntryPaths(String path, boolean recurse) {
-		if (path.length() > 0 && path.charAt(0) == '/')
+		if (path.length() > 0 && path.charAt(0) == '/') {
 			path = path.substring(1);
+		}
 		File pathFile = getFile(path, false);
-		if (pathFile == null || !BundleFile.secureAction.isDirectory(pathFile))
+		if (pathFile == null || !BundleFile.secureAction.isDirectory(pathFile)) {
 			return null;
+		}
 		String[] fileList = BundleFile.secureAction.list(pathFile);
-		if (fileList == null || fileList.length == 0)
+		if (fileList == null || fileList.length == 0) {
 			return null;
+		}
 		String dirPath = path.length() == 0 || path.charAt(path.length() - 1) == '/' ? path : path + '/';
 
 		LinkedHashSet<String> entries = new LinkedHashSet<>();
@@ -173,8 +177,9 @@ public class DirBundleFile extends BundleFile {
 				sb.append("/"); //$NON-NLS-1$
 				if (recurse) {
 					Enumeration<String> e = getEntryPaths(sb.toString(), true);
-					if (e != null)
+					if (e != null) {
 						entries.addAll(Collections.list(e));
+					}
 				}
 			}
 			entries.add(sb.toString());

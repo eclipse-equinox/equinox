@@ -18,7 +18,7 @@ import java.util.Collection;
 /**
  * Hook used to determine if a module revision being installed or updated will
  * cause a collision
- * 
+ *
  * @since 3.10
  */
 public interface ModuleCollisionHook {

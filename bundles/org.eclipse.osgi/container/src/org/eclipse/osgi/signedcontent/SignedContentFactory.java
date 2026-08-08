@@ -31,7 +31,7 @@ import org.osgi.framework.Bundle;
  * <p>
  * This interface is not intended to be implemented by clients.
  * </p>
- * 
+ *
  * @since 3.4
  * @noimplement This interface is not intended to be implemented by clients.
  */
@@ -39,7 +39,7 @@ public interface SignedContentFactory {
 	/**
 	 * Returns a <code>SignedContent</code> object for the specified content of a
 	 * repository.
-	 * 
+	 *
 	 * @param content the content of the repository
 	 * @return signed content for the specified repository
 	 * @throws IOException              if an IO exception occurs while reading the
@@ -60,7 +60,7 @@ public interface SignedContentFactory {
 
 	/**
 	 * Returns a <code>SignedContent</code> object for the specified bundle.
-	 * 
+	 *
 	 * @param bundle the bundle to get a signed content for.
 	 * @return signed content for the specified bundle.
 	 * @throws IOException              if an IO exception occurs while reading the

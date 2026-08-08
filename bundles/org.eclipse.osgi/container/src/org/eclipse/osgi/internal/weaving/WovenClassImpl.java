@@ -102,24 +102,28 @@ public final class WovenClassImpl implements WovenClass, HookContext<WeavingHook
 	@Override
 	public void setBytes(byte[] newBytes) {
 		checkPermission();
-		if (newBytes == null)
+		if (newBytes == null) {
 			throw new NullPointerException("newBytes cannot be null."); //$NON-NLS-1$
-		if ((hookFlags & FLAG_HOOKSCOMPLETE) != 0)
+		}
+		if ((hookFlags & FLAG_HOOKSCOMPLETE) != 0) {
 			// someone is calling this outside of weave
 			throw new IllegalStateException("Weaving has completed already."); //$NON-NLS-1$
+		}
 		this.resultBytes = this.validBytes = newBytes;
 	}
 
 	void checkPermission() {
 		SecurityManager sm = System.getSecurityManager();
-		if (sm != null)
+		if (sm != null) {
 			sm.checkPermission(new AdminPermission(loader.getWiring().getBundle(), AdminPermission.WEAVE));
+		}
 	}
 
 	@Override
 	public List<String> getDynamicImports() {
-		if ((hookFlags & FLAG_HOOKSCOMPLETE) == 0)
+		if ((hookFlags & FLAG_HOOKSCOMPLETE) == 0) {
 			return dynamicImports;
+		}
 		// being called outside of weave; return unmodified list
 		return Collections.unmodifiableList(dynamicImports);
 	}
@@ -142,12 +146,14 @@ public final class WovenClassImpl implements WovenClass, HookContext<WeavingHook
 		this.clazz = clazz;
 		hookFlags |= FLAG_WEAVINGCOMPLETE;
 		// Only notify listeners if weaving hooks were called.
-		if ((hookFlags & FLAG_HOOKCALLED) == 0)
+		if ((hookFlags & FLAG_HOOKCALLED) == 0) {
 			return;
+		}
 		// Only notify listeners if they haven't already been notified of
 		// the terminal TRANSFORMING_FAILED state.
-		if (error != null)
+		if (error != null) {
 			return;
+		}
 		// If clazz is null, a class definition failure occurred.
 		setState(clazz == null ? DEFINE_FAILED : DEFINED);
 		notifyWovenClassListeners();
@@ -175,8 +181,9 @@ public final class WovenClassImpl implements WovenClass, HookContext<WeavingHook
 
 	@Override
 	public void call(final WeavingHook hook, ServiceRegistration<WeavingHook> hookRegistration) throws Exception {
-		if (error != null)
+		if (error != null) {
 			return; // do not call any other hooks once an error has occurred.
+		}
 
 		if (skipRegistration(hookRegistration)) {
 			// Note we double check denied hooks here just
@@ -223,16 +230,21 @@ public final class WovenClassImpl implements WovenClass, HookContext<WeavingHook
 	}
 
 	private boolean validBytes(byte[] checkBytes) {
-		if (checkBytes == null || checkBytes.length < 4)
+		if (checkBytes == null || checkBytes.length < 4) {
 			return false;
-		if ((checkBytes[0] & 0xCA) != 0xCA)
+		}
+		if ((checkBytes[0] & 0xCA) != 0xCA) {
 			return false;
-		if ((checkBytes[1] & 0xFE) != 0xFE)
+		}
+		if ((checkBytes[1] & 0xFE) != 0xFE) {
 			return false;
-		if ((checkBytes[2] & 0xBA) != 0xBA)
+		}
+		if ((checkBytes[2] & 0xBA) != 0xBA) {
 			return false;
-		if ((checkBytes[3] & 0xBE) != 0xBE)
+		}
+		if ((checkBytes[3] & 0xBE) != 0xBE) {
 			return false;
+		}
 		return true;
 	}
 
@@ -245,9 +257,9 @@ public final class WovenClassImpl implements WovenClass, HookContext<WeavingHook
 						hookRegistration.getReference().getBundle(), e);
 			}
 		};
-		if (System.getSecurityManager() == null)
+		if (System.getSecurityManager() == null) {
 			registry.notifyHooksPrivileged(WovenClassListener.class, "modified", context); //$NON-NLS-1$
-		else {
+		} else {
 			try {
 				AccessController.doPrivileged((PrivilegedExceptionAction<Void>) () -> {
 					registry.notifyHooksPrivileged(WovenClassListener.class, "modified", context); //$NON-NLS-1$
@@ -300,8 +312,9 @@ public final class WovenClassImpl implements WovenClass, HookContext<WeavingHook
 			}
 		}
 
-		if (error != null)
+		if (error != null) {
 			throw error;
+		}
 
 		if (newImports != null) {
 			// add any new dynamic imports
@@ -326,10 +339,12 @@ public final class WovenClassImpl implements WovenClass, HookContext<WeavingHook
 				.getRevisionInfo()).getDomain();
 		if (wovenDomain != null) {
 			// security is enabled; add the permissions
-			for (ManifestElement clause : importElements)
-				for (String pkg : clause.getValueComponents())
+			for (ManifestElement clause : importElements) {
+				for (String pkg : clause.getValueComponents()) {
 					((BundlePermissions) wovenDomain.getPermissions())
 							.addWovenPermission(new PackagePermission(pkg, PackagePermission.IMPORT));
+				}
+			}
 		}
 	}
 

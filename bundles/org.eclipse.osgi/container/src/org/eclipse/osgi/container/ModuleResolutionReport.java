@@ -33,7 +33,7 @@ import org.osgi.service.resolver.ResolutionException;
 /**
  * A resolution report implementation used by the container for resolution
  * operations.
- * 
+ *
  * @since 3.10
  */
 class ModuleResolutionReport implements ResolutionReport {
@@ -81,12 +81,12 @@ class ModuleResolutionReport implements ResolutionReport {
 	private final Map<Resource, List<Entry>> entries;
 	private final ResolutionException resolutionException;
 	private final Map<Resource, List<Wire>> resolutionResult;
-	private int totalPerm;
-	private int processedPerm;
-	private int usesPerm;
-	private int subPerm;
-	private int importPerm;
-	private boolean printOptional;
+	private final int totalPerm;
+	private final int processedPerm;
+	private final int usesPerm;
+	private final int subPerm;
+	private final int importPerm;
+	private final boolean printOptional;
 
 	ModuleResolutionReport(Map<Resource, List<Wire>> resolutionResult, Map<Resource, List<Entry>> entries,
 			ResolutionException cause, int totalPerm, int processedPerm, int usesPerm, int subPerm, int importPerm,

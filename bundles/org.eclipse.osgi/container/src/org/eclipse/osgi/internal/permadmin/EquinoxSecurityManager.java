@@ -105,8 +105,9 @@ public class EquinoxSecurityManager extends SecurityManager {
 	 */
 	public AccessControlContext getContextToBeChecked() {
 		CheckContext cc = localCheckContext.get();
-		if (cc != null && cc.accs != null && !cc.accs.isEmpty())
+		if (cc != null && cc.accs != null && !cc.accs.isEmpty()) {
 			return cc.accs.get(cc.accs.size() - 1);
+		}
 		return null;
 	}
 
@@ -123,8 +124,9 @@ public class EquinoxSecurityManager extends SecurityManager {
 			acc.checkPermission(perm);
 			// We want to pop the first set of postponed conditions and process them
 			List<Decision[]> conditionSets = cc.depthCondSets.get(cc.getDepth());
-			if (conditionSets == null)
+			if (conditionSets == null) {
 				return;
+			}
 			// TODO the spec seems impossible to implement just doing the simple thing for
 			// now
 			Map<Class<? extends Condition>, Dictionary<Object, Object>> conditionDictionaries = new HashMap<>();
@@ -145,16 +147,19 @@ public class EquinoxSecurityManager extends SecurityManager {
 						break;
 					}
 					int decision = getPostponedDecision(domainDecision, conditionDictionaries, cc);
-					if ((decision & SecurityTable.ABSTAIN) != 0)
+					if ((decision & SecurityTable.ABSTAIN) != 0) {
 						continue;
-					if ((decision & SecurityTable.GRANTED) != 0)
+					}
+					if ((decision & SecurityTable.GRANTED) != 0) {
 						grant = true;
+					}
 					break;
 				}
-				if (!grant)
+				if (!grant) {
 					// did not find a condition to grant the permission for this domain
 					throw new SecurityException("Conditions not satisfied"); //$NON-NLS-1$
 				// continue to next domain
+				}
 			}
 
 		} finally {
@@ -173,8 +178,9 @@ public class EquinoxSecurityManager extends SecurityManager {
 				conditionDictionaries.put(postponedCond.getClass(), condContext);
 			}
 			// prevent recursion into Condition
-			if (cc.CondClassSet == null)
+			if (cc.CondClassSet == null) {
 				cc.CondClassSet = new ArrayList<>(2);
+			}
 			if (cc.CondClassSet.contains(postponedCond.getClass())) {
 				return SecurityTable.ABSTAIN;
 			}
@@ -184,8 +190,9 @@ public class EquinoxSecurityManager extends SecurityManager {
 				boolean mutable = postponedCond.isMutable();
 				boolean isSatisfied = postponedCond.isSatisfied(new Condition[] { postponedCond }, condContext);
 				decision.handleImmutable(postponedCond, isSatisfied, mutable);
-				if (!isSatisfied)
+				if (!isSatisfied) {
 					return SecurityTable.ABSTAIN;
+				}
 			} finally {
 				cc.CondClassSet.remove(postponedCond.getClass());
 			}

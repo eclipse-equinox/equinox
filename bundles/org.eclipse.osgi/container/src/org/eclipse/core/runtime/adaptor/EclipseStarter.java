@@ -94,7 +94,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * <p>
  * Note that the fields on this class are not API.
  * </p>
- * 
+ *
  * @since 3.0
  * @noextend This class is not intended to be subclassed by clients.
  */
@@ -258,17 +258,21 @@ public class EclipseStarter {
 	 * jared as a single jar
 	 */
 	public static void main(String[] args) throws Exception {
-		if (getProperty("eclipse.startTime") == null) //$NON-NLS-1$
+		if (getProperty("eclipse.startTime") == null) { //$NON-NLS-1$
 			setProperty("eclipse.startTime", Long.toString(System.currentTimeMillis())); //$NON-NLS-1$
-		if (getProperty(PROP_NOSHUTDOWN) == null)
+		}
+		if (getProperty(PROP_NOSHUTDOWN) == null) {
 			setProperty(PROP_NOSHUTDOWN, "true"); //$NON-NLS-1$
+		}
 		// set the compatibility boot delegation flag to false to get "standard" OSGi
 		// behavior WRT boot delegation (bug 178477)
-		if (getProperty(EquinoxConfiguration.PROP_COMPATIBILITY_BOOTDELEGATION) == null)
+		if (getProperty(EquinoxConfiguration.PROP_COMPATIBILITY_BOOTDELEGATION) == null) {
 			setProperty(EquinoxConfiguration.PROP_COMPATIBILITY_BOOTDELEGATION, "false"); //$NON-NLS-1$
+		}
 		Object result = run(args, null);
-		if (result instanceof Integer && !Boolean.valueOf(getProperty(PROP_NOSHUTDOWN)).booleanValue())
+		if (result instanceof Integer && !Boolean.valueOf(getProperty(PROP_NOSHUTDOWN)).booleanValue()) {
 			System.exit(((Integer) result).intValue());
+		}
 	}
 
 	/**
@@ -287,47 +291,54 @@ public class EclipseStarter {
 	 * @throws Exception if anything goes wrong
 	 */
 	public static Object run(String[] args, Runnable endSplashHandler) throws Exception {
-		if (running)
+		if (running) {
 			throw new IllegalStateException(Msg.ECLIPSE_STARTUP_ALREADY_RUNNING);
+		}
 		boolean startupFailed = true;
 		try {
 			startup(args, endSplashHandler);
 			startupFailed = false;
-			if (Boolean.valueOf(getProperty(PROP_IGNOREAPP)).booleanValue() || isForcedRestart())
+			if (Boolean.valueOf(getProperty(PROP_IGNOREAPP)).booleanValue() || isForcedRestart()) {
 				return null;
+			}
 			return run(null);
 		} catch (Throwable e) {
 			// ensure the splash screen is down
-			if (endSplashHandler != null)
+			if (endSplashHandler != null) {
 				endSplashHandler.run();
+			}
 			// may use startupFailed to understand where the error happened
 			FrameworkLogEntry logEntry = new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0,
 					startupFailed ? Msg.ECLIPSE_STARTUP_STARTUP_ERROR : Msg.ECLIPSE_STARTUP_APP_ERROR, 1, e, null);
-			if (log != null)
+			if (log != null) {
 				log.log(logEntry);
-			else
+			} else { // TODO desperate measure - ideally, we should write this to disk (a la // Main.log)
 				// TODO desperate measure - ideally, we should write this to disk (a la
 				// Main.log)
 				e.printStackTrace();
+			}
 		} finally {
 			try {
 				// The application typically sets the exit code however the framework can
 				// request that
 				// it be re-started. We need to check for this and potentially override the exit
 				// code.
-				if (isForcedRestart())
+				if (isForcedRestart()) {
 					setProperty(PROP_EXITCODE, "23"); //$NON-NLS-1$
-				if (!Boolean.valueOf(getProperty(PROP_NOSHUTDOWN)).booleanValue())
+				}
+				if (!Boolean.valueOf(getProperty(PROP_NOSHUTDOWN)).booleanValue()) {
 					shutdown();
+				}
 			} catch (Throwable e) {
 				FrameworkLogEntry logEntry = new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0,
 						Msg.ECLIPSE_STARTUP_SHUTDOWN_ERROR, 1, e, null);
-				if (log != null)
+				if (log != null) {
 					log.log(logEntry);
-				else
+				} else { // TODO desperate measure - ideally, we should write this to disk (a la // Main.log)
 					// TODO desperate measure - ideally, we should write this to disk (a la
 					// Main.log)
 					e.printStackTrace();
+				}
 			}
 		}
 		// we only get here if an error happened
@@ -341,7 +352,7 @@ public class EclipseStarter {
 
 	/**
 	 * Returns true if the platform is already running, false otherwise.
-	 * 
+	 *
 	 * @return whether or not the platform is already running
 	 */
 	public static boolean isRunning() {
@@ -357,14 +368,15 @@ public class EclipseStarter {
 	 * The given runnable (if not <code>null</code>) is used to tear down the splash
 	 * screen if required.
 	 * </p>
-	 * 
+	 *
 	 * @param args the arguments passed to the application
 	 * @return BundleContext the context of the system bundle
 	 * @throws Exception if anything goes wrong
 	 */
 	public static BundleContext startup(String[] args, Runnable endSplashHandler) throws Exception {
-		if (running)
+		if (running) {
 			throw new IllegalStateException(Msg.ECLIPSE_STARTUP_ALREADY_RUNNING);
+		}
 		processCommandLine(args);
 		framework = new Equinox(getConfiguration());
 		framework.init();
@@ -420,7 +432,7 @@ public class EclipseStarter {
 
 	private static int getStartLevel() {
 		String level = getProperty(PROP_INITIAL_STARTLEVEL);
-		if (level != null)
+		if (level != null) {
 			try {
 				return Integer.parseInt(level);
 			} catch (NumberFormatException e) {
@@ -428,6 +440,7 @@ public class EclipseStarter {
 					Debug.println("Start level = " + level + "  parsed. Using hardcoded default: 6"); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}
+		}
 		return DEFAULT_INITIAL_STARTLEVEL;
 	}
 
@@ -440,18 +453,20 @@ public class EclipseStarter {
 	 * platform, and not consumed by the platform code, are passed to the
 	 * application as a <code>String[]</code>.
 	 * </p>
-	 * 
+	 *
 	 * @param argument the argument passed to the application. May be
 	 *                 <code>null</code>
 	 * @return the result of running the application
 	 * @throws Exception if anything goes wrong
 	 */
 	public static Object run(Object argument) throws Exception {
-		if (!running)
+		if (!running) {
 			throw new IllegalStateException(Msg.ECLIPSE_STARTUP_NOT_RUNNING);
+		}
 		// if we are just initializing, do not run the application just return.
-		if (initialize)
+		if (initialize) {
 			return Integer.valueOf(0);
+		}
 		try {
 			if (appLauncher == null) {
 
@@ -497,22 +512,27 @@ public class EclipseStarter {
 	 * obtained via getRunnable, will be permanently invalid. The effects of
 	 * attempting to invoke methods on invalid objects is undefined.
 	 * </p>
-	 * 
+	 *
 	 * @throws Exception if anything goes wrong
 	 */
 	public static void shutdown() throws Exception {
-		if (!running || framework == null)
+		if (!running || framework == null) {
 			return;
-		if (framework.getState() == Bundle.ACTIVE) {
-			if (appLauncherRegistration != null)
-				appLauncherRegistration.unregister();
-			if (splashStreamRegistration != null)
-				splashStreamRegistration.unregister();
-			if (defaultMonitorRegistration != null)
-				defaultMonitorRegistration.unregister();
 		}
-		if (appLauncher != null)
+		if (framework.getState() == Bundle.ACTIVE) {
+			if (appLauncherRegistration != null) {
+				appLauncherRegistration.unregister();
+			}
+			if (splashStreamRegistration != null) {
+				splashStreamRegistration.unregister();
+			}
+			if (defaultMonitorRegistration != null) {
+				defaultMonitorRegistration.unregister();
+			}
+		}
+		if (appLauncher != null) {
 			appLauncher.shutdown();
+		}
 		appLauncherRegistration = null;
 		appLauncher = null;
 		splashStreamRegistration = null;
@@ -554,12 +574,13 @@ public class EclipseStarter {
 	}
 
 	private static void publishSplashScreen(final Runnable endSplashHandler) {
-		if (endSplashHandler == null)
+		if (endSplashHandler == null) {
 			return;
+		}
 		// register the output stream to the launcher if it exists
 		try {
-			Method method = endSplashHandler.getClass().getMethod("getOutputStream", new Class[0]); //$NON-NLS-1$
-			Object outputStream = method.invoke(endSplashHandler, new Object[0]);
+			Method method = endSplashHandler.getClass().getMethod("getOutputStream"); //$NON-NLS-1$
+			Object outputStream = method.invoke(endSplashHandler);
 			if (outputStream instanceof OutputStream) {
 				Dictionary<String, Object> osProperties = new Hashtable<>();
 				osProperties.put("name", "splashstream"); //$NON-NLS-1$//$NON-NLS-2$
@@ -611,23 +632,26 @@ public class EclipseStarter {
 				if (baseSpec.startsWith(FILE_SCHEME)) {
 					File child = new File(baseSpec.substring(5));
 					baseURL = child.isAbsolute() ? child.toURL() : new File(parent, child.getPath()).toURL();
-				} else
+				} else {
 					baseURL = createURL(baseSpec);
+				}
 			}
 
 			fileLocation = new File(baseURL.getPath());
 			// if the location is relative, prefix it with the parent
-			if (!fileLocation.isAbsolute())
+			if (!fileLocation.isAbsolute()) {
 				fileLocation = new File(parent, fileLocation.toString());
+			}
 		}
 		// If the result is a reference then search for the real result and
 		// reconstruct the answer.
 		if (reference) {
 			String result = searchFor(fileLocation.getName(), new File(fileLocation.getParent()).getAbsolutePath());
-			if (result != null)
+			if (result != null) {
 				url = createURL(REFERENCE_PROTOCOL, null, FILE_SCHEME + result);
-			else
+			} else {
 				return null;
+			}
 		}
 
 		// finally we have something worth trying
@@ -675,8 +699,9 @@ public class EclipseStarter {
 
 		// If we installed/uninstalled something, force a refresh of all
 		// installed/uninstalled bundles
-		if (!toRefresh.isEmpty() && refreshPackages(toRefresh.toArray(new Bundle[toRefresh.size()])))
+		if (!toRefresh.isEmpty() && refreshPackages(toRefresh.toArray(new Bundle[toRefresh.size()]))) {
 			return null; // cannot continue; refreshPackages shutdown the framework
+		}
 
 		// schedule all basic bundles to be started
 		Bundle[] startInitBundles = startBundles.toArray(new Bundle[startBundles.size()]);
@@ -717,9 +742,9 @@ public class EclipseStarter {
 			if (index >= 0) {
 				String[] attributes = getArrayFromList(name.substring(index + 1, name.length()), ":"); //$NON-NLS-1$
 				for (String attribute : attributes) {
-					if (attribute.equals("start")) //$NON-NLS-1$
+					if (attribute.equals("start")) { //$NON-NLS-1$
 						start = true;
-					else {
+					} else {
 						try {
 							level = Integer.parseInt(attribute);
 						} catch (NumberFormatException e) { // bug 188089
@@ -754,8 +779,9 @@ public class EclipseStarter {
 	// shutdown
 	private static boolean refreshPackages(Bundle[] bundles) throws InterruptedException {
 		FrameworkWiring frameworkWiring = context.getBundle().adapt(FrameworkWiring.class);
-		if (frameworkWiring == null)
+		if (frameworkWiring == null) {
 			return false;
+		}
 		Semaphore semaphore = new Semaphore(0);
 		StartupEventListener listener = new StartupEventListener(semaphore, FrameworkEvent.PACKAGES_REFRESHED);
 		context.addBundleListener(listener);
@@ -949,8 +975,9 @@ public class EclipseStarter {
 			if (i == configArgs[configArgIndex]) {
 				frameworkArgs[k++] = args[i];
 				configArgIndex++;
-			} else
+			} else {
 				appArgs[j++] = args[i];
+			}
 		}
 		return;
 	}
@@ -968,13 +995,16 @@ public class EclipseStarter {
 
 	protected static String getSysPath() {
 		String result = getProperty(PROP_SYSPATH);
-		if (result != null)
+		if (result != null) {
 			return result;
+		}
 		result = getSysPathFromURL(getProperty(PROP_FRAMEWORK));
-		if (result == null)
+		if (result == null) {
 			result = getSysPathFromCodeSource();
-		if (result == null)
+		}
+		if (result == null) {
 			throw new IllegalStateException("Can not find the system path."); //$NON-NLS-1$
+		}
 		if (Character.isUpperCase(result.charAt(0))) {
 			char[] chars = result.toCharArray();
 			chars[0] = Character.toLowerCase(chars[0]);
@@ -985,11 +1015,13 @@ public class EclipseStarter {
 	}
 
 	private static String getSysPathFromURL(String urlSpec) {
-		if (urlSpec == null)
+		if (urlSpec == null) {
 			return null;
+		}
 		URL url = LocationHelper.buildURL(urlSpec, false);
-		if (url == null)
+		if (url == null) {
 			return null;
+		}
 		File fwkFile = LocationHelper.decodePath(new File(url.getPath()));
 		fwkFile = new File(fwkFile.getAbsolutePath());
 		fwkFile = new File(fwkFile.getParent());
@@ -998,14 +1030,17 @@ public class EclipseStarter {
 
 	private static String getSysPathFromCodeSource() {
 		ProtectionDomain pd = EclipseStarter.class.getProtectionDomain();
-		if (pd == null)
+		if (pd == null) {
 			return null;
+		}
 		CodeSource cs = pd.getCodeSource();
-		if (cs == null)
+		if (cs == null) {
 			return null;
+		}
 		URL url = cs.getLocation();
-		if (url == null)
+		if (url == null) {
 			return null;
+		}
 		String result = url.getPath();
 		if (File.separatorChar == '\\') {
 			// in case on windows the \ is used
@@ -1013,11 +1048,13 @@ public class EclipseStarter {
 		}
 		if (result.endsWith(".jar")) { //$NON-NLS-1$
 			result = result.substring(0, result.lastIndexOf('/'));
-			if ("folder".equals(getProperty(PROP_FRAMEWORK_SHAPE))) //$NON-NLS-1$
+			if ("folder".equals(getProperty(PROP_FRAMEWORK_SHAPE))) { //$NON-NLS-1$
 				result = result.substring(0, result.lastIndexOf('/'));
+			}
 		} else {
-			if (result.endsWith("/")) //$NON-NLS-1$
+			if (result.endsWith("/")) { //$NON-NLS-1$
 				result = result.substring(0, result.length() - 1);
+			}
 			result = result.substring(0, result.lastIndexOf('/'));
 			result = result.substring(0, result.lastIndexOf('/'));
 		}
@@ -1029,18 +1066,21 @@ public class EclipseStarter {
 		List<Bundle> initial = new ArrayList<>();
 		for (Bundle bundle : installed) {
 			if (bundle.getLocation().startsWith(INITIAL_LOCATION)) {
-				if (includeInitial)
+				if (includeInitial) {
 					initial.add(bundle);
-			} else if (!includeInitial && bundle.getBundleId() != 0)
+				}
+			} else if (!includeInitial && bundle.getBundleId() != 0) {
 				initial.add(bundle);
+			}
 		}
 		return initial.toArray(new Bundle[initial.size()]);
 	}
 
 	private static Bundle getBundleByLocation(String location, Bundle[] bundles) {
 		for (Bundle bundle : bundles) {
-			if (location.equalsIgnoreCase(bundle.getLocation()))
+			if (location.equalsIgnoreCase(bundle.getLocation())) {
 				return bundle;
+			}
 		}
 		return null;
 	}
@@ -1101,8 +1141,9 @@ public class EclipseStarter {
 					startBundles.add(osgiBundle);
 				}
 				// include basic bundles in case they were not resolved before
-				if ((osgiBundle.getState() & Bundle.INSTALLED) != 0)
+				if ((osgiBundle.getState() & Bundle.INSTALLED) != 0) {
 					toRefresh.add(osgiBundle);
+				}
 			} catch (BundleException | IOException e) {
 				FrameworkLogEntry entry = new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0,
 						NLS.bind(Msg.ECLIPSE_STARTUP_FAILED_INSTALL, initialBundle.location), 0, e, null);
@@ -1117,8 +1158,9 @@ public class EclipseStarter {
 		Dictionary<String, String> headers = target.getHeaders(""); //$NON-NLS-1$
 		// first check to see if this is a fragment bundle
 		String fragmentHost = headers.get(Constants.FRAGMENT_HOST);
-		if (fragmentHost != null)
+		if (fragmentHost != null) {
 			return false; // do not activate fragment bundles
+		}
 		// look for the OSGi defined Bundle-ActivationPolicy header
 		String activationPolicy = headers.get(Constants.BUNDLE_ACTIVATIONPOLICY);
 		try {
@@ -1127,24 +1169,26 @@ public class EclipseStarter {
 						activationPolicy);
 				if (elements != null && elements.length > 0) {
 					// if the value is "lazy" then it has a lazy activation poliyc
-					if (Constants.ACTIVATION_LAZY.equals(elements[0].getValue()))
+					if (Constants.ACTIVATION_LAZY.equals(elements[0].getValue())) {
 						return true;
+					}
 				}
 			} else {
 				// check for Eclipse specific lazy start headers "Eclipse-LazyStart" and
 				// "Eclipse-AutoStart"
 				String eclipseLazyStart = headers.get(EquinoxModuleDataNamespace.LAZYSTART_HEADER);
-				if (eclipseLazyStart == null)
+				if (eclipseLazyStart == null) {
 					eclipseLazyStart = headers.get(EquinoxModuleDataNamespace.AUTOSTART_HEADER);
+				}
 				ManifestElement[] elements = ManifestElement.parseHeader(EquinoxModuleDataNamespace.AUTOSTART_HEADER,
 						eclipseLazyStart);
 				if (elements != null && elements.length > 0) {
 					// if the value is true then it is lazy activated
-					if ("true".equals(elements[0].getValue())) //$NON-NLS-1$
+					if ("true".equals(elements[0].getValue())) { //$NON-NLS-1$
 						return true;
-					// otherwise it is only lazy activated if it defines an exceptions directive.
-					else if (elements[0].getDirective("exceptions") != null) //$NON-NLS-1$
+					} else if (elements[0].getDirective("exceptions") != null) { //$NON-NLS-1$
 						return true;
+					}
 				}
 			}
 		} catch (BundleException be) {
@@ -1180,27 +1224,34 @@ public class EclipseStarter {
 	 * base URL. Works only for file: URLs
 	 */
 	private static URL makeRelative(URL base, URL location) throws MalformedURLException {
-		if (base == null)
+		if (base == null) {
 			return location;
-		if (!"file".equals(base.getProtocol())) //$NON-NLS-1$
+		}
+		if (!"file".equals(base.getProtocol())) { //$NON-NLS-1$
 			return location;
-		if (!location.getProtocol().equals(REFERENCE_PROTOCOL))
+		}
+		if (!location.getProtocol().equals(REFERENCE_PROTOCOL)) {
 			return location; // we can only make reference urls relative
+		}
 		URL nonReferenceLocation = createURL(location.getPath());
 		// if some URL component does not match, return the original location
-		if (!base.getProtocol().equals(nonReferenceLocation.getProtocol()))
+		if (!base.getProtocol().equals(nonReferenceLocation.getProtocol())) {
 			return location;
+		}
 		File locationPath = new File(nonReferenceLocation.getPath());
 		// if location is not absolute, return original location
-		if (!locationPath.isAbsolute())
+		if (!locationPath.isAbsolute()) {
 			return location;
+		}
 		File relativePath = makeRelative(new File(base.getPath()), locationPath);
 		String urlPath = relativePath.getPath();
-		if (File.separatorChar != '/')
+		if (File.separatorChar != '/') {
 			urlPath = urlPath.replace(File.separatorChar, '/');
-		if (nonReferenceLocation.getPath().endsWith("/")) //$NON-NLS-1$
+		}
+		if (nonReferenceLocation.getPath().endsWith("/")) { //$NON-NLS-1$
 			// restore original trailing slash
 			urlPath += '/';
+		}
 		// couldn't use File to create URL here because it prepends the path with
 		// user.dir
 		URL relativeURL = createURL(base.getProtocol(), base.getHost(), base.getPort(), urlPath);
@@ -1233,8 +1284,9 @@ public class EclipseStarter {
 	}
 
 	private static File makeRelative(File base, File location) {
-		if (!location.isAbsolute())
+		if (!location.isAbsolute()) {
 			return location;
+		}
 		File relative = new File(new FilePath(base).makeRelative(new FilePath(location)));
 		return relative;
 	}
@@ -1259,14 +1311,16 @@ public class EclipseStarter {
 
 		@Override
 		public void bundleChanged(BundleEvent event) {
-			if (event.getBundle().getBundleId() == 0 && event.getType() == BundleEvent.STOPPING)
+			if (event.getBundle().getBundleId() == 0 && event.getType() == BundleEvent.STOPPING) {
 				semaphore.release();
+			}
 		}
 
 		@Override
 		public void frameworkEvent(FrameworkEvent event) {
-			if (event.getType() == frameworkEventType)
+			if (event.getType() == frameworkEventType) {
 				semaphore.release();
+			}
 		}
 
 	}
@@ -1291,9 +1345,10 @@ public class EclipseStarter {
 					}
 				}
 				// can we acquire the semaphore yet?
-				if (semaphore.tryAcquire(50, TimeUnit.MILLISECONDS))
+				if (semaphore.tryAcquire(50, TimeUnit.MILLISECONDS)) {
 					break; // done
 				// else still working, spin another update
+				}
 			}
 		} finally {
 			if (listener != null) {
@@ -1321,27 +1376,31 @@ public class EclipseStarter {
 			File startFile = new File(start);
 			startFile = LocationHelper.decodePath(startFile);
 			candidates = startFile.list();
-			if (candidates != null)
+			if (candidates != null) {
 				searchCandidates.put(start, candidates);
+			}
 		}
-		if (candidates == null)
+		if (candidates == null) {
 			return null;
+		}
 		String result = null;
 		Object[] maxVersion = null;
 		boolean resultIsFile = false;
 		for (String candidateName : candidates) {
-			if (!candidateName.startsWith(target))
+			if (!candidateName.startsWith(target)) {
 				continue;
+			}
 			boolean simpleJar = false;
 			final char versionSep = candidateName.length() > target.length() ? candidateName.charAt(target.length())
 					: 0;
 			if (candidateName.length() > target.length() && versionSep != '_' && versionSep != '-') {
 				// make sure this is not just a jar with no (_|-)version tacked on the end
-				if (candidateName.length() == 4 + target.length() && candidateName.endsWith(".jar")) //$NON-NLS-1$
+				if (candidateName.length() == 4 + target.length() && candidateName.endsWith(".jar")) { //$NON-NLS-1$
 					simpleJar = true;
-				else
+				} else { // name does not match the target properly with an (_|-) version at the end
 					// name does not match the target properly with an (_|-) version at the end
 					continue;
+				}
 			}
 			// Note: directory with version suffix is always > than directory without
 			// version suffix
@@ -1360,8 +1419,9 @@ public class EclipseStarter {
 				}
 			}
 		}
-		if (result == null)
+		if (result == null) {
 			return null;
+		}
 		return result.replace(File.separatorChar, '/') + (resultIsFile ? "" : "/"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
@@ -1369,7 +1429,7 @@ public class EclipseStarter {
 	 * Do a quick parse of version identifier so its elements can be correctly
 	 * compared. If we are unable to parse the full version, remaining elements are
 	 * initialized with suitable defaults.
-	 * 
+	 *
 	 * @return an array of size 4; first three elements are of type Integer
 	 *         (representing major, minor and service) and the fourth element is of
 	 *         type String (representing qualifier). A value of null is returned if
@@ -1387,8 +1447,9 @@ public class EclipseStarter {
 				try {
 					result[i] = Integer.valueOf(token);
 				} catch (Exception e) {
-					if (i == 0)
+					if (i == 0) {
 						return null; // return null if no valid numbers are present
+					}
 					// invalid number format - use default numbers (-1) for the rest
 					break;
 				}
@@ -1402,24 +1463,28 @@ public class EclipseStarter {
 
 	/**
 	 * Compares version strings.
-	 * 
+	 *
 	 * @return result of comparison, as integer; <code><0</code> if left < right;
 	 *         <code>0</code> if left == right; <code>>0</code> if left > right;
 	 */
 	private static int compareVersion(Object[] left, Object[] right) {
-		if (left == null)
+		if (left == null) {
 			return -1;
+		}
 		int result = ((Integer) left[0]).compareTo((Integer) right[0]); // compare major
-		if (result != 0)
+		if (result != 0) {
 			return result;
+		}
 
 		result = ((Integer) left[1]).compareTo((Integer) right[1]); // compare minor
-		if (result != 0)
+		if (result != 0) {
 			return result;
+		}
 
 		result = ((Integer) left[2]).compareTo((Integer) right[2]); // compare service
-		if (result != 0)
+		if (result != 0) {
 			return result;
+		}
 
 		return ((String) left[3]).compareTo((String) right[3]); // compare qualifier
 	}
@@ -1447,25 +1512,27 @@ public class EclipseStarter {
 	 * If the specified properties contains a null value then the key for that value
 	 * will be cleared from the properties of the platform.
 	 * </p>
-	 * 
+	 *
 	 * @param initialProperties the initial properties to set for the platform.
 	 * @since 3.2
 	 */
 	public static void setInitialProperties(Map<String, String> initialProperties) {
-		if (initialProperties == null || initialProperties.isEmpty())
+		if (initialProperties == null || initialProperties.isEmpty()) {
 			return;
+		}
 		for (Map.Entry<String, String> entry : initialProperties.entrySet()) {
-			if (entry.getValue() != null)
+			if (entry.getValue() != null) {
 				setProperty(entry.getKey(), entry.getValue());
-			else
+			} else {
 				clearProperty(entry.getKey());
+			}
 		}
 	}
 
 	/**
 	 * Returns the context of the system bundle. A value of <code>null</code> is
 	 * returned if the platform is not running.
-	 * 
+	 *
 	 * @return the context of the system bundle
 	 * @throws java.lang.SecurityException If the caller does not have the
 	 *                                     appropriate
@@ -1474,8 +1541,9 @@ public class EclipseStarter {
 	 *                                     permissions.
 	 */
 	public static BundleContext getSystemBundleContext() {
-		if (context == null || !running)
+		if (context == null || !running) {
 			return null;
+		}
 		return context.getBundle().getBundleContext();
 	}
 
@@ -1495,17 +1563,19 @@ public class EclipseStarter {
 	 * registration. <p> At the time a handler is called the framework is shutdown.
 	 * Handlers must not depend on a running framework to execute or attempt to load
 	 * additional classes from bundles installed in the framework.
-	 * 
+	 *
 	 * @param handler the framework shutdown handler
-	 * 
+	 *
 	 * @throws IllegalStateException if the platform is already running
 	 */
 	static void internalAddFrameworkShutdownHandler(Runnable handler) {
-		if (running)
+		if (running) {
 			throw new IllegalStateException(Msg.ECLIPSE_STARTUP_ALREADY_RUNNING);
+		}
 
-		if (shutdownHandlers == null)
+		if (shutdownHandlers == null) {
 			shutdownHandlers = new ArrayList<>();
+		}
 
 		shutdownHandlers.add(handler);
 	}
@@ -1515,22 +1585,25 @@ public class EclipseStarter {
 	 * react when the framework is shutdown internally.
 	 *
 	 * Removes a framework shutdown handler. <p>
-	 * 
+	 *
 	 * @param handler the framework shutdown handler
-	 * 
+	 *
 	 * @throws IllegalStateException if the platform is already running
 	 */
 	static void internalRemoveFrameworkShutdownHandler(Runnable handler) {
-		if (running)
+		if (running) {
 			throw new IllegalStateException(Msg.ECLIPSE_STARTUP_ALREADY_RUNNING);
+		}
 
-		if (shutdownHandlers != null)
+		if (shutdownHandlers != null) {
 			shutdownHandlers.remove(handler);
+		}
 	}
 
 	private static void registerFrameworkShutdownHandlers() {
-		if (shutdownHandlers == null)
+		if (shutdownHandlers == null) {
 			return;
+		}
 
 		final Bundle systemBundle = context.getBundle();
 		for (Runnable handler : shutdownHandlers) {

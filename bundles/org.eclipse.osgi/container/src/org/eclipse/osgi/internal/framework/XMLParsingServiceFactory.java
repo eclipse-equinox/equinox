@@ -33,8 +33,9 @@ class XMLParsingServiceFactory implements ServiceFactory<Object> {
 
 	@Override
 	public Object getService(Bundle bundle, ServiceRegistration<Object> registration) {
-		if (!setTccl || bundle == null)
+		if (!setTccl || bundle == null) {
 			return createService();
+		}
 		/*
 		 * Set the TCCL while creating jaxp factory instances to the requesting bundles
 		 * class loader. This is needed to work around bug 285505. There are issues if
@@ -59,8 +60,9 @@ class XMLParsingServiceFactory implements ServiceFactory<Object> {
 			}
 			return createService();
 		} finally {
-			if (restoreTccl)
+			if (restoreTccl) {
 				Thread.currentThread().setContextClassLoader(savedClassLoader);
+			}
 		}
 	}
 

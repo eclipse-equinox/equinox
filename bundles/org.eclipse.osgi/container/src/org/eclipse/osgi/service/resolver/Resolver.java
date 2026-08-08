@@ -22,7 +22,7 @@ import java.util.Dictionary;
  * <p>
  * Clients may implement this interface.
  * </p>
- * 
+ *
  * @since 3.1
  */
 public interface Resolver {
@@ -42,7 +42,7 @@ public interface Resolver {
 	 * Note the given state is destructively modified to reflect the results of
 	 * resolution.
 	 * </p>
-	 * 
+	 *
 	 * @param discard            the list of bundles to discard the resolve status
 	 *                           and reresolve. A <code>null</code> value indicates
 	 *                           that all currently unresolved bundles in the state
@@ -90,14 +90,14 @@ public interface Resolver {
 
 	/**
 	 * Notifies the resolver a bundle has been added to the state.
-	 * 
+	 *
 	 * @param bundle the bundle added
 	 */
 	public void bundleAdded(BundleDescription bundle);
 
 	/**
 	 * Notifies the resolver a bundle has been removed from the state.
-	 * 
+	 *
 	 * @param bundle  the bundle description to remove
 	 * @param pending indicates if the bundle to be remove has current dependents
 	 *                and will pend complete removal until the bundle has been
@@ -107,7 +107,7 @@ public interface Resolver {
 
 	/**
 	 * Notifies the resolver a bundle has been updated in the state.
-	 * 
+	 *
 	 * @param newDescription      the new description
 	 * @param existingDescription the existing description
 	 * @param pending             indicates if the bundle to be updated has current
@@ -121,7 +121,7 @@ public interface Resolver {
 	 * import for the specified requestedPackage for the specified importingBundle.
 	 * If no ExportPackageDescription is available that satisfies a dynamic import
 	 * for the importingBundle then <code>null</code> is returned.
-	 * 
+	 *
 	 * @param importingBundle  the BundleDescription that is requesting a dynamic
 	 *                         package
 	 * @param requestedPackage the name of the package that is being requested
@@ -151,7 +151,7 @@ public interface Resolver {
 	 * <li>The bundle ID which supplies the base description. Lower IDs take
 	 * priority over higher IDs.
 	 * </ol>
-	 * 
+	 *
 	 * @param selectionPolicy the selection policy for this resolver
 	 * @since 3.2
 	 */
@@ -159,7 +159,7 @@ public interface Resolver {
 
 	/**
 	 * Returns the selection policy for this resolver or null if it is not set
-	 * 
+	 *
 	 * @return the selection policy for this resolver or null if it is not set
 	 * @since 3.2
 	 */

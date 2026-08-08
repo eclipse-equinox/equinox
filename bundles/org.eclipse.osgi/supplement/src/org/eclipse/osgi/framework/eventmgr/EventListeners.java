@@ -28,6 +28,7 @@ import java.util.Set;
  * @deprecated As of 3.5. Replaced by CopyOnWriteIdentityMap.
  * @noextend This class is not intended to be subclassed by clients.
  */
+@Deprecated
 public class EventListeners<K, V> {
 	private final CopyOnWriteIdentityMap<K, V> list = new CopyOnWriteIdentityMap<>();
 

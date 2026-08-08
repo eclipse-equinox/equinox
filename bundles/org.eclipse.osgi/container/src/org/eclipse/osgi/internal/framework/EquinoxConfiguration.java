@@ -354,9 +354,10 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 				setConfiguration(PROP_CLEAN, "true"); //$NON-NLS-1$
 			}
 
-			if (getConfiguration(PROP_STATE_SAVE_DELAY_INTERVAL) == null)
+			if (getConfiguration(PROP_STATE_SAVE_DELAY_INTERVAL) == null) {
 				// Property not specified. Use the default.
 				setConfiguration(PROP_STATE_SAVE_DELAY_INTERVAL, DEFAULT_STATE_SAVE_DELAY_INTERVAL);
+			}
 			try {
 				// Verify type compatibility.
 				Long.parseLong(getConfiguration(PROP_STATE_SAVE_DELAY_INTERVAL));
@@ -397,8 +398,9 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 
 		private Properties loadProperties(URL location) {
 			Properties result = new Properties();
-			if (location == null)
+			if (location == null) {
 				return result;
+			}
 			try {
 				try (InputStream in = LocationHelper.getStream(location)) {
 					result.load(in);
@@ -422,8 +424,9 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 				Object key = eKeys.nextElement();
 				if (key instanceof String) {
 					String value = result.getProperty((String) key);
-					if (value != null)
+					if (value != null) {
 						result.put(key, substituteVars(value, true));
+					}
 				}
 			}
 			return result;
@@ -444,13 +447,14 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 						// we have found the end of a var
 						String prop = null;
 						// get the value of the var from system properties
-						if (var != null && var.length() > 0)
+						if (var != null && var.length() > 0) {
 							prop = getProperty(var);
+						}
 						if (prop == null) {
 							try {
 								// try using the System.getenv method if it exists (bug 126921)
-								Method getenv = System.class.getMethod("getenv", new Class[] { String.class }); //$NON-NLS-1$
-								prop = (String) getenv.invoke(null, new Object[] { var });
+								Method getenv = System.class.getMethod("getenv", String.class); //$NON-NLS-1$
+								prop = (String) getenv.invoke(null, var);
 							} catch (Throwable t) {
 								// do nothing;
 								// on 1.4 VMs this throws an error
@@ -474,16 +478,18 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 						var = null;
 					}
 				} else {
-					if (!varStarted)
+					if (!varStarted) {
 						buf.append(tok); // the token is not part of a var
-					else
+					} else {
 						var = tok; // the token is the var key; save the key to process when we find the end token
+					}
 				}
 			}
-			if (var != null)
+			if (var != null) {
 				// found a case of $var at the end of the path with no trailing $; just append
 				// it as is.
 				buf.append(VARIABLE_DELIM_CHAR).append(var);
+			}
 			return buf.toString();
 		}
 
@@ -642,9 +648,11 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 						getConfiguration(EquinoxConfiguration.PROP_FRAMEWORK_LIBRARY_EXTENSIONS, getConfiguration(
 								org.osgi.framework.Constants.FRAMEWORK_LIBRARY_EXTENSIONS, getOSLibraryExtDefaults())),
 						","); //$NON-NLS-1$
-		for (int i = 0; i < libExtensions.length; i++)
-			if (libExtensions[i].length() > 0 && libExtensions[i].charAt(0) != '.')
+		for (int i = 0; i < libExtensions.length; i++) {
+			if (libExtensions[i].length() > 0 && libExtensions[i].charAt(0) != '.') {
 				libExtensions[i] = '.' + libExtensions[i];
+			}
+		}
 		LIB_EXTENSIONS = Collections.unmodifiableList(Arrays.asList(libExtensions));
 		ECLIPSE_LIB_VARIANTS = buildEclipseLibraryVariants(getWS(), getOS(), getOSArch(), getNL());
 		ECLIPSE_NL_JAR_VARIANTS = buildNLJarVariants(getNL());
@@ -725,8 +733,9 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	}
 
 	private URL getConfigIni(EquinoxLocations locations, boolean parent) {
-		if (Boolean.TRUE.toString().equals(getConfiguration(EquinoxConfiguration.PROP_IGNORE_USER_CONFIGURATION)))
+		if (Boolean.TRUE.toString().equals(getConfiguration(EquinoxConfiguration.PROP_IGNORE_USER_CONFIGURATION))) {
 			return null;
+		}
 		Location configArea = locations.getConfigurationLocation();
 		if (configArea != null && parent) {
 			configArea = configArea.getParentLocation();
@@ -850,52 +859,71 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 
 	public static String guessWS(String osName) {
 		// setup default values for known OSes if nothing was specified
-		if (osName.equals(Constants.OS_WIN32))
+		if (osName.equals(Constants.OS_WIN32)) {
 			return Constants.WS_WIN32;
-		if (osName.equals(Constants.OS_LINUX))
+		}
+		if (osName.equals(Constants.OS_LINUX)) {
 			return Constants.WS_GTK;
-		if (osName.equals(Constants.OS_FREEBSD))
+		}
+		if (osName.equals(Constants.OS_FREEBSD)) {
 			return Constants.WS_GTK;
-		if (osName.equals(Constants.OS_MACOSX))
+		}
+		if (osName.equals(Constants.OS_MACOSX)) {
 			return Constants.WS_COCOA;
-		if (osName.equals(Constants.OS_HPUX))
+		}
+		if (osName.equals(Constants.OS_HPUX)) {
 			return Constants.WS_MOTIF;
-		if (osName.equals(Constants.OS_AIX))
+		}
+		if (osName.equals(Constants.OS_AIX)) {
 			return Constants.WS_MOTIF;
-		if (osName.equals(Constants.OS_SOLARIS))
+		}
+		if (osName.equals(Constants.OS_SOLARIS)) {
 			return Constants.WS_GTK;
-		if (osName.equals(Constants.OS_QNX))
+		}
+		if (osName.equals(Constants.OS_QNX)) {
 			return Constants.WS_PHOTON;
+		}
 		return Constants.WS_UNKNOWN;
 	}
 
 	public static String guessOS(String osName) {
 		// check to see if the OS name is "Windows 98" or some other
 		// flavour which should be converted to win32.
-		if (osName.regionMatches(true, 0, Constants.OS_WIN32, 0, 3))
+		if (osName.regionMatches(true, 0, Constants.OS_WIN32, 0, 3)) {
 			return Constants.OS_WIN32;
+		}
 		// EXCEPTION: All mappings of SunOS convert to Solaris
-		if (osName.equalsIgnoreCase(INTERNAL_OS_SUNOS))
+		if (osName.equalsIgnoreCase(INTERNAL_OS_SUNOS)) {
 			return Constants.OS_SOLARIS;
-		if (osName.equalsIgnoreCase(INTERNAL_OS_LINUX))
+		}
+		if (osName.equalsIgnoreCase(INTERNAL_OS_LINUX)) {
 			return Constants.OS_LINUX;
-		if (osName.equalsIgnoreCase(INTERNAL_OS_QNX))
+		}
+		if (osName.equalsIgnoreCase(INTERNAL_OS_QNX)) {
 			return Constants.OS_QNX;
-		if (osName.equalsIgnoreCase(INTERNAL_OS_AIX))
+		}
+		if (osName.equalsIgnoreCase(INTERNAL_OS_AIX)) {
 			return Constants.OS_AIX;
-		if (osName.equalsIgnoreCase(INTERNAL_OS_HPUX))
+		}
+		if (osName.equalsIgnoreCase(INTERNAL_OS_HPUX)) {
 			return Constants.OS_HPUX;
-		if (osName.equalsIgnoreCase(INTERNAL_OS_OS400))
+		}
+		if (osName.equalsIgnoreCase(INTERNAL_OS_OS400)) {
 			return Constants.OS_OS400;
-		if (osName.equalsIgnoreCase(INTERNAL_OS_OS390))
+		}
+		if (osName.equalsIgnoreCase(INTERNAL_OS_OS390)) {
 			return Constants.OS_OS390;
-		if (osName.equalsIgnoreCase(INTERNAL_OS_ZOS))
+		}
+		if (osName.equalsIgnoreCase(INTERNAL_OS_ZOS)) {
 			return Constants.OS_ZOS;
-		if (osName.equalsIgnoreCase(INTERNAL_OS_FREEBSD))
+		}
+		if (osName.equalsIgnoreCase(INTERNAL_OS_FREEBSD)) {
 			return Constants.OS_FREEBSD;
+		}
 		// os.name on Mac OS can be either Mac OS or Mac OS X
-		if (osName.regionMatches(true, 0, INTERNAL_OS_MACOSX, 0, INTERNAL_OS_MACOSX.length()))
+		if (osName.regionMatches(true, 0, INTERNAL_OS_MACOSX, 0, INTERNAL_OS_MACOSX.length())) {
 			return Constants.OS_MACOSX;
+		}
 		return Constants.OS_UNKNOWN;
 	}
 
@@ -965,17 +993,19 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		if (id != null && properties != null) {
 			String idVersion = id + DEV_FILE_ENTRY_VERSION_SEPARATOR + bundle.getVersion();
 			String entry = properties.getOrDefault(idVersion, properties.get(id)); // prefer idVersion value
-			if (entry != null)
+			if (entry != null) {
 				result = getArrayFromList(entry);
+			}
 		}
-		if (result == null)
+		if (result == null) {
 			result = defaultClasspath;
+		}
 		return result;
 	}
 
 	/**
 	 * Returns a list of classpath elements for the specified bundle symbolic name.
-	 * 
+	 *
 	 * @param bundle a bundle revision to get the development classpath for
 	 * @return a list of development classpath elements
 	 */
@@ -1114,9 +1144,10 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 			}
 		}
 		value = getConfiguration(FRAMEWORK_LANGUAGE);
-		if (value == null)
+		if (value == null) {
 			// set the value of the framework language property
 			setConfiguration(FRAMEWORK_LANGUAGE, Locale.getDefault().getLanguage());
+		}
 		// set the support properties for fragments and require-bundle (bug 173090)
 		setConfiguration(SUPPORTS_FRAMEWORK_FRAGMENT, "true"); //$NON-NLS-1$
 		setConfiguration(SUPPORTS_FRAMEWORK_REQUIREBUNDLE, "true"); //$NON-NLS-1$
@@ -1165,13 +1196,13 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		if (archValue == null) {
 			String name = EquinoxContainer.secureAction.getProperty(PROP_JVM_OS_ARCH);
 			// Map i386 architecture to x86
-			if (name.equalsIgnoreCase(INTERNAL_ARCH_I386))
+			if (name.equalsIgnoreCase(INTERNAL_ARCH_I386)) {
 				archValue = Constants.ARCH_X86;
-			// Map amd64 architecture to x86_64
-			else if (name.equalsIgnoreCase(INTERNAL_AMD64))
+			} else if (name.equalsIgnoreCase(INTERNAL_AMD64)) {
 				archValue = Constants.ARCH_X86_64;
-			else
+			} else {
 				archValue = name;
+			}
 			setConfiguration(PROP_OSGI_ARCH, archValue);
 		}
 		// set the initial UUID so that it is set as soon as possible
@@ -1206,12 +1237,14 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 			StringBuilder sb = new StringBuilder(value.length());
 			char[] chars = value.toCharArray();
 			for (char element : chars) {
-				if (!Character.isDigit(element))
+				if (!Character.isDigit(element)) {
 					break;
+				}
 				sb.append(element);
 			}
-			if (sb.length() > 0)
+			if (sb.length() > 0) {
 				return Integer.parseInt(sb.toString());
+			}
 			return 0;
 		}
 	}

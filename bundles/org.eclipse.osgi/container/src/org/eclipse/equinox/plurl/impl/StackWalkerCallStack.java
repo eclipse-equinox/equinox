@@ -62,6 +62,7 @@ class StackWalkerCallStack implements CallStack {
 	}
 
 
+	@Override
 	public Class<?>[] getClassContext() {
 		if (fallback != null) {
 			return fallback.getClassContext();
@@ -70,6 +71,7 @@ class StackWalkerCallStack implements CallStack {
 		if (stackWalker != null) {
 			try {
 				forEach.invoke(stackWalker, new Consumer<Object>() {
+					@Override
 					public void accept(Object s) {
 						try {
 							result.add((Class<?>) getDeclaringClass.invoke(s));

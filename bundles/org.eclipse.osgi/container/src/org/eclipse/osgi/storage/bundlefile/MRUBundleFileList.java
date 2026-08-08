@@ -77,40 +77,46 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 	 * Adds a BundleFile which is about to be opened to the MRU list. If the number
 	 * of open BundleFiles == the fileLimit then the least recently used BundleFile
 	 * is closed.
-	 * 
+	 *
 	 * @param bundleFile the bundle file about to be opened.
 	 * @return true if back pressure is needed
 	 */
 	public boolean add(BundleFile bundleFile) {
-		if (fileLimit < MIN)
+		if (fileLimit < MIN) {
 			return false; // MRU is disabled
+		}
 		BundleFile toRemove = null;
 		EventManager manager = null;
 		boolean backpressureNeeded = false;
 		synchronized (this) {
-			if (bundleFile.getMruIndex() >= 0)
+			if (bundleFile.getMruIndex() >= 0) {
 				return false; // do nothing; someone is trying add a bundleFile that is already in an MRU list
+			}
 			int index = 0; // default to the first slot
 			if (numOpen < fileLimit) {
 				// numOpen does not exceed the fileLimit
 				// find the first null slot to use in the MRU
-				for (int i = 0; i < fileLimit; i++)
+				for (int i = 0; i < fileLimit; i++) {
 					if (bundleFileList[i] == null) {
 						index = i;
 						break;
 					}
+				}
 			} else {
 				// numOpen has reached the fileLimit
 				// find the least recently used bundleFile and close it
 				// and use its slot for the new bundleFile to be opened.
 				index = 0;
-				for (int i = 1; i < fileLimit; i++)
-					if (useStampList[i] < useStampList[index])
+				for (int i = 1; i < fileLimit; i++) {
+					if (useStampList[i] < useStampList[index]) {
 						index = i;
+					}
+				}
 				toRemove = bundleFileList[index];
-				if (toRemove.getMruIndex() != index)
+				if (toRemove.getMruIndex() != index) {
 					throw new IllegalStateException(
 							"The BundleFile has the incorrect mru index: " + index + " != " + toRemove.getMruIndex()); //$NON-NLS-1$//$NON-NLS-2$
+				}
 				removeInternal(toRemove);
 				backpressureNeeded = isBackPressureNeeded();
 			}
@@ -120,8 +126,9 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 			incUseStamp(index);
 			numOpen++;
 			if (toRemove != null) {
-				if (bundleFileCloserManager == null)
+				if (bundleFileCloserManager == null) {
 					bundleFileCloserManager = new EventManager("Bundle File Closer"); //$NON-NLS-1$
+				}
 				manager = bundleFileCloserManager;
 			}
 
@@ -136,13 +143,14 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 
 	/**
 	 * Removes a bundle file which is about to be closed
-	 * 
+	 *
 	 * @param bundleFile the bundle file about to be closed
 	 * @return true if the bundleFile existed in the MRU; false otherwise
 	 */
 	public boolean remove(BundleFile bundleFile) {
-		if (fileLimit < MIN)
+		if (fileLimit < MIN) {
 			return false; // MRU is disabled
+		}
 		synchronized (this) {
 			int index = bundleFile.getMruIndex();
 			if ((index >= 0 && index < fileLimit) && bundleFileList[index] == bundleFile) {
@@ -164,16 +172,18 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 
 	/**
 	 * Increments the use stamp of a bundle file
-	 * 
+	 *
 	 * @param bundleFile the bundle file to increment the use stamp for
 	 */
 	public void use(BundleFile bundleFile) {
-		if (fileLimit < MIN)
+		if (fileLimit < MIN) {
 			return; // MRU is disabled
+		}
 		synchronized (this) {
 			int index = bundleFile.getMruIndex();
-			if ((index >= 0 && index < fileLimit) && bundleFileList[index] == bundleFile)
+			if ((index >= 0 && index < fileLimit) && bundleFileList[index] == bundleFile) {
 				incUseStamp(index);
+			}
 		}
 	}
 
@@ -181,8 +191,9 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 	private void incUseStamp(int index) {
 		if (curUseStamp == Long.MAX_VALUE) {
 			// we hit the curUseStamp max better reset all the stamps
-			for (int i = 0; i < fileLimit; i++)
+			for (int i = 0; i < fileLimit; i++) {
 				useStampList[i] = 0;
+			}
 			curUseStamp = 0;
 		}
 		useStampList[index] = ++curUseStamp;
@@ -246,8 +257,9 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 	}
 
 	private void closeBundleFile(BundleFile toRemove, EventManager manager) {
-		if (toRemove == null)
+		if (toRemove == null) {
 			return;
+		}
 		if (debug.DEBUG_BUNDLE_FILE) {
 			debug.trace(OPTION_DEBUG_BUNDLE_FILE, "MRUBundleFileList: about to close bundle file: " + toRemove); //$NON-NLS-1$
 		}
@@ -273,8 +285,9 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 	 */
 	public void shutdown() {
 		synchronized (this) {
-			if (bundleFileCloserManager != null)
+			if (bundleFileCloserManager != null) {
 				bundleFileCloserManager.close();
+			}
 			bundleFileCloserManager = null;
 		}
 	}
@@ -282,13 +295,14 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 	/**
 	 * Returns true if this MRUBundleFileList is currently closing the specified
 	 * bundle file on the current thread.
-	 * 
+	 *
 	 * @param bundleFile the bundle file
 	 * @return true if the bundle file is being closed on the current thread
 	 */
 	public boolean isClosing(BundleFile bundleFile) {
-		if (fileLimit < MIN)
+		if (fileLimit < MIN) {
 			return false; // MRU is disabled
+		}
 		// check the thread local variable
 		return closingBundleFile.get() == bundleFile;
 	}

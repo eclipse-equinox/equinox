@@ -53,10 +53,12 @@ public class SingleSourcePackage extends PackageSource {
 
 	@Override
 	public boolean equals(Object source) {
-		if (this == source)
+		if (this == source) {
 			return true;
-		if (!(source instanceof SingleSourcePackage))
+		}
+		if (!(source instanceof SingleSourcePackage)) {
 			return false;
+		}
 		SingleSourcePackage singleSource = (SingleSourcePackage) source;
 		// we do an == test on id because the id is interned in the constructor of
 		// PackageSource
