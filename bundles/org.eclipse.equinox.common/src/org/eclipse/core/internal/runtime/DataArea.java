@@ -71,10 +71,8 @@ public class DataArea {
 			if (url == null) {
 				throw new IllegalStateException(CommonMessages.meta_instanceDataUnspecified);
 			}
-			// TODO assume the URL is a file:
-			// Use the new File technique to ensure that the resultant string is
-			// in the right format (e.g., leading / removed from /c:/foo etc)
-			location = IPath.fromOSString(new File(url.getFile()).toString());
+			// Assume the URL is a file:
+			location = IPath.fromPath(URIUtil.toFilePath(url));
 			initializeLocation();
 		} catch (CoreException e) {
 			throw new IllegalStateException(e.getMessage());
