@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.useradmin;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.Dictionary;
 import java.util.Vector;
 import org.osgi.service.useradmin.UserAdminEvent;
@@ -99,24 +101,11 @@ public class User extends Role implements org.osgi.service.useradmin.User {
 		useradmin.checkAlive();
 		Object checkValue = credentials.get(key);
 		if (checkValue != null) {
-			if (value instanceof String) {
-				if (checkValue.equals(value)) {
-					return (true);
-				}
-			} else if (value instanceof byte[] valueArray) {
-				if (!(checkValue instanceof byte[] checkValueArray)) {
-					return (false);
-				}
-				int length = valueArray.length;
-				if (length != checkValueArray.length) {
-					return (false);
-				}
-				for (int i = 0; i < length; i++) {
-					if (valueArray[i] != checkValueArray[i]) {
-						return (false);
-					}
-				}
-				return (true);
+			if (value instanceof String && checkValue instanceof String) {
+				return MessageDigest.isEqual(((String) value).getBytes(StandardCharsets.UTF_8),
+						((String) checkValue).getBytes(StandardCharsets.UTF_8));
+			} else if (value instanceof byte[] valueArray && checkValue instanceof byte[] checkValueArray) {
+				return MessageDigest.isEqual(valueArray, checkValueArray);
 			}
 		}
 		return (false); // if checkValue is null
