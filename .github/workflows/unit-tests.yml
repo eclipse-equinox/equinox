@@ -62,8 +62,8 @@ jobs:
           - { name: useradmin,   chapter: '107', label: 'User Admin',          suffix: ' Service Specification', pattern: "TEST-org.osgi.test.cases.useradmin-*.xml" }
           - { name: event,       chapter: '113', label: 'Event Admin',         suffix: ' Service Specification', pattern: "TEST-org.osgi.test.cases.event-*.xml" }
           - { name: coordinator, chapter: '130', label: 'Coordinator',         suffix: ' Service Specification', pattern: "TEST-org.osgi.test.cases.coordinator-*.xml" }
+          - { name: serviceloader, chapter: '133', label: 'Service Loader Mediator', suffix: ' Specification', pattern: "TEST-org.osgi.test.cases.serviceloader-*.xml" }
           - { name: tracker,     chapter: '701', label: 'Tracker',             suffix: ' Specification',         pattern: "TEST-org.osgi.test.cases.tracker-*.xml" }
-          
     steps:  
       - name: Download and Extract Unit Test Results
         env:
