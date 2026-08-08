@@ -228,6 +228,13 @@ public class ServletRequestAdvisor extends Object {
 			stream = connection.getInputStream();
 		}
 
+		// getErrorStream() is null when an error response carries no body, e.g. a
+		// bodyless 416, so guard against it before draining and closing.
+		if (stream == null) {
+			map.put("responseBody", Arrays.asList(""));
+			return map;
+		}
+
 		try {
 			String drainedStream = drain(stream);
 			map.put("responseBody", Arrays.asList(drainedStream));

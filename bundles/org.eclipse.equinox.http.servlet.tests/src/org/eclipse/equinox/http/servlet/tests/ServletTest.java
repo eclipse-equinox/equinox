@@ -2005,6 +2005,34 @@ public class ServletTest extends BaseTest {
 	}
 
 	@Test
+	public void test_ResourceRangeRequest_InvalidRange() throws Exception {
+		Bundle bundle = installBundle(TEST_BUNDLE_2);
+		ServletContextHelper customSCH = new ServletContextHelper(bundle) {
+			@Override
+			public String getMimeType(String filename) {
+				if (filename.endsWith(".mp4")) { //$NON-NLS-1$
+					return "video/mp4"; //$NON-NLS-1$
+				}
+				return null;
+			}
+		};
+		Dictionary<String, Object> contextProps = new Hashtable<>();
+		contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "foo");
+		contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/foo");
+		registrations.add(getBundleContext().registerService(ServletContextHelper.class, customSCH, contextProps));
+		Map<String, List<String>> actual;
+		Map<String, List<String>> requestHeader = new HashMap<>();
+		requestHeader.put("Range", Collections.singletonList("bytes=9999-1000"));
+		try {
+			bundle.start();
+			actual = requestAdvisor.request("foo/TestResource1/rangerequest.mp4", requestHeader);
+		} finally {
+			uninstallBundle(bundle);
+		}
+		assertEquals("Response Code", Collections.singletonList("416"), actual.get("responseCode"));
+	}
+
+	@Test
 	public void test_ResourceRangeRequest_WithRange() throws Exception {
 		Map<String, List<String>> actual;
 		Bundle bundle = installBundle(TEST_BUNDLE_2);
