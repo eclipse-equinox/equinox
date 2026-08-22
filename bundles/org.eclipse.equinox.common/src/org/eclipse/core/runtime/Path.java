@@ -15,6 +15,7 @@
 package org.eclipse.core.runtime;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.Arrays;
 
 /**
@@ -43,6 +44,7 @@ import java.util.Arrays;
  * @noextend This class is not intended to be subclassed by clients.
  */
 public final class Path implements IPath, Cloneable {
+	private static final long serialVersionUID = 1L;
 	/* masks for flag values: */
 	/**
 	 * if HAS_LEADING is set then Path starts with leading slash i.e. it is
@@ -127,7 +129,7 @@ public final class Path implements IPath, Cloneable {
 	private final String[] segments;
 
 	/** cached hash code */
-	private int hash;
+	private transient int hash;
 
 	/**
 	 * flags indicating separators (has leading, is UNC, has trailing, is for
@@ -1462,4 +1464,26 @@ public final class Path implements IPath, Cloneable {
 		String[] newSegments = Arrays.copyOf(s, count);
 		return new Path(device, newSegments, flags);
 	}
+
+	// magic method of Serializable interface
+	Object writeReplace() {
+		return new PortablePath(toPortableString());
+	}
+
+	static final class PortablePath implements Serializable {
+
+		private static final long serialVersionUID = 1L;
+		private String portableString;
+
+		public PortablePath(String portableString) {
+			this.portableString = portableString;
+		}
+
+		// magic method of Serializable interface
+		Object readResolve() {
+			return fromPortableString(portableString);
+		}
+
+	}
+
 }
