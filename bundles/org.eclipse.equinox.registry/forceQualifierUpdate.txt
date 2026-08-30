@@ -7,3 +7,4 @@ https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/16
 https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/1923
 https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/2044
 https://github.com/eclipse-equinox/equinox/pull/939
+https://github.com/eclipse-platform/eclipse.platform/issues/2889
