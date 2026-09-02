@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2021 Red Hat Inc.
+ * Copyright (c) 2020, 2026 Red Hat Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,26 +10,38 @@
  *
  * Contributors:
  *     Red Hat Inc. - initial version
+ *     Aleksandar Kurtakov - modified to make Java FFM version
  *******************************************************************************/
 package org.eclipse.equinox.internal.security.linux;
 
-import java.util.List;
+import java.lang.foreign.GroupLayout;
+import java.lang.foreign.MemoryLayout;
+import java.lang.foreign.MemoryLayout.PathElement;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
 
-import com.sun.jna.Pointer;
-import com.sun.jna.Structure;
+/**
+ * GLib's {@code GError}. Only the message is read; {@code domain} and
+ * {@code code} are declared because the message offset depends on them.
+ */
+final class GError {
 
-public class GError extends Structure {
-	public int domain;
-	public int code;
-	public String message;
+	private static final GroupLayout LAYOUT = MemoryLayout.structLayout( //
+			ValueLayout.JAVA_INT.withName("domain"), //$NON-NLS-1$
+			ValueLayout.JAVA_INT.withName("code"), //$NON-NLS-1$
+			ValueLayout.ADDRESS.withName("message")); //$NON-NLS-1$
 
-	public GError(Pointer p) {
-		super(p);
-		read();
+	private static final long MESSAGE_OFFSET = LAYOUT.byteOffset(PathElement.groupElement("message")); //$NON-NLS-1$
+
+	private GError() {
 	}
 
-	@Override
-	protected List<String> getFieldOrder() {
-		return List.of("domain", "code", "message"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	/**
+	 * Copies the message out of the {@code GError} at the given pointer, so that
+	 * the result stays valid once the native error has been freed.
+	 */
+	static String readMessage(MemorySegment pointer) {
+		MemorySegment error = pointer.reinterpret(LAYOUT.byteSize());
+		return Foreign.readString(error.get(ValueLayout.ADDRESS, MESSAGE_OFFSET));
 	}
 }
