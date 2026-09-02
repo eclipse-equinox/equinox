@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2024 IBM Corporation and others.
+ * Copyright (c) 2017, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -12,12 +12,16 @@
  *     Julien HENRY - Linux implementation
  *     Red Hat Inc. - add validation method to handle KDE failures
  *     Red Hat Inc. - modified to make JNA version
+ *     Aleksandar Kurtakov - modified to make Java FFM version
  *******************************************************************************/
 package org.eclipse.equinox.internal.security.linux;
 
-import java.nio.charset.StandardCharsets;
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
 import java.security.SecureRandom;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.crypto.spec.PBEKeySpec;
 
@@ -27,11 +31,6 @@ import org.eclipse.equinox.internal.security.storage.provider.IValidatingPasswor
 import org.eclipse.equinox.security.storage.provider.IPreferencesContainer;
 import org.eclipse.equinox.security.storage.provider.PasswordProvider;
 
-import com.sun.jna.Library;
-import com.sun.jna.Native;
-import com.sun.jna.Pointer;
-import com.sun.jna.ptr.PointerByReference;
-
 public class LinuxPasswordProvider extends PasswordProvider implements IValidatingPasswordProvider {
 
 	/**
@@ -40,104 +39,101 @@ public class LinuxPasswordProvider extends PasswordProvider implements IValidati
 	private static final int PASSWORD_LENGTH = 64;
 
 	private static final String SECRET_COLLECTION_DEFAULT = "default"; //$NON-NLS-1$
-	// open flags = (RTLD_NODELETE | RTLD_GLOBAL | RTLD_LAZY)
-	private static final Map<String, Object> LIB_LOAD_OPTIONS = Map.of(Library.OPTION_OPEN_FLAGS, 0x1101);
 
-	private final SecretSchema fEquinoxSchema = new SecretSchema("org.eclipse.equinox", //$NON-NLS-1$
-			SecretSchemaFlags.SECRET_SCHEMA_NONE, new SecretSchemaAttribute(null, 0));
+	/** Backs {@link #fEquinoxSchema}; lives as long as this provider. */
+	private final Arena fSchemaArena = Arena.ofAuto();
+
+	private final SecretSchema fEquinoxSchema = new SecretSchema(fSchemaArena, "org.eclipse.equinox", //$NON-NLS-1$
+			SecretSchemaFlags.SECRET_SCHEMA_NONE);
 	private LibSecret fLibSecret;
 	private LibGio fLibGio;
 
-	private interface LibGio extends Library {
-		Pointer g_bus_get_sync(int bus_type, Pointer cancellable, PointerByReference gerror);
-
-		void g_error_free(Pointer error);
-
-		GList g_list_append(GList list, Pointer data);
-	}
-
-	private interface LibSecret extends Library {
-		Pointer secret_service_get_sync(int flags, Pointer cancellable, PointerByReference gerror);
-
-		Pointer secret_collection_for_alias_sync(Pointer service, final String alias, int flags, Pointer cancellable,
-				PointerByReference gerror);
-
-		boolean secret_collection_get_locked(Pointer self);
-
-		String secret_collection_get_label(Pointer self);
-
-		int secret_service_unlock_sync(Pointer service, GList objects, Pointer cancellable, PointerByReference unlocked,
-				PointerByReference error);
-
-		String secret_password_lookup_sync(SecretSchema schema, Pointer cancellable, PointerByReference error,
-				Object... attributes);
-
-		boolean secret_password_store_sync(SecretSchema schema, String collection, String label, String password,
-				Pointer cancellable, PointerByReference error, Object... attributes);
-	}
-
 	private void unlockSecretService() {
 
-		fLibGio = Native.load("gio-2.0", LibGio.class, LIB_LOAD_OPTIONS); //$NON-NLS-1$
+		fLibGio = LibGio.getInstance();
+		fLibSecret = LibSecret.getInstance();
 
-		PointerByReference gerror = new PointerByReference();
-		gerror.setValue(Pointer.NULL);
-		fLibGio.g_bus_get_sync(GBusType.G_BUS_TYPE_SESSION, Pointer.NULL, gerror);
-		requireNoError(gerror, "Unable to get DBus session bus: "); //$NON-NLS-1$
+		// GObject references owned by this method, released on every exit path
+		List<MemorySegment> owned = new ArrayList<>(3);
+		try (Arena arena = Arena.ofConfined()) {
+			MemorySegment gerror = arena.allocate(ValueLayout.ADDRESS);
+			owned.add(fLibGio.busGetSync(GBusType.G_BUS_TYPE_SESSION, MemorySegment.NULL, gerror));
+			requireNoError(gerror, "Unable to get DBus session bus: "); //$NON-NLS-1$
 
-		fLibSecret = Native.load("secret-1", LibSecret.class, LIB_LOAD_OPTIONS); //$NON-NLS-1$
-		Pointer secretService = fLibSecret.secret_service_get_sync(SecretServiceFlags.SECRET_SERVICE_LOAD_COLLECTIONS,
-				Pointer.NULL, gerror);
-		requireNoError(gerror, "Unable to get secret service: "); //$NON-NLS-1$
+			MemorySegment secretService = fLibSecret.serviceGetSync(SecretServiceFlags.SECRET_SERVICE_LOAD_COLLECTIONS,
+					MemorySegment.NULL, gerror);
+			owned.add(secretService);
+			requireNoError(gerror, "Unable to get secret service: "); //$NON-NLS-1$
 
-		Pointer defaultCollection = fLibSecret.secret_collection_for_alias_sync(secretService,
-				SECRET_COLLECTION_DEFAULT, SecretCollectionFlags.SECRET_COLLECTION_NONE, Pointer.NULL, gerror);
-		requireNoError(gerror, "Unable to get secret collection: "); //$NON-NLS-1$
-		if (defaultCollection == Pointer.NULL) {
-			throw new SecurityException("Unable to find default secret collection"); //$NON-NLS-1$
-		}
-		if (fLibSecret.secret_collection_get_locked(defaultCollection)) {
-			fLibSecret.secret_collection_get_label(defaultCollection);
-			GList list = fLibGio.g_list_append(null, defaultCollection);
-			PointerByReference unlocked = new PointerByReference();
-			fLibSecret.secret_service_unlock_sync(secretService, list, Pointer.NULL, unlocked, gerror);
-			fLibGio.g_error_free(unlocked.getValue());
-			fLibGio.g_error_free(list.getPointer());
+			MemorySegment defaultCollection = fLibSecret.collectionForAliasSync(secretService,
+					arena.allocateFrom(SECRET_COLLECTION_DEFAULT), SecretCollectionFlags.SECRET_COLLECTION_NONE,
+					MemorySegment.NULL, gerror);
+			owned.add(defaultCollection);
+			requireNoError(gerror, "Unable to get secret collection: "); //$NON-NLS-1$
+			if (MemorySegment.NULL.equals(defaultCollection)) {
+				throw new SecurityException("Unable to find default secret collection"); //$NON-NLS-1$
+			}
+			if (fLibSecret.collectionGetLocked(defaultCollection)) {
+				MemorySegment list = fLibGio.listAppend(MemorySegment.NULL, defaultCollection);
+				MemorySegment unlocked = arena.allocate(ValueLayout.ADDRESS);
+				try {
+					fLibSecret.serviceUnlockSync(secretService, list, MemorySegment.NULL, unlocked, gerror);
+				} finally {
+					// the out list holds a reference to each object it names
+					fLibGio.listFreeFullUnref(unlocked.get(ValueLayout.ADDRESS, 0));
+					fLibGio.listFree(list);
+				}
 
-			requireNoError(gerror, "Unable to unlock: "); //$NON-NLS-1$
+				requireNoError(gerror, "Unable to unlock: "); //$NON-NLS-1$
+			}
+		} finally {
+			owned.forEach(fLibGio::objectUnref);
 		}
 
 	}
 
 	private String getMasterPassword() throws SecurityException {
 		unlockSecretService();
-		PointerByReference gerror = new PointerByReference();
-		String password = fLibSecret.secret_password_lookup_sync(fEquinoxSchema, Pointer.NULL, gerror, Pointer.NULL);
+		try (Arena arena = Arena.ofConfined()) {
+			MemorySegment gerror = arena.allocate(ValueLayout.ADDRESS);
+			MemorySegment password = fLibSecret.passwordLookupSync(fEquinoxSchema.segment(), MemorySegment.NULL,
+					gerror);
 
-		requireNoError(gerror, ""); //$NON-NLS-1$
-		if (password == null) {
-			throw new SecurityException("Unable to find password"); //$NON-NLS-1$
+			requireNoError(gerror, ""); //$NON-NLS-1$
+			if (MemorySegment.NULL.equals(password)) {
+				throw new SecurityException("Unable to find password"); //$NON-NLS-1$
+			}
+			try {
+				return Foreign.readString(password);
+			} finally {
+				fLibSecret.passwordFree(password);
+			}
 		}
-		return new String(password.getBytes(), StandardCharsets.UTF_8);
 	}
 
 	private void saveMasterPassword(String password) throws SecurityException {
 		unlockSecretService();
-		PointerByReference gerror = new PointerByReference();
+		try (Arena arena = Arena.ofConfined()) {
+			MemorySegment gerror = arena.allocate(ValueLayout.ADDRESS);
 
-		String passwordUTF8 = new String(password.getBytes(), StandardCharsets.UTF_8);
+			boolean stored = fLibSecret.passwordStoreSync(fEquinoxSchema.segment(),
+					arena.allocateFrom(SECRET_COLLECTION_DEFAULT), arena.allocateFrom("Equinox master password"), //$NON-NLS-1$
+					arena.allocateFrom(password), MemorySegment.NULL, gerror);
 
-		fLibSecret.secret_password_store_sync(fEquinoxSchema, SECRET_COLLECTION_DEFAULT, "Equinox master password", //$NON-NLS-1$
-				passwordUTF8, Pointer.NULL, gerror, Pointer.NULL);
-
-		requireNoError(gerror, ""); //$NON-NLS-1$
+			requireNoError(gerror, ""); //$NON-NLS-1$
+			if (!stored) {
+				// libsecret can refuse the call without setting the error, and a
+				// password that was never stored must not be handed out as valid
+				throw new SecurityException("Unable to store password"); //$NON-NLS-1$
+			}
+		}
 	}
 
-	private void requireNoError(PointerByReference gerror, String details) {
-		if (gerror.getValue() != Pointer.NULL) {
-			GError error = new GError(gerror.getValue());
-			String message = error.message;
-			fLibGio.g_error_free(gerror.getValue());
+	private void requireNoError(MemorySegment gerror, String details) {
+		MemorySegment error = gerror.get(ValueLayout.ADDRESS, 0);
+		if (!MemorySegment.NULL.equals(error)) {
+			String message = GError.readMessage(error);
+			fLibGio.errorFree(error);
 			throw new SecurityException(details + message);
 		}
 	}
