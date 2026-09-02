@@ -38,7 +38,7 @@ def runOnNativeBuildAgent(String platform, Closure body) {
 
 /** Returns the download URL of the JDK against whose C headers (in the 'include/' folder) and native libraries the natives are compiled.*/
 def getNativeJdkUrl(String os, String arch) { // To update the used JDK version update the URL template below
-	return "https://download.eclipse.org/justj/jres/21/downloads/20260801_0941/org.eclipse.justj.openjdk.hotspot.jre.minimal.stripped-21.0.12-${os}-${arch}.tar.gz"
+	return "https://download.eclipse.org/justj/jres/25/downloads/20260826_0616/org.eclipse.justj.openjdk.hotspot.jre.minimal.stripped-25.0.4.1-${os}-${arch}.tar.gz"
 }
 
 def isOnMainIshBranch() {
@@ -290,7 +290,7 @@ pipeline {
 		stage('Build') {
 			tools {
 				maven 'apache-maven-latest'
-				jdk 'temurin-jdk21-latest'
+				jdk 'temurin-jdk25-latest'
 			}
 			environment {
 				EQUINOX_BINARIES_LOC = "$WORKSPACE/equinox.binaries"
