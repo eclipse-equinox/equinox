@@ -138,10 +138,22 @@ public class ServiceLoaderMediatorHook extends ClassLoaderHook implements Bundle
 
 	@Override
 	public Bundle addingBundle(Bundle bundle, BundleEvent event) {
-		BundleServices services = BundleServices.of(bundle);
-		if (services == null) {
-			return null;
+		BundleServices computed = BundleServices.of(bundle);
+		boolean placeholder = false;
+		if (computed == null) {
+			BundleRevision revision = bundle.adapt(BundleRevision.class);
+			// A host bundle without own service providers/consumers still needs to be
+			// tracked if it has an attached fragment providing OSGi services: only the
+			// host's own life-cycle events (STARTING/STOPPING) can trigger the
+			// (un)registration of the fragment's published OSGi services, see
+			// BundleServices#hostsProviderFragments.
+			if (revision == null || !BundleServices.hostsProviderFragments(revision)) {
+				return null;
+			}
+			computed = BundleServices.emptyPlaceholder(bundle);
+			placeholder = true;
 		}
+		BundleServices services = computed;
 		try (var locked = lock(lock.writeLock())) {
 			trackedBundles.put(bundle, services);
 			Map<String, List<String>> providedServices = services.providedServices();
@@ -157,6 +169,22 @@ public class ServiceLoaderMediatorHook extends ClassLoaderHook implements Bundle
 					providedServices.forEach((serviceType, providers) -> {
 						LOGGER.fine("Registered services providers for service '" + serviceType + "' (in bundle " //$NON-NLS-1$ //$NON-NLS-2$
 								+ bundle + "): " + providers); //$NON-NLS-1$
+					});
+				}
+			}
+			if (placeholder) {
+				// This host bundle is tracked for the first time: if it is already
+				// starting/active, perform the registration that a STARTING event would
+				// otherwise have triggered (that event won't be re-delivered, since this
+				// bundle wasn't tracked yet when it occurred).
+				BundleContext bundleContext = bundle.getBundleContext();
+				if (bundleContext != null) {
+					BundleServices fragmentServices = services;
+					bundleAndFragments(bundle).forEach(b -> {
+						BundleServices fs = trackedBundles.get(b);
+						if (fs != null && fs != fragmentServices) {
+							fs.registerOSGiServices(bundleContext);
+						}
 					});
 				}
 			}

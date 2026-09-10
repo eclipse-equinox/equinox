@@ -78,6 +78,51 @@ record BundleServices(Bundle bundle, boolean isProcessedConsumer, Map<String, Li
 		return null;
 	}
 
+	/**
+	 * An empty placeholder used to track a host bundle that has no own service
+	 * providers/consumers, purely so the {@code BundleTracker} keeps delivering
+	 * {@code modifiedBundle} STARTING/STOPPING events for it. Those events are
+	 * needed to (un)register the OSGi services published by its attached
+	 * fragment(s), see {@link #hostsProviderFragments(BundleRevision)}.
+	 */
+	static BundleServices emptyPlaceholder(Bundle bundle) {
+		return new BundleServices(bundle, false, Map.of(), Map.of(), new ArrayList<>());
+	}
+
+	/**
+	 * @return {@code true} if the given (non-fragment) host bundle has at least
+	 *         one attached fragment that advertises and publishes an OSGi service
+	 *         provider (see chapter 133.4 -- Service Provider Bundles). Such
+	 *         fragments cannot register/unregister their OSGi services
+	 *         themselves, since they don't have their own life-cycle -- the
+	 *         registration has to happen when their *host* starts/stops.
+	 */
+	static boolean hostsProviderFragments(BundleRevision hostRevision) {
+		if ((hostRevision.getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
+			return false; // fragments are handled directly through of(fragment)
+		}
+		BundleWiring hostWiring = hostRevision.getWiring();
+		if (hostWiring == null) {
+			return false;
+		}
+		List<BundleWire> providedHostWires = hostWiring.getProvidedWires(HostNamespace.HOST_NAMESPACE);
+		if (providedHostWires == null || providedHostWires.isEmpty()) {
+			return false;
+		}
+		return providedHostWires.stream().map(BundleWire::getRequirer)
+				.anyMatch(fragmentRevision -> providesOSGiService(fragmentRevision, hostWiring));
+	}
+
+	private static boolean providesOSGiService(BundleRevision fragmentRevision, BundleWiring hostWiring) {
+		Map<String, List<String>> provided = getAdvertisedServiceProviders(fragmentRevision);
+		Map<String, List<ServicePublication>> published = getPublishedServices(fragmentRevision);
+		provided.keySet().retainAll(published.keySet());
+		if (provided.isEmpty()) {
+			return false;
+		}
+		return hasOSGiExtenderRequirement(hostWiring, "(osgi.extender=osgi.serviceloader.registrar)"); //$NON-NLS-1$
+	}
+
 	private static boolean requiresServiceLoaderProcessor(BundleWiring wiring) {
 		// See chapter 133.3.2 -- Opting In
 		// https://docs.osgi.org/specification/osgi.cmpn/8.0.0/service.loader.html#d0e80429
