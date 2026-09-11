@@ -25,6 +25,8 @@
 	  <!-- The actual TCKs are executed in the org.eclipse.osgi.tck module because of reference to other service implementations -->
 	  <tck.skip>true</tck.skip>
 	  <failOnJavadocErrors>false</failOnJavadocErrors>
+	  <!-- This ensures we use the -release 8 for compilation to ensure only java 8 API is used -->
+	  <tycho.useJDK>SYSTEM</tycho.useJDK>
   </properties>
   
   <build>
