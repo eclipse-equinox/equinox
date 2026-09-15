@@ -71,12 +71,15 @@ public class DynamicImportList extends AbstractList<String> implements RandomAcc
 			throw new IllegalArgumentException(e);
 		}
 		SecurityManager sm = System.getSecurityManager();
-		if (sm == null)
+		if (sm == null) {
 			return;
+		}
 		// Security is enabled. Ensure the weaver has import package permission
 		// for each dynamic import added.
-		for (ManifestElement clause : clauses)
-			for (String pkg : clause.getValueComponents())
+		for (ManifestElement clause : clauses) {
+			for (String pkg : clause.getValueComponents()) {
 				sm.checkPermission(new PackagePermission(pkg, PackagePermission.IMPORT));
+			}
+		}
 	}
 }

@@ -70,7 +70,7 @@ import org.osgi.framework.wiring.BundleWiring;
  * represents the loaded state of the bundle. BundleLoader objects are created
  * lazily; care should be taken not to force the creation of a BundleLoader
  * unless it is necessary.
- * 
+ *
  * @see org.eclipse.osgi.internal.loader.BundleLoaderSources
  */
 public class BundleLoader extends ModuleLoader {
@@ -141,8 +141,9 @@ public class BundleLoader extends ModuleLoader {
 	public final static String getPackageName(String name) {
 		if (name != null) {
 			int index = name.lastIndexOf('.'); /* find last period in class name */
-			if (index > 0)
+			if (index > 0) {
 				return name.substring(0, index);
+			}
 		}
 		return DEFAULT_PACKAGE;
 	}
@@ -160,8 +161,9 @@ public class BundleLoader extends ModuleLoader {
 			/* check for leading slash */
 			int begin = ((name.length() > 1) && (name.charAt(0) == '/')) ? 1 : 0;
 			int end = name.lastIndexOf('/'); /* index of last slash */
-			if (end > begin)
+			if (end > begin) {
 				return name.substring(begin, end).replace('/', '.');
+			}
 		}
 		return DEFAULT_PACKAGE;
 	}
@@ -241,14 +243,16 @@ public class BundleLoader extends ModuleLoader {
 		PackageSource requiredSource = providerLoader.findRequiredSource(name, visited);
 		PackageSource exportSource = providerLoader.exportSources.createPackageSource(importWire.getCapability(),
 				false);
-		if (requiredSource == null)
+		if (requiredSource == null) {
 			return exportSource;
+		}
 		return createMultiSource(name, new PackageSource[] { requiredSource, exportSource });
 	}
 
 	private static PackageSource createMultiSource(String packageName, PackageSource[] sources) {
-		if (sources.length == 1)
+		if (sources.length == 1) {
 			return sources[0];
+		}
 		List<SingleSourcePackage> sourceList = new ArrayList<>(sources.length);
 		for (PackageSource source : sources) {
 			SingleSourcePackage[] innerSources = source.getSuppliers();
@@ -403,7 +407,7 @@ public class BundleLoader extends ModuleLoader {
 	/**
 	 * Finds a class local to this bundle. Only the classloader for this bundle is
 	 * searched.
-	 * 
+	 *
 	 * @param name The name of the class to find.
 	 * @return The loaded Class or null if the class is not found.
 	 */
@@ -493,8 +497,9 @@ public class BundleLoader extends ModuleLoader {
 		} catch (FileNotFoundException e) {
 			// will not happen
 		}
-		if (result != null)
+		if (result != null) {
 			return result;
+		}
 		// 3) search the imported packages
 		PackageSource source = findImportedSource(pkgName, null);
 		if (source != null) {
@@ -508,8 +513,9 @@ public class BundleLoader extends ModuleLoader {
 				// calling defineClass on our loader.
 				result = getModuleClassLoader().publicFindLoaded(name);
 			}
-			if (result != null)
+			if (result != null) {
 				return result;
+			}
 			return generateException(name, generateException, loaderTrace);
 		}
 		// 4) search the required bundles
@@ -523,33 +529,39 @@ public class BundleLoader extends ModuleLoader {
 			result = source.loadClass(name);
 		}
 		// 5) search the local bundle
-		if (result == null)
+		if (result == null) {
 			result = findLocalClass(name);
-		if (result != null)
+		}
+		if (result != null) {
 			return result;
+		}
 		// 6) attempt to find a dynamic import source; only do this if a required source
 		// was not found
 		if (source == null) {
 			source = findDynamicSource(pkgName);
 			if (source != null) {
 				result = source.loadClass(name);
-				if (result != null)
+				if (result != null) {
 					return result;
+				}
 				return generateException(name, generateException, loaderTrace);
 			}
 		}
 
-		if (result == null)
+		if (result == null) {
 			try {
 				result = (Class<?>) searchHooks(name, POST_CLASS);
 			} catch (FileNotFoundException e) {
 				// will not happen
 			}
+		}
 		// do buddy policy loading
-		if (result == null && policy != null)
+		if (result == null && policy != null) {
 			result = policy.doBuddyClassLoading(name);
-		if (result != null)
+		}
+		if (result != null) {
 			return result;
+		}
 		// hack to support backwards compatibility for bootdelegation
 		// or last resort; do class context trick to work around VM bugs
 		if (parentDelegation && parent != null && !bootDelegation
@@ -580,8 +592,9 @@ public class BundleLoader extends ModuleLoader {
 	private <E> E searchHooks(String name, int type) throws ClassNotFoundException, FileNotFoundException {
 
 		List<ClassLoaderHook> loaderHooks = container.getConfiguration().getHookRegistry().getClassLoaderHooks();
-		if (loaderHooks == null)
+		if (loaderHooks == null) {
 			return null;
+		}
 		E result = null;
 		for (ClassLoaderHook hook : loaderHooks) {
 			switch (type) {
@@ -612,13 +625,15 @@ public class BundleLoader extends ModuleLoader {
 	}
 
 	private boolean isRequestFromVM() {
-		if (!container.getConfiguration().contextBootDelegation)
+		if (!container.getConfiguration().contextBootDelegation) {
 			return false;
+		}
 		// works around VM bugs that require all classloaders to have access to parent
 		// packages
 		Class<?>[] context = CLASS_CONTEXT.getClassContext();
-		if (context == null || context.length < 2)
+		if (context == null || context.length < 2) {
 			return false;
+		}
 		// skip the first class; it is the ClassContext class
 		for (int i = 1; i < context.length; i++) {
 			Class<?> clazz = context[i];
@@ -658,8 +673,9 @@ public class BundleLoader extends ModuleLoader {
 	}
 
 	private static ClassLoader getClassLoader(final Class<?> clazz) {
-		if (System.getSecurityManager() == null)
+		if (System.getSecurityManager() == null) {
 			return clazz.getClassLoader();
+		}
 		return AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
 			@Override
 			public ClassLoader run() {
@@ -673,8 +689,9 @@ public class BundleLoader extends ModuleLoader {
 	 * bundle's classloader.
 	 */
 	public URL findResource(String name) {
-		if ((name.length() > 1) && (name.charAt(0) == '/')) /* if name has a leading slash */
+		if ((name.length() > 1) && (name.charAt(0) == '/')) { /* if name has a leading slash */
 			name = name.substring(1); /* remove leading slash before search */
+		}
 		String pkgName = getResourcePackageName(name);
 		String loaderTrace = debug.loaderWithPackage(pkgName);
 		if (loaderTrace != null) {
@@ -685,16 +702,17 @@ public class BundleLoader extends ModuleLoader {
 		// First check the parent classloader for system resources, if it is a java
 		// resource.
 		if (parent != null) {
-			if (pkgName.startsWith(JAVA_PACKAGE))
+			if (pkgName.startsWith(JAVA_PACKAGE)) {
 				// 1) if startsWith "java." delegate to parent and terminate search
 				// we never delegate java resource requests past the parent
 				return parent.getResource(name);
-			else if (container.isBootDelegationPackage(pkgName)) {
+			} else if (container.isBootDelegationPackage(pkgName)) {
 				// 2) if part of the bootdelegation list then delegate to parent and continue of
 				// failure
 				URL result = parent.getResource(name);
-				if (result != null)
+				if (result != null) {
 					return result;
+				}
 				bootDelegation = true;
 			}
 		}
@@ -707,8 +725,9 @@ public class BundleLoader extends ModuleLoader {
 		} catch (ClassNotFoundException e) {
 			// will not happen
 		}
-		if (result != null)
+		if (result != null) {
 			return result;
+		}
 		// 3) search the imported packages
 		PackageSource source = findImportedSource(pkgName, null);
 		if (source != null) {
@@ -729,20 +748,23 @@ public class BundleLoader extends ModuleLoader {
 			result = source.getResource(name);
 		}
 		// 5) search the local bundle
-		if (result == null)
+		if (result == null) {
 			result = findLocalResource(name);
-		if (result != null)
+		}
+		if (result != null) {
 			return result;
+		}
 		// 6) attempt to find a dynamic import source; only do this if a required source
 		// was not found
 		if (source == null) {
 			source = findDynamicSource(pkgName);
-			if (source != null)
+			if (source != null) {
 				// must return the result of the dynamic import and do not continue
 				return source.getResource(name);
+			}
 		}
 
-		if (result == null)
+		if (result == null) {
 			try {
 				result = (URL) searchHooks(name, POST_RESOURCE);
 			} catch (FileNotFoundException e) {
@@ -750,17 +772,21 @@ public class BundleLoader extends ModuleLoader {
 			} catch (ClassNotFoundException e) {
 				// will not happen
 			}
+		}
 		// do buddy policy loading
-		if (result == null && policy != null)
+		if (result == null && policy != null) {
 			result = policy.doBuddyResourceLoading(name);
-		if (result != null)
+		}
+		if (result != null) {
 			return result;
+		}
 		// hack to support backwards compatibility for bootdelegation
 		// or last resort; do class context trick to work around VM bugs
 		if (parent != null && !bootDelegation
-				&& (container.getConfiguration().compatibilityBootDelegation || isRequestFromVM()))
+				&& (container.getConfiguration().compatibilityBootDelegation || isRequestFromVM())) {
 			// we don't need to continue if the resource is not found here
 			return parent.getResource(name);
+		}
 		return result;
 	}
 
@@ -771,8 +797,9 @@ public class BundleLoader extends ModuleLoader {
 	public Enumeration<URL> findResources(String name) throws IOException {
 		// do not delegate to parent because ClassLoader#getResources already did and it
 		// is final!!
-		if ((name.length() > 1) && (name.charAt(0) == '/')) /* if name has a leading slash */
+		if ((name.length() > 1) && (name.charAt(0) == '/')) { /* if name has a leading slash */
 			name = name.substring(1); /* remove leading slash before search */
+		}
 		String pkgName = getResourcePackageName(name);
 		String loaderTrace = debug.loaderWithPackage(pkgName);
 		if (loaderTrace != null) {
@@ -784,11 +811,11 @@ public class BundleLoader extends ModuleLoader {
 		// First check the parent classloader for system resources, if it is a java
 		// resource.
 		if (parent != null) {
-			if (pkgName.startsWith(JAVA_PACKAGE))
+			if (pkgName.startsWith(JAVA_PACKAGE)) {
 				// 1) if startsWith "java." delegate to parent and terminate search
 				// we never delegate java resource requests past the parent
 				return parent.getResources(name);
-			else if (container.isBootDelegationPackage(pkgName)) {
+			} else if (container.isBootDelegationPackage(pkgName)) {
 				// 2) if part of the bootdelegation list then delegate to parent and continue
 				result = compoundEnumerations(result, parent.getResources(name));
 				bootDelegation = true;
@@ -832,10 +859,11 @@ public class BundleLoader extends ModuleLoader {
 		// was not found
 		if (source == null && !result.hasMoreElements()) {
 			source = findDynamicSource(pkgName);
-			if (source != null)
+			if (source != null) {
 				return compoundEnumerations(result, source.getResources(name));
+			}
 		}
-		if (!result.hasMoreElements())
+		if (!result.hasMoreElements()) {
 			try {
 				Enumeration<URL> hookResources = searchHooks(name, POST_RESOURCES);
 				result = compoundEnumerations(result, hookResources);
@@ -844,6 +872,7 @@ public class BundleLoader extends ModuleLoader {
 			} catch (FileNotFoundException e) {
 				return null;
 			}
+		}
 		if (policy != null) {
 			Enumeration<URL> buddyResult = policy.doBuddyResourcesLoading(name);
 			result = compoundEnumerations(result, buddyResult);
@@ -852,9 +881,10 @@ public class BundleLoader extends ModuleLoader {
 		// or last resort; do class context trick to work around VM bugs
 		if (!result.hasMoreElements()) {
 			if (parent != null && !bootDelegation
-					&& (container.getConfiguration().compatibilityBootDelegation || isRequestFromVM()))
+					&& (container.getConfiguration().compatibilityBootDelegation || isRequestFromVM())) {
 				// we don't need to continue if the resource is not found here
 				return parent.getResources(name);
+			}
 		}
 		return result;
 	}
@@ -868,8 +898,9 @@ public class BundleLoader extends ModuleLoader {
 	@Override
 	protected Collection<String> listResources(String path, String filePattern, int options) {
 		String pkgName = getResourcePackageName(path.endsWith("/") ? path : path + '/'); //$NON-NLS-1$
-		if ((path.length() > 1) && (path.charAt(0) == '/')) /* if name has a leading slash */
+		if ((path.length() > 1) && (path.charAt(0) == '/')) { /* if name has a leading slash */
 			path = path.substring(1); /* remove leading slash before search */
+		}
 		boolean subPackages = (options & BundleWiring.LISTRESOURCES_RECURSE) != 0;
 		List<String> packages = new ArrayList<>();
 		// search imported package names
@@ -880,8 +911,9 @@ public class BundleLoader extends ModuleLoader {
 		}
 		for (PackageSource source : imports) {
 			String id = source.getId();
-			if (id.equals(pkgName) || (subPackages && isSubPackage(pkgName, id)))
+			if (id.equals(pkgName) || (subPackages && isSubPackage(pkgName, id))) {
 				packages.add(id);
+			}
 		}
 
 		// now add package names from required bundles
@@ -914,9 +946,10 @@ public class BundleLoader extends ModuleLoader {
 				String packagePath = name.replace('.', '/');
 				Collection<String> externalResources = externalSource.listResources(packagePath, filePattern);
 				for (String resource : externalResources) {
-					if (!result.contains(resource)) // prevent duplicates; could happen if the package is split or
-													// exporter has fragments/multiple jars
+					if (!result.contains(resource)) { // prevent duplicates; could happen if the package is split or
+						// exporter has fragments/multiple jars
 						result.add(resource);
+					}
 				}
 			}
 		}
@@ -925,8 +958,9 @@ public class BundleLoader extends ModuleLoader {
 		Collection<String> localResources = getModuleClassLoader().listLocalResources(path, filePattern, options);
 		for (String resource : localResources) {
 			String resourcePkg = getResourcePackageName(resource);
-			if (!importedPackages.contains(resourcePkg) && !result.contains(resource))
+			if (!importedPackages.contains(resourcePkg) && !result.contains(resource)) {
 				result.add(resource);
+			}
 		}
 		// finally search the policy; but only if not localSearch
 		if (!localSearch && policy != null) {
@@ -941,15 +975,18 @@ public class BundleLoader extends ModuleLoader {
 	}
 
 	public static <E> Enumeration<E> compoundEnumerations(Enumeration<E> list1, Enumeration<E> list2) {
-		if (list2 == null || !list2.hasMoreElements())
+		if (list2 == null || !list2.hasMoreElements()) {
 			return list1 == null ? Collections.emptyEnumeration() : list1;
-		if (list1 == null || !list1.hasMoreElements())
+		}
+		if (list1 == null || !list1.hasMoreElements()) {
 			return list2 == null ? Collections.emptyEnumeration() : list2;
+		}
 		List<E> compoundResults = Collections.list(list1);
 		while (list2.hasMoreElements()) {
 			E item = list2.nextElement();
-			if (!compoundResults.contains(item)) // don't add duplicates
+			if (!compoundResults.contains(item)) { // don't add duplicates
 				compoundResults.add(item);
+			}
 		}
 		return Collections.enumeration(compoundResults);
 	}
@@ -957,7 +994,7 @@ public class BundleLoader extends ModuleLoader {
 	/**
 	 * Finds a resource local to this bundle. Only the classloader for this bundle
 	 * is searched.
-	 * 
+	 *
 	 * @param name The name of the resource to find.
 	 * @return The URL to the resource or null if the resource is not found.
 	 */
@@ -978,15 +1015,16 @@ public class BundleLoader extends ModuleLoader {
 
 	/**
 	 * Return a string representation of this loader.
-	 * 
+	 *
 	 * @return String
 	 */
 	@Override
 	public final String toString() {
 		ModuleRevision revision = wiring.getRevision();
 		String name = revision.getSymbolicName();
-		if (name == null)
+		if (name == null) {
 			name = "unknown"; //$NON-NLS-1$
+		}
 		return name + '_' + revision.getVersion();
 	}
 
@@ -998,46 +1036,52 @@ public class BundleLoader extends ModuleLoader {
 	 * @return true if the package should be imported.
 	 */
 	private final boolean isDynamicallyImported(String pkgname) {
-		if (this instanceof SystemBundleLoader)
+		if (this instanceof SystemBundleLoader) {
 			return false; // system bundle cannot dynamically import
+		}
 		// must check for startsWith("java.") to satisfy R3 section 4.7.2
-		if (pkgname.startsWith("java.")) //$NON-NLS-1$
+		if (pkgname.startsWith("java.")) { //$NON-NLS-1$
 			return true;
+		}
 
 		synchronized (importedSources) {
 			/* "*" shortcut */
-			if (dynamicAllPackages)
+			if (dynamicAllPackages) {
 				return true;
+			}
 
 			/* match against specific names */
-			if (dynamicImportPackages != null)
+			if (dynamicImportPackages != null) {
 				for (String dynamicImportPackage : dynamicImportPackages) {
 					if (pkgname.equals(dynamicImportPackage)) {
 						return true;
 					}
 				}
+			}
 
 			/* match against names with trailing wildcards */
-			if (dynamicImportPackageStems != null)
+			if (dynamicImportPackageStems != null) {
 				for (String dynamicImportPackageStem : dynamicImportPackageStems) {
 					if (pkgname.startsWith(dynamicImportPackageStem)) {
 						return true;
 					}
 				}
+			}
 		}
 		return false;
 	}
 
 	final void addExportedProvidersFor(String packageName, List<PackageSource> result,
 			Collection<BundleLoader> visited) {
-		if (visited.contains(this))
+		if (visited.contains(this)) {
 			return;
+		}
 		visited.add(this);
 		// See if we locally provide the package.
 		PackageSource local = null;
-		if (isExportedPackage(packageName))
+		if (isExportedPackage(packageName)) {
 			local = exportSources.getPackageSource(packageName);
-		else if (isSubstitutedExport(packageName)) {
+		} else if (isSubstitutedExport(packageName)) {
 			result.add(findImportedSource(packageName, visited));
 			return; // should not continue to required bundles in this case
 		}
@@ -1055,8 +1099,9 @@ public class BundleLoader extends ModuleLoader {
 			}
 		}
 		// now add the locally provided package.
-		if (local != null)
+		if (local != null) {
 			result.add(local);
+		}
 	}
 
 	private BundleLoader getProviderLoader(ModuleWire wire) {
@@ -1076,21 +1121,24 @@ public class BundleLoader extends ModuleLoader {
 
 	final void addProvidedPackageNames(String packageName, List<String> result, boolean subPackages,
 			Collection<BundleLoader> visited) {
-		if (visited.contains(this))
+		if (visited.contains(this)) {
 			return;
+		}
 		visited.add(this);
 		synchronized (exportedPackages) {
 			for (String exported : exportedPackages) {
 				if (exported.equals(packageName) || (subPackages && isSubPackage(packageName, exported))) {
-					if (!result.contains(exported))
+					if (!result.contains(exported)) {
 						result.add(exported);
+					}
 				}
 			}
 		}
 		for (String substituted : wiring.getSubstitutedNames()) {
 			if (substituted.equals(packageName) || (subPackages && isSubPackage(packageName, substituted))) {
-				if (!result.contains(substituted))
+				if (!result.contains(substituted)) {
 					result.add(substituted);
+				}
 			}
 		}
 		for (ModuleWire bundleWire : requiredBundleWires) {
@@ -1130,8 +1178,9 @@ public class BundleLoader extends ModuleLoader {
 				}
 			}
 		}
-		if (dynamicImports.size() > 0)
+		if (dynamicImports.size() > 0) {
 			addDynamicImportPackage(dynamicImports.toArray(new String[dynamicImports.size()]));
+		}
 	}
 
 	/**
@@ -1139,12 +1188,13 @@ public class BundleLoader extends ModuleLoader {
 	 * tables of this BundleLoader. Duplicate packages are checked and not added
 	 * again. This method is not thread safe. Callers should ensure synchronization
 	 * when calling this method.
-	 * 
+	 *
 	 * @param packages the DynamicImport-Package elements to add.
 	 */
 	private void addDynamicImportPackage(String[] packages) {
-		if (packages == null)
+		if (packages == null) {
 			return;
+		}
 
 		synchronized (importedSources) {
 			int size = packages.length;
@@ -1170,27 +1220,31 @@ public class BundleLoader extends ModuleLoader {
 
 			for (int i = 0; i < size; i++) {
 				String name = packages[i];
-				if (isDynamicallyImported(name))
+				if (isDynamicallyImported(name)) {
 					continue;
+				}
 				if (name.equals("*")) { //$NON-NLS-1$
 					// shortcut
 					dynamicAllPackages = true;
 					return;
 				}
 
-				if (name.endsWith(".*")) //$NON-NLS-1$
+				if (name.endsWith(".*")) { //$NON-NLS-1$
 					stems.add(name.substring(0, name.length() - 1));
-				else
+				} else {
 					names.add(name);
+				}
 			}
 
 			size = stems.size();
-			if (size > 0)
+			if (size > 0) {
 				dynamicImportPackageStems = stems.toArray(new String[size]);
+			}
 
 			size = names.size();
-			if (size > 0)
+			if (size > 0) {
 				dynamicImportPackages = names.toArray(new String[size]);
+			}
 		}
 	}
 
@@ -1198,12 +1252,13 @@ public class BundleLoader extends ModuleLoader {
 	 * Adds a list of DynamicImport-Package manifest elements to the dynamic import
 	 * tables of this BundleLoader. Duplicate packages are checked and not added
 	 * again.
-	 * 
+	 *
 	 * @param packages the DynamicImport-Package elements to add.
 	 */
 	public final void addDynamicImportPackage(ManifestElement[] packages) {
-		if (packages == null)
+		if (packages == null) {
 			return;
+		}
 		List<String> dynamicImports = new ArrayList<>(packages.length);
 		StringBuilder importSpec = new StringBuilder();
 		for (ManifestElement dynamicImportElement : packages) {
@@ -1237,11 +1292,13 @@ public class BundleLoader extends ModuleLoader {
 	 * bundle. This will not include an local package source
 	 */
 	private PackageSource findSource(String pkgName) {
-		if (pkgName == null)
+		if (pkgName == null) {
 			return null;
+		}
 		PackageSource result = findImportedSource(pkgName, null);
-		if (result != null)
+		if (result != null) {
 			return result;
+		}
 		// Note that dynamic imports are not checked to avoid aggressive wiring (bug
 		// 105779)
 		return findRequiredSource(pkgName, null);
@@ -1305,13 +1362,16 @@ public class BundleLoader extends ModuleLoader {
 		}
 		synchronized (requiredSources) {
 			PackageSource result = requiredSources.get(pkgName);
-			if (result != null)
+			if (result != null) {
 				return result.isNullSource() ? null : result;
+			}
 		}
-		if (visited == null)
+		if (visited == null) {
 			visited = new ArrayList<>();
-		if (!visited.contains(this))
+		}
+		if (!visited.contains(this)) {
 			visited.add(this); // always add ourselves so we do not recurse back to ourselves
+		}
 		List<PackageSource> result = new ArrayList<>(3);
 		for (ModuleWire bundleWire : requiredBundleWires) {
 			BundleLoader loader = getProviderLoader(bundleWire);
@@ -1346,14 +1406,17 @@ public class BundleLoader extends ModuleLoader {
 	 */
 	public final PackageSource getPackageSource(String pkgName) {
 		PackageSource result = findSource(pkgName);
-		if (!isExportedPackage(pkgName))
+		if (!isExportedPackage(pkgName)) {
 			return result;
+		}
 		// if the package is exported then we need to get the local source
 		PackageSource localSource = exportSources.getPackageSource(pkgName);
-		if (result == null)
+		if (result == null) {
 			return localSource;
-		if (localSource == null)
+		}
+		if (localSource == null) {
 			return result;
+		}
 		return createMultiSource(pkgName, new PackageSource[] { result, localSource });
 	}
 

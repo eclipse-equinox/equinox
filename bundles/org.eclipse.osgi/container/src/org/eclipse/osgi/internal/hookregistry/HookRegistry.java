@@ -36,7 +36,7 @@ import org.eclipse.osgi.util.ManifestElement;
 /**
  * The hook registry is used to store all the hooks which are configured by the
  * hook configurators.
- * 
+ *
  * @see HookConfigurator
  */
 public final class HookRegistry {
@@ -46,7 +46,7 @@ public final class HookRegistry {
 	 * <p>
 	 * A framework extension may supply a hook configurators properties file to
 	 * specify a list of hook configurators.
-	 * 
+	 *
 	 * @see #HOOK_CONFIGURATORS
 	 */
 	public static final String HOOK_CONFIGURATORS_FILE = "hookconfigurators.properties"; //$NON-NLS-1$
@@ -163,8 +163,9 @@ public final class HookRegistry {
 				input = url.openStream();
 				configuratorProps.load(input);
 				String hooksValue = configuratorProps.getProperty(HOOK_CONFIGURATORS);
-				if (hooksValue == null)
+				if (hooksValue == null) {
 					continue;
+				}
 				boolean builtin = Boolean.valueOf(configuratorProps.getProperty(BUILTIN_HOOKS)).booleanValue();
 				String[] configurators = ManifestElement.getArrayFromList(hooksValue, ","); //$NON-NLS-1$
 				for (String configurator : configurators) {
@@ -181,12 +182,13 @@ public final class HookRegistry {
 						"error loading: " + url.toExternalForm(), 0, e, null)); //$NON-NLS-1$
 				// ignore and continue to next URL
 			} finally {
-				if (input != null)
+				if (input != null) {
 					try {
 						input.close();
 					} catch (IOException e) {
 						// do nothing
 					}
+				}
 			}
 		}
 	}
@@ -240,7 +242,7 @@ public final class HookRegistry {
 
 	/**
 	 * Returns the list of configured class loading hooks.
-	 * 
+	 *
 	 * @return the list of configured class loading hooks.
 	 */
 	public List<ClassLoaderHook> getClassLoaderHooks() {
@@ -249,7 +251,7 @@ public final class HookRegistry {
 
 	/**
 	 * Returns the list of configured storage hooks.
-	 * 
+	 *
 	 * @return the list of configured storage hooks.
 	 */
 	public List<StorageHookFactory<?, ?, ?>> getStorageHookFactories() {
@@ -258,7 +260,7 @@ public final class HookRegistry {
 
 	/**
 	 * Returns the configured bundle file wrapper factories
-	 * 
+	 *
 	 * @return the configured bundle file wrapper factories
 	 */
 	public List<BundleFileWrapperFactoryHook> getBundleFileWrapperFactoryHooks() {
@@ -267,7 +269,7 @@ public final class HookRegistry {
 
 	/**
 	 * Returns the configured activator hook factories
-	 * 
+	 *
 	 * @return the configured activator hook factories
 	 */
 	public List<ActivatorHookFactory> getActivatorHookFactories() {
@@ -275,14 +277,15 @@ public final class HookRegistry {
 	}
 
 	private <H> void add(H hook, List<H> hooks) {
-		if (initialized)
+		if (initialized) {
 			throw new IllegalStateException("Cannot add hooks dynamically."); //$NON-NLS-1$
+		}
 		hooks.add(hook);
 	}
 
 	/**
 	 * Adds a class loader hook to this hook registry.
-	 * 
+	 *
 	 * @param classLoaderHook a class loading hook object.
 	 */
 	public void addClassLoaderHook(ClassLoaderHook classLoaderHook) {
@@ -291,7 +294,7 @@ public final class HookRegistry {
 
 	/**
 	 * Adds a storage hook to this hook registry.
-	 * 
+	 *
 	 * @param storageHookFactory a storage hook object.
 	 */
 	public void addStorageHookFactory(StorageHookFactory<?, ?, ?> storageHookFactory) {
@@ -300,7 +303,7 @@ public final class HookRegistry {
 
 	/**
 	 * Adds a bundle file wrapper factory for this hook registry
-	 * 
+	 *
 	 * @param factory a bundle file wrapper factory object.
 	 */
 	public void addBundleFileWrapperFactoryHook(BundleFileWrapperFactoryHook factory) {
@@ -310,7 +313,7 @@ public final class HookRegistry {
 	/**
 	 * Adds an activator hook factory. The activators created by this factory will
 	 * be started and stopped when the system bundle is started and stopped.
-	 * 
+	 *
 	 * @param activatorHookFactory the activator hook factory.
 	 */
 	public void addActivatorHookFactory(ActivatorHookFactory activatorHookFactory) {
@@ -319,7 +322,7 @@ public final class HookRegistry {
 
 	/**
 	 * Returns the configuration associated with this hook registry.
-	 * 
+	 *
 	 * @return the configuration associated with this hook registry.
 	 */
 	public EquinoxConfiguration getConfiguration() {
@@ -328,7 +331,7 @@ public final class HookRegistry {
 
 	/**
 	 * Returns the equinox container associated with this hook registry.
-	 * 
+	 *
 	 * @return the equinox container associated with this hook registry.
 	 */
 	public EquinoxContainer getContainer() {

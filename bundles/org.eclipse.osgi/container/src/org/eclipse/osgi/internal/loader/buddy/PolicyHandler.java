@@ -64,22 +64,25 @@ public class PolicyHandler implements SynchronousBundleListener {
 	}
 
 	static Object[] getArrayFromList(String stringList) {
-		if (stringList == null || stringList.trim().equals("")) //$NON-NLS-1$
+		if (stringList == null || stringList.trim().equals("")) { //$NON-NLS-1$
 			return null;
+		}
 		List<Object> list = new ArrayList<>();
 		StringTokenizer tokens = new StringTokenizer(stringList, ","); //$NON-NLS-1$
 		while (tokens.hasMoreTokens()) {
 			String token = tokens.nextToken().trim();
-			if (!token.equals("")) //$NON-NLS-1$
+			if (!token.equals("")) { //$NON-NLS-1$
 				list.add(token.toLowerCase());
+			}
 		}
 		return list.isEmpty() ? new Object[0] : list.toArray(new Object[list.size()]);
 	}
 
 	private IBuddyPolicy getPolicyImplementation(Object[] policiesSnapshot, int policyOrder) {
 		synchronized (policiesSnapshot) {
-			if (policyOrder >= policiesSnapshot.length)
+			if (policyOrder >= policiesSnapshot.length) {
 				return null;
+			}
 			if (policiesSnapshot[policyOrder] instanceof String) {
 				String buddyName = (String) policiesSnapshot[policyOrder];
 
@@ -158,8 +161,9 @@ public class PolicyHandler implements SynchronousBundleListener {
 			int policyCount = (policiesSnapshot == null) ? 0 : policiesSnapshot.length;
 			for (int i = 0; i < policyCount && result == null; i++) {
 				IBuddyPolicy policy = getPolicyImplementation(policiesSnapshot, i);
-				if (policy != null)
+				if (policy != null) {
 					result = policy.loadClass(name);
+				}
 			}
 			return result;
 		} finally {
@@ -177,8 +181,9 @@ public class PolicyHandler implements SynchronousBundleListener {
 			int policyCount = (policiesSnapshot == null) ? 0 : policiesSnapshot.length;
 			for (int i = 0; i < policyCount && result == null; i++) {
 				IBuddyPolicy policy = getPolicyImplementation(policiesSnapshot, i);
-				if (policy != null)
+				if (policy != null) {
 					result = policy.loadResource(name);
+				}
 			}
 			return result;
 		} finally {
@@ -196,16 +201,19 @@ public class PolicyHandler implements SynchronousBundleListener {
 			int policyCount = (policiesSnapshot == null) ? 0 : policiesSnapshot.length;
 			for (int i = 0; i < policyCount; i++) {
 				IBuddyPolicy policy = getPolicyImplementation(policiesSnapshot, i);
-				if (policy == null)
+				if (policy == null) {
 					continue;
+				}
 				Enumeration<URL> result = policy.loadResources(name);
 				if (result != null) {
-					if (results == null)
+					if (results == null) {
 						results = new ArrayList<>(policyCount);
+					}
 					while (result.hasMoreElements()) {
 						URL url = result.nextElement();
-						if (!results.contains(url)) // only add if not already added
+						if (!results.contains(url)) { // only add if not already added
 							results.add(url);
+						}
 					}
 				}
 			}
@@ -225,8 +233,9 @@ public class PolicyHandler implements SynchronousBundleListener {
 			int policyCount = (policiesSnapshot == null) ? 0 : policiesSnapshot.length;
 			for (int i = 0; i < policyCount; i++) {
 				IBuddyPolicy policy = getPolicyImplementation(policiesSnapshot, i);
-				if (policy != null)
+				if (policy != null) {
 					policy.addListResources(results, path, filePattern, options);
+				}
 			}
 		} finally {
 			stopLoading(path);
@@ -235,8 +244,9 @@ public class PolicyHandler implements SynchronousBundleListener {
 
 	private boolean startLoading(String name) {
 		Set<String> classesAndResources = beingLoaded.get();
-		if (classesAndResources != null && classesAndResources.contains(name))
+		if (classesAndResources != null && classesAndResources.contains(name)) {
 			return false;
+		}
 
 		if (classesAndResources == null) {
 			classesAndResources = new HashSet<>(3);
@@ -260,8 +270,9 @@ public class PolicyHandler implements SynchronousBundleListener {
 
 	@Override
 	public void bundleChanged(BundleEvent event) {
-		if ((event.getType() & (BundleEvent.RESOLVED | BundleEvent.UNRESOLVED)) == 0)
+		if ((event.getType() & (BundleEvent.RESOLVED | BundleEvent.UNRESOLVED)) == 0) {
 			return;
+		}
 		// reinitialize the policies
 		policies = originalBuddyList.toArray();
 	}

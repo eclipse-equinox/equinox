@@ -167,12 +167,13 @@ public class URLStreamHandlerProxy extends PlurlStreamHandlerBase {
 		try {
 			URLStreamHandlerService service = getRealHandlerService();
 			Method openConn = service.getClass().getMethod("openConnection", //$NON-NLS-1$
-					new Class[] { URL.class, Proxy.class });
+								URL.class, Proxy.class );
 			openConn.setAccessible(true);
-			return (URLConnection) openConn.invoke(service, new Object[] { u, p });
+			return (URLConnection) openConn.invoke(service, u, p);
 		} catch (InvocationTargetException e) {
-			if (e.getTargetException() instanceof IOException)
+			if (e.getTargetException() instanceof IOException) {
 				throw (IOException) e.getTargetException();
+			}
 			throw (RuntimeException) e.getTargetException();
 		} catch (Exception e) {
 			// expected on JRE < 1.5
@@ -203,8 +204,8 @@ public class URLStreamHandlerProxy extends PlurlStreamHandlerBase {
 
 	private static final class LazyURLStreamHandlerService implements Supplier<URLStreamHandlerService> {
 
-		private BundleContext bundleContext;
-		private ServiceReference<URLStreamHandlerService> reference;
+		private final BundleContext bundleContext;
+		private final ServiceReference<URLStreamHandlerService> reference;
 		private URLStreamHandlerService service;
 		private boolean disposed;
 

@@ -71,10 +71,11 @@ public class LogServiceManager implements SynchronousBundleListener, FrameworkLi
 				new MockSystemBundle());
 		systemBundleLog = logServiceFactory.getSystemBundleLog();
 		for (LogListener logListener : systemListeners) {
-			if (logListener instanceof LogFilter)
+			if (logListener instanceof LogFilter) {
 				logReaderServiceFactory.addLogListener(logListener, (LogFilter) logListener);
-			else
+			} else {
 				logReaderServiceFactory.addLogListener(logListener, ExtendedLogReaderServiceFactory.NULL_LOGGER_FILTER);
+			}
 		}
 
 	}

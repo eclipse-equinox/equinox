@@ -28,7 +28,7 @@ public class DirZipBundleEntry extends BundleEntry {
 	/**
 	 * ZipBundleFile for this entry.
 	 */
-	private ZipBundleFile bundleFile;
+	private final ZipBundleFile bundleFile;
 	/**
 	 * The name for this entry
 	 */

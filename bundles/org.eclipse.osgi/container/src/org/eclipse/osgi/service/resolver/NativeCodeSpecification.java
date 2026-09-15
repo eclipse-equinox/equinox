@@ -24,7 +24,7 @@ package org.eclipse.osgi.service.resolver;
  * This interface is not intended to be implemented by clients. The
  * {@link StateObjectFactory} should be used to construct instances.
  * </p>
- * 
+ *
  * @since 3.4
  * @noimplement This interface is not intended to be implemented by clients.
  */
@@ -33,7 +33,7 @@ public interface NativeCodeSpecification extends VersionConstraint {
 	 * Returns the list of possible suppliers to this native code specification.
 	 * When this native code specification is resolved one of the possible suppliers
 	 * will be selected and returned by {@link VersionConstraint#getSupplier()}.
-	 * 
+	 *
 	 * @return the list of possible suppliers.
 	 */
 	public NativeCodeDescription[] getPossibleSuppliers();

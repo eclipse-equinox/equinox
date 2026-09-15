@@ -93,8 +93,9 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 	}
 
 	private static synchronized PrintStream getErrorStream() {
-		if (errorStream == null)
+		if (errorStream == null) {
 			return System.err;
+		}
 
 		return errorStream;
 	}
@@ -171,19 +172,23 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 			listenersLock.readLock().unlock();
 		}
 		try {
-			if (incrementNestedCount() == MAX_RECURSIONS)
+			if (incrementNestedCount() == MAX_RECURSIONS) {
 				return false;
-			if (filtersCopy == null)
+			}
+			if (filtersCopy == null) {
 				return false;
+			}
 
-			if (filtersCopy == ALWAYS_LOG)
+			if (filtersCopy == ALWAYS_LOG) {
 				return true;
+			}
 
 			int filtersLength = filtersCopy.length;
 			for (int i = 0; i < filtersLength; i++) {
 				LogFilter filter = filtersCopy[i];
-				if (safeIsLoggable(filter, bundle, name, level))
+				if (safeIsLoggable(filter, bundle, name, level)) {
 					return true;
+				}
 			}
 		} finally {
 			decrementNestedCount();
@@ -199,8 +204,9 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 
 	private void decrementNestedCount() {
 		int[] count = getCount();
-		if (count[0] == 0)
+		if (count[0] == 0) {
 			return;
+		}
 		count[0] = count[0] - 1;
 	}
 
@@ -243,8 +249,9 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 			listenersLock.readLock().unlock();
 		}
 		try {
-			if (incrementNestedCount() >= MAX_RECURSIONS)
+			if (incrementNestedCount() >= MAX_RECURSIONS) {
 				return;
+			}
 			int size = listenersCopy.size();
 			for (int i = 0; i < size; i++) {
 				Object[] listenerObjects = listenersCopy.getValue(i);
@@ -311,8 +318,9 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 			filtersList.add(filter);
 		}
 
-		if (filtersList.isEmpty())
+		if (filtersList.isEmpty()) {
 			filters = null;
+		}
 
 		filters = filtersList.toArray(new LogFilter[filtersList.size()]);
 	}
@@ -420,7 +428,7 @@ class OrderedExecutor implements ThreadFactory {
 	 */
 	class OrderedTaskQueue {
 		private final Queue<OrderedTask> dependencyQueue = new LinkedList<>();
-		private AtomicReference<OrderedTask> firstTask = new AtomicReference<>();
+		private final AtomicReference<OrderedTask> firstTask = new AtomicReference<>();
 
 		void execute(Runnable task, int numListeners) {
 			executeOrderedTask(task, this, numListeners);

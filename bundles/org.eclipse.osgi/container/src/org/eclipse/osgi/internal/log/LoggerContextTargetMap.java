@@ -92,8 +92,9 @@ public class LoggerContextTargetMap {
 			// add bundle to target maps before constructing
 			add(bundle);
 			logService = new ExtendedLogServiceImpl(factory, bundle);
-			if (bundle != null && bundle.getState() != Bundle.UNINSTALLED)
+			if (bundle != null && bundle.getState() != Bundle.UNINSTALLED) {
 				logServices.put(bundle, logService);
+			}
 		}
 		return logService;
 	}
