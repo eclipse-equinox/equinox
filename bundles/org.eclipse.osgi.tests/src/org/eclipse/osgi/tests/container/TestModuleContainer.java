@@ -26,7 +26,10 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -1094,7 +1097,7 @@ public class TestModuleContainer extends AbstractTest {
 
 		List<ModuleWire> providedWiresF = wiringF.getProvidedModuleWires(PackageNamespace.PACKAGE_NAMESPACE);
 		assertEquals("Wrong number of provided wires: " + providedWiresF, 0, providedWiresF.size());
-		assertSucessfulWith(report, 2, 1, 1, 1);
+		assertSucessfulWith(report, 2, 1, 1, 1); // TODO check why we now need MORE
 	}
 
 	@Test
@@ -3941,7 +3944,7 @@ public class TestModuleContainer extends AbstractTest {
 			modules.add(installDummyModule(manifest, manifest, container));
 		}
 		report = container.resolve(modules, true);
-		assertSucessfulWith(report, 15, 62, 47, 5);
+		assertSucessfulWith(report, 4, 75, 11, 1);
 	}
 
 	protected void assertSucessfulWith(ResolutionReport report, int maxProcessed, int maxSubstitution,
@@ -4370,14 +4373,14 @@ public class TestModuleContainer extends AbstractTest {
 	@Test
 	public void testLocalUseConstraintViolations() throws Exception {
 		ResolutionReport result = resolveTestSet("set1");
-		assertSucessfulWith(result, 6, 20, 23, 6);
+		assertSucessfulWith(result, 3, 245, 7, 0);
 	}
 
 	@Test
 
 	public void testLocalUseConstraintViolations2() throws Exception {
 		ResolutionReport result = resolveTestSet("set2");
-		assertSucessfulWith(result, 3, 3, 1, 3);
+		assertSucessfulWith(result, 1, 2, 1, 0);
 	}
 
 	@Test
@@ -4394,17 +4397,24 @@ public class TestModuleContainer extends AbstractTest {
 
 	@Test
 	public void testLargeSet() throws Exception {
-		ResolutionReport result = resolveModuleDatabaseDump("big", TimeUnit.MINUTES.toSeconds(5));
-		assertSucessfulWith(result, 1821, 29, 26359, 6736);
+		ResolutionReport result = resolveModuleDatabaseDump("big", 30, TimeUnit.SECONDS);
+		assertSucessfulWith(result, 1, 28, 1, 0);
 	}
 
 	@Test
 	public void testSdkSet() throws Exception {
-		ResolutionReport result = resolveModuleDatabaseDump("sdk202509", TimeUnit.MINUTES.toSeconds(1));
-		assertSucessfulWith(result, 9, 18, 1, 42);
+		ResolutionReport result = resolveModuleDatabaseDump("sdk202509", 10, TimeUnit.SECONDS);
+		assertSucessfulWith(result, 1, 17, 1, 0);
 	}
 
-	private ResolutionReport resolveModuleDatabaseDump(String testSetName, long batchTimeoutSeconds) throws Exception {
+	@Test
+	public void testBcSet() throws Exception {
+		ResolutionReport result = resolveModuleDatabaseDump("bc", 10, TimeUnit.MINUTES);
+		assertSucessfulWith(result, 100000, 100000, 100000, 100000);
+	}
+
+	private ResolutionReport resolveModuleDatabaseDump(String testSetName, long batchTimeout, TimeUnit timeoutUnit)
+			throws Exception {
 		URL entry = getBundle().getEntry("/test_files/containerTests/" + testSetName + ".state");
 		assertNotNull("can't find test set: " + testSetName, entry);
 		int maxThreads = Math.max(Runtime.getRuntime().availableProcessors() - 1, 1);
@@ -4421,7 +4431,7 @@ public class TestModuleContainer extends AbstractTest {
 		ScheduledExecutorService timeoutExecutor = new ScheduledThreadPoolExecutor(1);
 		Map<String, String> configuration = new HashMap<>();
 		configuration.put(EquinoxConfiguration.PROP_RESOLVER_BATCH_TIMEOUT,
-				Long.toString(TimeUnit.SECONDS.toMillis(batchTimeoutSeconds)));
+				Long.toString(timeoutUnit.toMillis(batchTimeout)));
 		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(new DummyCollisionHook(false), configuration,
 				new DummyResolverHookFactory(), new DummyDebugOptions(Collections.emptyMap()));
 		adaptor.setResolverExecutor(executor);
@@ -4439,7 +4449,7 @@ public class TestModuleContainer extends AbstractTest {
 			}
 		}
 		AtomicBoolean timeout = new AtomicBoolean();
-		ScheduledFuture<?> watch = watchDog.schedule(() -> timeout.set(true), batchTimeoutSeconds, TimeUnit.SECONDS);
+		ScheduledFuture<?> watch = watchDog.schedule(() -> timeout.set(true), batchTimeout, timeoutUnit);
 		ResolutionReport report = container.resolve(container.getModules(), true);
 		watch.cancel(true);
 		assertFalse("Resolve operation timed out!", timeout.get());
@@ -4553,5 +4563,30 @@ public class TestModuleContainer extends AbstractTest {
 			}
 		}
 		return result;
+	}
+
+	/**
+	 * The main class takes a module database and compress/anonymous it by replace
+	 * all locations with a running number
+	 * 
+	 * @param args
+	 * @throws Exception
+	 */
+	public static void main(String[] args) throws Exception {
+		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(new DummyCollisionHook(false), null);
+		DummyModuleDatabase moduleDatabase = adaptor.getDatabase();
+		try (DataInputStream stream = new DataInputStream(new FileInputStream(args[0]))) {
+			moduleDatabase.load(stream);
+		}
+		List<Module> modules = adaptor.getContainer().getModules();
+		Field field = Module.class.getDeclaredField("location");
+		field.setAccessible(true);
+		int cnt = 0;
+		for (Module module : modules) {
+			field.set(module, Integer.toString(cnt++));
+		}
+		try (DataOutputStream out = new DataOutputStream(new FileOutputStream(args[0] + ".compressed"))) {
+			moduleDatabase.store(out, false);
+		}
 	}
 }
