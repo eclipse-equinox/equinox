@@ -1,0 +1,94 @@
+--- a/eclipse.platform.common/bundles/org.eclipse.platform.doc.isv/reference/misc/runtime-options.html
++++ b/eclipse.platform.common/bundles/org.eclipse.platform.doc.isv/reference/misc/runtime-options.html
+@@ -XXX,XX +XXX,XX @@ results in a value of
+ <dl>
+ <dt>@launcher.dir</dt>
+ <dd>
+-    Directs Eclipse to compute a location value relative to the directory containing the Eclipse launcher binary. @launcher.dir can be followed by additional path segments. In all cases, the string "@location.dir" is simply replaced with the parent directory of the path pointed to by the Java "eclipse.launcher" System property. For example, setting
++    Directs Eclipse to compute a location value relative to the directory containing the Eclipse launcher binary. @launcher.dir can be followed by additional path segments. In all cases, the string "@launcher.dir" is simply replaced with the parent directory of the path pointed to by the Java "eclipse.launcher" System property. For example, setting
+     <pre>
+         osgi.install.area=@launcher.dir/../../../pool
+     </pre>
+@@ -XXX,XX +XXX,XX @@ results in a value of
+ </dd>
+ <dt>@user.home</dt>
+ <dd>
+-    Directs Eclipse to compute a location value relative to the user's home directory. @user.home can be followed by additional path segments. In all cases, the string "@user.home" is simply replaced with the value of the Java "user.home" System property. For example, setting
++    Directs Eclipse to compute a location value relative to the user's home directory. @user.home can be followed by additional path segments. In all cases, the string "@user.home" is simply replaced with the value of the Java "user.home" System property. For example, setting
+     <pre>
+         osgi.instance.area=@user.home/myWorkspace
+     </pre>
+@@ -XXX,XX +XXX,XX @@ results in a value of
+ </dd>
+ <dt>@user.dir</dt>
+ <dd>
+-    Directs Eclipse to compute a location value relative to the current working directory. @user.dir can be followed by additional path segments. In all cases, the string "@user.dir" is simply replaced with the value of the Java "user.dir" System property. For example, setting
++    Directs Eclipse to compute a location value relative to the current working directory. @user.dir can be followed by additional path segments. In all cases, the string "@user.dir" is simply replaced with the value of the Java "user.dir" System property. For example, setting
+     <pre>
+         osgi.instance.area=@user.dir/myWorkspace
+     </pre>
+@@ -XXX,XX +XXX,XX @@ results in a value of
+         file:/usr/share/eclipse/myWorkspace
+     </pre>
+ </dd>
++<dt>@user.data</dt>
++<dd>
++    Directs Eclipse to compute a location value relative to the user's application data directory. @user.data can be followed by additional path segments. The behavior is OS-specific:
++    <ul>
++        <li><strong>Windows:</strong> Maps to <code>%APPDATA%</code> (e.g., <code>C:\Users\username\AppData\Roaming</code>)</li>
++        <li><strong>Linux/Unix:</strong> Maps to <code>$HOME</code> with the first path segment prefixed with a dot to make it hidden (e.g., <code>/home/username/.myApp</code>)</li>
++        <li><strong>macOS:</strong> Maps to the user's Application Support directory (e.g., <code>~/Library/Application Support</code>)</li>
++    </ul>
++    For example, setting
++    <pre>
++        osgi.instance.area=@user.data/myApp/workspace
++    </pre>
++    results in a value of:
++    <ul>
++        <li><strong>Windows:</strong> <code>file:/C:/Users/bob/AppData/Roaming/myApp/workspace</code></li>
++        <li><strong>Linux:</strong> <code>file:/home/bob/.myApp/workspace</code></li>
++        <li><strong>macOS:</strong> <code>file:/Users/bob/Library/Application Support/myApp/workspace</code></li>
++    </ul>
++    Note: On Linux/Unix systems, only the first path segment after @user.data is made hidden (prefixed with a dot).
++</dd>
++<dt>@user.data.shared</dt>
++<dd>
++    Directs Eclipse to compute a location value relative to the shared application data directory. @user.data.shared can be followed by additional path segments. The behavior is OS-specific:
++    <ul>
++        <li><strong>Windows:</strong> Maps to <code>%PROGRAMDATA%</code> (e.g., <code>C:\ProgramData</code>)</li>
++        <li><strong>Linux/Unix:</strong> Maps to <code>/srv</code></li>
++        <li><strong>macOS:</strong> Maps to the local (system-wide) Application Support directory (e.g., <code>/Library/Application Support</code>)</li>
++    </ul>
++    For example, setting
++    <pre>
++        osgi.configuration.area=@user.data.shared/myApp/config
++    </pre>
++    results in a value of:
++    <ul>
++        <li><strong>Windows:</strong> <code>file:/C:/ProgramData/myApp/config</code></li>
++        <li><strong>Linux:</strong> <code>file:/srv/myApp/config</code></li>
++        <li><strong>macOS:</strong> <code>file:/Library/Application Support/myApp/config</code></li>
++    </ul>
++</dd>
++<dt>@user.documents</dt>
++<dd>
++    Directs Eclipse to compute a location value relative to the user's documents directory. @user.documents can be followed by additional path segments. The behavior is OS-specific:
++    <ul>
++        <li><strong>Windows:</strong> Maps to the user's Documents folder (e.g., <code>C:\Users\username\Documents</code>)</li>
++        <li><strong>Linux/Unix:</strong> Maps to <code>$HOME</code></li>
++        <li><strong>macOS:</strong> Maps to the user's Documents directory (e.g., <code>~/Documents</code>)</li>
++    </ul>
++    For example, setting
++    <pre>
++        osgi.instance.area=@user.documents/MyEclipseProjects
++    </pre>
++    results in a value of:
++    <ul>
++        <li><strong>Windows:</strong> <code>file:/C:/Users/bob/Documents/MyEclipseProjects</code></li>
++        <li><strong>Linux:</strong> <code>file:/home/bob/MyEclipseProjects</code></li>
++        <li><strong>macOS:</strong> <code>file:/Users/bob/Documents/MyEclipseProjects</code></li>
++    </ul>
++</dd>
+ </dl>
+ 
+ </body>
