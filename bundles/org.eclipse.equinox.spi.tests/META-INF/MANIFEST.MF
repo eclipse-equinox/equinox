@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Tests
+Bundle-SymbolicName: org.eclipse.equinox.spi.tests
+Bundle-Version: 1.0.0.qualifier
+Export-Package: org.eclipse.equinox.spi.tests.service;x-internal:=true
+Automatic-Module-Name: org.eclipse.equinox.spi.tests
+Bundle-RequiredExecutionEnvironment: JavaSE-21
+Service-Component: OSGI-INF/org.eclipse.equinox.spi.tests.impl.TestServiceConsumerImpl.xml
+Bundle-ActivationPolicy: lazy
+Import-Package: org.junit.jupiter.api;version="[5.14.0,6.0.0)",
+ org.junit.jupiter.api.function;version="[5.14.0,6.0.0)",
+ org.junit.jupiter.api.io;version="[5.14.0,6.0.0)"
+Require-Bundle: org.eclipse.osgi
+Require-Capability: osgi.extender;filter:="(osgi.extender=osgi.component)"
