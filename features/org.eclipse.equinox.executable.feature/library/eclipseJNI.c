@@ -34,7 +34,10 @@ static JNINativeMethod natives[] = {{"_update_splash", "()V", (void *)&update_sp
 									{"_set_launcher_info", "(Ljava/lang/String;Ljava/lang/String;)V", (void *)&set_launcher_info},
 									{"_show_splash", "(Ljava/lang/String;)V", (void *)&show_splash},
 									{"_takedown_splash", "()V", (void *)&takedown_splash},
-									{"_get_os_recommended_folder", "()Ljava/lang/String;", (void *)&get_os_recommended_folder}};
+									{"_get_os_recommended_folder", "()Ljava/lang/String;", (void *)&get_os_recommended_folder},
+									{"_get_os_user_data_directory", "()Ljava/lang/String;", (void *)&get_os_user_data_directory},
+									{"_get_os_user_data_shared_directory", "()Ljava/lang/String;", (void *)&get_os_user_data_shared_directory},
+									{"_get_os_user_documents_directory", "()Ljava/lang/String;", (void *)&get_os_user_documents_directory}};
 
 /* local methods */
 static jstring newJavaString(JNIEnv *env, _TCHAR * str);
@@ -144,6 +147,36 @@ JNIEXPORT jstring JNICALL get_os_recommended_folder(JNIEnv * env, jobject obj){
 #else
 	return NULL;
 #endif
+}
+
+JNIEXPORT jstring JNICALL get_os_user_data_directory(JNIEnv * env, jobject obj){
+	_TCHAR* dir = getOSUserDataDirectory();
+	if (dir != NULL) {
+		jstring result = newJavaString(env, dir);
+		free(dir);
+		return result;
+	}
+	return NULL;
+}
+
+JNIEXPORT jstring JNICALL get_os_user_data_shared_directory(JNIEnv * env, jobject obj){
+	_TCHAR* dir = getOSUserDataSharedDirectory();
+	if (dir != NULL) {
+		jstring result = newJavaString(env, dir);
+		free(dir);
+		return result;
+	}
+	return NULL;
+}
+
+JNIEXPORT jstring JNICALL get_os_user_documents_directory(JNIEnv * env, jobject obj){
+	_TCHAR* dir = getOSUserDocumentsDirectory();
+	if (dir != NULL) {
+		jstring result = newJavaString(env, dir);
+		free(dir);
+		return result;
+	}
+	return NULL;
 }
 
 /*

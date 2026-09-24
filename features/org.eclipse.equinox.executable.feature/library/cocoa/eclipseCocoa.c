@@ -620,3 +620,30 @@ _TCHAR* getFolderForApplicationData() {
 	NSString* appSupport = getApplicationSupport();
 	return (_TCHAR*)[[NSString stringWithFormat:@"%@/%@_%s", appSupport, bundleId, getUUID()] UTF8String];
 }
+
+_TCHAR* getOSUserDataDirectory() {
+	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
+	if ([paths count] > 0) {
+		NSString *appSupport = [paths objectAtIndex:0];
+		return strdup([appSupport UTF8String]);
+	}
+	return NULL;
+}
+
+_TCHAR* getOSUserDataSharedDirectory() {
+	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSLocalDomainMask, YES);
+	if ([paths count] > 0) {
+		NSString *appSupport = [paths objectAtIndex:0];
+		return strdup([appSupport UTF8String]);
+	}
+	return NULL;
+}
+
+_TCHAR* getOSUserDocumentsDirectory() {
+	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+	if ([paths count] > 0) {
+		NSString *documents = [paths objectAtIndex:0];
+		return strdup([documents UTF8String]);
+	}
+	return NULL;
+}
