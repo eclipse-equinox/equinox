@@ -57,7 +57,7 @@ import org.osgi.framework.namespace.HostNamespace;
  * {@link ClasspathEntry} objects for a module class loader implementation.
  * Additional behavior may be added to a classpath manager by configuring a
  * {@link ClassLoaderHook}.
- * 
+ *
  * @see ModuleClassLoader
  * @see ClassLoaderHook
  * @since 3.2
@@ -81,12 +81,12 @@ public class ClasspathManager {
 	private ArrayMap<String, String> loadedLibraries = null;
 	// used to detect recusive defineClass calls for the same class on the same
 	// class loader (bug 345500)
-	private ThreadLocal<DefineContext> currentDefineContext = new ThreadLocal<>();
+	private final ThreadLocal<DefineContext> currentDefineContext = new ThreadLocal<>();
 
 	/**
 	 * Constructs a classpath manager for the given generation and module class
 	 * loader
-	 * 
+	 *
 	 * @param generation  the host generation for this classpath manager
 	 * @param classloader the ModuleClassLoader for this classpath manager
 	 */
@@ -186,7 +186,7 @@ public class ClasspathManager {
 	 * methods. This allows class loading hooks to add additional ClasspathEntry
 	 * objects to the result for the requested classpath. Then the local host
 	 * classpath entries and attached fragment classpath entries are searched.
-	 * 
+	 *
 	 * @param result           a list of ClasspathEntry objects. This list is used
 	 *                         to add new ClasspathEntry objects to.
 	 * @param cp               the requested classpath.
@@ -213,7 +213,7 @@ public class ClasspathManager {
 	 * host classpath entries are searched first and then attached fragments
 	 * classpath entries are searched. The search stops once the first classpath
 	 * entry is found.
-	 * 
+	 *
 	 * @param result      a list of ClasspathEntry objects. This list is used to add
 	 *                    new ClasspathEntry objects to.
 	 * @param cp          the requested classpath.
@@ -256,9 +256,10 @@ public class ClasspathManager {
 	private boolean addEclipseClassPathEntry(ArrayList<ClasspathEntry> result, String cp, ClasspathManager hostManager,
 			Generation source) {
 		String var = hasPrefix(cp);
-		if (var != null)
+		if (var != null) {
 			// find internal library using eclipse predefined vars
 			return addInternalClassPath(var, result, cp, hostManager, source);
+		}
 		if (cp.startsWith(NativeCodeFinder.EXTERNAL_LIB_PREFIX)) {
 			cp = cp.substring(NativeCodeFinder.EXTERNAL_LIB_PREFIX.length());
 			// find external library using system property substitution
@@ -275,19 +276,22 @@ public class ClasspathManager {
 	private boolean addInternalClassPath(String var, ArrayList<ClasspathEntry> cpEntries, String cp,
 			ClasspathManager hostManager, Generation source) {
 		EquinoxConfiguration configuration = source.getBundleInfo().getStorage().getConfiguration();
-		if (var.equals("ws")) //$NON-NLS-1$
+		if (var.equals("ws")) { //$NON-NLS-1$
 			return ClasspathManager.addStandardClassPathEntry(cpEntries,
-					"ws/" + configuration.getWS() + cp.substring(4), hostManager, source); //$NON-NLS-1$
-		if (var.equals("os")) //$NON-NLS-1$
+			"ws/" + configuration.getWS() + cp.substring(4), hostManager, source); //$NON-NLS-1$
+		}
+		if (var.equals("os")) { //$NON-NLS-1$
 			return ClasspathManager.addStandardClassPathEntry(cpEntries,
-					"os/" + configuration.getOS() + cp.substring(4), hostManager, source); //$NON-NLS-1$
+			"os/" + configuration.getOS() + cp.substring(4), hostManager, source); //$NON-NLS-1$
+		}
 		if (var.equals("nl")) { //$NON-NLS-1$
 			cp = cp.substring(4);
 			List<String> NL_JAR_VARIANTS = source.getBundleInfo().getStorage()
 					.getConfiguration().ECLIPSE_NL_JAR_VARIANTS;
 			for (String nlVariant : NL_JAR_VARIANTS) {
-				if (ClasspathManager.addStandardClassPathEntry(cpEntries, "nl/" + nlVariant + cp, hostManager, source)) //$NON-NLS-1$
+				if (ClasspathManager.addStandardClassPathEntry(cpEntries, "nl/" + nlVariant + cp, hostManager, source)) { //$NON-NLS-1$
 					return true;
+				}
 			}
 		}
 		return false;
@@ -295,19 +299,22 @@ public class ClasspathManager {
 
 	// return a String representing the string found between the $s
 	private static String hasPrefix(String libPath) {
-		if (libPath.startsWith("$ws$")) //$NON-NLS-1$
+		if (libPath.startsWith("$ws$")) { //$NON-NLS-1$
 			return "ws"; //$NON-NLS-1$
-		if (libPath.startsWith("$os$")) //$NON-NLS-1$
+		}
+		if (libPath.startsWith("$os$")) { //$NON-NLS-1$
 			return "os"; //$NON-NLS-1$
-		if (libPath.startsWith("$nl$")) //$NON-NLS-1$
+		}
+		if (libPath.startsWith("$nl$")) { //$NON-NLS-1$
 			return "nl"; //$NON-NLS-1$
+		}
 		return null;
 	}
 
 	/**
 	 * Creates a new ClasspathEntry object for the requested classpath if the source
 	 * exists.
-	 * 
+	 *
 	 * @param cp           the requested classpath.
 	 * @param cpGeneration the source generation to search for the classpath
 	 * @return a new ClasspathEntry for the requested classpath or null if the
@@ -318,31 +325,34 @@ public class ClasspathManager {
 		File file;
 		BundleEntry cpEntry = cpGeneration.getBundleFile().getEntry(cp);
 		// check for internal library directories in a bundle jar file
-		if (cpEntry != null && cpEntry.getName().endsWith("/")) //$NON-NLS-1$
+		if (cpEntry != null && cpEntry.getName().endsWith("/")) { //$NON-NLS-1$
 			bundlefile = createBundleFile(cp, cpGeneration);
-		// check for internal library jars
-		else if ((file = cpGeneration.getBundleFile().getFile(cp, false)) != null)
+		} else if ((file = cpGeneration.getBundleFile().getFile(cp, false)) != null) {
 			bundlefile = createBundleFile(file, cpGeneration);
-		if (bundlefile != null)
+		}
+		if (bundlefile != null) {
 			return createClassPathEntry(bundlefile, cpGeneration);
+		}
 		return null;
 	}
 
 	/**
 	 * Uses the requested classpath as an absolute path to locate a source for a new
 	 * ClasspathEntry.
-	 * 
+	 *
 	 * @param cp           the requested classpath
 	 * @param cpGeneration the source generation to search for the classpath
 	 * @return a classpath entry which uses an absolut path as a source
 	 */
 	public ClasspathEntry getExternalClassPath(String cp, Generation cpGeneration) {
 		File file = new File(cp);
-		if (!file.isAbsolute())
+		if (!file.isAbsolute()) {
 			return null;
+		}
 		BundleFile bundlefile = createBundleFile(file, cpGeneration);
-		if (bundlefile != null)
+		if (bundlefile != null) {
 			return createClassPathEntry(bundlefile, cpGeneration);
+		}
 		return null;
 	}
 
@@ -375,10 +385,11 @@ public class ClasspathManager {
 
 	private ClasspathEntry createClassPathEntry(BundleFile bundlefile, Generation source) {
 		ClasspathEntry entry;
-		if (classloader != null)
+		if (classloader != null) {
 			entry = classloader.createClassPathEntry(bundlefile, source);
-		else
+		} else {
 			entry = new ClasspathEntry(bundlefile, source.getDomain(), source);
+		}
 		return entry;
 	}
 
@@ -391,7 +402,7 @@ public class ClasspathManager {
 	 * configured class loading hooks
 	 * {@link ClassLoaderHook#postFindLocalResource(String, URL, ClasspathManager)}
 	 * methods.
-	 * 
+	 *
 	 * @param resource the requested resource name.
 	 * @return the requested resource URL or null if the resource does not exist
 	 */
@@ -472,7 +483,7 @@ public class ClasspathManager {
 	/**
 	 * Finds the local resources by searching the ClasspathEntry objects of the
 	 * classpath manager.
-	 * 
+	 *
 	 * @param resource the requested resource name.
 	 * @return an enumeration of the the requested resources
 	 */
@@ -498,8 +509,9 @@ public class ClasspathManager {
 			findLocalResources(resource, fragCP.getEntries(), m, classPathIndex, resources);
 		}
 
-		if (resources.size() > 0)
+		if (resources.size() > 0) {
 			return Collections.enumeration(resources);
+		}
 		return Collections.emptyEnumeration();
 	}
 
@@ -519,7 +531,7 @@ public class ClasspathManager {
 	/**
 	 * Finds a local entry by searching the ClasspathEntry objects of the classpath
 	 * manager.
-	 * 
+	 *
 	 * @param path the requested entry path.
 	 * @return the requested entry or null if the entry does not exist
 	 */
@@ -530,7 +542,7 @@ public class ClasspathManager {
 	/**
 	 * Finds a local entry by searching the ClasspathEntry with the specified class
 	 * path index.
-	 * 
+	 *
 	 * @param path           the requested entry path.
 	 * @param classPathIndex the index of the ClasspathEntry to search
 	 * @return the requested entry or null if the entry does not exist
@@ -597,7 +609,7 @@ public class ClasspathManager {
 	 * Finally all the configured class loading hooks
 	 * {@link ClassLoaderHook#postFindLocalClass(String, Class, ClasspathManager)}
 	 * methods are called.
-	 * 
+	 *
 	 * @param classname the requested class name.
 	 * @return the requested class or null if the class does not exist
 	 * @throws ClassNotFoundException if a ClassLoaderHook prevents the requested
@@ -611,8 +623,9 @@ public class ClasspathManager {
 				hook.preFindLocalClass(classname, this);
 			}
 			result = classloader.publicFindLoaded(classname);
-			if (result != null)
+			if (result != null) {
 				return result;
+			}
 			result = findLocalClassImpl(classname, hooks);
 			return result;
 		} finally {
@@ -673,16 +686,18 @@ public class ClasspathManager {
 		String filename = name.replace('.', '/').concat(".class"); //$NON-NLS-1$
 
 		BundleEntry entry = classpathEntry.findEntry(filename);
-		if (entry == null)
+		if (entry == null) {
 			return null;
+		}
 
 		byte[] classbytes;
 		try {
 			classbytes = entry.getBytes();
 		} catch (IOException e) {
-			if (loaderTrace != null)
+			if (loaderTrace != null) {
 				debug.trace(loaderTrace,
 						"  IOException reading " + filename + " from " + classpathEntry.getBundleFile()); //$NON-NLS-1$ //$NON-NLS-2$
+			}
 			throw (LinkageError) new LinkageError("Error reading class bytes: " + name).initCause(e); //$NON-NLS-1$
 		}
 		if (loaderTrace != null) {
@@ -717,7 +732,7 @@ public class ClasspathManager {
 	 * method to define the class. After that, the class loader hooks are called to
 	 * announce the class definition by calling
 	 * {@link ClassLoaderHook#recordClassDefine(String, Class, byte[], ClasspathEntry, BundleEntry, ClasspathManager)}.
-	 * 
+	 *
 	 * @param name           the name of the class to define
 	 * @param classbytes     the class bytes
 	 * @param classpathEntry the classpath entry used to load the class bytes
@@ -852,7 +867,7 @@ public class ClasspathManager {
 
 	/**
 	 * Returns the fragment classpaths of this classpath manager
-	 * 
+	 *
 	 * @return the fragment classpaths of this classpath manager
 	 */
 	public FragmentClasspath[] getFragmentClasspaths() {
@@ -861,7 +876,7 @@ public class ClasspathManager {
 
 	/**
 	 * Returns the host classpath entries for this classpath manager
-	 * 
+	 *
 	 * @return the host classpath entries for this classpath manager
 	 */
 	public ClasspathEntry[] getHostClasspathEntries() {
@@ -870,14 +885,15 @@ public class ClasspathManager {
 
 	/**
 	 * Finds a library for the bundle represented by this class path manager
-	 * 
+	 *
 	 * @param libname the library name
 	 * @return The absolution path to the library or null if not found
 	 */
 	public String findLibrary(String libname) {
 		synchronized (this) {
-			if (loadedLibraries == null)
+			if (loadedLibraries == null) {
 				loadedLibraries = new ArrayMap<>(1);
+			}
 		}
 		synchronized (loadedLibraries) {
 			// we assume that each classloader will load a small number of of libraries
@@ -885,12 +901,14 @@ public class ClasspathManager {
 			// libraries
 			// each element is a String[2], each array is {"libname", "libpath"}
 			String libpath = loadedLibraries.get(libname);
-			if (libpath != null)
+			if (libpath != null) {
 				return libpath;
+			}
 
 			libpath = findLibrary0(libname);
-			if (libpath != null)
+			if (libpath != null) {
 				loadedLibraries.put(libname, libpath);
+			}
 			return libpath;
 		}
 	}
@@ -941,13 +959,15 @@ public class ClasspathManager {
 		generations.add(generation);
 		// next get the attached fragments bundle files
 		FragmentClasspath[] currentFragments = getFragmentClasspaths();
-		for (FragmentClasspath fragmentClasspath : currentFragments)
+		for (FragmentClasspath fragmentClasspath : currentFragments) {
 			generations.add(fragmentClasspath.getGeneration());
+		}
 
 		// now search over all the bundle files
 		Enumeration<URL> eURLs = Storage.findEntries(generations, path, filePattern, options);
-		if (eURLs == null)
+		if (eURLs == null) {
 			return Collections.emptyList();
+		}
 		return Collections.unmodifiableList(Collections.list(eURLs));
 	}
 

@@ -19,7 +19,7 @@ import java.io.*;
  * Internal class.
  */
 public class Locker_JavaIo implements Locker {
-	private File lockFile;
+	private final File lockFile;
 	private RandomAccessFile lockRAF;
 
 	public Locker_JavaIo(File lockFile) {
@@ -30,10 +30,12 @@ public class Locker_JavaIo implements Locker {
 	public synchronized boolean lock() throws IOException {
 		//if the lock file already exists, try to delete,
 		//assume failure means another eclipse has it open
-		if (lockFile.exists())
+		if (lockFile.exists()) {
 			lockFile.delete();
-		if (lockFile.exists())
+		}
+		if (lockFile.exists()) {
 			return false;
+		}
 
 		//open the lock file so other instances can't co-exist
 		lockRAF = new RandomAccessFile(lockFile, "rw"); //$NON-NLS-1$
@@ -58,14 +60,16 @@ public class Locker_JavaIo implements Locker {
 		} catch (IOException e) {
 			//don't complain, we're making a best effort to clean up
 		}
-		if (lockFile != null)
+		if (lockFile != null) {
 			lockFile.delete();
+		}
 	}
 
 	@Override
 	public synchronized boolean isLocked() throws IOException {
-		if (lockRAF != null)
+		if (lockRAF != null) {
 			return true;
+		}
 		try {
 			return !lock();
 		} finally {

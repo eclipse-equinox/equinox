@@ -60,10 +60,12 @@ public class ManifestLocalization {
 	}
 
 	Dictionary<String, String> getHeaders(String localeString) {
-		if (localeString == null)
+		if (localeString == null) {
 			localeString = Locale.getDefault().toString();
-		if (localeString.length() == 0)
+		}
+		if (localeString.length() == 0) {
 			return rawHeaders;
+		}
 		boolean isDefaultLocale = localeString.equals(Locale.getDefault().toString());
 		Dictionary<String, String> currentDefault = defaultLocaleHeaders;
 		if (isDefaultLocale && currentDefault != null) {
@@ -71,8 +73,9 @@ public class ManifestLocalization {
 		}
 		if (generation.getRevision().getRevisions().getModule().getState().equals(Module.State.UNINSTALLED)) {
 			// defaultLocaleHeaders should have been initialized on uninstall
-			if (currentDefault != null)
+			if (currentDefault != null) {
 				return currentDefault;
+			}
 			return rawHeaders;
 		}
 		ResourceBundle localeProperties = getResourceBundle(localeString, isDefaultLocale);
@@ -136,12 +139,14 @@ public class ManifestLocalization {
 	 */
 	ResourceBundle getResourceBundle(String localeString, boolean isDefaultLocale) {
 		BundleResourceBundle resourceBundle = lookupResourceBundle(localeString);
-		if (isDefaultLocale)
+		if (isDefaultLocale) {
 			return (ResourceBundle) resourceBundle;
+		}
 		// need to determine if this is resource bundle is an empty stem
 		// if it is then the default locale should be used
-		if (resourceBundle == null || resourceBundle.isStemEmpty())
+		if (resourceBundle == null || resourceBundle.isStemEmpty()) {
 			return (ResourceBundle) lookupResourceBundle(Locale.getDefault().toString());
+		}
 		return (ResourceBundle) resourceBundle;
 	}
 
@@ -151,12 +156,14 @@ public class ManifestLocalization {
 		// getting the first value from the raw headers forces the manifest to be parsed
 		// (bug 332039)
 		String localizationHeader = rawHeaders.get(Constants.BUNDLE_LOCALIZATION);
-		if (localizationHeader == null)
+		if (localizationHeader == null) {
 			localizationHeader = Constants.BUNDLE_LOCALIZATION_DEFAULT_BASENAME;
+		}
 
 		BundleResourceBundle result = cache.get(localeString);
-		if (result != null)
+		if (result != null) {
 			return result.isEmpty() ? null : result;
+		}
 
 		// Collect all the necessary inputstreams to create the resource bundle without
 		// holding any locks. Finding resources and inputstreams from the wirings
@@ -206,8 +213,9 @@ public class ManifestLocalization {
 				if (varientBundle == null) {
 					varientBundle = new EmptyResouceBundle(nlVarients[i]);
 				}
-				if (parent != null)
+				if (parent != null) {
 					varientBundle.setParent((ResourceBundle) parent);
+				}
 				cache.put(nlVarients[i], varientBundle);
 				parent = varientBundle;
 			}
@@ -300,17 +308,20 @@ public class ManifestLocalization {
 
 		@Override
 		public boolean isEmpty() {
-			if (parent == null)
+			if (parent == null) {
 				return true;
+			}
 			return ((BundleResourceBundle) parent).isEmpty();
 		}
 
 		@Override
 		public boolean isStemEmpty() {
-			if (defaultRoot.equals(localeString))
+			if (defaultRoot.equals(localeString)) {
 				return false;
-			if (parent == null)
+			}
+			if (parent == null) {
 				return true;
+			}
 			return ((BundleResourceBundle) parent).isStemEmpty();
 		}
 	}

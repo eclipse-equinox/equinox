@@ -27,7 +27,7 @@ package org.eclipse.osgi.service.resolver;
  * allowed to resolve and a ResolverError of type
  * {@link ResolverError#DISABLED_BUNDLE} must be added to the state.
  * </p>
- * 
+ *
  * @see State
  * @since 3.4
  */
@@ -38,14 +38,15 @@ public final class DisabledInfo {
 
 	/**
 	 * DisabledInfo constructor.
-	 * 
+	 *
 	 * @param policyName the name of the policy
 	 * @param message    the message, may be <code>null</code>
 	 * @param bundle     the bundle
 	 */
 	public DisabledInfo(String policyName, String message, BundleDescription bundle) {
-		if (policyName == null || bundle == null)
+		if (policyName == null || bundle == null) {
 			throw new IllegalArgumentException();
+		}
 		this.policyName = policyName;
 		this.message = message;
 		this.bundle = bundle;
@@ -53,7 +54,7 @@ public final class DisabledInfo {
 
 	/**
 	 * Returns the name of the policy which disabled the bundle.
-	 * 
+	 *
 	 * @return the name of the policy
 	 */
 	public String getPolicyName() {
@@ -62,7 +63,7 @@ public final class DisabledInfo {
 
 	/**
 	 * Returns the message describing the reason the bundle is disabled.
-	 * 
+	 *
 	 * @return the message
 	 */
 	public String getMessage() {
@@ -71,7 +72,7 @@ public final class DisabledInfo {
 
 	/**
 	 * Returns the bundle which is disabled
-	 * 
+	 *
 	 * @return the bundle which is disabled
 	 */
 	public BundleDescription getBundle() {
@@ -80,14 +81,17 @@ public final class DisabledInfo {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == this)
+		if (obj == this) {
 			return true;
-		if (!(obj instanceof DisabledInfo))
+		}
+		if (!(obj instanceof DisabledInfo)) {
 			return false;
+		}
 		DisabledInfo other = (DisabledInfo) obj;
 		if (getBundle() == other.getBundle() && getPolicyName().equals(other.getPolicyName())) {
-			if (getMessage() == null ? other.getMessage() == null : getMessage().equals(other.getMessage()))
+			if (getMessage() == null ? other.getMessage() == null : getMessage().equals(other.getMessage())) {
 				return true;
+			}
 		}
 		return false;
 	}

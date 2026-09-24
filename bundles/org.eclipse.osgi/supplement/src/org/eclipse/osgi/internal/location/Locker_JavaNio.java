@@ -49,17 +49,19 @@ public class Locker_JavaNio implements Locker {
 			fileLock = raFile.getChannel().tryLock(0, 1, false);
 		} catch (IOException ioe) {
 			// print exception if debugging
-			if (debug)
+			if (debug) {
 				System.out.println(NLS.bind(Msg.location_cannotLock, lockFile));
+			}
 			// produce a more specific message for clients
-			String specificMessage = NLS.bind(Msg.location_cannotLockNIO, new Object[] {lockFile, ioe.getMessage(), "\"-D" + LocationHelper.PROP_OSGI_LOCKING + "=none\""}); //$NON-NLS-1$ //$NON-NLS-2$
+			String specificMessage = NLS.bind(Msg.location_cannotLockNIO, lockFile, ioe.getMessage(), "\"-D" + LocationHelper.PROP_OSGI_LOCKING + "=none\""); //$NON-NLS-1$ //$NON-NLS-2$
 			throw new IOException(specificMessage, ioe);
 		} catch (OverlappingFileLockException e) {
 			// handle it as null result
 			fileLock = null;
 		} finally {
-			if (fileLock != null)
+			if (fileLock != null) {
 				return true;
+			}
 			raFile.close();
 			raFile = null;
 		}
@@ -88,8 +90,9 @@ public class Locker_JavaNio implements Locker {
 
 	@Override
 	public synchronized boolean isLocked() throws IOException {
-		if (fileLock != null)
+		if (fileLock != null) {
 			return true;
+		}
 		try {
 			RandomAccessFile temp = new RandomAccessFile(lockFile, "rw"); //$NON-NLS-1$
 			FileLock tempLock = null;
@@ -101,8 +104,9 @@ public class Locker_JavaNio implements Locker {
 				try {
 					tempLock = temp.getChannel().tryLock(0, 1, false);
 				} catch (IOException ioe) {
-					if (debug)
+					if (debug) {
 						System.out.println(NLS.bind(Msg.location_cannotLock, lockFile));
+					}
 					// produce a more specific message for clients
 					String specificMessage = NLS.bind(Msg.location_cannotLockNIO, lockFile, ioe.getMessage(), "\"-D" + LocationHelper.PROP_OSGI_LOCKING + "=none\""); //$NON-NLS-1$ //$NON-NLS-2$
 					throw new IOException(specificMessage);

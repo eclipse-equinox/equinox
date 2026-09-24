@@ -28,7 +28,7 @@ import org.osgi.service.log.LogService;
 /**
  * This class has debug constants which can be used by the Framework
  * implementation and Adaptor implementations
- * 
+ *
  * @since 3.1
  */
 public class Debug implements DebugOptionsListener {
@@ -248,7 +248,7 @@ public class Debug implements DebugOptionsListener {
 
 	/**
 	 * Trace the message for the specified topic
-	 * 
+	 *
 	 * @param topic
 	 * @param message
 	 */
@@ -306,13 +306,14 @@ public class Debug implements DebugOptionsListener {
 
 	/**
 	 * Trace the throwable for the specified topic.
-	 * 
+	 *
 	 * @param topic
 	 * @param t
 	 */
 	public void traceThrowable(String topic, Throwable t) {
-		if (t == null)
+		if (t == null) {
 			return;
+		}
 		LogService current = logService;
 		if (current != null) {
 			current.getLogger(topic).trace(topic, t);

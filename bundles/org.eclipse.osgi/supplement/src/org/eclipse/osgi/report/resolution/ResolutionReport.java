@@ -28,9 +28,9 @@ import org.osgi.service.resolver.ResolutionException;
  * are gathered by a special type of {@link ResolverHook} which implements the
  * report {@link Listener} interface. The following example demonstrates how to
  * gather a resolution report for a list of bundles
- * 
+ *
  * <pre>
- * 
+ *
  * public static ResolutionReport getResolutionReport(Bundle[] bundles, BundleContext context) {
  * 	DiagReportListener reportListener = new DiagReportListener(bundles);
  * 	ServiceRegistration&lt;ResolverHookFactory&gt; hookReg = context.registerService(ResolverHookFactory.class,
@@ -44,11 +44,11 @@ import org.osgi.service.resolver.ResolutionException;
  * 		hookReg.unregister();
  * 	}
  * }
- * 
+ *
  * private static class DiagReportListener implements ResolverHookFactory {
  * 	private final Collection&lt;BundleRevision&gt; targetTriggers = new ArrayList&lt;BundleRevision&gt;();
  * 	volatile ResolutionReport report = null;
- * 
+ *
  * 	public DiagReportListener(Bundle[] bundles) {
  * 		for (Bundle bundle : bundles) {
  * 			BundleRevision revision = bundle.adapt(BundleRevision.class);
@@ -56,30 +56,30 @@ import org.osgi.service.resolver.ResolutionException;
  * 				targetTriggers.add(revision);
  * 			}
  * 		}
- * 
+ *
  * 	}
- * 
+ *
  * 	class DiagResolverHook implements ResolverHook, ResolutionReport.Listener {
- * 
+ *
  * 		public void handleResolutionReport(ResolutionReport report) {
  * 			DiagReportListener.this.report = report;
  * 		}
- * 
+ *
  * 		public void filterResolvable(Collection&lt;BundleRevision&gt; candidates) {
  * 		}
- * 
+ *
  * 		public void filterSingletonCollisions(BundleCapability singleton,
  * 				Collection&lt;BundleCapability&gt; collisionCandidates) {
  * 		}
- * 
+ *
  * 		public void filterMatches(BundleRequirement requirement, Collection&lt;BundleCapability&gt; candidates) {
  * 		}
- * 
+ *
  * 		public void end() {
  * 		}
- * 
+ *
  * 	}
- * 
+ *
  * 	public ResolverHook begin(Collection&lt;BundleRevision&gt; triggers) {
  * 		if (triggers.containsAll(targetTriggers)) {
  * 			// this is the triggers we are looking for
@@ -89,13 +89,13 @@ import org.osgi.service.resolver.ResolutionException;
  * 		// in the resolve process to gather the report
  * 		return null;
  * 	}
- * 
+ *
  * 	ResolutionReport getReport() {
  * 		return report;
  * 	}
  * }
  * </pre>
- * 
+ *
  * @since 3.10
  */
 @ProviderType

@@ -99,6 +99,7 @@ public final class BundleToJarInputStream extends InputStream {
 		return false;
 	}
 
+	@Override
 	public int read() throws IOException {
 		if (nextEntryInput != null) {
 			int result = nextEntryInput.read();

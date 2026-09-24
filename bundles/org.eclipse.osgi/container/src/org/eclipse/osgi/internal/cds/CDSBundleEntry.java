@@ -37,7 +37,7 @@ public class CDSBundleEntry extends BundleEntry {
 
 	/**
 	 * The constructor
-	 * 
+	 *
 	 * @param path       the path to the class file
 	 * @param classbytes the magic cookie bytes for the class in the shared cache
 	 * @param bundleFile the bundle file where the class comes from
@@ -59,7 +59,7 @@ public class CDSBundleEntry extends BundleEntry {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry#getFileURL() uses
 	 * the wrapped bundle file to get the actual file url to the content of the
 	 * class on disk.
@@ -73,7 +73,7 @@ public class CDSBundleEntry extends BundleEntry {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry#getInputStream()
 	 * wraps the classbytes into a ByteArrayInputStream. This should not be used by
 	 * classloading.
@@ -87,7 +87,7 @@ public class CDSBundleEntry extends BundleEntry {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry#getBytes() if
 	 * classbytes is not null, it returns the magic cookie for the shared class.
 	 * This is used to define the class during class loading. if classbytes is null,
@@ -100,7 +100,7 @@ public class CDSBundleEntry extends BundleEntry {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry#getLocalURL() uses
 	 * the wrapped bundle file to get the actual local url to the content of the
 	 * class on disk.

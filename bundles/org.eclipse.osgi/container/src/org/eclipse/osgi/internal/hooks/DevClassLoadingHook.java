@@ -52,12 +52,14 @@ public class DevClassLoadingHook extends ClassLoaderHook implements KeyedElement
 		// first check that we are in devmode for this sourcedata
 		String[] devClassPaths = !configuration.inDevelopmentMode() ? null
 				: configuration.getDevClassPath(sourceGeneration.getRevision());
-		if (devClassPaths == null || devClassPaths.length == 0)
+		if (devClassPaths == null || devClassPaths.length == 0) {
 			return false; // not in dev mode return
+		}
 		// check that dev classpath entries have not already been added; we mark this in
 		// the first entry below
-		if (!cpEntries.isEmpty() && cpEntries.get(0).getUserObject(KEY) != null)
+		if (!cpEntries.isEmpty() && cpEntries.get(0).getUserObject(KEY) != null) {
 			return false; // this source has already had its dev classpath entries added.
+		}
 
 		// get the specified classpath from the Bundle-ClassPath header to check for
 		// dups
@@ -97,8 +99,9 @@ public class DevClassLoadingHook extends ClassLoaderHook implements KeyedElement
 				} else {
 					// if in dev mode, try using the cp as an absolute path
 					// we assume absolute entries come from fragments. Find the source
-					if (fromFragment)
+					if (fromFragment) {
 						devCP = devCP.substring(0, devCP.length() - FRAGMENT.length());
+					}
 					Generation fragSource = findFragmentSource(sourceGeneration, devCP, hostmanager, fromFragment);
 					if (fragSource != null) {
 						ClasspathEntry entry = hostmanager.getExternalClassPath(devCP, fragSource);
@@ -113,19 +116,22 @@ public class DevClassLoadingHook extends ClassLoaderHook implements KeyedElement
 		// mark the first entry of the list.
 		// This way we can quickly tell that dev classpath entries have been added to
 		// the list
-		if (result && !cpEntries.isEmpty())
+		if (result && !cpEntries.isEmpty()) {
 			cpEntries.get(0).addUserObject(this);
+		}
 		return result;
 	}
 
 	private Generation findFragmentSource(Generation hostGeneration, String cp, ClasspathManager manager,
 			boolean fromFragment) {
-		if (hostGeneration != manager.getGeneration())
+		if (hostGeneration != manager.getGeneration()) {
 			return hostGeneration;
+		}
 
 		File file = new File(cp);
-		if (!file.isAbsolute())
+		if (!file.isAbsolute()) {
 			return hostGeneration;
+		}
 		FragmentClasspath[] fragCPs = manager.getFragmentClasspaths();
 		for (FragmentClasspath fragCP : fragCPs) {
 			BundleFile fragBase = fragCP.getGeneration().getBundleFile();

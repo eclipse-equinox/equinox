@@ -42,7 +42,7 @@ public abstract class PlurlStreamHandlerBase extends URLStreamHandler implements
 	 * Parse a URL using the {@code PlurlSetter} object. This method sets the
 	 * {@code plurlSetter} field with the specified {@code PlurlSetter} object and
 	 * then calls {@code parseURL(URL,String,int,int)}.
-	 * 
+	 *
 	 * @param setter The object on which the {@code setURL} method must be invoked
 	 *               for the specified URL.
 	 * @see "java.net.URLStreamHandler.parseURL"
@@ -55,7 +55,7 @@ public abstract class PlurlStreamHandlerBase extends URLStreamHandler implements
 
 	/**
 	 * This method calls {@code super.openConnection(URL, Proxy)}
-	 * 
+	 *
 	 * @see "java.net.URLStreamHandler.openConnection(URL, Proxy)"
 	 */
 	@Override
@@ -65,7 +65,7 @@ public abstract class PlurlStreamHandlerBase extends URLStreamHandler implements
 
 	/**
 	 * This method calls {@code super.toExternalForm}.
-	 * 
+	 *
 	 * @see "java.net.URLStreamHandler.toExternalForm"
 	 */
 	@Override
@@ -75,7 +75,7 @@ public abstract class PlurlStreamHandlerBase extends URLStreamHandler implements
 
 	/**
 	 * This method calls {@code super.equals(URL,URL)}.
-	 * 
+	 *
 	 * @see "java.net.URLStreamHandler.equals(URL,URL)"
 	 */
 	@Override
@@ -85,7 +85,7 @@ public abstract class PlurlStreamHandlerBase extends URLStreamHandler implements
 
 	/**
 	 * This method calls {@code super.getDefaultPort}.
-	 * 
+	 *
 	 * @see "java.net.URLStreamHandler.getDefaultPort"
 	 */
 	@Override
@@ -95,7 +95,7 @@ public abstract class PlurlStreamHandlerBase extends URLStreamHandler implements
 
 	/**
 	 * This method calls {@code super.getHostAddress}.
-	 * 
+	 *
 	 * @see "java.net.URLStreamHandler.getHostAddress"
 	 */
 	@Override
@@ -105,7 +105,7 @@ public abstract class PlurlStreamHandlerBase extends URLStreamHandler implements
 
 	/**
 	 * This method calls {@code super.hashCode(URL)}.
-	 * 
+	 *
 	 * @see "java.net.URLStreamHandler.hashCode(URL)"
 	 */
 	@Override
@@ -115,7 +115,7 @@ public abstract class PlurlStreamHandlerBase extends URLStreamHandler implements
 
 	/**
 	 * This method calls {@code super.hostsEqual}.
-	 * 
+	 *
 	 * @see "java.net.URLStreamHandler.hostsEqual"
 	 */
 	@Override
@@ -125,7 +125,7 @@ public abstract class PlurlStreamHandlerBase extends URLStreamHandler implements
 
 	/**
 	 * This method calls {@code super.sameFile}.
-	 * 
+	 *
 	 * @see "java.net.URLStreamHandler.sameFile"
 	 */
 	@Override
@@ -136,7 +136,7 @@ public abstract class PlurlStreamHandlerBase extends URLStreamHandler implements
 	/**
 	 * This method calls
 	 * {@code plurlSetter.setURL(URL,String,String,int,String,String,String,String)}.
-	 * 
+	 *
 	 * @see "java.net.URLStreamHandler.setURL(URL,String,String,int,String,String)"
 	 */
 	@SuppressWarnings("deprecation")
@@ -155,7 +155,7 @@ public abstract class PlurlStreamHandlerBase extends URLStreamHandler implements
 	 * This method calls
 	 * {@code realHandler.setURL(URL,String,String,int,String,String,String,String)}
 	 * .
-	 * 
+	 *
 	 * @see "java.net.URLStreamHandler.setURL(URL,String,String,int,String,String,String,String)"
 	 */
 	@Override

@@ -31,7 +31,7 @@ import org.osgi.framework.Version;
  * <p>
  * This interface is not intended to be implemented by clients.
  * </p>
- * 
+ *
  * @since 3.1
  * @noimplement This interface is not intended to be implemented by clients.
  */
@@ -51,6 +51,7 @@ public interface StateObjectFactory {
 	 * @return the created state
 	 * @deprecated use {@link #createState(boolean) }
 	 */
+	@Deprecated
 	public State createState();
 
 	/**
@@ -99,6 +100,7 @@ public interface StateObjectFactory {
 	 * @deprecated use
 	 *             {@link #createBundleDescription(long, String, Version, String, BundleSpecification[], HostSpecification, ImportPackageSpecification[], ExportPackageDescription[], boolean, boolean, boolean, String, String[], GenericSpecification[], GenericDescription[])}
 	 */
+	@Deprecated
 	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location,
 			BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports,
 			ExportPackageDescription[] exports, String[] providedPackages, boolean singleton);
@@ -138,6 +140,7 @@ public interface StateObjectFactory {
 	 * @deprecated use
 	 *             {@link #createBundleDescription(long, String, Version, String, BundleSpecification[], HostSpecification, ImportPackageSpecification[], ExportPackageDescription[], boolean, boolean, boolean, String, String[], GenericSpecification[], GenericDescription[])}
 	 */
+	@Deprecated
 	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location,
 			BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports,
 			ExportPackageDescription[] exports, String[] providedPackages, boolean singleton, boolean attachFragments,
@@ -292,6 +295,7 @@ public interface StateObjectFactory {
 	 * @deprecated use
 	 *             {@link #createBundleDescription(State, Dictionary, String, long)}
 	 */
+	@Deprecated
 	public BundleDescription createBundleDescription(Dictionary<String, String> manifest, String location, long id)
 			throws BundleException;
 
@@ -341,7 +345,7 @@ public interface StateObjectFactory {
 	/**
 	 * Creates bundle specifications from the given declaration. The declaration
 	 * uses the bundle manifest syntax for the Require-Bundle header.
-	 * 
+	 *
 	 * @param declaration a string declaring bundle specifications
 	 * @return the bundle specifications
 	 * @since 3.8
@@ -362,7 +366,7 @@ public interface StateObjectFactory {
 	/**
 	 * Creates host specifications from the given declaration. The declaration uses
 	 * the bundle manifest syntax for the Fragment-Host header.
-	 * 
+	 *
 	 * @param declaration a string declaring host specifications
 	 * @return the host specifications
 	 * @since 3.8
@@ -400,7 +404,7 @@ public interface StateObjectFactory {
 	/**
 	 * Creates an import package specification that is a copy of the given import
 	 * package
-	 * 
+	 *
 	 * @param original the import package to be copied
 	 * @return the created package specification
 	 */
@@ -409,7 +413,7 @@ public interface StateObjectFactory {
 	/**
 	 * Creates an import package specifications from the given declaration. The
 	 * declaration uses the bundle manifest syntax for the Import-Package header.
-	 * 
+	 *
 	 * @param declaration a string declaring import package specifications
 	 * @return the import package specifications
 	 * @since 3.8
@@ -435,7 +439,7 @@ public interface StateObjectFactory {
 
 	/**
 	 * Creates a generic description from the given parameters
-	 * 
+	 *
 	 * @param name       the name of the generic description
 	 * @param type       the type of the generic description (may be
 	 *                   <code>null</code>)
@@ -447,12 +451,13 @@ public interface StateObjectFactory {
 	 * @deprecated use
 	 *             {@link #createGenericDescription(String, String, Version, Map)}
 	 */
+	@Deprecated
 	public GenericDescription createGenericDescription(String name, String type, Version version,
 			Map<String, ?> attributes);
 
 	/**
 	 * Creates a generic description from the given parameters
-	 * 
+	 *
 	 * @param type       the type of the generic description (may be
 	 *                   <code>null</code>)
 	 * @param attributes the attributes for the generic description (may be
@@ -470,7 +475,7 @@ public interface StateObjectFactory {
 	/**
 	 * Creates generic descriptions from the given declaration. The declaration uses
 	 * the bundle manifest syntax for the Provide-Capability header.
-	 * 
+	 *
 	 * @param declaration a string declaring generic descriptions
 	 * @return the generic descriptions
 	 * @since 3.8
@@ -479,7 +484,7 @@ public interface StateObjectFactory {
 
 	/**
 	 * Creates a generic specification from the given parameters
-	 * 
+	 *
 	 * @param name           the name of the generic specification
 	 * @param type           the type of the generic specification (may be
 	 *                       <code>null</code>)
@@ -495,7 +500,7 @@ public interface StateObjectFactory {
 	/**
 	 * Creates generic specifications from the given declaration. The declaration
 	 * uses the bundle manifest syntax for the Require-Capability header.
-	 * 
+	 *
 	 * @param declaration a string declaring generic specifications
 	 * @return the generic specifications
 	 * @since 3.8
@@ -504,7 +509,7 @@ public interface StateObjectFactory {
 
 	/**
 	 * Creates a native code specification from the given parameters
-	 * 
+	 *
 	 * @param nativeCodeDescriptions the native code descriptors
 	 * @param optional               whether the specification is optional
 	 * @return the created native code specification
@@ -515,7 +520,7 @@ public interface StateObjectFactory {
 
 	/**
 	 * Creates a native code description from the given parameters
-	 * 
+	 *
 	 * @param nativePaths the native code paths (may be <code>null</code>)
 	 * @param processors  the supported processors (may be <code>null</code>)
 	 * @param osNames     the supported operating system names (may be
@@ -535,7 +540,7 @@ public interface StateObjectFactory {
 	/**
 	 * Creates an export package specification that is a copy of the given
 	 * constraint
-	 * 
+	 *
 	 * @param original the export package to be copied
 	 * @return the created package
 	 */
@@ -544,7 +549,7 @@ public interface StateObjectFactory {
 	/**
 	 * Creates export package descriptions from the given declaration. The
 	 * declaration uses the bundle manifest syntax for the Export-Package header.
-	 * 
+	 *
 	 * @param declaration a string declaring export package descriptions
 	 * @return the export package descriptions
 	 * @since 3.8
@@ -563,6 +568,7 @@ public interface StateObjectFactory {
 	 * @deprecated use {@link #writeState(State, File)} instead
 	 * @since 3.1
 	 */
+	@Deprecated
 	public void writeState(State state, OutputStream stream) throws IOException;
 
 	/**
@@ -577,6 +583,7 @@ public interface StateObjectFactory {
 	 * @deprecated use {@link #writeState(State, File)} instead
 	 * @see #writeState(State, OutputStream)
 	 */
+	@Deprecated
 	public void writeState(State state, DataOutputStream stream) throws IOException;
 
 	/**
@@ -601,6 +608,7 @@ public interface StateObjectFactory {
 	 * @deprecated use {@link #readState(File)} instead
 	 * @since 3.1
 	 */
+	@Deprecated
 	public State readState(InputStream stream) throws IOException;
 
 	/**
@@ -613,6 +621,7 @@ public interface StateObjectFactory {
 	 * @deprecated use {@link #readState(File)} instead
 	 * @see #readState(InputStream)
 	 */
+	@Deprecated
 	public State readState(DataInputStream stream) throws IOException;
 
 	/**
@@ -627,7 +636,7 @@ public interface StateObjectFactory {
 
 	static class StateObjectFactoryProxy implements StateObjectFactory {
 		private static final String IMPL_NAME = "org.eclipse.osgi.internal.resolver.StateObjectFactoryImpl"; //$NON-NLS-1$
-		private Object monitor = new Object();
+		private final Object monitor = new Object();
 		private StateObjectFactory implementation;
 
 		private StateObjectFactory getImplementation() {
