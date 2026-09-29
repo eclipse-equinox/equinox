@@ -92,6 +92,7 @@ public class Msg extends NLS {
 	public static String ECLIPSE_STARTUP_FAILED_INSTALL;
 	public static String ECLIPSE_STARTUP_FAILED_START;
 	public static String ECLIPSE_STARTUP_APP_ERROR;
+	public static String ECLIPSE_STARTUP_NO_APPLICATION_CONSOLE;
 	public static String ECLIPSE_STARTUP_PROPS_NOT_SET;
 	public static String error_badNL;
 	public static String error_badNL_language;
