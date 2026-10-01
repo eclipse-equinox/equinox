@@ -83,8 +83,8 @@ public class SystemBundleActivator implements BundleActivator {
 
 		equinoxContainer.systemStart(bc);
 
-		plurl = new PlurlImpl();
 		try {
+			plurl = new PlurlImpl();
 			plurl.install();
 			URLStreamHandlerFactoryImpl ushf = new URLStreamHandlerFactoryImpl(bc, equinoxContainer);
 			ContentHandlerFactoryImpl chf = new ContentHandlerFactoryImpl(bc, equinoxContainer);
@@ -92,7 +92,7 @@ public class SystemBundleActivator implements BundleActivator {
 			plurlStreamHandlerFactory = ushf;
 			Plurl.add(chf);
 			plurlContentHandlerFactory = chf;
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			// Don't fail framework launch if we cannot register with plurl.
 			// Any handler services will get ignored for this framework instance.
 			equinoxContainer.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, e.getMessage(), e);
@@ -241,7 +241,7 @@ public class SystemBundleActivator implements BundleActivator {
 		if (plurlStreamHandlerFactory != null) {
 			try {
 				Plurl.remove(plurlStreamHandlerFactory);
-			} catch (Exception e) {
+			} catch (Throwable e) {
 				bundle.getEquinoxContainer().getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR,
 						e.getMessage(), e);
 			}
@@ -249,14 +249,14 @@ public class SystemBundleActivator implements BundleActivator {
 		if (plurlContentHandlerFactory != null) {
 			try {
 				Plurl.remove(plurlContentHandlerFactory);
-			} catch (Exception e) {
+			} catch (Throwable e) {
 				bundle.getEquinoxContainer().getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR,
 						e.getMessage(), e);
 			}
 		}
 		try {
 			plurl.uninstall();
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			bundle.getEquinoxContainer().getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR,
 					e.getMessage(), e);
 		}
