@@ -491,15 +491,12 @@ static _TCHAR* findLibrary(_TCHAR* library, _TCHAR* program)
 	_tcscat(fragment, wsArg);
 	_tcscat(fragment, dot);
 	_tcscat(fragment, osArg);
-	//!(fragmentOS.equals(Constants.OS_MACOSX) && !Constants.ARCH_X86_64.equals(fragmentArch))
-#if !(defined(MACOSX) && !defined(__x86_64__)) 
-	/* The Mac fragment covers both archs and does not have that last segment */
 	_tcscat(fragment, dot);
 	_tcscat(fragment, osArchArg);
-#endif	
 	progLength = pathLength = _tcslen(programDir);
 #ifdef MACOSX
-	pathLength += 9;
+    static _TCHAR* macosxPathSegments = _T_ECLIPSE("../Eclipse/");
+	pathLength += _tcslen(macosxPathSegments);
 #endif
 	path = malloc( (pathLength + 1 + 7 + 1) * sizeof(_TCHAR));
 	_tcscpy(path, programDir);
@@ -508,7 +505,7 @@ static _TCHAR* findLibrary(_TCHAR* library, _TCHAR* program)
 		path[progLength + 1] = 0;
 	}
 #ifdef MACOSX
-	_tcscat(path, _T_ECLIPSE("../../../"));
+	_tcscat(path, macosxPathSegments);
 #endif
 	_tcscat(path, _T_ECLIPSE("plugins"));
 	
