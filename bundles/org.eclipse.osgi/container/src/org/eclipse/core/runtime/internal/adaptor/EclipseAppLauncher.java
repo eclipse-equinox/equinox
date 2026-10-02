@@ -26,6 +26,7 @@ import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.service.runnable.ApplicationLauncher;
 import org.eclipse.osgi.service.runnable.ApplicationRunnable;
+import org.eclipse.osgi.service.runnable.NoApplicationException;
 import org.eclipse.osgi.service.runnable.ParameterizedRunnable;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -89,7 +90,7 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 		// the app launcher as a service and runtime synchronously calls launch on the
 		// service
 		if (failOnNoDefault && runnable == null)
-			throw new IllegalStateException(Msg.ECLIPSE_STARTUP_ERROR_NO_APPLICATION);
+			throw new NoApplicationException(Msg.ECLIPSE_STARTUP_ERROR_NO_APPLICATION);
 		Object result = null;
 		boolean doRelaunch;
 		Bundle b = context.getBundle();
@@ -206,6 +207,6 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 			launch.invoke(defaultApp, new Object[] { null });
 			return start(argument);
 		}
-		throw new IllegalStateException(Msg.ECLIPSE_STARTUP_ERROR_NO_APPLICATION);
+		throw new NoApplicationException(Msg.ECLIPSE_STARTUP_ERROR_NO_APPLICATION);
 	}
 }
