@@ -242,6 +242,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	public static final String PROP_EQUINOX_START_LEVEL_RESTRICT_PARALLEL = "equinox.start.level.restrict.parallel"; //$NON-NLS-1$
 	public static final String PROP_RESOLVER_REVISION_BATCH_SIZE = "equinox.resolver.revision.batch.size"; //$NON-NLS-1$
 	public static final String PROP_RESOLVER_BATCH_TIMEOUT = "equinox.resolver.batch.timeout"; //$NON-NLS-1$
+	public static final String PROP_RESOLVER_BATCH_PERMUTATION_LIMIT = "equinox.resolver.batch.permutation.limit"; //$NON-NLS-1$
 
 	public static final String PROP_SYSTEM_PROVIDE_HEADER = "equinox.system.provide.header"; //$NON-NLS-1$
 	public static final String SYSTEM_PROVIDE_HEADER_ORIGINAL = "original"; //$NON-NLS-1$
