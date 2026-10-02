@@ -17,7 +17,7 @@ import java.io.IOException;
 
 /**
  * Indicates that signed content is invalid according to one of the signers.
- * 
+ *
  * @since 3.4
  * @noextend This class is not intended to be subclassed by clients.
  */

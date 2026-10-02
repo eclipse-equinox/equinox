@@ -740,21 +740,23 @@ public abstract class FilterImpl implements Filter {
 				if (i + 1 < size) /* if this is not that last substr */ {
 					if (substr == null) /* * */ {
 						String substr2 = substrings[i + 1];
-						if (substr2 == null) /* ** */
+						if (substr2 == null) { /* ** */
 							continue; /* ignore first star */
+						}
 						/* xxx */
 						int index = string.indexOf(substr2, pos);
 						if (index == -1) {
 							return false;
 						}
 						pos = index + substr2.length();
-						if (i + 2 < size) // if there are more
+						if (i + 2 < size) { // if there are more
 							// substrings, increment
 							// over the string we just
 							// matched; otherwise need
 							// to do the last substr
 							// check
 							i++;
+						}
 					} else /* xxx */ {
 						int len = substr.length();
 						if (string.regionMatches(pos, substr, 0, len)) {
@@ -1209,7 +1211,7 @@ public abstract class FilterImpl implements Filter {
 	/**
 	 * Returns the leftmost required primary key value for the filter to evaluate to
 	 * true. This is useful for indexing candidates to match against this filter.
-	 * 
+	 *
 	 * @param primaryKey the primary key
 	 * @return The leftmost required primary key value or null if none could be
 	 *         determined.
@@ -1233,7 +1235,7 @@ public abstract class FilterImpl implements Filter {
 
 	/**
 	 * Returns all the attributes contained within this filter
-	 * 
+	 *
 	 * @return all the attributes contained within this filter
 	 */
 	public String[] getAttributes() {
@@ -1653,7 +1655,7 @@ public abstract class FilterImpl implements Filter {
 		private Version leftVersion;
 		private Version rightVersion;
 		private char rightRule = 0;
-		private Collection<Version> excludes = new ArrayList<>(0);
+		private final Collection<Version> excludes = new ArrayList<>(0);
 
 		@Override
 		public String toString() {
@@ -1670,16 +1672,18 @@ public abstract class FilterImpl implements Filter {
 		}
 
 		boolean setLeft(char leftRule, Version leftVersion) {
-			if (this.leftVersion != null && this.leftVersion != leftVersion)
+			if (this.leftVersion != null && this.leftVersion != leftVersion) {
 				return false;
+			}
 			this.leftRule = excludes.contains(leftVersion) ? '(' : leftRule;
 			this.leftVersion = leftVersion;
 			return true;
 		}
 
 		boolean setRight(char rightRule, Version rightVersion) {
-			if (this.rightVersion != null && this.rightVersion != rightVersion)
+			if (this.rightVersion != null && this.rightVersion != rightVersion) {
 				return false;
+			}
 			this.rightRule = excludes.contains(rightVersion) ? ')' : rightRule;
 			this.rightVersion = rightVersion;
 			return true;

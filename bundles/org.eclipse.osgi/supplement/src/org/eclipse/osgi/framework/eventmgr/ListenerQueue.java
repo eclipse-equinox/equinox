@@ -83,6 +83,7 @@ public class ListenerQueue<K, V, E> {
 	 * @throws IllegalStateException If called after one of the dispatch methods has been called.
 	 * @deprecated As of 3.5. Replaced by {@link #queueListeners(Set, EventDispatcher)}.
 	 */
+	@Deprecated
 	public void queueListeners(EventListeners<K, V> listeners, EventDispatcher<K, V, E> dispatcher) {
 		queueListeners(listeners.entrySet(), dispatcher);
 	}

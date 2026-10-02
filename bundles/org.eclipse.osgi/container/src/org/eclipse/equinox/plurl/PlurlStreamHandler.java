@@ -30,15 +30,15 @@ import java.net.URLConnection;
  * {@code setURL} method on the {@code PlurlSetter} object received in the
  * {@code parseURL} method instead of {@code URLStreamHandler.setURL} to avoid a
  * {@code SecurityException}.
- * 
+ *
  * @see PlurlStreamHandlerBase
- * 
+ *
  */
 public interface PlurlStreamHandler {
 	/**
 	 * Interface used by {@code PlurlStreamHandler} objects to call the
 	 * {@code setURL} method on the plurl proxy {@code URLStreamHandler} object.
-	 * 
+	 *
 	 * <p>
 	 * Objects of this type are passed to the
 	 * {@link PlurlStreamHandler#parseURL(PlurlSetter, URL, String, int, int)}
@@ -46,7 +46,7 @@ public interface PlurlStreamHandler {
 	 * {@code URLStreamHandlerSetter} object will invoke the {@code setURL} method
 	 * on the plurl proxy {@code URLStreamHandler} object that is actually
 	 * registered with {@code java.net.URL} for the protocol.
-	 * 
+	 *
 	 */
 	public interface PlurlSetter {
 		/**
@@ -105,7 +105,7 @@ public interface PlurlStreamHandler {
 	 * Parse a URL. This method is called by the {@code URLStreamHandler} proxy
 	 * implemented by plurl, instead of {@code java.net.URLStreamHandler.parseURL},
 	 * passing a {@code PlurlSetter} object.
-	 * 
+	 *
 	 * @param plurlSetter The object on which {@code setURL} must be invoked for
 	 *                    this URL. If the setter is {@code null} then the
 	 *                    {@link PlurlStreamHandler#setURL(URL, String, String, int, String, String, String, String, String)}
@@ -119,7 +119,7 @@ public interface PlurlStreamHandler {
 	 * {@link #parseURL(PlurlSetter, URL, String, int, int)} then call the
 	 * {@link PlurlSetter#setURL(URL, String, String, int, String, String, String, String, String)}
 	 * method. Otherwise call {@code super.setURL}.
-	 * 
+	 *
 	 * @see "java.net.URLStreamHandler.setURL"
 	 */
 	public void setURL(URL u, String proto, String host, int port, String file, String ref);
@@ -129,7 +129,7 @@ public interface PlurlStreamHandler {
 	 * {@link #parseURL(PlurlSetter, URL, String, int, int)} then call the
 	 * {@link PlurlSetter#setURL(URL, String, String, int, String, String, String, String, String)}
 	 * method. Otherwise call {@code super.setURL}.
-	 * 
+	 *
 	 * @see "java.net.URLStreamHandler.setURL"
 	 */
 	public void setURL(URL u, String proto, String host, int port, String auth, String user, String path,

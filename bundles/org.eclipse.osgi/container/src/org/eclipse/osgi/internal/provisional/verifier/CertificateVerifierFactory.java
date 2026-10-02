@@ -29,7 +29,7 @@ import org.osgi.framework.Bundle;
 public interface CertificateVerifierFactory {
 	/**
 	 * Creates a certificate verifier for the specified content of a repository
-	 * 
+	 *
 	 * @param content the content of the repository
 	 * @return a certificate verifier for the specified content of a repository
 	 * @throws IOException if an IO exception occurs while reading the repository
@@ -38,7 +38,7 @@ public interface CertificateVerifierFactory {
 
 	/**
 	 * Returns a certificate verifier for the specified bundle.
-	 * 
+	 *
 	 * @param bundle the bundle to get a verifier for
 	 * @return a certificate verifier for the specified bundle.
 	 * @throws IOException if an IO exception occurs while reading the bundle

@@ -136,7 +136,7 @@ public abstract class NLS {
 	 * the following resources will be searched using the class loader of the
 	 * specified class:
 	 * </p>
-	 * 
+	 *
 	 * <pre>
 	 *   org/eclipse/example/nls/messages_en_US.properties
 	 *   org/eclipse/example/nls/messages_en.properties
@@ -174,18 +174,22 @@ public abstract class NLS {
 	 * See the class comment for exact details.
 	 */
 	private static String internalBind(String message, Object[] args, String argZero, String argOne) {
-		if (message == null)
+		if (message == null) {
 			return "No message available."; //$NON-NLS-1$
-		if (args == null || args.length == 0)
+		}
+		if (args == null || args.length == 0) {
 			args = EMPTY_ARGS;
+		}
 
 		int length = message.length();
 		//estimate correct size of string buffer to avoid growth
 		int bufLen = length + (args.length * 5);
-		if (argZero != null)
+		if (argZero != null) {
 			bufLen += argZero.length() - 3;
-		if (argOne != null)
+		}
+		if (argOne != null) {
 			bufLen += argOne.length() - 3;
+		}
 		StringBuilder buffer = new StringBuilder(bufLen < 0 ? 0 : bufLen);
 		for (int i = 0; i < length; i++) {
 			char c = message.charAt(i);
@@ -209,11 +213,11 @@ public abstract class NLS {
 					} catch (NumberFormatException e) {
 						throw new IllegalArgumentException(e);
 					}
-					if (number == 0 && argZero != null)
+					if (number == 0 && argZero != null) {
 						buffer.append(argZero);
-					else if (number == 1 && argOne != null)
+					} else if (number == 1 && argOne != null) {
 						buffer.append(argOne);
-					else {
+					} else {
 						if (number >= args.length || number < 0) {
 							buffer.append("<missing argument>"); //$NON-NLS-1$
 							i = index;
@@ -274,8 +278,9 @@ public abstract class NLS {
 					result.add('_' + additional + EXTENSION);
 				}
 				lastSeparator = nl.lastIndexOf('_');
-				if (lastSeparator == -1)
+				if (lastSeparator == -1) {
 					break;
+				}
 				nl = nl.substring(0, lastSeparator);
 			}
 			//add the empty suffix last (most general)
@@ -284,8 +289,9 @@ public abstract class NLS {
 		}
 		root = root.replace('.', '/');
 		String[] variants = new String[nlSuffixes.length];
-		for (int i = 0; i < variants.length; i++)
+		for (int i = 0; i < variants.length; i++) {
 			variants[i] = root + nlSuffixes[i];
+		}
 		return variants;
 	}
 
@@ -313,11 +319,13 @@ public abstract class NLS {
 		final int numFields = fieldArray.length;
 		for (int i = 0; i < numFields; i++) {
 			Field field = fieldArray[i];
-			if ((field.getModifiers() & MOD_MASK) != MOD_EXPECTED)
+			if ((field.getModifiers() & MOD_MASK) != MOD_EXPECTED) {
 				continue;
+			}
 			//if the field has a a value assigned, there is nothing to do
-			if (fieldMap.get(field.getName()) == ASSIGNED)
+			if (fieldMap.get(field.getName()) == ASSIGNED) {
 				continue;
+			}
 			try {
 				// Set a value for this empty field. We should never get an exception here because
 				// we know we have a public static non-final field. If we do get an exception, silently
@@ -325,8 +333,9 @@ public abstract class NLS {
 				// will fail later in the code and if so then we will see both the NPE and this error.
 				String value = "NLS missing message: " + field.getName() + " in: " + bundleName; //$NON-NLS-1$ //$NON-NLS-2$
 				log(SEVERITY_WARNING, value, null);
-				if (!isAccessible)
+				if (!isAccessible) {
 					field.setAccessible(true);
+				}
 				field.set(null, value);
 			} catch (Exception e) {
 				log(SEVERITY_ERROR, "Error setting the missing message value for: " + field.getName(), e); //$NON-NLS-1$
@@ -347,8 +356,9 @@ public abstract class NLS {
 		//build a map of field names to Field objects
 		final int len = fieldArray.length;
 		Map<Object, Object> fields = new HashMap<>(len * 2);
-		for (int i = 0; i < len; i++)
+		for (int i = 0; i < len; i++) {
 			fields.put(fieldArray[i].getName(), fieldArray[i]);
+		}
 
 		// search the variants from most specific to most general, since
 		// the MessagesProperties.put method will mark assigned fields
@@ -357,8 +367,9 @@ public abstract class NLS {
 		for (String variant : variants) {
 			// loader==null if we're launched off the Java boot classpath
 			final InputStream input = loader == null ? ClassLoader.getSystemResourceAsStream(variant) : loader.getResourceAsStream(variant);
-			if (input == null)
+			if (input == null) {
 				continue;
+			}
 			try {
 				final MessagesProperties properties = new MessagesProperties(fields, bundleName, isAccessible);
 				final PropertyResourceBundle bundle = new PropertyResourceBundle(input);
@@ -368,12 +379,13 @@ public abstract class NLS {
 			} catch (IOException e) {
 				log(SEVERITY_ERROR, "Error loading " + variant, e); //$NON-NLS-1$
 			} finally {
-				if (input != null)
+				if (input != null) {
 					try {
 						input.close();
 					} catch (IOException e) {
 						// ignore
 					}
+				}
 			}
 		}
 		computeMissingMessages(bundleName, clazz, fields, fieldArray, isAccessible);
@@ -392,8 +404,9 @@ public abstract class NLS {
 	 * @param e - exception to log
 	 */
 	static void log(int severity, String message, Exception e) {
-		if (severity == SEVERITY_WARNING && ignoreWarnings)
+		if (severity == SEVERITY_WARNING && ignoreWarnings) {
 			return; // ignoring warnings; bug 292980
+		}
 		if (frameworkLog != null) {
 			frameworkLog.log(new FrameworkLogEntry("org.eclipse.osgi", severity, 1, message, 0, e, null)); //$NON-NLS-1$
 			return;
@@ -408,13 +421,16 @@ public abstract class NLS {
 			default :
 				statusMsg = "Warning: "; //$NON-NLS-1$
 		}
-		if (message != null)
+		if (message != null) {
 			statusMsg += message;
-		if (e != null)
+		}
+		if (e != null) {
 			statusMsg += ": " + e.getMessage(); //$NON-NLS-1$
+		}
 		System.err.println(statusMsg);
-		if (e != null)
+		if (e != null) {
 			e.printStackTrace();
+		}
 	}
 
 	/*
@@ -445,8 +461,9 @@ public abstract class NLS {
 		public synchronized Object put(Object key, Object value) {
 			Object fieldObject = fields.put(key, ASSIGNED);
 			// if already assigned, there is nothing to do
-			if (fieldObject == ASSIGNED)
+			if (fieldObject == ASSIGNED) {
 				return null;
+			}
 			if (fieldObject == null) {
 				final String msg = "NLS unused message: " + key + " in: " + bundleName;//$NON-NLS-1$ //$NON-NLS-2$
 				// keys with '.' are ignored by design (bug 433424)
@@ -457,18 +474,20 @@ public abstract class NLS {
 			}
 			final Field field = (Field) fieldObject;
 			//can only set value of public static non-final fields
-			if ((field.getModifiers() & MOD_MASK) != MOD_EXPECTED)
+			if ((field.getModifiers() & MOD_MASK) != MOD_EXPECTED) {
 				return null;
+			}
 			try {
 				// Check to see if we are allowed to modify the field. If we aren't (for instance
 				// if the class is not public) then change the accessible attribute of the field
 				// before trying to set the value.
-				if (!isAccessible)
+				if (!isAccessible) {
 					field.setAccessible(true);
 				// Set the value into the field. We should never get an exception here because
 				// we know we have a public static non-final field. If we do get an exception, silently
 				// log it and continue. This means that the field will (most likely) be un-initialized and
 				// will fail later in the code and if so then we will see both the NPE and this error.
+				}
 
 				// Extra care is taken to be sure we create a String with its own backing char[] (bug 287183)
 				// This is to ensure we do not keep the key chars in memory.

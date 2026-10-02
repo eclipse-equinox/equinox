@@ -20,7 +20,7 @@ import java.security.cert.Certificate;
  * <p>
  * This interface is not intended to be implemented by clients.
  * </p>
- * 
+ *
  * @since 3.4
  * @noimplement This interface is not intended to be implemented by clients.
  */
@@ -28,7 +28,7 @@ public interface SignerInfo {
 
 	/**
 	 * Returns the certificate chain
-	 * 
+	 *
 	 * @return the certificate chain
 	 */
 	public Certificate[] getCertificateChain();
@@ -36,7 +36,7 @@ public interface SignerInfo {
 	/**
 	 * Returns the certificate trust anchor used to establish authenticity. If
 	 * authenticity cannot be established then <code>null</code> is returned.
-	 * 
+	 *
 	 * @return the trust anchor
 	 */
 	public Certificate getTrustAnchor();
@@ -45,7 +45,7 @@ public interface SignerInfo {
 	 * Returns true if the trust anchor has been authenticated. This is a
 	 * convenience method equivalent to calling
 	 * <code>{@link #getTrustAnchor()} != null</code>
-	 * 
+	 *
 	 * @return true if the the signer info is trusted
 	 */
 	public boolean isTrusted();
@@ -53,11 +53,12 @@ public interface SignerInfo {
 	/**
 	 * Returns the <code>MessageDigest</code> algorithm used to verify content
 	 * signed by this signer info.
-	 * 
+	 *
 	 * @return the algorithm
 	 * @deprecated This information is not readily available using the JAR APIs
 	 *             included with Java. A value {@literal unknown} will be returned.
 	 */
+	@Deprecated
 	public String getMessageDigestAlgorithm();
 
 }

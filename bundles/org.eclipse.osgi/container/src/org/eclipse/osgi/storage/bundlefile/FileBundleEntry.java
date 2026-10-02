@@ -34,7 +34,7 @@ public class FileBundleEntry extends BundleEntry {
 
 	/**
 	 * Constructs the BundleEntry using a File.
-	 * 
+	 *
 	 * @param file BundleFile object this entry is a member of
 	 * @param name the name of this BundleEntry
 	 */
@@ -42,10 +42,12 @@ public class FileBundleEntry extends BundleEntry {
 		this.file = file;
 		boolean endsInSlash = name.length() > 0 && name.charAt(name.length() - 1) == '/';
 		if (BundleFile.secureAction.isDirectory(file)) {
-			if (!endsInSlash)
+			if (!endsInSlash) {
 				name += '/';
-		} else if (endsInSlash)
+			}
+		} else if (endsInSlash) {
 			name = name.substring(0, name.length() - 1);
+		}
 		this.name = name;
 	}
 

@@ -44,6 +44,7 @@ public class ConnectInputStream extends InputStream implements ContentProvider {
 		throw new IOException();
 	}
 
+	@Override
 	public File getContent() {
 		return null;
 	}

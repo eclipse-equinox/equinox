@@ -28,11 +28,13 @@ public class ExtendedLogReaderServiceImpl implements ExtendedLogReaderService {
 	@Override
 	public synchronized void addLogListener(LogListener listener, LogFilter filter) {
 		checkShutdown();
-		if (listener == null)
+		if (listener == null) {
 			throw new IllegalArgumentException("LogListener must not be null"); //$NON-NLS-1$
+		}
 
-		if (filter == null)
+		if (filter == null) {
 			throw new IllegalArgumentException("LogFilter must not be null"); //$NON-NLS-1$
+		}
 
 		listeners.add(listener);
 		factory.addLogListener(listener, filter);
@@ -52,16 +54,18 @@ public class ExtendedLogReaderServiceImpl implements ExtendedLogReaderService {
 	@Override
 	public synchronized void removeLogListener(LogListener listener) {
 		checkShutdown();
-		if (listener == null)
+		if (listener == null) {
 			throw new IllegalArgumentException("LogListener must not be null"); //$NON-NLS-1$
+		}
 
 		factory.removeLogListener(listener);
 		listeners.remove(listener);
 	}
 
 	private synchronized void checkShutdown() {
-		if (listeners == null)
+		if (listeners == null) {
 			throw new IllegalStateException("LogReaderService is shutdown."); //$NON-NLS-1$
+		}
 	}
 
 	synchronized void shutdown() {

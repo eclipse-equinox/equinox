@@ -81,8 +81,9 @@ public final class PermissionInfoCollection extends PermissionCollection {
 	}
 
 	boolean implies(final BundlePermissions bundlePermissions, Permission perm) {
-		if (hasAllPermission)
+		if (hasAllPermission) {
 			return true;
+		}
 		final Class<? extends Permission> permClass = perm.getClass();
 		PermissionCollection collection = getCachedCollection(bundlePermissions, permClass);
 		// must populate the collection outside of the lock to prevent class loader

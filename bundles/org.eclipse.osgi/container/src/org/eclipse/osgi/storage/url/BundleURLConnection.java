@@ -88,8 +88,9 @@ public class BundleURLConnection extends URLConnection implements BundleReferenc
 					}
 				}
 				try {
-					if (in.markSupported())
+					if (in.markSupported()) {
 						contentType = guessContentTypeFromStream(in);
+					}
 				} catch (IOException e) {
 					// do nothing
 				}
@@ -128,7 +129,7 @@ public class BundleURLConnection extends URLConnection implements BundleReferenc
 
 	/**
 	 * Converts the URL to a common local URL protocol (i.e file: or jar: protocol)
-	 * 
+	 *
 	 * @return the local URL using a common local protocol
 	 */
 	public URL getLocalURL() {
@@ -140,7 +141,7 @@ public class BundleURLConnection extends URLConnection implements BundleReferenc
 	 * Converts the URL to a URL that uses the file: protocol. The content of this
 	 * URL may be downloaded or extracted onto the local filesystem to create a file
 	 * URL.
-	 * 
+	 *
 	 * @return the local URL that uses the file: protocol
 	 */
 	public URL getFileURL() {

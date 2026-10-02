@@ -154,6 +154,7 @@ public interface Constants {
 	 * @deprecated use <code>ARCH_X86_64</code> instead. Note the values
 	 * has been changed to be the value of the <code>ARCH_X86_64</code> constant.
 	 */
+	@Deprecated
 	public static final String ARCH_AMD64 = ARCH_X86_64;
 
 	/**

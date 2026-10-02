@@ -30,7 +30,7 @@ package org.eclipse.osgi.service.resolver;
  * capability. For example, if a fragment specifies additional
  * capabilities.</li>
  * </ul>
- * 
+ *
  * @since 3.7
  */
 public class StateWire {
@@ -41,7 +41,7 @@ public class StateWire {
 
 	/**
 	 * Constructs a new state wire.
-	 * 
+	 *
 	 * @param requirementHost     the bundle hosting the requirement.
 	 * @param declaredRequirement the declared requirement. The bundle declaring the
 	 *                            requirement may be different from the requirement
@@ -63,7 +63,7 @@ public class StateWire {
 
 	/**
 	 * Gets the requirement host.
-	 * 
+	 *
 	 * @return the requirement host.
 	 */
 	public BundleDescription getRequirementHost() {
@@ -72,7 +72,7 @@ public class StateWire {
 
 	/**
 	 * Gets the declared requirement.
-	 * 
+	 *
 	 * @return the declared requirement.
 	 */
 	public VersionConstraint getDeclaredRequirement() {
@@ -81,7 +81,7 @@ public class StateWire {
 
 	/**
 	 * gets the capability host.
-	 * 
+	 *
 	 * @return the capability host.
 	 */
 	public BundleDescription getCapabilityHost() {
@@ -90,7 +90,7 @@ public class StateWire {
 
 	/**
 	 * gets the declared capability.
-	 * 
+	 *
 	 * @return the declared capability.
 	 */
 	public BaseDescription getDeclaredCapability() {

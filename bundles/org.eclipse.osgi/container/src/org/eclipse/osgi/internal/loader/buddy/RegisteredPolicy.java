@@ -36,8 +36,9 @@ public class RegisteredPolicy extends DependentPolicy {
 		super(requester);
 
 		// Filter the dependents;
-		if (allDependents == null)
+		if (allDependents == null) {
 			return;
+		}
 
 		String requesterName = requester.getWiring().getRevision().getSymbolicName();
 		for (Iterator<ModuleWiring> iter = allDependents.iterator(); iter.hasNext();) {
@@ -65,8 +66,9 @@ public class RegisteredPolicy extends DependentPolicy {
 
 		// After the filtering, if nothing is left then null out the variable for
 		// optimization
-		if (allDependents.size() == 0)
+		if (allDependents.size() == 0) {
 			allDependents = null;
+		}
 	}
 
 	@Override
@@ -90,8 +92,9 @@ public class RegisteredPolicy extends DependentPolicy {
 
 	@Override
 	public URL loadResource(String name) {
-		if (allDependents == null)
+		if (allDependents == null) {
 			return null;
+		}
 
 		URL result = null;
 		int size = allDependents.size();
@@ -107,8 +110,9 @@ public class RegisteredPolicy extends DependentPolicy {
 
 	@Override
 	public Enumeration<URL> loadResources(String name) {
-		if (allDependents == null)
+		if (allDependents == null) {
 			return null;
+		}
 
 		Enumeration<URL> results = null;
 		int size = allDependents.size();

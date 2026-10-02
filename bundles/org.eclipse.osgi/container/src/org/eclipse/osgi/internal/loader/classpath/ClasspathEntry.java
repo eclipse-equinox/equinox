@@ -41,7 +41,7 @@ import org.eclipse.osgi.storage.bundlefile.BundleFile;
  * source to load classes and resources from, and a single
  * <code>ProtectionDomain</code> which is used as the domain to define classes
  * loaded from this ClasspathEntry.
- * 
+ *
  * @since 3.2
  */
 public class ClasspathEntry {
@@ -69,7 +69,7 @@ public class ClasspathEntry {
 
 	/**
 	 * Constructs a ClasspathElement with the specified bundlefile and domain
-	 * 
+	 *
 	 * @param bundlefile A BundleFile object which acts as a source
 	 * @param domain     the protection domain
 	 */
@@ -150,7 +150,7 @@ public class ClasspathEntry {
 
 	/**
 	 * Returns the source BundleFile for this classpath entry
-	 * 
+	 *
 	 * @return the source BundleFile for this classpath entry
 	 */
 	public BundleFile getBundleFile() {
@@ -159,7 +159,7 @@ public class ClasspathEntry {
 
 	/**
 	 * Returns the ProtectionDomain for this classpath entry
-	 * 
+	 *
 	 * @return the ProtectionDomain for this classpath entry
 	 */
 	public ProtectionDomain getDomain() {
@@ -168,25 +168,27 @@ public class ClasspathEntry {
 
 	/**
 	 * Returns a user object which is keyed by the specified key
-	 * 
+	 *
 	 * @param key the key of the user object to get
 	 * @return a user object which is keyed by the specified key
 	 */
 	public synchronized Object getUserObject(Object key) {
-		if (userObjects == null)
+		if (userObjects == null) {
 			return null;
+		}
 		return userObjects.get(key);
 
 	}
 
 	/**
 	 * Adds a user object
-	 * 
+	 *
 	 * @param userObject the user object to add
 	 */
 	public synchronized void addUserObject(KeyedElement userObject) {
-		if (userObjects == null)
+		if (userObjects == null) {
 			userObjects = new HashMap<>(5);
+		}
 		if (!userObjects.containsKey(userObject.getKey())) {
 			userObjects.put(userObject.getKey(), userObject);
 		}
@@ -195,7 +197,7 @@ public class ClasspathEntry {
 	/**
 	 * Finds the entry with the specified path. This handles Multi-Release searching
 	 * also.
-	 * 
+	 *
 	 * @param path the path to find
 	 * @return the entry with the specified path.
 	 */
@@ -212,7 +214,7 @@ public class ClasspathEntry {
 	/**
 	 * Finds the resource wiht the specified name. This handles Multi-Release
 	 * searching also.
-	 * 
+	 *
 	 * @param name  the resource name
 	 * @param m     the module this classpath entry is for
 	 * @param index the index this classpath entry.
@@ -249,8 +251,9 @@ public class ClasspathEntry {
 					manIn = mfEntry.getInputStream();
 					return new Manifest(manIn);
 				} finally {
-					if (manIn != null)
+					if (manIn != null) {
 						manIn.close();
+					}
 				}
 			} catch (IOException e) {
 				// do nothing

@@ -33,7 +33,7 @@ import org.osgi.resource.Requirement;
 
 /**
  * An implementation of {@link BundleRevision}.
- * 
+ *
  * @since 3.10
  */
 public final class ModuleRevision implements BundleRevision {
@@ -59,6 +59,7 @@ public final class ModuleRevision implements BundleRevision {
 
 	private NamespaceList<ModuleCapability> createCapabilities(NamespaceList.Builder<GenericInfo> capabilityInfos) {
 		return capabilityInfos.transformIntoCopy(new Function<GenericInfo, ModuleCapability>() {
+			@Override
 			public ModuleCapability apply(GenericInfo i) {
 				Map<String, String> directives = i.mutable ? copyUnmodifiableMap(i.directives) : i.directives;
 				Map<String, Object> attributes = i.mutable ? copyUnmodifiableMap(i.attributes) : i.attributes;
@@ -82,6 +83,7 @@ public final class ModuleRevision implements BundleRevision {
 
 	private NamespaceList<ModuleRequirement> createRequirements(NamespaceList.Builder<GenericInfo> infos) {
 		return infos.transformIntoCopy(new Function<GenericInfo, ModuleRequirement>() {
+			@Override
 			public ModuleRequirement apply(GenericInfo i) {
 				return new ModuleRequirement(i.namespace, i.directives, i.attributes, ModuleRevision.this);
 			}
@@ -115,7 +117,7 @@ public final class ModuleRevision implements BundleRevision {
 
 	/**
 	 * Returns the capabilities declared by this revision
-	 * 
+	 *
 	 * @param namespace The namespace of the declared capabilities to return or
 	 *                  {@code null} to return the declared capabilities from all
 	 *                  namespaces.
@@ -127,7 +129,7 @@ public final class ModuleRevision implements BundleRevision {
 
 	/**
 	 * Returns the requirements declared by this revision
-	 * 
+	 *
 	 * @param namespace The namespace of the declared requirements to return or
 	 *                  {@code null} to return the declared requirements from all
 	 *                  namespaces.
@@ -159,7 +161,7 @@ public final class ModuleRevision implements BundleRevision {
 
 	/**
 	 * Returns the {@link ModuleRevisions revisions} for this revision.
-	 * 
+	 *
 	 * @return the {@link ModuleRevisions revisions} for this revision.
 	 */
 	public ModuleRevisions getRevisions() {
@@ -169,7 +171,7 @@ public final class ModuleRevision implements BundleRevision {
 	/**
 	 * Returns the revision info for this revision. The revision info is assigned
 	 * when a revision is created to install a module or update module
-	 * 
+	 *
 	 * @return the revision info for this revision, may be {@code null}.
 	 */
 	public Object getRevisionInfo() {
@@ -179,7 +181,7 @@ public final class ModuleRevision implements BundleRevision {
 	/**
 	 * A convenience method to quickly determine if this revision has declared the
 	 * lazy activation policy.
-	 * 
+	 *
 	 * @return true if the lazy activation policy has been declared by this module;
 	 *         otherwise false is returned.
 	 */
@@ -206,8 +208,9 @@ public final class ModuleRevision implements BundleRevision {
 	@Override
 	public String toString() {
 		List<ModuleCapability> identities = getModuleCapabilities(IdentityNamespace.IDENTITY_NAMESPACE);
-		if (identities.isEmpty())
+		if (identities.isEmpty()) {
 			return super.toString();
+		}
 		return identities.get(0).toString();
 	}
 

@@ -48,10 +48,11 @@ public class FilePath {
 	 */
 	public FilePath(File location) {
 		initialize(location.getPath());
-		if (location.isDirectory())
+		if (location.isDirectory()) {
 			flags |= HAS_TRAILING;
-		else
+		} else {
 			flags &= ~HAS_TRAILING;
+		}
 	}
 
 	/**
@@ -66,18 +67,21 @@ public class FilePath {
 	 */
 	private int computeSegmentCount(String path) {
 		int len = path.length();
-		if (len == 0 || (len == 1 && path.charAt(0) == SEPARATOR))
+		if (len == 0 || (len == 1 && path.charAt(0) == SEPARATOR)) {
 			return 0;
+		}
 		int count = 1;
 		int prev = -1;
 		int i;
 		while ((i = path.indexOf(SEPARATOR, prev + 1)) != -1) {
-			if (i != prev + 1 && i != len)
+			if (i != prev + 1 && i != len) {
 				++count;
+			}
 			prev = i;
 		}
-		if (path.charAt(len - 1) == SEPARATOR)
+		if (path.charAt(len - 1) == SEPARATOR) {
 			--count;
+		}
 		return count;
 	}
 
@@ -86,8 +90,9 @@ public class FilePath {
 	 */
 	private String[] computeSegments(String path) {
 		int maxSegmentCount = computeSegmentCount(path);
-		if (maxSegmentCount == 0)
+		if (maxSegmentCount == 0) {
 			return NO_SEGMENTS;
+		}
 		String[] newSegments = new String[maxSegmentCount];
 		int len = path.length();
 		// allways absolute
@@ -103,19 +108,23 @@ public class FilePath {
 			int end = path.indexOf(SEPARATOR, next);
 			next = end + 1;
 			String segment = path.substring(start, end == -1 ? lastPosition + 1 : end);
-			if (CURRENT_DIR.equals(segment))
+			if (CURRENT_DIR.equals(segment)) {
 				continue;
+			}
 			if (PARENT_DIR.equals(segment)) {
-				if (actualSegmentCount > 0)
+				if (actualSegmentCount > 0) {
 					actualSegmentCount--;
+				}
 				continue;
 			}
 			newSegments[actualSegmentCount++] = segment;
 		}
-		if (actualSegmentCount == newSegments.length)
+		if (actualSegmentCount == newSegments.length) {
 			return newSegments;
-		if (actualSegmentCount == 0)
+		}
+		if (actualSegmentCount == 0) {
 			return NO_SEGMENTS;
+		}
 		String[] actualSegments = new String[actualSegmentCount];
 		System.arraycopy(newSegments, 0, actualSegments, 0, actualSegments.length);
 		return actualSegments;
@@ -164,21 +173,25 @@ public class FilePath {
 			} else if (original.startsWith(UNC_SLASHES)) {
 				// handle UNC paths
 				int uncPrefixEnd = original.indexOf(SEPARATOR, 2);
-				if (uncPrefixEnd >= 0)
+				if (uncPrefixEnd >= 0) {
 					uncPrefixEnd = original.indexOf(SEPARATOR, uncPrefixEnd + 1);
+				}
 				if (uncPrefixEnd >= 0) {
 					device = original.substring(0, uncPrefixEnd);
 					original = original.substring(uncPrefixEnd, original.length());
-				} else
+				} else { // not a valid UNC
 					// not a valid UNC
 					throw new IllegalArgumentException("Not a valid UNC: " + original); //$NON-NLS-1$
+				}
 			}
 		}
 		// device names letters and UNCs properly stripped off
-		if (original.charAt(0) == SEPARATOR)
+		if (original.charAt(0) == SEPARATOR) {
 			flags |= HAS_LEADING;
-		if (original.charAt(original.length() - 1) == SEPARATOR)
+		}
+		if (original.charAt(original.length() - 1) == SEPARATOR) {
 			flags |= HAS_TRAILING;
+		}
 		segments = computeSegments(original);
 	}
 
@@ -204,21 +217,25 @@ public class FilePath {
 	 *         path
 	 */
 	public String makeRelative(FilePath base) {
-		if (base.device != null && !base.device.equalsIgnoreCase(this.device))
+		if (base.device != null && !base.device.equalsIgnoreCase(this.device)) {
 			return base.toString();
+		}
 		int baseCount = this.segments.length;
 		int count = this.matchingFirstSegments(base);
-		if (baseCount == count && count == base.segments.length)
+		if (baseCount == count && count == base.segments.length) {
 			return base.hasTrailingSlash() ? ("." + SEPARATOR) : "."; //$NON-NLS-1$ //$NON-NLS-2$
+		}
 		StringBuilder relative = new StringBuilder(); //
-		for (int j = 0; j < baseCount - count; j++)
+		for (int j = 0; j < baseCount - count; j++) {
 			relative.append(PARENT_DIR + SEPARATOR);
+		}
 		for (int i = 0; i < base.segments.length - count; i++) {
 			relative.append(base.segments[count + i]);
 			relative.append(SEPARATOR);
 		}
-		if (!base.hasTrailingSlash())
+		if (!base.hasTrailingSlash()) {
 			relative.deleteCharAt(relative.length() - 1);
+		}
 		return relative.toString();
 	}
 
@@ -231,8 +248,9 @@ public class FilePath {
 		int max = Math.min(segments.length, anotherPathLen);
 		int count = 0;
 		for (int i = 0; i < max; i++) {
-			if (!segments[i].equals(anotherPath.segments[i]))
+			if (!segments[i].equals(anotherPath.segments[i])) {
 				return count;
+			}
 			count++;
 		}
 		return count;
@@ -246,16 +264,19 @@ public class FilePath {
 	@Override
 	public String toString() {
 		StringBuilder result = new StringBuilder();
-		if (device != null)
+		if (device != null) {
 			result.append(device);
-		if (isAbsolute())
+		}
+		if (isAbsolute()) {
 			result.append(SEPARATOR);
+		}
 		for (String segment : segments) {
 			result.append(segment);
 			result.append(SEPARATOR);
 		}
-		if (segments.length > 0 && !hasTrailingSlash())
+		if (segments.length > 0 && !hasTrailingSlash()) {
 			result.deleteCharAt(result.length() - 1);
+		}
 		return result.toString();
 	}
 }

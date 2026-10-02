@@ -46,7 +46,7 @@ public class DefaultStartupMonitor implements StartupMonitor {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.core.runtime.adaptor.StartupMonitor#update()
 	 */
 	@Override

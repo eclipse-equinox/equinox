@@ -65,7 +65,7 @@ public class SystemBundleActivator implements BundleActivator {
 	private Plurl plurl;
 	private PlurlStreamHandlerFactory plurlStreamHandlerFactory;
 	private PlurlContentHandlerFactory plurlContentHandlerFactory;
-	private List<ServiceRegistration<?>> registrations = new ArrayList<>(10);
+	private final List<ServiceRegistration<?>> registrations = new ArrayList<>(10);
 	private SecurityManager setSecurityManagner;
 
 	@SuppressWarnings("deprecation")
@@ -200,8 +200,9 @@ public class SystemBundleActivator implements BundleActivator {
 			}
 		}
 
-		if (configuration.getDebug().DEBUG_SECURITY)
+		if (configuration.getDebug().DEBUG_SECURITY) {
 			configuration.getDebug().trace(OPTION_DEBUG_SECURITY, "Setting SecurityManager to: " + toInstall); //$NON-NLS-1$
+		}
 		try {
 			if (toInstall != null) {
 				System.setSecurityManager(toInstall);
@@ -261,8 +262,9 @@ public class SystemBundleActivator implements BundleActivator {
 					e.getMessage(), e);
 		}
 		// unregister services
-		for (ServiceRegistration<?> registration : registrations)
+		for (ServiceRegistration<?> registration : registrations) {
 			registration.unregister();
+		}
 		registrations.clear();
 		bundle.getEquinoxContainer().getLogServices().stop(bc);
 		unintallSecurityManager();
@@ -270,8 +272,9 @@ public class SystemBundleActivator implements BundleActivator {
 	}
 
 	private void unintallSecurityManager() {
-		if (setSecurityManagner != null && System.getSecurityManager() == setSecurityManagner)
+		if (setSecurityManagner != null && System.getSecurityManager() == setSecurityManagner) {
 			System.setSecurityManager(null);
+		}
 		setSecurityManagner = null;
 	}
 
@@ -287,8 +290,9 @@ public class SystemBundleActivator implements BundleActivator {
 
 	private void register(BundleContext context, String serviceClass, Object service, boolean setRanking,
 			Dictionary<String, Object> properties) {
-		if (properties == null)
+		if (properties == null) {
 			properties = new Hashtable<>();
+		}
 		if (setRanking) {
 			properties.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MAX_VALUE));
 		}

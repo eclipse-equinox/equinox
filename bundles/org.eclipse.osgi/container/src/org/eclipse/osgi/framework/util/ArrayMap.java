@@ -36,16 +36,18 @@ public class ArrayMap<K, V> implements Collection<K> {
 	 * change the values of the keys and values Lists.
 	 */
 	public ArrayMap(List<K> keys, List<V> values) {
-		if (keys.size() != values.size())
+		if (keys.size() != values.size()) {
 			throw new IllegalArgumentException("Keys and values size must be equal."); //$NON-NLS-1$
+		}
 		this.keys = keys;
 		this.values = values;
 	}
 
 	public V get(K key) {
 		int index = keys.indexOf(key);
-		if (index < 0)
+		if (index < 0) {
 			return null;
+		}
 		return values.get(index);
 	}
 
@@ -62,8 +64,9 @@ public class ArrayMap<K, V> implements Collection<K> {
 	@Override
 	public boolean remove(Object key) {
 		int index = keys.indexOf(key);
-		if (index < 0)
+		if (index < 0) {
 			return false;
+		}
 		keys.remove(index);
 		values.remove(index);
 		return true;
@@ -151,8 +154,9 @@ public class ArrayMap<K, V> implements Collection<K> {
 	@Override
 	public boolean removeAll(Collection<?> c) {
 		boolean result = false;
-		for (Object key : c)
+		for (Object key : c) {
 			result |= remove(key);
+		}
 		return result;
 	}
 
@@ -161,8 +165,9 @@ public class ArrayMap<K, V> implements Collection<K> {
 		boolean result = false;
 		Object[] keyArray = keys.toArray();
 		for (Object key : keyArray) {
-			if (!c.contains(key))
+			if (!c.contains(key)) {
 				result |= remove(key);
+			}
 		}
 		return result;
 	}
@@ -191,8 +196,9 @@ public class ArrayMap<K, V> implements Collection<K> {
 	private V getByIdentity(K key) {
 		int index = 0;
 		for (K existing : keys) {
-			if (existing == key)
+			if (existing == key) {
 				return getValue(index);
+			}
 			index++;
 		}
 		return null;

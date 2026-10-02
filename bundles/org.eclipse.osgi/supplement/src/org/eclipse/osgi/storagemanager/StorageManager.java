@@ -98,7 +98,7 @@ public final class StorageManager {
 	private final boolean openCleanup = Boolean.valueOf(System.getProperty("osgi.embedded.cleanupOnOpen")).booleanValue(); //$NON-NLS-1$
 	private final boolean saveCleanup = Boolean.valueOf(System.getProperty("osgi.embedded.cleanupOnSave")).booleanValue(); //$NON-NLS-1$
 
-	private class Entry {
+	private static class Entry {
 		int readId;
 		int writeId;
 		int fileType;
@@ -184,8 +184,9 @@ public final class StorageManager {
 	}
 
 	private void initializeInstanceFile() throws IOException {
-		if (instanceFile != null || readOnly)
+		if (instanceFile != null || readOnly) {
 			return;
+		}
 		this.instanceFile = ReliableFile.createTempFile(".tmp", ".instance", managerRoot); //$NON-NLS-1$//$NON-NLS-2$
 		this.instanceFile.deleteOnExit();
 		instanceLocker = LocationHelper.createLocker(instanceFile, lockMode, false);
@@ -214,12 +215,15 @@ public final class StorageManager {
 	 * @throws IOException if there are any problems adding the given file to the manager
 	 */
 	private void add(String managedFile, int fileType) throws IOException {
-		if (!open)
+		if (!open) {
 			throw new IOException(Msg.fileManager_notOpen);
-		if (readOnly)
+		}
+		if (readOnly) {
 			throw new IOException(Msg.fileManager_illegalInReadOnlyMode);
-		if (!lock(true))
+		}
+		if (!lock(true)) {
 			throw new IOException(Msg.fileManager_cannotLock);
+		}
 		try {
 			updateTable();
 			Entry entry = (Entry) table.get(managedFile);
@@ -230,8 +234,9 @@ public final class StorageManager {
 				// version on the disk to avoid name collisions. If version found,
 				// us the oldest generation+1 for the write ID.
 				int oldestGeneration = findOldestGeneration(managedFile);
-				if (oldestGeneration != 0)
+				if (oldestGeneration != 0) {
 					entry.setWriteId(oldestGeneration + 1);
+				}
 				save();
 			} else {
 				if (entry.getFileType() != fileType) {
@@ -263,8 +268,9 @@ public final class StorageManager {
 				}
 				try {
 					int generation = Integer.parseInt(file.substring(len));
-					if (generation > oldestGeneration)
+					if (generation > oldestGeneration) {
 						oldestGeneration = generation;
+					}
 				} catch (NumberFormatException e) {
 					continue;
 				}
@@ -286,20 +292,24 @@ public final class StorageManager {
 	 * @throws IOException if there are any problems updating the given managed files
 	 */
 	public void update(String[] managedFiles, String[] sources) throws IOException {
-		if (!open)
+		if (!open) {
 			throw new IOException(Msg.fileManager_notOpen);
-		if (readOnly)
+		}
+		if (readOnly) {
 			throw new IOException(Msg.fileManager_illegalInReadOnlyMode);
-		if (!lock(true))
+		}
+		if (!lock(true)) {
 			throw new IOException(Msg.fileManager_cannotLock);
+		}
 		try {
 			updateTable();
 			int[] originalReadIDs = new int[managedFiles.length];
 			boolean error = false;
 			for (int i = 0; i < managedFiles.length; i++) {
 				originalReadIDs[i] = getId(managedFiles[i]);
-				if (!update(managedFiles[i], sources[i]))
+				if (!update(managedFiles[i], sources[i])) {
 					error = true;
+				}
 			}
 			if (error) {
 				// restore the original readIDs to avoid inconsistency for this group
@@ -321,13 +331,15 @@ public final class StorageManager {
 	 * @return the names of the managed files
 	 */
 	public String[] getManagedFiles() {
-		if (!open)
+		if (!open) {
 			return null;
+		}
 		Set<Object> set = table.keySet();
 		String[] keys = set.toArray(new String[set.size()]);
 		String[] result = new String[keys.length];
-		for (int i = 0; i < keys.length; i++)
+		for (int i = 0; i < keys.length; i++) {
 			result[i] = new String(keys[i]);
+		}
 		return result;
 	}
 
@@ -350,11 +362,13 @@ public final class StorageManager {
 	 * @return the id of the managed file
 	 */
 	public int getId(String managedFile) {
-		if (!open)
+		if (!open) {
 			return -1;
+		}
 		Entry entry = (Entry) table.get(managedFile);
-		if (entry == null)
+		if (entry == null) {
 			return -1;
+		}
 		return entry.getReadId();
 	}
 
@@ -380,16 +394,19 @@ public final class StorageManager {
 	 *                         lock.
 	 */
 	private boolean lock(boolean wait) throws IOException {
-		if (readOnly)
+		if (readOnly) {
 			return false;
+		}
 		if (locker == null) {
 			locker = LocationHelper.createLocker(lockFile, lockMode, false);
-			if (locker == null)
+			if (locker == null) {
 				throw new IOException(Msg.fileManager_cannotLock);
+			}
 		}
 		boolean locked = locker.lock();
-		if (locked || !wait)
+		if (locked || !wait) {
 			return locked;
+		}
 		//Someone else must have the directory locked, but they should release it quickly
 		long start = System.currentTimeMillis();
 		while (true) {
@@ -398,12 +415,14 @@ public final class StorageManager {
 			} catch (InterruptedException e) {/*ignore*/
 			}
 			locked = locker.lock();
-			if (locked)
+			if (locked) {
 				return true;
+			}
 			// never wait longer than 5 seconds
 			long time = System.currentTimeMillis() - start;
-			if (time > MAX_LOCK_WAIT)
+			if (time > MAX_LOCK_WAIT) {
 				return false;
+			}
 		}
 	}
 
@@ -423,8 +442,9 @@ public final class StorageManager {
 	 *               <code>null</code> if the given managed file is not managed
 	 */
 	public File lookup(String managedFile, boolean add) throws IOException {
-		if (!open)
+		if (!open) {
 			throw new IOException(Msg.fileManager_notOpen);
+		}
 		Entry entry = (Entry) table.get(managedFile);
 		if (entry == null) {
 			if (add) {
@@ -442,8 +462,9 @@ public final class StorageManager {
 		File targetFile = new File(managedFile);
 		// its ok if the original does not exist. The table entry will capture
 		// that fact. There is no need to put something in the filesystem.
-		if (!original.exists() || targetFile.exists())
+		if (!original.exists() || targetFile.exists()) {
 			return false;
+		}
 		return original.renameTo(targetFile);
 	}
 
@@ -451,8 +472,9 @@ public final class StorageManager {
 	 * Saves the state of the storage manager and releases any locks held.
 	 */
 	private void release() {
-		if (locker == null)
+		if (locker == null) {
 			return;
+		}
 		locker.release();
 	}
 
@@ -463,14 +485,17 @@ public final class StorageManager {
 	 * @throws IOException if an error occured removing the managed file
 	 */
 	public void remove(String managedFile) throws IOException {
-		if (!open)
+		if (!open) {
 			throw new IOException(Msg.fileManager_notOpen);
-		if (readOnly)
+		}
+		if (readOnly) {
 			throw new IOException(Msg.fileManager_illegalInReadOnlyMode);
+		}
 		// The removal needs to be done eagerly, so the value is effectively removed from the disktable.
 		// Otherwise, an updateTable() caused by an update(,)  could cause the file to readded to the local table.
-		if (!lock(true))
+		if (!lock(true)) {
 			throw new IOException(Msg.fileManager_cannotLock);
+		}
 		try {
 			updateTable();
 			table.remove(managedFile);
@@ -483,8 +508,9 @@ public final class StorageManager {
 	private void updateTable() throws IOException {
 		int stamp;
 		stamp = ReliableFile.lastModifiedVersion(tableFile);
-		if (stamp == tableStamp || stamp == -1)
+		if (stamp == tableStamp || stamp == -1) {
 			return;
+		}
 		Properties diskTable = new Properties();
 		InputStream input = new ReliableFileInputStream(tableFile);
 		try {
@@ -527,8 +553,9 @@ public final class StorageManager {
 	 * This method should be called while the manager is locked.
 	 */
 	private void save() throws IOException {
-		if (readOnly)
+		if (readOnly) {
 			return;
+		}
 		// if the table file has change on disk, update our data structures then
 		// rewrite the file.
 		updateTable();
@@ -553,8 +580,9 @@ public final class StorageManager {
 			fileStream.close();
 			error = false;
 		} finally {
-			if (error)
+			if (error) {
 				fileStream.abort();
+			}
 		}
 		// bug 259981 we should clean up
 		if (saveCleanup) {
@@ -572,8 +600,9 @@ public final class StorageManager {
 
 	private boolean update(String managedFile, String source) throws IOException {
 		Entry entry = (Entry) table.get(managedFile);
-		if (entry == null)
+		if (entry == null) {
 			add(managedFile);
+		}
 		int newId = entry.getWriteId();
 		// attempt to rename the file to the next generation
 		boolean success = move(getAbsolutePath(source), getAbsolutePath(managedFile) + '.' + newId);
@@ -583,8 +612,9 @@ public final class StorageManager {
 			newId = findOldestGeneration(managedFile) + 1;
 			success = move(getAbsolutePath(source), getAbsolutePath(managedFile) + '.' + newId);
 		}
-		if (!success)
+		if (!success) {
 			return false;
+		}
 		// update the entry. read and write ids should be the same since
 		// everything is in sync
 		entry.setReadId(newId);
@@ -597,11 +627,13 @@ public final class StorageManager {
 	 * This removal is only done if the instance of eclipse calling this method is the last instance using this storage manager.
 	 */
 	private void cleanup(boolean doLock) throws IOException {
-		if (readOnly)
+		if (readOnly) {
 			return;
+		}
 		//Lock first, so someone else can not start while we're in the middle of cleanup
-		if (doLock && !lock(true))
+		if (doLock && !lock(true)) {
 			throw new IOException(Msg.fileManager_cannotLock);
+		}
 		try {
 			//Iterate through the temp files and delete them all, except the one representing this storage manager.
 			String[] files = managerRoot.list();
@@ -647,16 +679,18 @@ public final class StorageManager {
 				}
 			}
 		} finally {
-			if (doLock)
+			if (doLock) {
 				release();
+			}
 		}
 	}
 
 	private void deleteCopies(String fileName, String exceptionNumber) {
 		String notToDelete = fileName + '.' + exceptionNumber;
 		String[] files = base.list();
-		if (files == null)
+		if (files == null) {
 			return;
+		}
 		for (String file : files) {
 			if (file.startsWith(fileName + '.') && !file.equals(notToDelete)) {
 				new File(base, file).delete();
@@ -669,21 +703,25 @@ public final class StorageManager {
 	 * It is important to close the manager as it also cleans up old copies of the managed files.
 	 */
 	public void close() {
-		if (!open)
+		if (!open) {
 			return;
+		}
 		open = false;
-		if (readOnly)
+		if (readOnly) {
 			return;
+		}
 		try {
 			cleanup(true);
 		} catch (IOException e) {
 			//Ignore and close.
 		}
-		if (instanceLocker != null)
+		if (instanceLocker != null) {
 			instanceLocker.release();
+		}
 
-		if (instanceFile != null)
+		if (instanceFile != null) {
 			instanceFile.delete();
+		}
 	}
 
 	/**
@@ -695,13 +733,16 @@ public final class StorageManager {
 	public void open(boolean wait) throws IOException {
 		if (!readOnly) {
 			managerRoot.mkdirs();
-			if (!managerRoot.isDirectory())
+			if (!managerRoot.isDirectory()) {
 				throw new IOException(Msg.fileManager_cannotLock);
-			if (openCleanup)
+			}
+			if (openCleanup) {
 				cleanup(true);
+			}
 			boolean locked = lock(wait);
-			if (!locked && wait)
+			if (!locked && wait) {
 				throw new IOException(Msg.fileManager_cannotLock);
+			}
 		}
 
 		try {
@@ -725,8 +766,9 @@ public final class StorageManager {
 	 * @see #update(String[], String[])
 	 */
 	public File createTempFile(String file) throws IOException {
-		if (readOnly)
+		if (readOnly) {
 			throw new IOException(Msg.fileManager_illegalInReadOnlyMode);
+		}
 		File tmpFile = ReliableFile.createTempFile(file, ReliableFile.tmpExt, base);
 		// bug 350106: do not use deleteOnExit()  If clients really want that the
 		// they can call it themselves.
@@ -758,21 +800,24 @@ public final class StorageManager {
 	 */
 	public InputStream[] getInputStreamSet(String[] managedFiles) throws IOException {
 		InputStream[] streams = new InputStream[managedFiles.length];
-		for (int i = 0; i < streams.length; i++)
+		for (int i = 0; i < streams.length; i++) {
 			streams[i] = getInputStream(managedFiles[i], ReliableFile.OPEN_FAIL_ON_PRIMARY);
+		}
 		return streams;
 	}
 
 	private InputStream getInputStream(String managedFiles, int openMask) throws IOException {
 		if (useReliableFiles) {
 			int id = getId(managedFiles);
-			if (id == -1)
+			if (id == -1) {
 				return null;
+			}
 			return new ReliableFileInputStream(new File(getBase(), managedFiles), id, openMask);
 		}
 		File lookup = lookup(managedFiles, false);
-		if (lookup == null)
+		if (lookup == null) {
 			return null;
+		}
 		return new FileInputStream(lookup);
 	}
 
@@ -817,8 +862,9 @@ public final class StorageManager {
 			}
 		} catch (IOException e) {
 			// cleanup
-			for (int jdx = 0; jdx < idx; jdx++)
+			for (int jdx = 0; jdx < idx; jdx++) {
 				streams[jdx].abort();
+			}
 			throw e;
 		}
 		return streams;
@@ -872,8 +918,9 @@ public final class StorageManager {
 	 * @see #getOutputStreamSet(String[])
 	 */
 	void closeOutputStream(ManagedOutputStream smos) throws IOException {
-		if (smos.getState() != ManagedOutputStream.ST_OPEN)
+		if (smos.getState() != ManagedOutputStream.ST_OPEN) {
 			return;
+		}
 		ManagedOutputStream[] streamSet = smos.getStreamSet();
 		if (smos.getOutputFile() == null) {
 			// this is a ReliableFileOutputStream

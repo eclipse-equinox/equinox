@@ -18,14 +18,14 @@ package org.eclipse.osgi.service.resolver;
  * <p>
  * This interface is not intended to be implemented by clients.
  * </p>
- * 
+ *
  * @since 3.1
  * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface StateDelta {
 	/**
 	 * Returns an array of all the bundle deltas in this delta regardless of type.
-	 * 
+	 *
 	 * @return an array of bundle deltas
 	 */
 	public BundleDelta[] getChanges();
@@ -44,7 +44,7 @@ public interface StateDelta {
 
 	/**
 	 * Returns the state whose changes are represented by this delta.
-	 * 
+	 *
 	 * @return the state
 	 */
 	public State getState();
@@ -52,7 +52,7 @@ public interface StateDelta {
 	/**
 	 * Returns the resolver hook exception if one occurred while resolving the
 	 * state.
-	 * 
+	 *
 	 * @since 3.7
 	 */
 	public ResolverHookException getResovlerHookException();

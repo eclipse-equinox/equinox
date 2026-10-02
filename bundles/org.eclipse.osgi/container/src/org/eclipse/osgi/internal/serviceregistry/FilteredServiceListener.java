@@ -101,9 +101,10 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 			String[] classes = reference.getClasses();
 			int size = classes.length;
 			for (int i = 0; i < size; i++) {
-				if (classes[i] == objectClass) // objectClass strings have previously been interned for identity
-												// comparison
+				if (classes[i] == objectClass) { // objectClass strings have previously been interned for identity
+					// comparison
 					break objectClassCheck;
+				}
 			}
 			return; // no class in this event matches a required part of the filter; we do not need
 					// to deliver this event
@@ -111,8 +112,9 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 		// TODO could short circuit service.id filters as well since the id is constant
 		// for a registration.
 
-		if (!ServiceRegistry.hasListenServicePermission(event, context))
+		if (!ServiceRegistry.hasListenServicePermission(event, context)) {
 			return;
+		}
 
 		if (debug.DEBUG_EVENTS) {
 			String listenerName = this.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(this)); //$NON-NLS-1$
@@ -181,7 +183,7 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 
 	/**
 	 * Return the bundle context for the ListenerHook.
-	 * 
+	 *
 	 * @return The context of the bundle which added the service listener.
 	 * @see org.osgi.framework.hooks.service.ListenerHook.ListenerInfo#getBundleContext()
 	 */
@@ -192,7 +194,7 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 
 	/**
 	 * Return the filter string for the ListenerHook.
-	 * 
+	 *
 	 * @return The filter string with which the listener was added. This may be
 	 *         <code>null</code> if the listener was added without a filter.
 	 * @see org.osgi.framework.hooks.service.ListenerHook.ListenerInfo#getFilter()
@@ -228,7 +230,7 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 
 	/**
 	 * Returns an objectClass filter string for the specified class name.
-	 * 
+	 *
 	 * @return A filter string for the specified class name or <code>null</code> if
 	 *         the specified class name is <code>null</code>.
 	 */

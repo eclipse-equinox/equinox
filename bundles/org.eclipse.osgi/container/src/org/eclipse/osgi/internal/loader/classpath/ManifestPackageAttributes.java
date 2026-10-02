@@ -29,7 +29,7 @@ class ManifestPackageAttributes {
 
 	/**
 	 * Utility method to return the first version, or the second if it is null
-	 * 
+	 *
 	 * @param first  the string to return if not null
 	 * @param second the fallback value if the first is null
 	 * @return the first value, or the second value if the first is null
@@ -45,7 +45,7 @@ class ManifestPackageAttributes {
 	 * all <code>null</code> values then <code>null</code> values will be used. If
 	 * <code>null</code> values are used for all of the versions, titles, and
 	 * vendors then {@link #NONE} is returned.
-	 * 
+	 *
 	 * @param specificationTitle    the package specification title
 	 * @param specificationVersion  the package specification version
 	 * @param specificationVendor   the package specification vendor
@@ -94,7 +94,7 @@ class ManifestPackageAttributes {
 
 	/**
 	 * Returns the title, version and vendor for the package implementation.
-	 * 
+	 *
 	 * @return the title, version and vendor for the package implemetnation.
 	 */
 	TitleVersionVendor getImplementation() {
@@ -103,7 +103,7 @@ class ManifestPackageAttributes {
 
 	/**
 	 * Returns the title, version and vendor for the package specification.
-	 * 
+	 *
 	 * @return the title, version and vendor for the package specification.
 	 */
 	TitleVersionVendor getSpecification() {

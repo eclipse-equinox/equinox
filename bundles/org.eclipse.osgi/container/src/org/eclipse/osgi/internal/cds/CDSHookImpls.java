@@ -151,8 +151,9 @@ public class CDSHookImpls extends ClassLoaderHook implements BundleFileWrapperFa
 	}
 
 	private boolean hasMagicClassNumber(byte[] classbytes) {
-		if (classbytes == null || classbytes.length < 4)
+		if (classbytes == null || classbytes.length < 4) {
 			return false;
+		}
 		// TODO maybe there is a better way to do this? I'm not sure why I had to AND
 		// each byte with the value I was checking ...
 		return (classbytes[0] & 0xCA) == 0xCA && (classbytes[1] & 0xFE) == 0xFE && (classbytes[2] & 0xBA) == 0xBA
