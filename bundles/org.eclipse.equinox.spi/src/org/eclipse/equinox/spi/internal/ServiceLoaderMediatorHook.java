@@ -111,23 +111,23 @@ public class ServiceLoaderMediatorHook extends ClassLoaderHook implements Bundle
 
 	// --- tracking of service loader related bundles ---
 
-	private volatile BundleTracker<Bundle> serviceBundleTracker;
+	private final BundleTracker<Bundle> serviceBundleTracker;
 	private final Map<Bundle, BundleServices> trackedBundles = new ConcurrentHashMap<>();
 	private final Map<String, Set<BundleServices>> allServiceTypes = new HashMap<>();
 	private final Map<String, Set<BundleServices>> allProvidedServices = new HashMap<>();
 	private final Set<Bundle> stoppedProviders = ConcurrentHashMap.newKeySet();
+	private final ServiceLoaderMediatorHookConfigurator.Tracing tracing;
 
-	void start(BundleContext systemBundleContext) {
-		try (RuntimeCloseable locked = lock(lock.writeLock())) {
-			serviceBundleTracker = new BundleTracker<>(systemBundleContext, SERVICES_ACTIVE_STATES, this);
-			serviceBundleTracker.open();
-		}
+	public ServiceLoaderMediatorHook(BundleContext systemBundleContext,
+			ServiceLoaderMediatorHookConfigurator.Tracing tracing) {
+		this.tracing = tracing;
+		serviceBundleTracker = new BundleTracker<>(systemBundleContext, SERVICES_ACTIVE_STATES, this);
+		serviceBundleTracker.open();
 	}
 
 	void stop() {
 		try (RuntimeCloseable locked = lock(lock.writeLock())) {
 			this.serviceBundleTracker.close();
-			this.serviceBundleTracker = null;
 			this.trackedBundles.clear();
 			this.allServiceTypes.clear();
 			this.allProvidedServices.clear();
@@ -158,8 +158,7 @@ public class ServiceLoaderMediatorHook extends ClassLoaderHook implements Bundle
 						allProvidedServices.computeIfAbsent(providerClass, p -> createIdentityHashSet(3)).add(services);
 					}
 				});
-				ServiceLoaderMediatorHookConfigurator.tracing.debugRegistrations("Registered", //$NON-NLS-1$
-						providedServices, bundle);
+				tracing.debugRegistrations("Registered", providedServices, bundle); //$NON-NLS-1$
 			}
 			if (BundleServices.isFragment(bundleRevision)) {
 				BundleWiring hostingWiring = BundleServices.getHostingWiring(bundleRevision);
@@ -205,8 +204,7 @@ public class ServiceLoaderMediatorHook extends ClassLoaderHook implements Bundle
 			}
 			stoppedProviders.remove(bundle);
 
-			ServiceLoaderMediatorHookConfigurator.tracing.debugRegistrations("Unregistered", //$NON-NLS-1$
-					bundleServices.providedServices(), bundle);
+			tracing.debugRegistrations("Unregistered", bundleServices.providedServices(), bundle); //$NON-NLS-1$
 		}
 	}
 
