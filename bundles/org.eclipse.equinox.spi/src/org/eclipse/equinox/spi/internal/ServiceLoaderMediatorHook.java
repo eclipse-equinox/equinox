@@ -236,13 +236,14 @@ public class ServiceLoaderMediatorHook extends ClassLoaderHook implements Bundle
 			case BundleEvent.STARTED:
 			case BundleEvent.STOPPED:
 				// The completion of the start and stop process is irrelevant.
+			case BundleEvent.RESOLVED: // An update of the wiring is irrelevant.
 				break;
 			case BundleEvent.UPDATED:
 				removedBundle(bundle, event, trackedBundle);
 				addingBundle(bundle, event);
 				break;
 			default:
-				throw new IllegalStateException("Unsupported event type: " + event.getType()); //$NON-NLS-1$
+				throw new IllegalStateException("Unsupported event type " + event.getType() + " for bundle " + bundle); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 	}
