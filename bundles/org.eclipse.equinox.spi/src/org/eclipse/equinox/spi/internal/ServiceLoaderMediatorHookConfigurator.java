@@ -14,15 +14,12 @@
 
 package org.eclipse.equinox.spi.internal;
 
-import static org.eclipse.osgi.internal.debug.Debug.OPTION_DEBUG_LOADER_CDS;
-
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.osgi.internal.debug.Debug;
-import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
-import org.eclipse.osgi.internal.hookregistry.HookConfigurator;
-import org.eclipse.osgi.internal.hookregistry.HookRegistry;
+import org.eclipse.osgi.container.Module;
+import org.eclipse.osgi.container.ModuleContainerAdaptor;
+import org.eclipse.osgi.internal.hookregistry.ClassLoaderHook;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.osgi.service.debug.DebugOptionsListener;
 import org.osgi.framework.Bundle;
@@ -31,43 +28,29 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceRegistration;
 
-public class ServiceLoaderMediatorHookConfigurator implements HookConfigurator {
-	private static ServiceLoaderMediatorHook mediatorHook;
-	static Tracing tracing;
+public class ServiceLoaderMediatorHookConfigurator implements BundleActivator {
+	private ServiceLoaderMediatorHook mediatorHook;
+	private ServiceRegistration<ClassLoaderHook> hookRegistration;
+	private ServiceRegistration<DebugOptionsListener> debugListenerRegistration;
 
 	@Override
-	public void addHooks(HookRegistry hookRegistry) {
-		tracing = new Tracing(hookRegistry.getConfiguration());
+	public void start(BundleContext context) {
+		Tracing tracing = new Tracing();
+		debugListenerRegistration = context.registerService(DebugOptionsListener.class, tracing,
+				FrameworkUtil.asDictionary(Map.of(DebugOptions.LISTENER_SYMBOLICNAME, Tracing.NAME)));
 
-		ServiceLoaderMediatorHook hook = new ServiceLoaderMediatorHook();
-		hookRegistry.addClassLoaderHook(hook);
-		mediatorHook = hook;
+		mediatorHook = new ServiceLoaderMediatorHook(context, tracing);
+		hookRegistration = context.registerService(ClassLoaderHook.class, mediatorHook, null);
 	}
 
-	public static class Activator implements BundleActivator {
-		private ServiceRegistration<DebugOptionsListener> tracingRegistration;
+	@Override
+	public void stop(BundleContext context) {
+		hookRegistration.unregister();
+		hookRegistration = null;
+		mediatorHook.stop();
+		mediatorHook = null;
 
-		@Override
-		public void start(BundleContext context) throws Exception {
-			if (mediatorHook != null) { // Is null, if not added to osgi.framework.extensions path
-
-				Map<String, String> properties = Map.of(DebugOptions.LISTENER_SYMBOLICNAME, Tracing.NAME);
-				tracingRegistration = context.registerService(DebugOptionsListener.class, tracing,
-						FrameworkUtil.asDictionary(properties));
-
-				mediatorHook.start(context);
-			}
-		}
-
-		@Override
-		public void stop(BundleContext context) throws Exception {
-			if (mediatorHook != null) {
-				mediatorHook.stop();
-
-				tracingRegistration.unregister();
-				tracingRegistration = null;
-			}
-		}
+		debugListenerRegistration.unregister();
 	}
 
 	static class Tracing implements DebugOptionsListener {
@@ -76,22 +59,16 @@ public class ServiceLoaderMediatorHookConfigurator implements HookConfigurator {
 		private static final String OPTION_DEBUG_REGISTRATIONS = NAME + "/debug/registrations"; //$NON-NLS-1$
 		private static volatile boolean DEBUG_REGISTRATIONS = false;
 
-		private final Debug debug;
-
-		public Tracing(EquinoxConfiguration configuration) {
-			debug = configuration.getDebug();
-			optionsChanged(configuration.getDebugOptions());
-		}
-
 		@Override
 		public void optionsChanged(DebugOptions options) {
 			DEBUG_REGISTRATIONS = options.getBooleanOption(OPTION_DEBUG_REGISTRATIONS, false);
 		}
 
 		void debugRegistrations(String operation, Map<String, List<String>> services, Bundle bundle) {
-			if (ServiceLoaderMediatorHookConfigurator.Tracing.DEBUG_REGISTRATIONS) {
+			if (DEBUG_REGISTRATIONS) {
+				ModuleContainerAdaptor adaptor = bundle.adapt(Module.class).getContainer().getAdaptor();
 				services.forEach((serviceType, providers) -> {
-					debug.trace(OPTION_DEBUG_LOADER_CDS,
+					adaptor.trace(OPTION_DEBUG_REGISTRATIONS,
 							operation + " providers for service '" + serviceType + "' (from bundle " + bundle //$NON-NLS-1$ //$NON-NLS-2$
 							+ "): " + providers); //$NON-NLS-1$
 				});

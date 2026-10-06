@@ -26,7 +26,6 @@
 
 	<properties>
 		<skipAPIAnalysis>true</skipAPIAnalysis>
-		<surefire.testArgLine>-Dosgi.framework.extensions=reference:file:${org.eclipse.platform:org.eclipse.equinox.spi:eclipse-plugin}</surefire.testArgLine>
 	</properties>
 
 	<build>
@@ -45,18 +44,6 @@
 						</extraRequirements>
 					</dependency-resolution>
 				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<executions>
-					<!-- Generate properties containing the location of the just built org.eclipse.equinox.spi jar-->
-					<execution>
-						<goals>
-							<goal>properties</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 	</build>

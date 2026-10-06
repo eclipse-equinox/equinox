@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2016 IBM Corporation and others.
+ * Copyright (c) 2005, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.CopyOnWriteArrayList;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.cds.CDSHookConfigurator;
 import org.eclipse.osgi.internal.connect.ConnectHookConfigurator;
@@ -32,6 +33,14 @@ import org.eclipse.osgi.internal.hooks.EclipseLazyStarter;
 import org.eclipse.osgi.internal.signedcontent.SignedBundleHook;
 import org.eclipse.osgi.internal.weaving.WeavingHookConfigurator;
 import org.eclipse.osgi.util.ManifestElement;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * The hook registry is used to store all the hooks which are configured by the
@@ -84,7 +93,7 @@ public final class HookRegistry {
 
 	private final EquinoxContainer container;
 	private volatile boolean initialized = false;
-	private final List<ClassLoaderHook> classLoaderHooks = new ArrayList<>();
+	private final List<ClassLoaderHook> classLoaderHooks = new CopyOnWriteArrayList<>();
 	private final List<ClassLoaderHook> classLoaderHooksRO = Collections.unmodifiableList(classLoaderHooks);
 	private final List<StorageHookFactory<?, ?, ?>> storageHookFactories = new ArrayList<>();
 	private final List<StorageHookFactory<?, ?, ?>> storageHookFactoriesRO = Collections
@@ -98,6 +107,55 @@ public final class HookRegistry {
 
 	public HookRegistry(EquinoxContainer container) {
 		this.container = container;
+	}
+
+	private static final class ClassLoaderHookTracker implements ActivatorHookFactory, BundleActivator {
+		final List<ClassLoaderHook> clHooks;
+		final EquinoxContainer container;
+		private ServiceTracker<ClassLoaderHook, ClassLoaderHook> tracker;
+
+		public ClassLoaderHookTracker(List<ClassLoaderHook> clHooks, EquinoxContainer container) {
+			this.clHooks = clHooks;
+			this.container = container;
+		}
+
+		@Override
+		public BundleActivator createActivator() {
+			return this;
+		}
+
+		@Override
+		public void start(BundleContext context) throws Exception {
+			tracker = new ServiceTracker<ClassLoaderHook, ClassLoaderHook>(context, ClassLoaderHook.class, null) {
+				@Override
+				public ClassLoaderHook addingService(ServiceReference<ClassLoaderHook> reference) {
+					Bundle providerBundle = reference.getBundle();
+					// Permit only the framework and framework extension to add classloader-hooks
+					// dynamically
+					if (providerBundle.getBundleId() == Constants.SYSTEM_BUNDLE_ID) {
+						ClassLoaderHook hook = super.addingService(reference);
+						clHooks.add(hook);
+						return hook;
+					}
+					container.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, providerBundle,
+							new BundleException(
+									"ClassLoaderHook services must be registered by framework extensions.")); //$NON-NLS-1$
+					return null;
+				}
+
+				@Override
+				public void removedService(ServiceReference<ClassLoaderHook> reference, ClassLoaderHook hook) {
+					clHooks.remove(hook);
+					super.removedService(reference, hook);
+				}
+			};
+			tracker.open();
+		}
+
+		@Override
+		public void stop(BundleContext context) throws Exception {
+			tracker.close();
+		}
 	}
 
 	/**
@@ -127,6 +185,7 @@ public final class HookRegistry {
 		// make sure to add connect configurator first always
 		configurators.add(0, ConnectHookConfigurator.class.getName());
 		synchronized (this) {
+			addActivatorHookFactory(new ClassLoaderHookTracker(classLoaderHooks, container));
 			addClassLoaderHook(new DevClassLoadingHook(container.getConfiguration()));
 			addClassLoaderHook(new EclipseLazyStarter(container));
 			addClassLoaderHook(new WeavingHookConfigurator(container));
@@ -156,11 +215,9 @@ public final class HookRegistry {
 		int curBuiltin = 0;
 		while (hookConfigurators.hasMoreElements()) {
 			URL url = hookConfigurators.nextElement();
-			InputStream input = null;
-			try {
+			Properties configuratorProps = new Properties();
+			try (InputStream input = url.openStream()) {
 				// check each file for a hook.configurators property
-				Properties configuratorProps = new Properties();
-				input = url.openStream();
 				configuratorProps.load(input);
 				String hooksValue = configuratorProps.getProperty(HOOK_CONFIGURATORS);
 				if (hooksValue == null)
@@ -180,13 +237,6 @@ public final class HookRegistry {
 				errors.add(new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0,
 						"error loading: " + url.toExternalForm(), 0, e, null)); //$NON-NLS-1$
 				// ignore and continue to next URL
-			} finally {
-				if (input != null)
-					try {
-						input.close();
-					} catch (IOException e) {
-						// do nothing
-					}
 			}
 		}
 	}
