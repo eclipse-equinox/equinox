@@ -57,22 +57,25 @@ public class FrameworkExtensionInstaller {
 	private final ArrayMap<BundleActivator, Bundle> hookActivators = new ArrayMap<>(5);
 
 	private static Method findAddURLMethod(ClassLoader cl, String name) {
-		if (cl == null)
+		if (cl == null) {
 			return null;
+		}
 		return findMethod(cl.getClass(), name, new Class[] { URL.class });
 	}
 
 	private static Method findAddFilePathMethod(ClassLoader cl, String name) {
-		if (cl == null)
+		if (cl == null) {
 			return null;
+		}
 		return findMethod(cl.getClass(), name, new Class[] { String.class });
 	}
 
 	// recursively searches a class and it's superclasses for a (potentially
 	// inaccessable) method
 	private static Method findMethod(Class<?> clazz, String name, Class<?>[] args) {
-		if (clazz == null)
+		if (clazz == null) {
 			return null; // ends the recursion when getSuperClass returns null
+		}
 		try {
 			Method result = clazz.getDeclaredMethod(name, args);
 			result.setAccessible(true);
@@ -86,7 +89,7 @@ public class FrameworkExtensionInstaller {
 
 	private static void callAddURLMethod(URL arg) throws InvocationTargetException {
 		try {
-			ADD_FWK_URL_METHOD.invoke(CL, new Object[] { arg });
+			ADD_FWK_URL_METHOD.invoke(CL, arg);
 		} catch (Throwable t) {
 			throw new InvocationTargetException(t);
 		}
@@ -94,7 +97,7 @@ public class FrameworkExtensionInstaller {
 
 	private static void callAddFilePathMethod(File file) throws InvocationTargetException {
 		try {
-			ADD_FWK_FILE_PATH_METHOD.invoke(CL, new Object[] { file.getCanonicalPath() });
+			ADD_FWK_FILE_PATH_METHOD.invoke(CL, file.getCanonicalPath());
 		} catch (Throwable t) {
 			throw new InvocationTargetException(t);
 		}
@@ -173,7 +176,7 @@ public class FrameworkExtensionInstaller {
 
 	/**
 	 * Returns a list of classpath files for an extension bundle
-	 * 
+	 *
 	 * @param revision revision for the extension bundle
 	 * @return a list of classpath files for an extension bundle
 	 */
@@ -204,8 +207,9 @@ public class FrameworkExtensionInstaller {
 				results.add(((Generation) revision.getRevisionInfo()).getBundleFile().getBaseFile());
 			} else {
 				File result = ((Generation) revision.getRevisionInfo()).getBundleFile().getFile(path, false);
-				if (result != null)
+				if (result != null) {
 					results.add(result);
+				}
 			}
 		}
 		return results.toArray(new File[results.size()]);

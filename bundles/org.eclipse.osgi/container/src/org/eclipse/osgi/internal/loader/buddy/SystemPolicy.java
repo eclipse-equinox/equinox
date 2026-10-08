@@ -49,16 +49,18 @@ public class SystemPolicy implements IBuddyPolicy {
 	static ClassLoader createClassLoader(byte type, ClassLoader bootLoader) {
 		switch (type) {
 		case APP:
-			if (ClassLoader.getSystemClassLoader() != null)
+			if (ClassLoader.getSystemClassLoader() != null) {
 				return ClassLoader.getSystemClassLoader();
+			}
 			return bootLoader;
 
 		case BOOT:
 			return bootLoader;
 
 		case EXT:
-			if (ClassLoader.getSystemClassLoader() != null)
+			if (ClassLoader.getSystemClassLoader() != null) {
 				return ClassLoader.getSystemClassLoader().getParent();
+			}
 			return bootLoader;
 		}
 		return null;

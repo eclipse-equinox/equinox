@@ -33,7 +33,7 @@ import org.osgi.framework.BundleException;
  * A StorageHookFactory hooks into the persistent storage loading and saving of
  * bundle {@link Generation generations}. A factory creates StorageHook
  * instances that get associated with each Generation object installed.
- * 
+ *
  * @see Generation#getStorageHook(Class)
  * @param <S> the save context type
  * @param <L> the load context type
@@ -47,7 +47,7 @@ public abstract class StorageHookFactory<S, L, H extends StorageHookFactory.Stor
 	 * storage to check the consistency of cached persistent data. Any time a
 	 * storage hook changes the format of its persistent data the storage version
 	 * should be incremented.
-	 * 
+	 *
 	 * @return the storage version of this storage hook
 	 */
 	public int getStorageVersion() {
@@ -56,7 +56,7 @@ public abstract class StorageHookFactory<S, L, H extends StorageHookFactory.Stor
 
 	/**
 	 * Returns the implementation class name for the hook implementation
-	 * 
+	 *
 	 * @return the implementation class name for the hook implementation
 	 */
 	public final String getKey() {
@@ -69,7 +69,7 @@ public abstract class StorageHookFactory<S, L, H extends StorageHookFactory.Stor
 	 * specified version is identical to the current version. Implementations must
 	 * override this method if they want to support other (older) versions for
 	 * migration purposes.
-	 * 
+	 *
 	 * @param version the persisted version
 	 * @return true if the persisted version is compatible with the current version.
 	 */
@@ -81,7 +81,7 @@ public abstract class StorageHookFactory<S, L, H extends StorageHookFactory.Stor
 	 * Creates a save context object for a storage hook. The save context is passed
 	 * to the {@link StorageHook#save(Object, DataOutputStream)} for each generation
 	 * being persisted by the framework.
-	 * 
+	 *
 	 * @return a save context object or {@code null} if no save context is needed
 	 */
 	public S createSaveContext() {
@@ -92,7 +92,7 @@ public abstract class StorageHookFactory<S, L, H extends StorageHookFactory.Stor
 	 * Creates a load context object for a storage hook. The load context is passed
 	 * to the {@link StorageHook#load(Object, DataInputStream)} for each generation
 	 * being loaded from persistent storage by the framework.
-	 * 
+	 *
 	 * @param version the persistent version
 	 * @return the load context object or {@code null} if no load context is needed
 	 */
@@ -102,7 +102,7 @@ public abstract class StorageHookFactory<S, L, H extends StorageHookFactory.Stor
 
 	/**
 	 * Creates a storage hook for the specified generation.
-	 * 
+	 *
 	 * @param generation the generation for the storage hook
 	 * @return a storage hook or {@code null} if no hook is needed for the
 	 *         generation
@@ -131,17 +131,18 @@ public abstract class StorageHookFactory<S, L, H extends StorageHookFactory.Stor
 		}
 		Class<?> factoryClass = getClass();
 		Class<?> factoryClassOfStorageHook = result.getFactoryClass();
-		if (!factoryClass.equals(factoryClassOfStorageHook))
+		if (!factoryClass.equals(factoryClassOfStorageHook)) {
 			throw new IllegalStateException(String.format(
 					"The factory class '%s' of storage hook '%s' does not match the creating factory class of '%s'", //$NON-NLS-1$
 					factoryClassOfStorageHook.getName(), result, factoryClass.getName()));
+		}
 		return result;
 	}
 
 	/**
 	 * Allows a storage hook factory to handle the {@link URLConnection connection}
 	 * to the content for bundle install or update operation.
-	 * 
+	 *
 	 * @param module   the module being updated. Will be {@code null} for install
 	 *                 operations
 	 * @param location the bundle location be installed. Will be {@code null} for
@@ -177,7 +178,7 @@ public abstract class StorageHookFactory<S, L, H extends StorageHookFactory.Stor
 
 		/**
 		 * The generation associated with this hook.
-		 * 
+		 *
 		 * @return the generation associated with this hook.
 		 */
 		public Generation getGeneration() {
@@ -187,7 +188,7 @@ public abstract class StorageHookFactory<S, L, H extends StorageHookFactory.Stor
 		/**
 		 * Initializes this storage hook with the content of the specified bundle
 		 * manifest. This method is called when a bundle is installed or updated.
-		 * 
+		 *
 		 * @param manifest the bundle manifest to load into this storage hook
 		 * @throws BundleException if any error occurs
 		 */
@@ -199,7 +200,7 @@ public abstract class StorageHookFactory<S, L, H extends StorageHookFactory.Stor
 		 * Allows a builder to be modified before it is used by the framework to create
 		 * a {@link ModuleRevision revision} associated with the bundle
 		 * {@link #getGeneration() generation} being installed or updated.
-		 * 
+		 *
 		 * @param operation The lifecycle operation event that is in progress using the
 		 *                  supplied builder. This will be either
 		 *                  {@link ModuleEvent#INSTALLED installed} or
@@ -235,7 +236,7 @@ public abstract class StorageHookFactory<S, L, H extends StorageHookFactory.Stor
 		 * {@link #save(Object, DataOutputStream)} method stay in sync. This method must
 		 * be able to successfully read the data saved by the
 		 * {@link #save(Object, DataOutputStream)} method.
-		 * 
+		 *
 		 * @param is an input stream used to load the storage hook's data from.
 		 * @see #save(Object, DataOutputStream)
 		 * @throws IOException if any error occurs
@@ -252,7 +253,7 @@ public abstract class StorageHookFactory<S, L, H extends StorageHookFactory.Stor
 		 * {@link #load(Object, DataInputStream)} method stay in sync. This method must
 		 * be able to save data which the {@link #load(Object, DataInputStream)} method
 		 * can ready successfully.
-		 * 
+		 *
 		 * @see #load(Object, DataInputStream)
 		 * @param os an output stream used to save the storage hook's data from.
 		 * @throws IOException if any error occurs
@@ -272,7 +273,7 @@ public abstract class StorageHookFactory<S, L, H extends StorageHookFactory.Stor
 		/**
 		 * Validates the data in this storage hook, if the data is invalid then an
 		 * illegal state exception is thrown
-		 * 
+		 *
 		 * @throws IllegalStateException if the data is invalid
 		 */
 		public void validate() throws IllegalStateException {
@@ -281,7 +282,7 @@ public abstract class StorageHookFactory<S, L, H extends StorageHookFactory.Stor
 
 		/**
 		 * The storage hook factory class of this storage hook
-		 * 
+		 *
 		 * @return the storage hook factory class
 		 */
 		public Class<? extends StorageHookFactory<S, L, ? extends StorageHook<S, L>>> getFactoryClass() {

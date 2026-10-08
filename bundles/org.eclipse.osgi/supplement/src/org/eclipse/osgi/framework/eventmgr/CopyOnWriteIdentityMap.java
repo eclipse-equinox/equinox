@@ -388,7 +388,7 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 
 		/**
 		 * Constructor for map entry.
-		 * 
+		 *
 		 * @param key   Key object in entry. Used for uniqueness.
 		 * @param value Value object stored with key object.
 		 * @throws NullPointerException If key is null.

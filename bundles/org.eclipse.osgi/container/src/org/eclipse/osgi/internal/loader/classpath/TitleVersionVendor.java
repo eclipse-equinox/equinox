@@ -47,7 +47,7 @@ class TitleVersionVendor {
 
 	/**
 	 * Returns the title
-	 * 
+	 *
 	 * @return the title
 	 */
 	String getTitle() {
@@ -56,7 +56,7 @@ class TitleVersionVendor {
 
 	/**
 	 * returns the version
-	 * 
+	 *
 	 * @return the version
 	 */
 	String getVersion() {
@@ -65,7 +65,7 @@ class TitleVersionVendor {
 
 	/**
 	 * returns the vendor
-	 * 
+	 *
 	 * @return the vendor
 	 */
 	String getVendor() {

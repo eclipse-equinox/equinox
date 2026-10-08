@@ -228,7 +228,7 @@ public class ServiceUse<S> {
 	 * <p>
 	 * Use {@link #lock()} to lock the ServiceUseLock in a try-with-resources
 	 * statement.
-	 * 
+	 *
 	 * @return The ServiceUseLock for this ServiceUse.
 	 */
 	ServiceUseLock getLock() {
@@ -241,10 +241,10 @@ public class ServiceUse<S> {
 
 	/**
 	 * Acquires the {@link ServiceUseLock} of this ServiceUse.
-	 * 
+	 *
 	 * If this ServiceUse is locked by another thread then the current thread lies
 	 * dormant until the lock has been acquired.
-	 * 
+	 *
 	 * @return The unlocker, which is {@link AutoCloseable}, to unlock the
 	 *         ServiceUseLock of this ServiceUse.
 	 * @throws ServiceException If a deadlock with another ServiceUseLock is
@@ -309,7 +309,7 @@ public class ServiceUse<S> {
 	 * try-with-resources statement.
 	 * <p>
 	 * Also exposes {@link #getOwner()} and has an enhanced {@link #toString()}.
-	 * 
+	 *
 	 * @see ServiceUse#lock()
 	 */
 	static class ServiceUseLock extends ReentrantLock implements AutoCloseable {
@@ -321,7 +321,7 @@ public class ServiceUse<S> {
 		 * This method is not idempotent and should be called only once for each lock
 		 * acquisition.
 		 * </p>
-		 * 
+		 *
 		 * @see #unlock()
 		 */
 		@Override

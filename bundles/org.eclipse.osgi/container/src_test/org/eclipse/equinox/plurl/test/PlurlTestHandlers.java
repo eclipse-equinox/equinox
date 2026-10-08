@@ -176,7 +176,8 @@ public class PlurlTestHandlers {
 		public TestNotPlurlStreamHandlerFactory(List<String> protocols, Class<?>... shouldHandleClasses) {
 			super(protocols, shouldHandleClasses);
 		}
-	
+
+		@Override
 		protected URLStreamHandler createURLStreamHandlerImpl(String protocol) {
 			return new TestNotPlurlStreamHandler();
 		}
@@ -223,7 +224,7 @@ public class PlurlTestHandlers {
 			super(Arrays.asList(protos));
 			shouldHandle.set(true);
 		}
-	
+
 		@Override
 		protected URLStreamHandler createURLStreamHandlerImpl(String protocol) {
 			return new TestPlurlStreamHandler(true);
@@ -267,15 +268,15 @@ public class PlurlTestHandlers {
 
 	static class TestPlurlStreamHandler extends PlurlStreamHandlerBase {
 		private final boolean unsupported;
-	
+
 		public TestPlurlStreamHandler() {
 			this(false);
 		}
-	
+
 		public TestPlurlStreamHandler(boolean unsupported) {
 			this.unsupported = unsupported;
 		}
-	
+
 		@Override
 		public URLConnection openConnection(URL u) throws IOException {
 			if (unsupported) {
@@ -300,7 +301,7 @@ public class PlurlTestHandlers {
 				}
 			};
 		}
-	
+
 		@Override
 		public void parseURL(PlurlSetter setter, URL u, String spec, int start, int limit) {
 			if (unsupported) {
@@ -692,8 +693,8 @@ public class PlurlTestHandlers {
 		try {
 			URLStreamHandlerFactory factory = (URLStreamHandlerFactory) factoryField.get(null);
 			factory.getClass().getMethod("isMultiplexing", (Class[]) null); //$NON-NLS-1$
-			Method register = factory.getClass().getMethod("register", new Class[] { Object.class }); //$NON-NLS-1$
-			register.invoke(factory, new Object[] { f });
+			Method register = factory.getClass().getMethod("register", Object.class); //$NON-NLS-1$
+			register.invoke(factory, f);
 			factoryField.set(null, null);
 			URL.setURLStreamHandlerFactory(factory);
 		} catch (Exception e) {
@@ -710,8 +711,8 @@ public class PlurlTestHandlers {
 		try {
 			ContentHandlerFactory factory = (ContentHandlerFactory) factoryField.get(null);
 			factory.getClass().getMethod("isMultiplexing", (Class[]) null); //$NON-NLS-1$
-			Method register = factory.getClass().getMethod("register", new Class[] { Object.class }); //$NON-NLS-1$
-			register.invoke(factory, new Object[] { f });
+			Method register = factory.getClass().getMethod("register", Object.class); //$NON-NLS-1$
+			register.invoke(factory, f);
 			factoryField.set(null, null);
 			URLConnection.setContentHandlerFactory(factory);
 		} catch (Exception e) {
@@ -728,8 +729,8 @@ public class PlurlTestHandlers {
 		try {
 			URLStreamHandlerFactory factory = (URLStreamHandlerFactory) factoryField.get(null);
 			factory.getClass().getMethod("isMultiplexing", (Class[]) null); //$NON-NLS-1$
-			Method unregister = factory.getClass().getMethod("unregister", new Class[] { Object.class }); //$NON-NLS-1$
-			unregister.invoke(factory, new Object[] { f });
+			Method unregister = factory.getClass().getMethod("unregister", Object.class); //$NON-NLS-1$
+			unregister.invoke(factory, f);
 			factoryField.set(null, null);
 			URL.setURLStreamHandlerFactory(factory);
 		} catch (Exception e) {
@@ -746,8 +747,8 @@ public class PlurlTestHandlers {
 		try {
 			ContentHandlerFactory factory = (ContentHandlerFactory) factoryField.get(null);
 			factory.getClass().getMethod("isMultiplexing", (Class[]) null); //$NON-NLS-1$
-			Method unregister = factory.getClass().getMethod("unregister", new Class[] { Object.class }); //$NON-NLS-1$
-			unregister.invoke(factory, new Object[] { f });
+			Method unregister = factory.getClass().getMethod("unregister", Object.class); //$NON-NLS-1$
+			unregister.invoke(factory, f);
 			factoryField.set(null, null);
 			URLConnection.setContentHandlerFactory(factory);
 		} catch (Exception e) {

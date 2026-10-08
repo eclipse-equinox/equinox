@@ -90,7 +90,7 @@ import org.osgi.resource.Wire;
 import org.osgi.service.resolver.ResolutionException;
 /**
  * A container for installing, updating, uninstalling and resolve modules.
- * 
+ *
  * @since 3.10
  */
 public final class ModuleContainer implements DebugOptionsListener {
@@ -148,7 +148,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 
 	/**
 	 * Constructs a new container with the specified adaptor, module database.
-	 * 
+	 *
 	 * @param adaptor        the adaptor for the container
 	 * @param moduledataBase the module database
 	 */
@@ -188,7 +188,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 
 	/**
 	 * Returns the adaptor for this container
-	 * 
+	 *
 	 * @return the adaptor for this container
 	 */
 	public ModuleContainerAdaptor getAdaptor() {
@@ -197,7 +197,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 
 	/**
 	 * Returns the list of currently installed modules sorted by module id.
-	 * 
+	 *
 	 * @return the list of currently installed modules sorted by module id.
 	 */
 	public List<Module> getModules() {
@@ -207,7 +207,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 	/**
 	 * Returns the module installed with the specified id, or null if no such module
 	 * is installed.
-	 * 
+	 *
 	 * @param id the id of the module
 	 * @return the module with the specified id, or null of no such module is
 	 *         installed.
@@ -219,7 +219,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 	/**
 	 * Returns the module installed with the specified location, or null if no such
 	 * module is installed.
-	 * 
+	 *
 	 * @param location the location of the module
 	 * @return the module with the specified location, or null of no such module is
 	 *         installed.
@@ -232,7 +232,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 	 * Creates a synthetic requirement that is not associated with any module
 	 * revision. This is useful for calling
 	 * {@link FrameworkWiring#findProviders(Requirement)}.
-	 * 
+	 *
 	 * @param namespace  the requirement namespace
 	 * @param directives the requirement directives
 	 * @param attributes the requirement attributes
@@ -246,7 +246,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 	/**
 	 * Generates a human readable string representation of the the given capability,
 	 * mapping the namespace to well-known header names.
-	 * 
+	 *
 	 * @param capability the {@link Capability} for which a string representation is
 	 *                   desired
 	 * @since 3.19
@@ -265,10 +265,10 @@ public final class ModuleContainer implements DebugOptionsListener {
 	/**
 	 * Generates a human readable string representation of the the given
 	 * {@link Resource} using the IDENTITY_NAMESPACE
-	 * 
+	 *
 	 * @param resource the {@link Resource} for which a string representation is
 	 *                 desired
-	 * 
+	 *
 	 * @since 3.22
 	 */
 	public static String toString(Resource resource) {
@@ -300,7 +300,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 	/**
 	 * Generates a human readable string representation of the the given
 	 * requirement, mapping the namespace to well-known header names.
-	 * 
+	 *
 	 * @param requirement the {@link Requirement} for which a string representation
 	 *                    is desired
 	 * @since 3.19
@@ -323,8 +323,9 @@ public final class ModuleContainer implements DebugOptionsListener {
 	private static String createOSGiRequirement(Requirement requirement, String... versions) {
 		Map<String, String> directives = new HashMap<>(requirement.getDirectives());
 		String filter = directives.remove(Namespace.REQUIREMENT_FILTER_DIRECTIVE);
-		if (filter == null)
+		if (filter == null) {
 			throw new IllegalArgumentException("No filter directive found:" + requirement); //$NON-NLS-1$
+		}
 		FilterImpl filterImpl;
 		try {
 			filterImpl = FilterImpl.newInstance(filter);
@@ -333,8 +334,9 @@ public final class ModuleContainer implements DebugOptionsListener {
 		}
 		Map<String, String> matchingAttributes = filterImpl.getStandardOSGiAttributes(versions);
 		String name = matchingAttributes.remove(requirement.getNamespace());
-		if (name == null)
+		if (name == null) {
 			throw new IllegalArgumentException("Invalid requirement: " + requirement); //$NON-NLS-1$
+		}
 		return name + toString(matchingAttributes, false, true) + toString(directives, true, true);
 	}
 
@@ -343,8 +345,9 @@ public final class ModuleContainer implements DebugOptionsListener {
 	}
 
 	static <V> String toString(Map<String, V> map, boolean directives, boolean stringsOnly) {
-		if (map.size() == 0)
+		if (map.size() == 0) {
 			return ""; //$NON-NLS-1$
+		}
 		String assignment = directives ? ":=" : "="; //$NON-NLS-1$ //$NON-NLS-2$
 		Set<java.util.Map.Entry<String, V>> set = map.entrySet();
 		StringBuilder sb = new StringBuilder();
@@ -355,14 +358,16 @@ public final class ModuleContainer implements DebugOptionsListener {
 			if (value instanceof List) {
 				@SuppressWarnings("unchecked")
 				List<Object> list = (List<Object>) value;
-				if (list.isEmpty())
+				if (list.isEmpty()) {
 					continue;
+				}
 				Object component = list.get(0);
 				String className = component.getClass().getName();
 				String type = className.substring(className.lastIndexOf('.') + 1);
 				sb.append(key).append(':').append("List<").append(type).append(">").append(assignment).append('"'); //$NON-NLS-1$ //$NON-NLS-2$
-				for (Object object : list)
+				for (Object object : list) {
 					sb.append(object).append(',');
+				}
 				sb.setLength(sb.length() - 1);
 				sb.append('"');
 			} else {
@@ -384,7 +389,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 	 * <p>
 	 * If a module already exists with the specified location then the existing
 	 * module is returned and the builder is not used.
-	 * 
+	 *
 	 * @param origin       the module performing the install, may be {@code null}.
 	 * @param location     The location identifier of the module to install.
 	 * @param builder      the builder used to create the revision to install.
@@ -442,12 +447,14 @@ public final class ModuleContainer implements DebugOptionsListener {
 						collisionCandidates = new ArrayList<>(1);
 						for (ModuleCapability identity : sameIdentity) {
 							ModuleRevision equinoxRevision = identity.getRevision();
-							if (!equinoxRevision.isCurrent())
+							if (!equinoxRevision.isCurrent()) {
 								continue; // only pay attention to current revisions
+							}
 							// need to prevent duplicates here; this is in case a revisions object contains
 							// multiple revision objects.
-							if (!collisionCandidates.contains(equinoxRevision.getRevisions().getModule()))
+							if (!collisionCandidates.contains(equinoxRevision.getRevisions().getModule())) {
 								collisionCandidates.add(equinoxRevision.getRevisions().getModule());
+							}
 						}
 					}
 				}
@@ -486,10 +493,12 @@ public final class ModuleContainer implements DebugOptionsListener {
 
 			return result;
 		} finally {
-			if (locationLocked)
+			if (locationLocked) {
 				locationLocks.unlock(location);
-			if (nameLocked)
+			}
+			if (nameLocked) {
 				nameLocks.unlock(name);
+			}
 		}
 	}
 
@@ -497,7 +506,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 	 * Updates the specified module with a new revision. The specified builder is
 	 * used to create a new {@link ModuleRevision revision} which will become the
 	 * {@link Module#getCurrentRevision() current} revision of the new module.
-	 * 
+	 *
 	 * @param module       the module to update
 	 * @param builder      the builder used to create the revision for the update.
 	 * @param revisionInfo the revision info for the new revision, may be
@@ -541,15 +550,18 @@ public final class ModuleContainer implements DebugOptionsListener {
 					collisionCandidates = new ArrayList<>(1);
 					for (ModuleCapability identity : sameIdentity) {
 						ModuleRevision equinoxRevision = identity.getRevision();
-						if (!equinoxRevision.isCurrent())
+						if (!equinoxRevision.isCurrent()) {
 							continue;
+						}
 						Module m = equinoxRevision.getRevisions().getModule();
-						if (m.equals(module))
+						if (m.equals(module)) {
 							continue; // don't worry about the updating modules revisions
+						}
 						// need to prevent duplicates here; this is in case a revisions object contains
 						// multiple revision objects.
-						if (!collisionCandidates.contains(m))
+						if (!collisionCandidates.contains(m)) {
 							collisionCandidates.add(m);
+						}
 					}
 				}
 
@@ -600,14 +612,15 @@ public final class ModuleContainer implements DebugOptionsListener {
 				}
 			}
 		} finally {
-			if (nameLocked)
+			if (nameLocked) {
 				nameLocks.unlock(name);
+			}
 		}
 	}
 
 	/**
 	 * Uninstalls the specified module.
-	 * 
+	 *
 	 * @param module the module to uninstall
 	 * @throws BundleException if some error occurs uninstalling the module
 	 */
@@ -647,7 +660,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 
 	/**
 	 * Returns the {@link FrameworkWiring} for this container
-	 * 
+	 *
 	 * @return the framework wiring for this container.
 	 */
 	public FrameworkWiring getFrameworkWiring() {
@@ -656,7 +669,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 
 	/**
 	 * Returns the {@link FrameworkStartLevel} for this container
-	 * 
+	 *
 	 * @return the framework start level for this container
 	 */
 	public FrameworkStartLevel getFrameworkStartLevel() {
@@ -665,7 +678,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 
 	/**
 	 * Attempts to resolve the current revisions of the specified modules.
-	 * 
+	 *
 	 * @param triggers          the modules to resolve or {@code null} to resolve
 	 *                          all unresolved current revisions.
 	 * @param triggersMandatory true if the triggers must be resolved. This will
@@ -729,15 +742,17 @@ public final class ModuleContainer implements DebugOptionsListener {
 			for (Module module : triggers) {
 				if (!State.UNINSTALLED.equals(module.getState())) {
 					ModuleRevision current = module.getCurrentRevision();
-					if (current != null)
+					if (current != null) {
 						triggerRevisions.add(current);
+					}
 				}
 			}
 			Collection<Module> allModules = moduleDatabase.getModules();
 			for (Module module : allModules) {
 				ModuleRevision revision = module.getCurrentRevision();
-				if (revision != null && !wiringClone.containsKey(revision))
+				if (revision != null && !wiringClone.containsKey(revision)) {
 					unresolved.add(revision);
+				}
 			}
 		} finally {
 			moduleDatabase.readUnlock();
@@ -748,13 +763,15 @@ public final class ModuleContainer implements DebugOptionsListener {
 		Map<Resource, List<Wire>> resolutionResult = report.getResolutionResult();
 		Map<ModuleRevision, ModuleWiring> deltaWiring = resolutionResult == null ? Collections.emptyMap()
 				: moduleResolver.generateDelta(resolutionResult, wiringClone);
-		if (deltaWiring.isEmpty())
+		if (deltaWiring.isEmpty()) {
 			return report; // nothing to do
+		}
 
 		Collection<Module> modulesResolved = new ArrayList<>();
 		for (ModuleRevision deltaRevision : deltaWiring.keySet()) {
-			if (!wiringClone.containsKey(deltaRevision))
+			if (!wiringClone.containsKey(deltaRevision)) {
 				modulesResolved.add(deltaRevision.getRevisions().getModule());
+			}
 		}
 
 		return applyDelta(deltaWiring, modulesResolved, triggers, timestamp, restartTriggers, resolutionPermits)
@@ -765,7 +782,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 	/**
 	 * Attempts to resolve the specified dynamic package name request for the
 	 * specified revision.
-	 * 
+	 *
 	 * @param dynamicPkgName the package name to attempt a dynamic resolution for
 	 * @param revision       the module revision the dynamic resolution request is
 	 *                       for
@@ -810,8 +827,9 @@ public final class ModuleContainer implements DebugOptionsListener {
 					Collection<Module> allModules = moduleDatabase.getModules();
 					for (Module module : allModules) {
 						ModuleRevision current = module.getCurrentRevision();
-						if (current != null && !wiringClone.containsKey(current))
+						if (current != null && !wiringClone.containsKey(current)) {
 							unresolved.add(current);
+						}
 					}
 				} finally {
 					moduleDatabase.readUnlock();
@@ -856,8 +874,9 @@ public final class ModuleContainer implements DebugOptionsListener {
 
 				modulesResolved = new ArrayList<>();
 				for (ModuleRevision deltaRevision : deltaWiring.keySet()) {
-					if (!wiringClone.containsKey(deltaRevision))
+					if (!wiringClone.containsKey(deltaRevision)) {
 						modulesResolved.add(deltaRevision.getRevisions().getModule());
+					}
 				}
 
 				// Save the result
@@ -1014,8 +1033,9 @@ public final class ModuleContainer implements DebugOptionsListener {
 			Map<ModuleWiring, Collection<ModuleRevision>> hostsWithDynamicFrags = new HashMap<>(0);
 			moduleDatabase.writeLock();
 			try {
-				if (timestamp != moduleDatabase.getRevisionsTimestamp())
+				if (timestamp != moduleDatabase.getRevisionsTimestamp()) {
 					return false; // need to try again
+				}
 
 				Map<ModuleRevision, ModuleWiring> wiringCopy = moduleDatabase.getWiringsCopy();
 				for (Map.Entry<ModuleRevision, ModuleWiring> deltaEntry : deltaWiring.entrySet()) {
@@ -1276,8 +1296,9 @@ public final class ModuleContainer implements DebugOptionsListener {
 			// finally apply the unresolve to the database
 			moduleDatabase.writeLock();
 			try {
-				if (timestamp != moduleDatabase.getRevisionsTimestamp())
+				if (timestamp != moduleDatabase.getRevisionsTimestamp()) {
 					return null; // need to try again
+				}
 				// remove any wires from unresolved wirings that got removed
 				for (Map.Entry<ModuleWiring, Collection<ModuleWire>> entry : toRemoveWireLists.entrySet()) {
 					NamespaceList.Builder<ModuleWire> provided = entry.getKey().getProvidedWires().createBuilder();
@@ -1360,7 +1381,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 
 	/**
 	 * Refreshes the specified collection of modules.
-	 * 
+	 *
 	 * @param initial the modules to refresh or {@code null} to refresh the removal
 	 *                pending.
 	 * @return a resolution report for the resolve operation that may have occurred
@@ -1378,7 +1399,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 
 	/**
 	 * Returns the dependency closure of for the specified modules.
-	 * 
+	 *
 	 * @param initial The initial modules for which to generate the dependency
 	 *                closure
 	 * @return A collection containing a snapshot of the dependency closure of the
@@ -1397,7 +1418,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 	/**
 	 * Returns the revisions that have {@link ModuleWiring#isCurrent() non-current},
 	 * {@link ModuleWiring#isInUse() in use} module wirings.
-	 * 
+	 *
 	 * @return A collection containing a snapshot of the revisions which have
 	 *         non-current, in use ModuleWirings, or an empty collection if there
 	 *         are no such revisions.
@@ -1553,21 +1574,24 @@ public final class ModuleContainer implements DebugOptionsListener {
 				initial.add(revision.getRevisions().getModule());
 			}
 		}
-		for (Module module : initial)
+		for (Module module : initial) {
 			addDependents(module, wiringCopy, refreshClosure);
+		}
 		return refreshClosure;
 	}
 
 	private static void addDependents(Module module, Map<ModuleRevision, ModuleWiring> wiringCopy,
 			Set<Module> refreshClosure) {
-		if (refreshClosure.contains(module))
+		if (refreshClosure.contains(module)) {
 			return;
+		}
 		refreshClosure.add(module);
 		List<ModuleRevision> revisions = module.getRevisions().getModuleRevisions();
 		for (ModuleRevision revision : revisions) {
 			ModuleWiring wiring = wiringCopy.get(revision);
-			if (wiring == null)
+			if (wiring == null) {
 				continue;
+			}
 			List<ModuleWire> provided = wiring.getProvidedModuleWires(null);
 			// No null checks; we are holding the read lock here.
 			// Add all requirers of the provided wires
@@ -1593,12 +1617,14 @@ public final class ModuleContainer implements DebugOptionsListener {
 
 	private static void addDependents(ModuleRevision revision, Map<ModuleRevision, ModuleWiring> wiringCopy,
 			Set<ModuleRevision> dependencyClosure) {
-		if (dependencyClosure.contains(revision))
+		if (dependencyClosure.contains(revision)) {
 			return;
+		}
 		dependencyClosure.add(revision);
 		ModuleWiring wiring = wiringCopy.get(revision);
-		if (wiring == null)
+		if (wiring == null) {
 			return;
+		}
 		List<ModuleWire> provided = wiring.getProvidedModuleWires(null);
 		// No null checks; we are holding the read lock here.
 		// Add all requirers of the provided wires
@@ -1620,11 +1646,13 @@ public final class ModuleContainer implements DebugOptionsListener {
 	}
 
 	void checkAdminPermission(Bundle bundle, String action) {
-		if (bundle == null)
+		if (bundle == null) {
 			return;
+		}
 		SecurityManager sm = System.getSecurityManager();
-		if (sm != null)
+		if (sm != null) {
 			sm.checkPermission(new AdminPermission(bundle, action));
+		}
 	}
 
 	void refreshSystemModule() {
@@ -1700,8 +1728,9 @@ public final class ModuleContainer implements DebugOptionsListener {
 				modules = ModuleContainer.this.getModules();
 			}
 			for (Module module : modules) {
-				if (getWiring(module.getCurrentRevision()) == null)
+				if (getWiring(module.getCurrentRevision()) == null) {
 					return false;
+				}
 			}
 			return true;
 		}
@@ -1743,16 +1772,18 @@ public final class ModuleContainer implements DebugOptionsListener {
 		}
 
 		private Collection<Module> getModules(final Collection<Bundle> bundles) {
-			if (bundles == null)
+			if (bundles == null) {
 				return null;
+			}
 			return AccessController.doPrivileged(new PrivilegedAction<Collection<Module>>() {
 				@Override
 				public Collection<Module> run() {
 					Collection<Module> result = new ArrayList<>(bundles.size());
 					for (Bundle bundle : bundles) {
 						Module module = bundle.adapt(Module.class);
-						if (module == null)
+						if (module == null) {
 							throw new IllegalStateException("Could not adapt a bundle to a module. " + bundle); //$NON-NLS-1$
+						}
 						result.add(module);
 					}
 					return result;
@@ -2202,7 +2233,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 	/**
 	 * Writes the data for this container in a format suitable for using the
 	 * {@link ModuleDatabase#load(DataInputStream)} method.
-	 * 
+	 *
 	 * @param stream         the stream to use
 	 * @param persistWirings true if wirings should be persisted
 	 * @throws IOException if there is any problem storing to the stream

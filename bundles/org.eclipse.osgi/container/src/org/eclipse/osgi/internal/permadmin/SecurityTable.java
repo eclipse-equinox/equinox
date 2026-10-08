@@ -38,8 +38,9 @@ public class SecurityTable extends PermissionCollection {
 	private final transient Map<EvaluationCacheKey, Integer> evaluationCache = new ConcurrentHashMap<>(10000);
 
 	public SecurityTable(SecurityAdmin securityAdmin, SecurityRow[] rows) {
-		if (rows == null)
+		if (rows == null) {
 			throw new NullPointerException("rows cannot be null!!"); //$NON-NLS-1$
+		}
 		this.rows = rows;
 		this.securityAdmin = securityAdmin;
 	}
@@ -86,8 +87,9 @@ public class SecurityTable extends PermissionCollection {
 				// TODO log?
 				results[i] = SecurityRow.DECISION_ABSTAIN;
 			}
-			if ((results[i].decision & ABSTAIN) == ABSTAIN)
+			if ((results[i].decision & ABSTAIN) == ABSTAIN) {
 				continue; // ignore this row and continue to next row
+			}
 			if ((results[i].decision & POSTPONED) == POSTPONED) {
 				// row is postponed; we can no longer return quickly on a denied decision
 				postponed = true;
@@ -106,8 +108,9 @@ public class SecurityTable extends PermissionCollection {
 		}
 		Integer immediateDecision = handlePostponedConditions(evaluationCacheKey, hasMutable, postponed, results,
 				immediateDecisionIdx);
-		if (immediateDecision != null)
+		if (immediateDecision != null) {
 			return immediateDecision;
+		}
 		int finalDecision = postponed ? POSTPONED : ABSTAIN;
 		if (!hasMutable && (finalDecision & POSTPONED) != POSTPONED) {
 			evaluationCache.put(evaluationCacheKey, finalDecision);
@@ -140,11 +143,12 @@ public class SecurityTable extends PermissionCollection {
 			int i = immediateDecisionIdx < 0 ? results.length - 1 : immediateDecisionIdx - 1;
 			for (; i >= 0 && allSameDecision; i--) {
 				if ((results[i].decision & POSTPONED) == POSTPONED) {
-					if ((results[i].decision & immediateDecision) == 0)
+					if ((results[i].decision & immediateDecision) == 0) {
 						allSameDecision = false;
-					else
+					} else {
 						results[i] = SecurityRow.DECISION_ABSTAIN; // we can clear postpones with the same decision as
 																	// the immediate
+					}
 				}
 			}
 			if (allSameDecision) {
@@ -195,8 +199,9 @@ public class SecurityTable extends PermissionCollection {
 
 	String[] getEncodedRows() {
 		String[] encoded = new String[rows.length];
-		for (int i = 0; i < rows.length; i++)
+		for (int i = 0; i < rows.length; i++) {
 			encoded[i] = rows[i].getEncoded();
+		}
 		return encoded;
 	}
 

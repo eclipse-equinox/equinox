@@ -84,8 +84,9 @@ public abstract class ConsoleSession implements ServiceFactory<Object> {
 	 */
 	@Override
 	public final Object getService(Bundle bundle, ServiceRegistration<Object> registration) {
-		if (sessionRegistration == null)
+		if (sessionRegistration == null) {
 			sessionRegistration = registration;
+		}
 		return this;
 	}
 

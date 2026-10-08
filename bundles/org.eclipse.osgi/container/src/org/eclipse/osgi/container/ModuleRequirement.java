@@ -30,7 +30,7 @@ import org.osgi.resource.Requirement;
  * An implementation of {@link BundleRequirement}. This requirement implements
  * the matches method according to the OSGi specification which includes
  * implementing the mandatory directive for the osgi.wiring.* namespaces.
- * 
+ *
  * @since 3.10
  * @noextend This class is not intended to be subclassed by clients.
  */
@@ -55,8 +55,9 @@ public class ModuleRequirement implements BundleRequirement {
 
 	@Override
 	public boolean matches(BundleCapability capability) {
-		if (!namespace.equals(capability.getNamespace()))
+		if (!namespace.equals(capability.getNamespace())) {
 			return false;
+		}
 		String filterSpec = directives.get(Namespace.REQUIREMENT_FILTER_DIRECTIVE);
 		FilterImpl f = null;
 		if (filterSpec != null) {

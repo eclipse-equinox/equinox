@@ -47,7 +47,7 @@ abstract public class BundleFile {
 
 	/**
 	 * BundleFile constructor
-	 * 
+	 *
 	 * @param basefile The File object where this BundleFile is persistently stored.
 	 */
 	protected BundleFile(File basefile) {
@@ -57,7 +57,7 @@ abstract public class BundleFile {
 	/**
 	 * Returns a File for the bundle entry specified by the path. If required the
 	 * content of the bundle entry is extracted into a file on the file system.
-	 * 
+	 *
 	 * @param path       The path to the entry to locate a File for.
 	 * @param nativeCode true if the path is native code.
 	 * @return A File object to access the contents of the bundle entry.
@@ -76,7 +76,7 @@ abstract public class BundleFile {
 	/**
 	 * Performs the same function as calling {@link #getEntryPaths(String, boolean)}
 	 * with <code>recurse</code> equal to <code>false</code>.
-	 * 
+	 *
 	 * @param path path of the entry to locate in the bundle
 	 * @return an Enumeration of Strings that indicate the paths found or null if
 	 *         the path does not exist.
@@ -94,7 +94,7 @@ abstract public class BundleFile {
 	 * names are either files or directories themselves. If a returned name is a
 	 * directory, it finishes with a slash. If a returned name is a file, it does
 	 * not finish with a slash.
-	 * 
+	 *
 	 * @param path    path of the entry to locate in the bundle
 	 * @param recurse - If <code>true</code>, provide entries for the files and
 	 *                directories within the directory denoted by <code>path</code>
@@ -107,21 +107,21 @@ abstract public class BundleFile {
 
 	/**
 	 * Closes the BundleFile.
-	 * 
+	 *
 	 * @throws IOException if any error occurs.
 	 */
 	abstract public void close() throws IOException;
 
 	/**
 	 * Opens the BundleFiles.
-	 * 
+	 *
 	 * @throws IOException if any error occurs.
 	 */
 	abstract public void open() throws IOException;
 
 	/**
 	 * Determines if any BundleEntries exist in the given directory path.
-	 * 
+	 *
 	 * @param dir The directory path to check existence of.
 	 * @return true if the BundleFile contains entries under the given directory
 	 *         path; false otherwise.
@@ -137,7 +137,7 @@ abstract public class BundleFile {
 	 * the methods {@link #getEntry(String)} and/or
 	 * {@link #createResourceURL(BundleEntry, Module, int, String)} may be overriden
 	 * to augment the behavior.
-	 * 
+	 *
 	 * @param path       the path to the resource
 	 * @param hostModule the host module
 	 * @param index      the resource index
@@ -145,14 +145,15 @@ abstract public class BundleFile {
 	 */
 	public URL getResourceURL(String path, Module hostModule, int index) {
 		BundleEntry bundleEntry = getEntry(path);
-		if (bundleEntry == null)
+		if (bundleEntry == null) {
 			return null;
+		}
 		return createResourceURL(bundleEntry, hostModule, index, path);
 	}
 
 	/**
 	 * Creates a URL to access the content of the specified entry
-	 * 
+	 *
 	 * @param bundleEntry the bundle entry
 	 * @param hostModule  the host module
 	 * @param index       the resource index
@@ -169,7 +170,7 @@ abstract public class BundleFile {
 
 	/**
 	 * Returns the base file for this BundleFile
-	 * 
+	 *
 	 * @return the base file for this BundleFile
 	 */
 	public File getBaseFile() {
@@ -201,20 +202,24 @@ abstract public class BundleFile {
 	}
 
 	public static String fixTrailingSlash(String path, BundleEntry entry) {
-		if (path.length() == 0)
+		if (path.length() == 0) {
 			return "/"; //$NON-NLS-1$
-		if (path.charAt(0) != '/')
+		}
+		if (path.charAt(0) != '/') {
 			path = '/' + path;
+		}
 		String name = entry.getName();
-		if (name.length() == 0)
+		if (name.length() == 0) {
 			return path;
+		}
 		boolean pathSlash = path.charAt(path.length() - 1) == '/';
 		boolean entrySlash = name.length() > 0 && name.charAt(name.length() - 1) == '/';
 		if (entrySlash != pathSlash) {
-			if (entrySlash)
+			if (entrySlash) {
 				path = path + '/';
-			else
+			} else {
 				path = path.substring(0, path.length() - 1);
+			}
 		}
 		return path;
 	}

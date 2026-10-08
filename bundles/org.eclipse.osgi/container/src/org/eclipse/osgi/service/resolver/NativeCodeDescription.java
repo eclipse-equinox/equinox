@@ -21,21 +21,21 @@ import org.osgi.framework.Filter;
  * This interface is not intended to be implemented by clients. The
  * {@link StateObjectFactory} should be used to construct instances.
  * </p>
- * 
+ *
  * @since 3.4
  * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface NativeCodeDescription extends BaseDescription, Comparable<NativeCodeDescription> {
 	/**
 	 * Returns the paths to the native code libraries.
-	 * 
+	 *
 	 * @return the paths to the native code libraries.
 	 */
 	public String[] getNativePaths();
 
 	/**
 	 * Returns the processors supported by the native code.
-	 * 
+	 *
 	 * @return the processors supported by the native code. An empty array is
 	 *         returned if no processors are supported.
 	 */
@@ -43,7 +43,7 @@ public interface NativeCodeDescription extends BaseDescription, Comparable<Nativ
 
 	/**
 	 * Returns the operating system names supported by the native code.
-	 * 
+	 *
 	 * @return the operating system names supported by the native code. An empty
 	 *         array is returned if no operating systems are supported.
 	 */
@@ -51,7 +51,7 @@ public interface NativeCodeDescription extends BaseDescription, Comparable<Nativ
 
 	/**
 	 * Returns the operating system version ranges supported by the native code.
-	 * 
+	 *
 	 * @return the operating system version ranges supported by the native code. An
 	 *         empty array is returned if all versions are supported.
 	 */
@@ -59,7 +59,7 @@ public interface NativeCodeDescription extends BaseDescription, Comparable<Nativ
 
 	/**
 	 * Returns the languages supported by the native code.
-	 * 
+	 *
 	 * @return the languages supported by the native code. An empty array is
 	 *         returned if all languages are supported.
 	 */
@@ -67,7 +67,7 @@ public interface NativeCodeDescription extends BaseDescription, Comparable<Nativ
 
 	/**
 	 * Returns the selection filter used to select the native code.
-	 * 
+	 *
 	 * @return the selection filter used to select the native code.
 	 */
 	public Filter getFilter();
@@ -79,7 +79,7 @@ public interface NativeCodeDescription extends BaseDescription, Comparable<Nativ
 	 * <li>The language
 	 * <li>
 	 * </ul>
-	 * 
+	 *
 	 * @param other the native code description to be compared
 	 * @return a negative integer, zero, or a positive integer as this natve code
 	 *         description is less than, equal to, or greater than the specified
@@ -92,7 +92,7 @@ public interface NativeCodeDescription extends BaseDescription, Comparable<Nativ
 	/**
 	 * Indicates if this native code description has invalid native code paths.
 	 * Native code paths are invalid if they can not be found in the bundle content.
-	 * 
+	 *
 	 * @return true if the native code paths are invalid; otherwise false is
 	 *         returned.
 	 */

@@ -108,8 +108,9 @@ public class SystemBundleFile extends BundleFile {
 					// header
 					Map<String, String> headers = ManifestElement.parseBundleManifest(url.openStream(),
 							new CaseInsensitiveDictionaryMap<>());
-					if ("true".equals(headers.get(Storage.ECLIPSE_SYSTEMBUNDLE))) //$NON-NLS-1$
+					if ("true".equals(headers.get(Storage.ECLIPSE_SYSTEMBUNDLE))) { //$NON-NLS-1$
 						return url;
+					}
 				} catch (BundleException e) {
 					// ignore and continue to next URL
 				}

@@ -102,16 +102,21 @@ class ServiceProperties extends CaseInsensitiveDictionaryMap<String, Object> {
 	 * @return cloned object or original object if we didn't clone it.
 	 */
 	static Object cloneValue(Object value) {
-		if (value == null)
+		if (value == null) {
 			return null;
-		if (value instanceof String) /* shortcut String */
+		}
+		if (value instanceof String) { /* shortcut String */
 			return value;
-		if (value instanceof Number) /* shortcut Number */
+		}
+		if (value instanceof Number) { /* shortcut Number */
 			return value;
-		if (value instanceof Character) /* shortcut Character */
+		}
+		if (value instanceof Character) { /* shortcut Character */
 			return value;
-		if (value instanceof Boolean) /* shortcut Boolean */
+		}
+		if (value instanceof Boolean) { /* shortcut Boolean */
 			return value;
+		}
 
 		Class<?> clazz = value.getClass();
 		if (clazz.isArray()) {
@@ -145,8 +150,9 @@ class ServiceProperties extends CaseInsensitiveDictionaryMap<String, Object> {
 		int n = 0;
 		for (String key : keys) {
 			if (!key.equals(Constants.OBJECTCLASS)) {
-				if (n > 0)
+				if (n > 0) {
 					sb.append(", "); //$NON-NLS-1$
+				}
 
 				sb.append(key);
 				sb.append('=');
@@ -155,8 +161,9 @@ class ServiceProperties extends CaseInsensitiveDictionaryMap<String, Object> {
 					sb.append('[');
 					int length = Array.getLength(value);
 					for (int j = 0; j < length; j++) {
-						if (j > 0)
+						if (j > 0) {
 							sb.append(',');
+						}
 						sb.append(Array.get(value, j));
 					}
 					sb.append(']');

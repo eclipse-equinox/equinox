@@ -54,7 +54,7 @@ public class EquinoxEventPublisher {
 
 	private final EquinoxContainer container;
 
-	private Object monitor = new Object();
+	private final Object monitor = new Object();
 	private EventManager eventManager;
 
 	/*
@@ -278,8 +278,9 @@ public class EquinoxEventPublisher {
 
 	public void publishFrameworkEvent(int type, Bundle bundle, Throwable throwable,
 			final FrameworkListener... listeners) {
-		if (bundle == null)
+		if (bundle == null) {
 			bundle = container.getStorage().getModuleContainer().getModule(0).getBundle();
+		}
 		final FrameworkEvent event = new FrameworkEvent(type, bundle, throwable);
 		if (System.getSecurityManager() == null) {
 			publishFrameworkEventPrivileged(event, listeners);
@@ -316,8 +317,9 @@ public class EquinoxEventPublisher {
 		if (callerListeners != null && callerListeners.length > 0) {
 			Map<FrameworkListener, FrameworkListener> listeners = new HashMap<>();
 			for (FrameworkListener listener : callerListeners) {
-				if (listener != null)
+				if (listener != null) {
 					listeners.put(listener, listener);
+				}
 			}
 			// We use the system bundle context as the dispatcher
 			if (listeners.size() > 0) {
@@ -348,7 +350,7 @@ public class EquinoxEventPublisher {
 	/**
 	 * Coerce the generic type of a collection from
 	 * {@code Collection<BundleContextImpl>} to {@code Collection<BundleContext>}
-	 * 
+	 *
 	 * @param c Collection to be coerced.
 	 * @return c coerced to {@code Collection<BundleContext>}
 	 */
@@ -387,14 +389,16 @@ public class EquinoxEventPublisher {
 			synchronized (allSyncBundleListeners) {
 				CopyOnWriteIdentityMap<SynchronousBundleListener, SynchronousBundleListener> listeners = allSyncBundleListeners
 						.get(context);
-				if (listeners != null)
+				if (listeners != null) {
 					listeners.remove(listener);
+				}
 			}
 		} else {
 			synchronized (allBundleListeners) {
 				CopyOnWriteIdentityMap<BundleListener, BundleListener> listeners = allBundleListeners.get(context);
-				if (listeners != null)
+				if (listeners != null) {
 					listeners.remove(listener);
+				}
 			}
 		}
 	}
@@ -413,8 +417,9 @@ public class EquinoxEventPublisher {
 	void removeFrameworkListener(FrameworkListener listener, BundleContextImpl context) {
 		synchronized (allFrameworkListeners) {
 			CopyOnWriteIdentityMap<FrameworkListener, FrameworkListener> listeners = allFrameworkListeners.get(context);
-			if (listeners != null)
+			if (listeners != null) {
 				listeners.remove(listener);
+			}
 		}
 	}
 

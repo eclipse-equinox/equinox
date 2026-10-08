@@ -33,7 +33,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 	/**
 	 * size of crc and signature
 	 */
-	private int sigSize;
+	private final int sigSize;
 
 	/**
 	 * current position reading from file
@@ -98,10 +98,11 @@ public class ReliableFileInputStream extends FilterInputStream {
 		sigSize = reliable.getSignatureSize();
 		readPos = 0;
 		this.length = reliable.getInputLength();
-		if (sigSize > length)
+		if (sigSize > length) {
 			length = 0; // shouldn't ever happen
-		else
+		} else {
 			length -= sigSize;
+		}
 	}
 
 	/**
@@ -174,8 +175,9 @@ public class ReliableFileInputStream extends FilterInputStream {
 	 */
 	@Override
 	public synchronized int available() throws IOException {
-		if (readPos < length) // just in case
+		if (readPos < length) { // just in case
 			return (int) (length - readPos);
+		}
 		return 0;
 	}
 
@@ -186,8 +188,9 @@ public class ReliableFileInputStream extends FilterInputStream {
 	@Override
 	public synchronized long skip(long n) throws IOException {
 		long len = super.skip(n);
-		if (readPos + len > length)
+		if (readPos + len > length) {
 			len = length - readPos;
+		}
 		readPos += len;
 		return len;
 	}

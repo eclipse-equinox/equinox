@@ -51,8 +51,9 @@ public class SystemBundleLoader extends BundleLoader {
 	@Override
 	public Class<?> findClass(String name) throws ClassNotFoundException {
 		Class<?> result = findLocalClass(name);
-		if (result == null)
+		if (result == null) {
 			throw new ClassNotFoundException(name);
+		}
 		return result;
 	}
 
