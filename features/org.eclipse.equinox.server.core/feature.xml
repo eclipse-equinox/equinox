@@ -38,6 +38,10 @@
          version="0.0.0"/>
 
    <plugin
+         id="org.eclipse.equinox.spi"
+         version="0.0.0"/>
+
+   <plugin
          id="org.eclipse.equinox.common"
          version="0.0.0"/>
 
