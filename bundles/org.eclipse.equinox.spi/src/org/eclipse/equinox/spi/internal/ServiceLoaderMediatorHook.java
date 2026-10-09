@@ -309,6 +309,7 @@ public class ServiceLoaderMediatorHook extends ClassLoaderHook implements Bundle
 		if (!isConsumer(classLoader.getBundle())) {
 			return null;
 		}
+		List<Bundle> providerBundles = List.of();
 		try (RuntimeCloseable locked = lock(lock.readLock())) {
 			Set<BundleServices> services = allProvidedServices.get(classname); // set is mutable
 			if (services != null) {
@@ -322,14 +323,20 @@ public class ServiceLoaderMediatorHook extends ClassLoaderHook implements Bundle
 				if (walkCallerClasses(s -> s.anyMatch(c -> c == SERVICE_LOADER_LOAD_CLASS_CALLERS))) {
 					// If a service loader call reached this state, everything should be fine.
 					// No need to check again if the callers consumes the service type.
-					return providerHostBundle(classLoader, services, potentialServiceTypes).map(cl -> {
-						try {
-							return cl.loadClass(classname);
-						} catch (ClassNotFoundException | NoClassDefFoundError e) { // ignore
-							return null;
-						}
-					}).filter(Objects::nonNull).findFirst().orElse(null);
+					providerBundles = providerHostBundle(classLoader, services, potentialServiceTypes)
+							.collect(Collectors.toList());
 				}
+			}
+		}
+		// Load outside of the lock: loading may lazily start a bundle, which fires
+		// events that require the write lock (cannot be upgraded from the read lock).
+		for (Bundle bundle : providerBundles) {
+			try {
+				Class<?> clazz = bundle.loadClass(classname);
+				if (clazz != null) {
+					return clazz;
+				}
+			} catch (ClassNotFoundException | NoClassDefFoundError | IllegalStateException e) { // ignore
 			}
 		}
 		return null;
