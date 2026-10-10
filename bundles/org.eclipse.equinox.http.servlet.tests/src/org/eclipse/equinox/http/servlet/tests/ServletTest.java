@@ -2515,6 +2515,53 @@ public class ServletTest extends BaseTest {
 	}
 
 	@Test
+	public void test_Servlet16_fileupload_rejectPathTraversal() throws Exception {
+		Servlet servlet = new HttpServlet() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+					throws IOException, ServletException {
+
+				Part part = req.getPart("file");
+				Assert.assertNotNull(part);
+
+				File tempDir = (File) getServletContext().getAttribute(ServletContext.TEMPDIR);
+				// a name that climbs out of the configured multipart location
+				File escapee = new File(tempDir, "escaped-upload.txt");
+				escapee.delete();
+
+				PrintWriter writer = resp.getWriter();
+				try {
+					part.write("../../escaped-upload.txt");
+					writer.write("written");
+				} catch (IOException e) {
+					writer.write("rejected");
+				}
+				writer.write("|" + escapee.exists());
+			}
+		};
+
+		Dictionary<String, Object> props = new Hashtable<>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S16");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/Servlet16/*");
+		props.put("equinox.http.multipartSupported", Boolean.TRUE);
+		props.put("equinox.http.whiteboard.servlet.multipart.location", "file-upload-test");
+		// force the item onto disk so a store location (and the containment check) exists
+		props.put("equinox.http.whiteboard.servlet.multipart.fileSizeThreshold", 10);
+		registrations.add(getBundleContext().registerService(Servlet.class, servlet, props));
+
+		Map<String, List<Object>> map = new HashMap<>();
+
+		map.put("file", Arrays.<Object>asList(getClass().getResource("resource1.txt")));
+
+		Map<String, List<String>> result = requestAdvisor.upload("Servlet16/do", map);
+
+		assertEquals("200", result.get("responseCode").get(0));
+		assertEquals("rejected|false", result.get("responseBody").get(0));
+	}
+
+	@Test
 	public void test_Servlet16_fileuploadWithLocationMaxFileSize() throws Exception {
 		Servlet servlet = new HttpServlet() {
 			private static final long serialVersionUID = 1L;
