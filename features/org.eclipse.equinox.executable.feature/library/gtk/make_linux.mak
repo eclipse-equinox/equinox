@@ -1,5 +1,5 @@
 #*******************************************************************************
-# Copyright (c) 2000, 2018 IBM Corporation and others.
+# Copyright (c) 2000, 2026 IBM Corporation and others.
 #
 # This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License 2.0
@@ -146,7 +146,7 @@ $(DLL): $(DLL_OBJS) $(COMMON_OBJS)
 # can be done at runtime.
 ifeq ($(DEFAULT_OS_ARCH),x86_64)
 PERMITTED_LIBRARIES=libc.so.6 libpthread.so.0 libdl.so.2
-PERMITTED_GLIBC_VERSION=2.7
+PERMITTED_GLIBC_VERSION=2.34
 checklibs: all
 	$(info Verifying $(EXEC) $(DLL) have permitted dependencies)
 	./check_dependencies.sh $(EXEC) $(PERMITTED_GLIBC_VERSION) $(PERMITTED_LIBRARIES)
