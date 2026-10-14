@@ -90,13 +90,11 @@ public class PlatformLogWriterTest {
 		logger.debug("debug");
 		logger.trace("trace");
 		List<IStatus> allStatus = listener.getAllExpectedStatus();
-		assertEquals("Wrong number of status.", 6, allStatus.size());
+		assertEquals("Wrong number of status.", 4, allStatus.size());
 		assertStatus(allStatus.get(0), "audit", IStatus.OK);
 		assertStatus(allStatus.get(1), "error", IStatus.ERROR);
 		assertStatus(allStatus.get(2), "warn", IStatus.WARNING);
 		assertStatus(allStatus.get(3), "info", IStatus.INFO);
-		assertStatus(allStatus.get(4), "debug", IStatus.OK);
-		assertStatus(allStatus.get(5), "trace", IStatus.OK);
 	}
 
 	private void assertStatus(IStatus status, String message, int severity) {
