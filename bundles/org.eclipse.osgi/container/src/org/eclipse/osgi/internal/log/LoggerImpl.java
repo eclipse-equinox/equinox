@@ -29,7 +29,7 @@ public class LoggerImpl implements Logger {
 	protected final ExtendedLogServiceImpl logServiceImpl;
 	protected final String name;
 
-	private LogLevel enabledLevel = LogLevel.TRACE;
+	private LogLevel enabledLevel = LogLevel.WARN;
 
 	public LoggerImpl(ExtendedLogServiceImpl logServiceImpl, String name, LoggerContext loggerContext) {
 		this.logServiceImpl = logServiceImpl;
