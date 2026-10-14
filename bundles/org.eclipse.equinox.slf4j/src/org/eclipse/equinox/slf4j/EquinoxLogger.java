@@ -14,6 +14,8 @@
  *******************************************************************************/
 package org.eclipse.equinox.slf4j;
 
+import java.util.Locale;
+
 import org.osgi.service.log.Logger;
 import org.slf4j.Marker;
 import org.slf4j.event.Level;
@@ -24,34 +26,52 @@ class EquinoxLogger extends org.slf4j.helpers.AbstractLogger {
 	private static final long serialVersionUID = 1L;
 	private final Logger logger;
 
+	/**
+	 * The minimal level a log message must have in order to be forwarded to the
+	 * underlying Equinox logger. Messages with lower level are discarded.
+	 */
+	private static final String LOG_LEVEL_THRESHOLD = System.getProperty("equinox.slf4j.logThreshold", "INFO");
+	private final Level logLevelThreshold;
+
 	EquinoxLogger(String name, Logger logger) {
 		this.name = name;
 		this.logger = logger;
+		Level level;
+		try {
+			level = Level.valueOf(LOG_LEVEL_THRESHOLD.toUpperCase(Locale.ENGLISH));
+		} catch (Exception e) {
+			level = Level.INFO;
+		}
+		this.logLevelThreshold = level;
+	}
+
+	private boolean isEnabled(Level level) {
+		return this.logLevelThreshold.compareTo(level) >= 0;
 	}
 
 	@Override
 	public boolean isTraceEnabled() {
-		return logger != null && logger.isTraceEnabled();
+		return logger != null && isEnabled(Level.TRACE) && logger.isTraceEnabled();
 	}
 
 	@Override
 	public boolean isDebugEnabled() {
-		return logger != null && logger.isDebugEnabled();
+		return logger != null && isEnabled(Level.DEBUG) && logger.isDebugEnabled();
 	}
 
 	@Override
 	public boolean isInfoEnabled() {
-		return logger != null && logger.isInfoEnabled();
+		return logger != null && isEnabled(Level.INFO) && logger.isInfoEnabled();
 	}
 
 	@Override
 	public boolean isWarnEnabled() {
-		return logger != null && logger.isWarnEnabled();
+		return logger != null && isEnabled(Level.WARN) && logger.isWarnEnabled();
 	}
 
 	@Override
 	public boolean isErrorEnabled() {
-		return logger != null && logger.isErrorEnabled();
+		return logger != null && isEnabled(Level.ERROR) && logger.isErrorEnabled();
 	}
 
 	@Override
@@ -93,23 +113,23 @@ class EquinoxLogger extends org.slf4j.helpers.AbstractLogger {
 		//Must not pass a null argument to OSGi Logger
 		Object[] loggerArguments = throwable != null ? new Object[] { throwable } : new Object[0];
 
-		if(level == Level.TRACE && logger.isTraceEnabled()) {
+		if (level == Level.TRACE && isTraceEnabled()) {
 			String formattedMessage = safeBasicArrayFormat(messagePattern, arguments);
 			logger.trace(formattedMessage, loggerArguments);
 		}
-		if(level == Level.DEBUG && logger.isDebugEnabled()) {
+		if (level == Level.DEBUG && isDebugEnabled()) {
 			String formattedMessage = safeBasicArrayFormat(messagePattern, arguments);
 			logger.debug(formattedMessage, loggerArguments);
 		}
-		if(level == Level.WARN && logger.isWarnEnabled()) {
+		if (level == Level.WARN && isWarnEnabled()) {
 			String formattedMessage = safeBasicArrayFormat(messagePattern, arguments);
 			logger.warn(formattedMessage, loggerArguments);
 		}
-		if(level == Level.INFO && logger.isInfoEnabled()) {
+		if (level == Level.INFO && isInfoEnabled()) {
 			String formattedMessage = safeBasicArrayFormat(messagePattern, arguments);
 			logger.info(formattedMessage, loggerArguments);
 		}
-		if(level == Level.ERROR && logger.isErrorEnabled()) {
+		if (level == Level.ERROR && isErrorEnabled()) {
 			String formattedMessage = safeBasicArrayFormat(messagePattern, arguments);
 			logger.error(formattedMessage, loggerArguments);
 		}
