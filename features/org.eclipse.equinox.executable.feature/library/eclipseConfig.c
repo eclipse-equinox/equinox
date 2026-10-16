@@ -82,7 +82,13 @@ _TCHAR* getIniFile(_TCHAR* program, int consoleLauncher){
 	//On MacOSX, the eclipse.ini is not a sibling of the executable.
 	//It is in ../Eclipse/<launcherName>.ini relatively to the executable.
 	char *dirc, *basec, *bname, *dname;
-	dirc = strdup(program);
+	// The `program` string can have `.` or `..` in it, preventing us from correctly detecting the program's directory.
+	char normalized[PATH_MAX];
+	if (realpath(program, normalized) != NULL) {
+		dirc = strdup(normalized);
+	} else {
+		dirc = strdup(program);
+    }
 	basec = strdup(program);
 	dname = dirname(dirname(dirc));
 	bname = basename(basec);
