@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 Eclipse Foundation, Inc. and others.
+ * Copyright (c) 2023, 2026 Eclipse Foundation, Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -29,6 +29,8 @@ import java.util.List;
  * port and accepts following queries
  * - -args - returns the arguments passed to this application. Test verify if the
  * arguments are passed to application correctly by the launcher.
+ * - -pid - returns the process ID of this Java application so tests can verify
+ * separate-process invocation and signal that process.
  *
  * And accepts following information
  * - -exitdata - The exit data this application should set before exiting
@@ -40,6 +42,7 @@ import java.util.List;
 public class TestLauncherApp {
 
 	public static final String ARGS_PARAMETER = "-args"; //$NON-NLS-1$
+	public static final String PID_PARAMETER = "-pid"; //$NON-NLS-1$
 	public static final String EXITDATA_PARAMETER = "-exitdata"; //$NON-NLS-1$
 	public static final String EXITCODE_PARAMETER = "-exitcode"; //$NON-NLS-1$
 	public static final String MULTILINE_ARG_VALUE_TERMINATOR = "---"; //$NON-NLS-1$
@@ -100,6 +103,9 @@ public class TestLauncherApp {
 			while ((line = in.readLine()) != null) {
 				if (ARGS_PARAMETER.equals(line)) {
 					out.writeBytes(String.join("\n", args) + "\n" + MULTILINE_ARG_VALUE_TERMINATOR + "\n");
+					out.flush();
+				} else if (PID_PARAMETER.equals(line)) {
+					out.writeBytes(ProcessHandle.current().pid() + "\n");
 					out.flush();
 				} else if (EXITDATA_PARAMETER.equals(line)) {
 					while ((line = in.readLine()) != null) {
