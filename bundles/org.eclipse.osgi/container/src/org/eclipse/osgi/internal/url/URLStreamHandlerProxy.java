@@ -22,7 +22,7 @@ import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.function.Supplier;
-import org.eclipse.equinox.plurl.PlurlStreamHandlerBase;
+import org.eclipse.osgitech.plurl.PlurlStreamHandlerBase;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
