@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2025 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -171,8 +171,6 @@
 #include <sys/stat.h>
 #include <errno.h>
 #include <ctype.h>
-
-#include "eclipse-memcpy.h"
 
 #define MAX_PATH_LENGTH   2000
 #define MAX_SHARED_LENGTH   (16 * 1024)

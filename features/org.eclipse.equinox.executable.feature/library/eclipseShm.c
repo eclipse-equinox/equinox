@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -139,8 +139,6 @@ int setSharedData(const _TCHAR* id, const _TCHAR* data) {
 #include <stdio.h>
 #include <sys/types.h>
 #include <unistd.h>
-
-#include "eclipse-memcpy.h"
 
 int createSharedData(char** id, int size) {
 	int shmid;
