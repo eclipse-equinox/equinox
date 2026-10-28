@@ -43,14 +43,6 @@ JAVA_HOME ?= $(shell readlink -f /usr/bin/java | sed "s:jre/::" | sed "s:bin/jav
 PROGRAM_OUTPUT ?= eclipse
 PROGRAM_LIBRARY = $(PROGRAM_OUTPUT)_$(LIB_VERSION).so
 
-# 64 bit specific flag:
-ifeq ($(M_CFLAGS),)
-ifeq ($(DEFAULT_OS_ARCH),x86_64)
-# Bug 517013: Avoid using memcpy() to remain compatible with older glibc (not use these flags on 32bit.
-M_CFLAGS ?= -fno-builtin-memcpy -fno-builtin-memmove
-endif
-endif
-
 # Determine launch mode.
 ifeq ($(DEFAULT_OS_ARCH),x86_64)
 DEFAULT_JAVA ?= DEFAULT_JAVA_EXEC

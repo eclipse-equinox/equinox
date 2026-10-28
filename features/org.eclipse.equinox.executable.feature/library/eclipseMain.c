@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2015 IBM Corporation and others.
+ * Copyright (c) 2006, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -30,8 +30,6 @@
 #include <ctype.h>
 #include <locale.h>
 #include <sys/stat.h>
-
-#include "eclipse-memcpy.h"
 
 static _TCHAR* libraryMsg =
 _T_ECLIPSE("The %s executable launcher was unable to locate its \n\

@@ -31,8 +31,6 @@
 #include <strings.h>
 #endif
 
-#include "eclipse-memcpy.h"
-
 int checkProvidedVMType( _TCHAR* vm ) 
 {
 	_TCHAR* ch = NULL;
