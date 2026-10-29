@@ -315,6 +315,10 @@ public class ResourceServlet extends HttpServlet {
 				return false;
 			}
 
+			if (firstBytePos > lastBytePos) {
+				return false;
+			}
+
 			return true;
 		}
 
