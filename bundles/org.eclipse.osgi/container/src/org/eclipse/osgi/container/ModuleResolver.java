@@ -104,8 +104,10 @@ final class ModuleResolver {
 	private static final int DEFAULT_BATCH_SIZE = Integer.MAX_VALUE;
 	private static final int BATCH_MIN_TIMEOUT = (int) TimeUnit.SECONDS.toMillis(5);
 	private static final int DEFAULT_BATCH_TIMEOUT = (int) TimeUnit.MINUTES.toMillis(2);
+	private static final int DEFAULT_BATCH_PERMUTATION_LIMIT = 1000;
 	final int resolverRevisionBatchSize;
 	final int resolverBatchTimeout;
+	final int resolverBatchPermutationLimit;
 
 	void setDebugOptions() {
 		DebugOptions options = adaptor.getDebugOptions();
@@ -146,6 +148,10 @@ final class ModuleResolver {
 		this.resolverRevisionBatchSize = parseInteger(batchSizeConfig, DEFAULT_BATCH_SIZE, 1);
 		String batchTimeoutConfig = this.adaptor.getProperty(EquinoxConfiguration.PROP_RESOLVER_BATCH_TIMEOUT);
 		this.resolverBatchTimeout = parseInteger(batchTimeoutConfig, DEFAULT_BATCH_TIMEOUT, BATCH_MIN_TIMEOUT);
+		String batchPermutationLimitConfig = this.adaptor
+				.getProperty(EquinoxConfiguration.PROP_RESOLVER_BATCH_PERMUTATION_LIMIT);
+		this.resolverBatchPermutationLimit = parseInteger(batchPermutationLimitConfig,
+				DEFAULT_BATCH_PERMUTATION_LIMIT, 1);
 
 	}
 
@@ -604,6 +610,7 @@ final class ModuleResolver {
 			@Override
 			public void logPermutationAdded(PermutationType type) {
 				totalPerm++;
+				batchPermutationAdded();
 				switch (type) {
 				case USES:
 					usesPerm++;
@@ -661,6 +668,8 @@ final class ModuleResolver {
 		private final Set<Resource> failedToResolve = new HashSet<>();
 		private AtomicBoolean scheduleTimeout = new AtomicBoolean(true);
 		private AtomicReference<ScheduledFuture<?>> timoutFuture = new AtomicReference<>();
+		volatile Runnable batchCancel;
+		int batchPermutations;
 		/*
 		 * Used to generate the UNRESOLVED_PROVIDER resolution report entries.
 		 *
@@ -1179,6 +1188,17 @@ final class ModuleResolver {
 			}
 		}
 
+		void batchPermutationAdded() {
+			if (++batchPermutations > resolverBatchPermutationLimit && currentlyResolving != null
+					&& currentlyResolving.size() > 1) {
+				// a multi-root batch failing this often is cheaper to resolve one root at a time
+				Runnable cancel = batchCancel;
+				if (cancel != null) {
+					cancel.run();
+				}
+			}
+		}
+
 		private void resolveRevisionsIndividually(boolean isMandatory, ResolveLogger logger,
 				Map<Resource, List<Wire>> result, Collection<Resource> resources, Collection<ModuleRevision> revisions)
 				throws ResolutionException {
@@ -1198,6 +1218,7 @@ final class ModuleResolver {
 		private void resolveRevisions(List<Resource> revisions, boolean isMandatory, ResolveLogger logger,
 				Map<Resource, List<Wire>> result) throws ResolutionException {
 			boolean applyTransitiveFailures = true;
+			batchPermutations = 0;
 			currentlyResolving = revisions;
 			currentlyResolvingMandatory = isMandatory;
 			transitivelyResolveFailures.clear();
@@ -1748,6 +1769,7 @@ final class ModuleResolver {
 
 		@Override
 		public void onCancel(Runnable callback) {
+			batchCancel = callback;
 			// Note that for each resolve Process we only want timeout the initial batch
 			// resolve
 			if (scheduleTimeout.compareAndSet(true, false)) {
