@@ -231,7 +231,7 @@ class Candidates
             {
                 continue;
             }
-            List<Capability> candidates = rc.findProviders(requirement);
+            List<Capability> candidates = findProviders(rc, requirement);
             LinkedList<Resource> newToPopulate = new LinkedList<Resource>();
             ResolutionError thrown = processCandidates(newToPopulate, requirement, candidates);
              if (candidates.isEmpty() && !Util.isOptional(requirement))
@@ -268,6 +268,42 @@ class Candidates
             iterator.remove();
             remove(resource, toRemove);
         }
+    }
+
+    /**
+     * The providers the resolve context knows for the requirement. The capabilities of a fragment have the identity
+     * (bundle-symbolic-name and bundle-version) of the host, not the one of the fragment the resolve context
+     * sees, so if the requirement asks for the identity of a bundle the capabilities of fragments are asked for
+     * as well and matched again once they are hosted, see {@link #prepare()}.
+     */
+    private static List<Capability> findProviders(ResolveContext rc, Requirement requirement)
+    {
+        List<Capability> candidates = rc.findProviders(requirement);
+        if (!HostIdentity.isIdentityRequested(requirement))
+        {
+            return candidates;
+        }
+        List<Capability> relaxed = rc.findProviders(HostIdentity.relax(requirement));
+        if (relaxed == null)
+        {
+            return candidates;
+        }
+        List<Capability> result = new ArrayList<Capability>(relaxed.size());
+        for (Capability cap : relaxed)
+        {
+            if (candidates.contains(cap) || Util.isFragment(cap.getResource()))
+            {
+                result.add(cap);
+            }
+        }
+        for (Capability cap : candidates)
+        {
+            if (!result.contains(cap))
+            {
+                result.add(cap);
+            }
+        }
+        return result;
     }
 
     private boolean isEffective(Requirement req) {
@@ -902,6 +938,9 @@ class Candidates
             }
         }
 
+        // Requirements that ask for the identity of the exporting bundle that are not
+        // satisfied by a capability once it is provided by its host
+        List<Requirement> unsatisfied = new ArrayList<Requirement>();
         for (WrappedResource hostResource : hostResources)
         {
             // Replaces capabilities from fragments with the capabilities
@@ -922,6 +961,7 @@ class Candidates
                     {
                         dependents = new CopyOnWriteSet<Requirement>(dependents);
                         m_dependentMap.put(c, dependents);
+                        List<Requirement> mismatched = new ArrayList<Requirement>();
                         for (Requirement r : dependents)
                         {
                             // We have synthesized hosted capabilities for all
@@ -970,9 +1010,45 @@ class Candidates
                                                 hostResource.getDeclaredResource(),
                                                 origCap));
                             }
+                            // The identity of the exporting bundle of a capability
+                            // of a fragment is the one of the host.
+                            if (HostIdentity.isIdentityRequested(r) && !HostIdentity.matches(r, c))
+                            {
+                                getShadowList(r).remove(c);
+                                mismatched.add(r);
+                                unsatisfied.add(r);
+                            }
+                        }
+                        for (Requirement r : mismatched)
+                        {
+                            dependents.remove(r);
                         }
                     }
                 }
+            }
+        }
+
+        for (Requirement r : unsatisfied)
+        {
+            // another host may still provide the package
+            CandidateSelector remaining = m_candidateMap.get(r);
+            if (remaining != null && !remaining.isEmpty())
+            {
+                continue;
+            }
+            if (Util.isOptional(r))
+            {
+                m_candidateMap.remove(r);
+                continue;
+            }
+            Resource owner = r.getResource();
+            if (owner instanceof WrappedResource)
+            {
+                owner = ((WrappedResource) owner).getDeclaredResource();
+            }
+            if (m_populateResultCache.get(owner) != null)
+            {
+                removeResource(owner, new MissingRequirementError(r));
             }
         }
 
@@ -999,7 +1075,8 @@ class Candidates
     }
 
     private ShadowList getShadowList(Requirement r) {
-        CandidateSelector cands = getSelector(r);
+        // the selector may be empty while the hosted capabilities are inserted
+        CandidateSelector cands = m_candidateMap.get(r);
         if (cands instanceof ShadowList)
         {
             return (ShadowList) cands;
