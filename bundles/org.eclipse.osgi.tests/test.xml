@@ -48,6 +48,7 @@
       <property name="data-dir" value="${osgi_location}"/>
       <property name="plugin-name" value="org.eclipse.osgi.tests"/>
       <property name="classname" value="org.eclipse.osgi.tests.AutomatedTests"/>
+      <property name="vmargs" value="-XX:OnOutOfMemoryError=&quot;jmap -histo %p&quot;"/>
     </ant>
   </target>
 <!--
