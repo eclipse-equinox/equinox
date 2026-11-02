@@ -85,7 +85,6 @@ final class HostIdentity
             position[0]++;
             StringBuilder terms = new StringBuilder();
             boolean changed = false;
-            boolean always = false;
             int count = 0;
             while (filter.charAt(position[0]) == '(')
             {
@@ -94,7 +93,6 @@ final class HostIdentity
                 if (term == null)
                 {
                     changed = true;
-                    always |= operator == '|';
                 }
                 else
                 {
@@ -103,17 +101,14 @@ final class HostIdentity
                     count++;
                 }
             }
-            if (operator == '!')
+            // only a conjunction can drop terms, the result of any other operator would not be a superset
+            if (operator != '&')
             {
-                result = changed ? null : "(!" + terms + ")";
-            }
-            else if (always || count == 0)
-            {
-                result = null;
+                result = changed ? null : "(" + operator + terms + ")";
             }
             else
             {
-                result = "(" + operator + terms + ")";
+                result = count == 0 ? null : "(&" + terms + ")";
             }
         }
         else
