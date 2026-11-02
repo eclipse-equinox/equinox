@@ -284,10 +284,6 @@ class Candidates
             return candidates;
         }
         List<Capability> relaxed = rc.findProviders(HostIdentity.relax(requirement));
-        if (relaxed == null)
-        {
-            return candidates;
-        }
         List<Capability> result = new ArrayList<Capability>(relaxed.size());
         for (Capability cap : relaxed)
         {

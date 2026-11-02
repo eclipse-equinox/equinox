@@ -25,6 +25,7 @@ import java.util.Map;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.namespace.PackageNamespace;
+import org.osgi.framework.wiring.BundleRequirement;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Namespace;
 import org.osgi.resource.Requirement;
@@ -65,34 +66,11 @@ final class HostIdentity
         final Map<String, String> directives = new HashMap<String, String>(requirement.getDirectives());
         directives.put(Namespace.REQUIREMENT_FILTER_DIRECTIVE,
             relaxed == null ? "(" + requirement.getNamespace() + "=*)" : relaxed);
-        final Requirement wrapped = requirement;
-        return new Requirement()
+        if (requirement instanceof BundleRequirement)
         {
-            public String getNamespace()
-            {
-                return wrapped.getNamespace();
-            }
-
-            public Map<String, String> getDirectives()
-            {
-                return directives;
-            }
-
-            public Map<String, Object> getAttributes()
-            {
-                return wrapped.getAttributes();
-            }
-
-            public Resource getResource()
-            {
-                return wrapped.getResource();
-            }
-
-            public String toString()
-            {
-                return wrapped.toString();
-            }
-        };
+            return new RelaxedBundleRequirement((BundleRequirement) requirement, directives);
+        }
+        return new RelaxedRequirement(requirement, directives);
     }
 
     /** @return the relaxed term or <code>null</code> if it is always true */
