@@ -292,13 +292,6 @@ class Candidates
                 result.add(cap);
             }
         }
-        for (Capability cap : candidates)
-        {
-            if (!result.contains(cap))
-            {
-                result.add(cap);
-            }
-        }
         return result;
     }
 
