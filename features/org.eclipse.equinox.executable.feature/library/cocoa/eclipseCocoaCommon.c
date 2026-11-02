@@ -143,40 +143,48 @@ void * findSymbol( void * handle, char * symbol ){
 		return dlsym(handle, symbol);
 }
 
-char * resolveSymlinks( char * path ) {
-	char * result = 0;
-	CFURLRef url, resolved;
-	CFStringRef string;
+char* resolveSymlinks(char* path) {
+  char* result = 0;
+  CFURLRef url, resolved;
+  CFStringRef string, fileSystemPath;
 
-	if(path == NULL)
-		return path;
+  if(path == NULL)
+    return path;
 
-	string = CFStringCreateWithCString(kCFAllocatorDefault, path, kCFStringEncodingUTF8);
-	url = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, string, kCFURLPOSIXPathStyle, false);
-	CFRelease(string);
-	if(url == NULL)
-		return path;
+  string = CFStringCreateWithCString(kCFAllocatorDefault, path, kCFStringEncodingUTF8);
+  if (string == NULL) {
+    return path;
+  }
+  url = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, string, kCFURLPOSIXPathStyle, false);
+  CFRelease(string);
+  if(url == NULL)
+    return path;
 
-	UInt8 fsPath[PATH_MAX];
-	if (CFURLGetFileSystemRepresentation(url, true, fsPath, sizeof(fsPath))) {
-		NSError *error = nil;
-		NSURL *resolvedURL = [NSURL URLByResolvingAliasFileAtURL:(NSURL *)url options:NSURLBookmarkResolutionWithSecurityScope error:&error];
-		if (resolvedURL) {
-			resolved = CFURLCopyAbsoluteURL(url);
-			if(resolved != NULL) {
-				string = CFURLCopyFileSystemPath(resolved, kCFURLPOSIXPathStyle);
-				CFIndex length = CFStringGetMaximumSizeForEncoding(CFStringGetLength(string), kCFStringEncodingUTF8);
-				char *s = malloc(length);
-				if (CFStringGetCString(string, s, length, kCFStringEncodingUTF8)) {
-					result = s;
-				} else {
-					free(s);
-				}
-				CFRelease(string);
-				CFRelease(resolved);
-			}
-		}
-	}
-	CFRelease(url);
-	return result;
+  UInt8 fsPath[PATH_MAX];
+  if (CFURLGetFileSystemRepresentation(url, true, fsPath, sizeof(fsPath))) {
+    NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+    NSError *error = nil;
+    NSURL *resolvedURL = [NSURL URLByResolvingAliasFileAtURL:(__bridge NSURL *)url options:NSURLBookmarkResolutionWithSecurityScope error:&error];
+    if (resolvedURL == nil) {
+      result = NULL;
+    } else {
+      resolved = CFURLCopyAbsoluteURL((__bridge CFURLRef)resolvedURL);
+        fileSystemPath = CFURLCopyFileSystemPath(resolved, kCFURLPOSIXPathStyle);
+      CFRelease(resolved);
+      if (fileSystemPath) {
+        CFIndex length = CFStringGetMaximumSizeForEncoding(CFStringGetLength(fileSystemPath), kCFStringEncodingUTF8) + 1;
+        result = malloc(length);
+        if (CFStringGetCString(fileSystemPath, result, length, kCFStringEncodingUTF8) == false) {
+          free(result);
+          result = NULL;
+        }
+        CFRelease(fileSystemPath);
+      } else {
+        result = NULL;
+      }
+    }
+    [pool release];
+  }
+  CFRelease(url);
+  return result;
 }
