@@ -539,6 +539,12 @@ public class BundleLoader extends ModuleLoader {
 			}
 		}
 
+		if (source == null && !isExportedPackage(pkgName)) {
+			result = findDelegatedClass(name);
+			if (result != null)
+				return result;
+		}
+
 		if (result == null)
 			try {
 				result = (Class<?>) searchHooks(name, POST_CLASS);
@@ -562,6 +568,34 @@ public class BundleLoader extends ModuleLoader {
 			}
 		}
 		return generateException(name, generateException, loaderTrace);
+	}
+
+	private Class<?> findDelegatedClass(String name) {
+		if (name.startsWith(JAVA_PACKAGE)) {
+			return null;
+		}
+		DelegationHookSupport hooks = container.getServiceRegistry().getDelegationHooks();
+		return hooks.hasHooks() ? hooks.findClass(wiring, name) : null;
+	}
+
+	private URL findDelegatedResource(String name) {
+		if (name.startsWith(JAVA_PACKAGE)) {
+			return null;
+		}
+		DelegationHookSupport hooks = container.getServiceRegistry().getDelegationHooks();
+		return hooks.hasHooks() ? hooks.findResource(wiring, name) : null;
+	}
+
+	private Enumeration<URL> findDelegatedResources(String name) {
+		if (name.startsWith(JAVA_PACKAGE)) {
+			return null;
+		}
+		DelegationHookSupport hooks = container.getServiceRegistry().getDelegationHooks();
+		if (!hooks.hasHooks()) {
+			return null;
+		}
+		List<URL> urls = hooks.findResources(wiring, name);
+		return urls.isEmpty() ? null : Collections.enumeration(urls);
 	}
 
 	private Class<?> generateException(String name, boolean generate, String loaderTrace)
@@ -742,6 +776,12 @@ public class BundleLoader extends ModuleLoader {
 				return source.getResource(name);
 		}
 
+		if (source == null && !isExportedPackage(pkgName)) {
+			result = findDelegatedResource(name);
+			if (result != null)
+				return result;
+		}
+
 		if (result == null)
 			try {
 				result = (URL) searchHooks(name, POST_RESOURCE);
@@ -834,6 +874,9 @@ public class BundleLoader extends ModuleLoader {
 			source = findDynamicSource(pkgName);
 			if (source != null)
 				return compoundEnumerations(result, source.getResources(name));
+		}
+		if (source == null && !isExportedPackage(pkgName)) {
+			result = compoundEnumerations(result, findDelegatedResources(name));
 		}
 		if (!result.hasMoreElements())
 			try {
