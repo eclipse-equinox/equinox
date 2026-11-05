@@ -1,8 +1,32 @@
-# AGENTS.md
+# Eclipse Equinox - Agent Instructions
 
-Guidance for AI agents building and testing this repository (Eclipse Equinox, Tycho/Maven based).
-Verified with Maven 3.9.12 (CI uses 3.9.16), the Tycho 5.0.4 plugins (`.mvn/extensions.xml` pins the `tycho-build` extension to 5.0.2; the plugin version comes from the parent POM) and the parent `eclipse-platform-parent` 4.42.0-SNAPSHOT.
-Anything not verified is marked as such.
+Guidance for AI agents building, testing and changing this repository (Tycho/Maven based).
+
+## Rules
+
+* Always use Maven (`mvn`), online, with `package` or `verify`. Never `compile` only, never `-o`, no hand-rolled `javac`/`java -jar`.
+* Use JDK 25 for Maven (see "Java version").
+* Always pass `-Dtycho.baseline.replace=none` when you want to see your own changes (see "Baseline replacement").
+* Tests run in the `verify` phase, `mvn test` prints no `Tests run:` line.
+* Redirect Maven output to a file and grep it; a run prints very long `Resolving MavenDependencyRoots` lines, filter them with `grep -v MavenDependencyRoots`.
+* Add `-am` (or list both modules with `-pl a,b`) when a test must see your changes in another bundle of this repository (see "Building single modules").
+* If your change has no effect: check `mvn -v`, that `replaced with the baseline` does not occur in the log, that the changed bundle is in the `Reactor Summary`, and that a `Tests run:` line for your class exists.
+* The first build needs network access (target platform, Maven Central, `https://repo.eclipse.org/content/repositories/eclipse/`).
+
+## Quick start (commands)
+
+```sh
+export JAVA_HOME=<path to a JDK 25>      # confirm with the "Java version" line of `mvn -v`
+LOG=${TMPDIR:-/tmp}/build.log
+# Build one bundle, no tests:
+mvn -B -pl bundles/<bundle> package -DskipTests -Dtycho.baseline.replace=none
+# Run one test class:
+mvn -B -pl bundles/org.eclipse.equinox.preferences.tests -am verify \
+    -Dtest=PreferenceMetadataTest -Dsurefire.failIfNoSpecifiedTests=false -Dtycho.baseline.replace=none \
+    > $LOG 2>&1; grep -v MavenDependencyRoots $LOG | grep -n "Tests run:\|BUILD\|ERROR" | tail -30
+# Did Tycho throw away my changes? Must print 0:
+grep -c "replaced with the baseline" $LOG
+```
 
 ## Repository overview
 
@@ -19,83 +43,44 @@ docs/        Jekyll site
 ```
 
 The root `pom.xml` lists modules in profiles: `full-build` (default, everything; disable with `-Dskip-default-modules=true`) and a smaller module set for the TCK build.
-`org.eclipse.equinox.region.tests` is commented out in the root `pom.xml` (bug 470000), so `-pl bundles/org.eclipse.equinox.region.tests` fails with `Could not find the selected project in the reactor`.
+`org.eclipse.equinox.region.tests` is commented out there (bug 470000), so `-pl bundles/org.eclipse.equinox.region.tests` fails with `Could not find the selected project in the reactor`.
 
-## TL;DR
+## Java version
 
-```sh
-export JAVA_HOME=<path to a JDK 21+>      # must be 21+, see "Java"; confirm with `mvn -v` ("Java version" line)
-LOG=${TMPDIR:-/tmp}/build.log
-# Build one bundle, no tests:
-mvn -B -pl bundles/<bundle> package -DskipTests -Dtycho.baseline.replace=none
-# Run one test class (tests run in `verify`, not in `test`):
-mvn -B -pl bundles/org.eclipse.equinox.preferences.tests -am verify \
-    -Dtest=PreferenceMetadataTest -Dsurefire.failIfNoSpecifiedTests=false -Dtycho.baseline.replace=none \
-    > $LOG 2>&1; grep -v MavenDependencyRoots $LOG | grep -n "Tests run:\|BUILD\|ERROR" | tail -30
-# Did Tycho throw away my changes? Must print 0:
-grep -c "replaced with the baseline" $LOG
-```
-
-Rules of thumb:
-
-* Use Maven (`mvn`), online, with `package` or `verify`. Never `compile` only, never `-o`, no hand-rolled `javac`/`java -jar`.
-* Pass `-Dtycho.baseline.replace=none` whenever you want to see your own changes (see "Baseline replacement").
-* Tests run in the `verify` phase.
-  `mvn ... test -Dtest=X` ends with `BUILD SUCCESS` but prints no `Tests run:` line (verified).
-* Redirect Maven output to a file and grep it; the first lines are very long `Resolving MavenDependencyRoots = ...` entries, filter them with `grep -v MavenDependencyRoots`.
-* The first build needs network access (target platform, Maven Central, `https://repo.eclipse.org/content/repositories/eclipse/`).
-
-## Java
-
-* `JAVA_HOME` decides which JDK Maven runs on, not `java` on the `PATH`.
-  They can differ: `mvn -v` showed `Java version: 17.0.6 ... runtime: .../java-17-...` while `java -version` printed 21.
-* Tycho 5.x needs Java 21+.
-  Maven on JDK 17 fails after ~2 seconds, before building anything:
-
-  ```
-  [ERROR] Unable to provision, see the following errors:
-  ... Type BndProjectMapping not present
-  [ERROR] Caused by: org/eclipse/tycho/build/bnd/BndProjectMapping has been compiled by a more recent version of the Java Runtime (class file version 65.0), this version of the Java Runtime only recognizes class file versions up to 61.0
-  ```
-
-  Fix: point `JAVA_HOME` to a JDK 21+ (21 verified here; CI uses Maven 3.9.16 and JDKs 17/21/25 via toolchains, Jenkins builds with 25).
-* Bundles are compiled and tested with the JDK running Maven (log: `Command line: .../bin/java`).
-  The CI TCK job and Jenkins additionally pass `-Pbree-libs` (compile against the bundle's required execution environment via `~/.m2/toolchains.xml`, which is machine-specific).
-  Locally it is only needed when BREE-specific compile errors matter.
+* Build with JDK 25, as Jenkins does and as more Eclipse bundles require; Tycho 5.x itself needs at least JDK 21.
+  Maven uses `JAVA_HOME` (when set) rather than the `java` on the `PATH`, so check `mvn -v`.
+* With JDK 17 Maven fails within seconds, before building anything (`BndProjectMapping ... has been compiled by a more recent version of the Java Runtime (class file version 65.0)`).
+* Bundles are compiled and tested with the JDK running Maven.
+  CI and Jenkins additionally pass `-Pbree-libs` (compile against the bundle's required execution environment via the machine-specific `~/.m2/toolchains.xml`); locally it is only needed for BREE-specific compile errors.
 
 ## `.mvn` configuration (picked up automatically from the repo root)
 
-* `.mvn/extensions.xml`: registers the `tycho-build` core extension (that is why bundles need no `pom.xml`).
+* `.mvn/extensions.xml`: registers the `tycho-build` core extension (that is why bundles need no `pom.xml`); the plugin version comes from the parent POM.
 * `.mvn/maven.config` contains `-Pbuild-individual-bundles` and `-Dtycho.localArtifacts=ignore`.
-  * `build-individual-bundles` adds the `eclipse-hosted` repository (`repo.eclipse.org`) so the parent POM can be found and the target platform (I-build) is used for everything that is not in the reactor.
-  * `tycho.localArtifacts=ignore`: Tycho ignores artifacts of this repo previously installed in `~/.m2`.
-    Consequence: `mvn install` of A followed by `mvn -pl B` does not make B see A.
-    Both must be in the same reactor invocation.
-* There is no `.mvn/jvm.config` in this repository.
+  * `build-individual-bundles` adds the `eclipse-hosted` repository (`repo.eclipse.org`) so the parent POM can be found; everything not in the reactor comes from the target platform (I-build).
+  * `tycho.localArtifacts=ignore`: Tycho ignores artifacts of this repo previously installed in `~/.m2`, so `mvn install` of A followed by `mvn -pl B` does not make B see A. Both must be in the same reactor invocation.
+* There is no `.mvn/jvm.config`.
 * Do not edit these files to work around problems; pass `-D`/`-P` options instead.
 
-## Building outside the aggregator
+## Building single modules
 
-This repository is built standalone (CI: `mvn clean verify ...` in the repo root).
-The root `pom.xml` has `<relativePath>../eclipse-platform-parent</relativePath>`, which does not exist in a standalone checkout, so the parent POM comes from the local Maven repository or `repo.eclipse.org` (SNAPSHOT, may be stale).
-If the parent cannot be resolved (`Could not find artifact org.eclipse:eclipse-platform-parent:pom:4.42.0-SNAPSHOT`, not reproduced here because it is cached), ensure network access to `repo.eclipse.org` or, as a fallback, check out `https://github.com/eclipse-platform/eclipse.platform.releng.aggregator` and its `eclipse-platform-parent` folder as sibling `../eclipse-platform-parent` (unverified).
-
+* The root `pom.xml` has `<relativePath>../eclipse-platform-parent</relativePath>`, which does not exist in a standalone checkout, so the parent POM comes from the local Maven repository or `repo.eclipse.org` (SNAPSHOT, may be stale).
 * `mvn -pl <module> -am ...` builds the module plus all upstream modules of this repo from source.
-  Example: `-pl bundles/org.eclipse.equinox.preferences.tests -am` builds osgi, common, registry, preferences, preferences.tests (about 25 s for a single test class).
-* `mvn -pl <module> ...` without `-am` also works here (verified for several modules), but dependencies on other bundles of this repo are then taken as **released I-build binaries from the target platform**, not from your working tree.
-  Verified: the surefire `config.ini` of a `preferences.tests` run without `-am` referenced a downloaded `org.eclipse.equinox.preferences_3.12.200.v2026...` jar, not `bundles/.../target`.
-  Use `-am` (or list both modules with `-pl a,b`) whenever the test depends on a change in another bundle.
-* Whole-repo `mvn clean verify` works as in CI but is slow; `-Dskip-default-modules=true` restricts it to the TCK module set.
-* Native launcher binaries (`features/org.eclipse.equinox.executable.feature`) need the `equinox.binaries` repository (default `../../../equinox.binaries` resolved from the feature directory, i.e. a sibling folder of this repo checkout; override with `-Dequinox.binaries.loc=...` or `EQUINOX_BINARIES_LOC` as CI does).
-  Not verified here.
+  `-pl bundles/org.eclipse.equinox.preferences.tests -am` builds osgi, common, registry, preferences, preferences.tests (about 25 s for a single test class).
+* Without `-am`, dependencies on other bundles of this repo are **released I-build binaries from the target platform**, not from your working tree.
+  Use `-am` (or `-pl a,b`) whenever the test depends on a change in another bundle.
+* With `-am` and `-Dtest=X`, upstream modules without a matching test fail the build (`No tests matching pattern ...`), so add `-Dsurefire.failIfNoSpecifiedTests=false`.
+* Whole-repo `mvn clean verify` is what CI runs and is slow; `-Dskip-default-modules=true` restricts it to the TCK module set.
+* Native launcher binaries (`features/org.eclipse.equinox.executable.feature`) need the `equinox.binaries` repository; override its location with `-Dequinox.binaries.loc=...` or `EQUINOX_BINARIES_LOC` as CI does.
+  See the feature's `README.md`.
 
 ## Baseline replacement (the main trap)
 
 Symptom: build is green but your change is not in the jar, the tests, or the product that depends on it.
 
 Cause: the parent POM configures `tycho-p2-plugin` with `baselineRepositories` and `tycho.baseline.replace=all`.
-In `package` (goal `p2-metadata-default`) Tycho looks up each bundle by id and version in the baseline (the I-build repository).
-If the same `major.minor.micro` exists there, the freshly built jar (and the `-sources` jar) is overwritten with the baseline jar:
+In `package` Tycho looks up each bundle by id and version in the baseline (the I-build repository).
+If the same `major.minor.micro` exists there, the freshly built jar (and the `-sources` jar) is silently overwritten with the baseline jar, even on a plain `package` of a single bundle:
 
 ```
 [INFO] MavenProject: org.eclipse.platform:org.eclipse.equinox.preferences:3.12.200-SNAPSHOT @ ...
@@ -103,63 +88,39 @@ If the same `major.minor.micro` exists there, the freshly built jar (and the `-s
     The following attached artifacts have been replaced with the baseline version: [sources]
 ```
 
-Verified with a temporary probe constant (reverted afterwards) added to `org.eclipse.core.internal.preferences.AbstractScope`: `target/classes` contained it, the jar did not.
-This happens on a plain `package` of a single bundle, with an unchanged `.mvn` setup.
-It is not a Maven cache problem; `-U`, `mvn clean` or deleting `~/.m2` content do not help.
-
 Diagnose: `grep -n "replaced with the baseline\|No baseline version" $LOG`.
 
-Fix, pick one (both verified: jar contains the probe afterwards):
+Fix, pick one:
 
 1. `-Dtycho.baseline.replace=none` on the command line.
-   Log then shows `[WARNING] ... baseline and build artifacts have same version but different contents`, which is harmless.
+   The log then shows `[WARNING] ... baseline and build artifacts have same version but different contents`, which is harmless.
 2. Bump the bundle version (`Bundle-Version` in `META-INF/MANIFEST.MF`, also for `org.eclipse.osgi`).
-   Log then shows `No baseline version <groupId>:<artifactId>:eclipse-plugin:<version>` and your jar is kept.
-   Verified with `3.12.200` -> `3.12.300`.
-   Do this only if the bump belongs to the change (the repo's version check workflow `pr-checks.yml` enforces increments for changed bundles); never only to make a local run work.
+   The log then shows `No baseline version ...` and your jar is kept.
+   Do this only if the bump belongs to the change (`pr-checks.yml` enforces increments for changed bundles); never only to make a local run work.
 
-Does NOT work:
-
-* `-Dtycho.baseline=disable`: still 2 replacements (verified); the parent POM hard-codes `<baselineMode>warnCommon</baselineMode>`.
-* Clearing caches, `-U`, `mvn install`.
+Does NOT work: `-Dtycho.baseline=disable` (the parent POM hard-codes `<baselineMode>warnCommon</baselineMode>`), `mvn clean`, `-U`, `mvn install` or wiping `~/.m2` (it is not a stale cache).
 
 Never commit `-Dtycho.baseline.replace=none` into a POM or `.mvn` file; CI relies on the baseline.
 
 ## Running tests
 
 * Test bundles are `*.tests` (and `org.eclipse.equinox.cm.test`), packaged as `eclipse-test-plugin`; tests run in `verify`.
-* Single class: `-Dtest=PreferenceMetadataTest` (simple class name).
-  With `-am` you additionally need `-Dsurefire.failIfNoSpecifiedTests=false`, because the upstream modules built before the test bundle contain no test of that name and would fail the build:
-
-  ```
-  [ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.6.1:test (execute-tests) on project org.eclipse.osgi: No tests matching pattern "PreferenceMetadataTest" were executed! (Set -Dsurefire.failIfNoSpecifiedTests=false to ignore this error.)
-  ```
-
-* Proof that tests ran: `Tests run: 6, Failures: 0, Errors: 0, Skipped: 0` in the log; reports are in `<bundle>/target/surefire-reports`.
+* Single class: `-Dtest=<SimpleClassName>`.
+* Proof that tests ran: a line like `Tests run: 6, Failures: 0, Errors: 0, Skipped: 0` in the log; reports are in `<bundle>/target/surefire-reports`.
 * The GitHub `build.yml` build and TCK jobs run with `-Dmaven.test.failure.ignore`; locally a failing test fails the build.
-* OSGi TCK, per bundle (verified on `org.eclipse.equinox.preferences`, ~15 s):
+* OSGi TCK, per bundle (~15 s for `org.eclipse.equinox.preferences`):
   `mvn -B -pl bundles/org.eclipse.equinox.preferences verify -Pbree-libs -Ptck`.
   Results: `<bundle>/target/tck-results/TEST-*.xml`.
   CI runs all TCKs with `-Pbuild-individual-bundles -Pbree-libs -Ptck -Dskip-default-modules=true`; TCKs need a JavaSE-17 toolchain (see `pom.xml`).
 * UI/native/network tests may need a display or internet; judge failures by whether they relate to your change.
 
-## Checklist when "my change has no effect"
-
-1. `mvn -v` shows Java 21+?
-2. `grep -c "replaced with the baseline" $LOG` is `0`? If not, add `-Dtycho.baseline.replace=none`.
-3. Is the changed bundle in the reactor (`-am` or `-pl a,b`)? Check the `Reactor Build Order`/`Reactor Summary` block.
-4. Is there a `Tests run:` line for the class you expected (`verify`, not `test`)?
-5. Only then suspect your code.
-   Do not clear `~/.m2` or use `-U`.
-
 ## CI
 
-* `.github/workflows/build.yml`: `mvn --update-snapshots --batch-mode -Papi-check -Dcompare-version-with-baselines.skip=false -Dmaven.test.failure.ignore=true -Dnative=<ws>.<os>.x86_64 -Dequinox.binaries.loc=... clean verify` on Linux/Windows/macOS, plus a TCK job.
-  Needs full git history (`fetch-depth: 0`, required by the jgit timestamp provider; for a shallow local clone run `git fetch --unshallow`, symptom: `Using 'none' timestamp provider` style warnings, not reproduced here) and `libgtk-3-dev` on Linux.
-* `Jenkinsfile`: `mvn clean verify --batch-mode --fail-at-end -Pbree-libs -Papi-check -Pjavadoc -Dcompare-version-with-baselines.skip=false ...` with JDK 25, plus on-demand native launcher builds (`LBv<maj>-<min>` tags) that commit binaries to `equinox.binaries`.
-* `pr-checks.yml`: freeze period, merge commits (no merge commits in PRs) and version checks; the Eclipse Equinox Bot pushes `Version bump(s) for <release> stream` commits.
+* `.github/workflows/build.yml`: `clean verify` with `-Papi-check -Dcompare-version-with-baselines.skip=false -Dmaven.test.failure.ignore=true -Dnative=<ws>.<os>.x86_64 -Dequinox.binaries.loc=...` on Linux/Windows/macOS, plus a TCK job.
+  Needs full git history (`fetch-depth: 0`, required by the jgit timestamp provider) and `libgtk-3-dev` on Linux.
+* `Jenkinsfile`: `mvn clean verify` with `-Pbree-libs -Papi-check -Pjavadoc` on JDK 25, plus on-demand native launcher builds (`LBv<maj>-<min>` tags) that commit binaries to `equinox.binaries`.
+* `pr-checks.yml`: freeze period, no merge commits, version checks; the Eclipse Equinox Bot pushes `Version bump(s) for <release> stream` commits.
 * A changed bundle with comparator errors needs its qualifier forced: append a line to the bundle's `forceQualifierUpdate.txt` (see commit `04cb8e97d`).
-* Native launcher sources and build instructions: `features/org.eclipse.equinox.executable.feature/README.md`.
 
 ## Code and commit style
 
@@ -207,6 +168,5 @@ The human committer stays responsible for everything that is contributed; make t
 
 ## References
 
-* Homepage https://equinox.eclipseprojects.io/, issues https://github.com/eclipse-equinox/equinox/issues, discussions https://github.com/eclipse-equinox/equinox/discussions, mailing list equinox-dev@eclipse.org
 * OSGi specifications https://docs.osgi.org/
-* IDE setup: Oomph setup linked in `CONTRIBUTING.md`
+
