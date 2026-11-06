@@ -36,31 +36,35 @@
 #define APP_PACKAGE "APP_PACKAGE"
 #define JAVAROOT "JAVAROOT"
 
-static void debug(const char *fmt, ...);
-static void dumpArgs(char *tag, int argc, char* argv[]);
+static void debug(FILE* logFile, const char *fmt, ...);
+static void dumpArgs(FILE* logFile, char *tag, int argc, char* argv[]);
 static char *append(char *buffer, const char *s);
 static char *appendc(char *buffer, char c);
 static char *expandShell(char *arg, const char *appPackage, const char *javaRoot);
 static char *my_strcasestr(const char *big, const char *little);
 
-static FILE *fgConsoleLog;
 static char *fgAppPackagePath;
 static int fgPid;
 
 extern int original_main(int argc, char* argv[]);
 int main( int argc, char* argv[] ) {
+	FILE *fgConsoleLog = fopen("/dev/console", "w");
+	if (fgConsoleLog == NULL) {
+		perror("Unable to open log");
+	}
 
-    
-    NSOperatingSystemVersion version = [[NSProcessInfo processInfo] operatingSystemVersion];
-    if ((version.majorVersion < 10) || ((version.majorVersion == 10) && (version.minorVersion < 10))) {
-        displayMessage("Error", "This application requires Mac OS 10.10 or greater.");
-        return 0;
-    }
+	NSOperatingSystemVersion version = [[NSProcessInfo processInfo] operatingSystemVersion];
+	if ((version.majorVersion < 10) || ((version.majorVersion == 10) && (version.minorVersion < 10))) {
+		displayMessage("Error", "This application requires Mac OS 10.10 or greater.");
+		if (fgConsoleLog) {
+			fclose(fgConsoleLog);
+		}
+		return 0;
+	}
 
-	fgConsoleLog= fopen("/dev/console", "w");
 	fgPid= getpid();
 
-	dumpArgs("start", argc, argv);
+	dumpArgs(fgConsoleLog, "start", argc, argv);
 	if ( (argc > 1 && strncmp(argv[1], "-psn_", 5) == 0) || argc == 1) {
 		/* find path to application bundle (ignoring case) */
 		char *pos= my_strcasestr(argv[0], APP_PACKAGE_PATTERN);
@@ -96,38 +100,40 @@ int main( int argc, char* argv[] ) {
 							if (CFStringGetCString(sr, s, argStringSize, kCFStringEncodingUTF8)) {
 								argv[argc++]= expandShell(s, fgAppPackagePath, NULL);
 							} else {
-								fprintf(fgConsoleLog, "can't extract bytes\n");
+								fprintf(fgConsoleLog == NULL ? stderr : fgConsoleLog, "can't extract bytes\n");
 							}
 							//free(s);
 						}
 					}
 				} else {
-					fprintf(fgConsoleLog, "no Eclipse dict found\n");
+					fprintf(fgConsoleLog == NULL ? stderr : fgConsoleLog, "no Eclipse dict found\n");
 				}
 			} else {
-				fprintf(fgConsoleLog, "no bundle dict found\n");
+				fprintf(fgConsoleLog == NULL ? stderr : fgConsoleLog, "no bundle dict found\n");
 			}
 		} else {
-			fprintf(fgConsoleLog, "no bundle found\n");
+			fprintf(fgConsoleLog == NULL ? stderr : fgConsoleLog, "no bundle found\n");
 		}
 	}
 	int exitcode= original_main(argc, argv);
-	debug("<<<< exit(%d)\n", exitcode);
-	fclose(fgConsoleLog);
+	debug(fgConsoleLog, "<<<< exit(%d)\n", exitcode);
+	if (fgConsoleLog) {
+		fclose(fgConsoleLog);
+	}
 	return exitcode;
 }
 
-static void debug(const char *fmt, ...) {
+static void debug(FILE* logFile, const char *fmt, ...) {
 #if DEBUG
 	va_list ap;
 	va_start(ap, fmt);
-	fprintf(fgConsoleLog, "%05d: ", fgPid);
-	vfprintf(fgConsoleLog, fmt, ap);
+	fprintf(logFile == NULL ? stderr : logFile, "%05d: ", fgPid);
+	vfprintf(logFile == NULL ? stderr : logFile, fmt, ap);
 	va_end(ap);
 #endif
 }
 
-static void dumpArgs(char *tag, int argc, char* argv[]) {
+static void dumpArgs(FILE* logFile, char *tag, int argc, char* argv[]) {
 #if DEBUG
 	int i;
 	if (argc < 0) {
@@ -135,10 +141,10 @@ static void dumpArgs(char *tag, int argc, char* argv[]) {
 		for (i= 0; argv[i] != NULL; i++)
 			 argc++;
 	}
-	debug(">>>> %s:", tag);
+	debug(logFile, ">>>> %s:", tag);
 	for (i= 0; i < argc && argv[i] != NULL; i++)
-		fprintf(fgConsoleLog, " <%s>", argv[i]);
-	fprintf(fgConsoleLog, "\n");
+		fprintf(logFile == NULL ? stderr : logFile, " <%s>", argv[i]);
+	fprintf(logFile == NULL ? stderr : logFile, "\n");
 #endif
 }
 
