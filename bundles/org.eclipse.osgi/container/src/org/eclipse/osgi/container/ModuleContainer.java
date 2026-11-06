@@ -1605,6 +1605,12 @@ public final class ModuleContainer implements DebugOptionsListener {
 		for (ModuleWire providedWire : provided) {
 			addDependents(providedWire.getRequirer(), wiringCopy, dependencyClosure);
 		}
+		// add the wirings that got classes from this one through a DelegationHook
+		for (ModuleWiring dependent : wiring.getDelegationDependents()) {
+			if (wiringCopy.get(dependent.getRevision()) == dependent) {
+				addDependents(dependent.getRevision(), wiringCopy, dependencyClosure);
+			}
+		}
 		// add all hosts of a fragment
 		if (revision.getTypes() == BundleRevision.TYPE_FRAGMENT) {
 			List<ModuleWire> hosts = wiring.getRequiredModuleWires(HostNamespace.HOST_NAMESPACE);
