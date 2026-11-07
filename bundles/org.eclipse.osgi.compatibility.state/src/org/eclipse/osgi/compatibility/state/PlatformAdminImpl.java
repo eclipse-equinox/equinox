@@ -25,7 +25,6 @@ import org.eclipse.osgi.internal.framework.BundleContextImpl;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.module.ResolverImpl;
 import org.eclipse.osgi.internal.resolver.StateHelperImpl;
-import org.eclipse.osgi.internal.resolver.StateObjectFactoryImpl;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.DisabledInfo;
 import org.eclipse.osgi.service.resolver.PlatformAdmin;
@@ -37,7 +36,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
 public class PlatformAdminImpl implements PlatformAdmin {
-	private final StateObjectFactory factory = new StateObjectFactoryImpl();
+	private final StateObjectFactory factory = StateObjectFactory.defaultFactory;
 	private final Object monitor = new Object();
 	private EquinoxContainer equinoxContainer;
 	private BundleContext bc;
