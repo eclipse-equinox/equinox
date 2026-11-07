@@ -57,6 +57,7 @@ import org.eclipse.osgi.storage.Storage.StorageException;
 import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 import org.eclipse.osgi.storage.bundlefile.BundleFile;
 import org.eclipse.osgi.storage.bundlefile.BundleFileWrapperChain;
+import org.eclipse.osgi.storage.bundlefile.SystemBundleFile;
 import org.eclipse.osgi.storage.url.BundleResourceHandler;
 import org.eclipse.osgi.storage.url.bundleentry.Handler;
 import org.eclipse.osgi.util.ManifestElement;
@@ -277,6 +278,105 @@ public final class BundleInfo {
 				this.contentType = contentType;
 				setLastModified(content);
 			}
+		}
+
+		/**
+		 * Sets the content for this generation and checks for Eclipse-BundleShape header.
+		 * If the header is set to "dir", the content will be extracted to a directory.
+		 * This method creates the BundleFile to read headers without opening the JAR twice.
+		 * 
+		 * @param content the content file or directory
+		 * @param contentType the type of content
+		 * @return the BundleFile for this generation
+		 * @throws BundleException if an error occurs during installation
+		 */
+		BundleFile installBundleFile(File content, Type contentType) throws BundleException {
+			if (getBundleId() == 0) {
+				throw new UnsupportedOperationException("Should not be done for the system bundle."); //$NON-NLS-1$
+			}
+			synchronized (this.genMonitor) {
+				this.content = content;
+				this.isDirectory = content != null && Storage.secureAction.isDirectory(content);
+				this.contentType = contentType;
+				setLastModified(content);
+				return checkBundleShape();
+			}
+		}
+
+		/**
+		 * Creates the BundleFile and checks if the bundle should be extracted based on
+		 * the Eclipse-BundleShape header. If extraction is needed, swaps the content
+		 * to the extracted directory.
+		 * 
+		 * @return the BundleFile for this generation
+		 * @throws BundleException if an error occurs
+		 */
+		private BundleFile checkBundleShape() throws BundleException {
+			// Create the initial bundle file to read headers
+			BundleFile initialBundleFile;
+			if (getBundleId() == 0 && content == null && contentType != Type.CONNECT) {
+				initialBundleFile = new SystemBundleFile();
+			} else {
+				initialBundleFile = getStorage().createBundleFile(content, this, isDirectory, true);
+			}
+
+			// Only check for Eclipse-BundleShape if this is a DEFAULT type JAR file (not a directory)
+			if (contentType == Type.DEFAULT && content != null && content.isFile()) {
+				try {
+					initialBundleFile.open();
+					// Get headers to check for Eclipse-BundleShape
+					String bundleShape = getRawHeaders().get(Storage.ECLIPSE_BUNDLESHAPE);
+					if ("dir".equalsIgnoreCase(bundleShape)) { //$NON-NLS-1$
+						// Need to extract the JAR to a directory
+						initialBundleFile.close();
+						
+						File extractedDir = content.getParentFile();
+						File jarFile = content;
+						File tempExtractDir = new File(extractedDir, content.getName() + ".tmp"); //$NON-NLS-1$
+						
+						try {
+							// Extract to temporary directory first
+							getStorage().extractJarToDirectory(jarFile, tempExtractDir);
+							
+							// Delete the original JAR file
+							if (!jarFile.delete()) {
+								throw new IOException("Could not delete original JAR file: " + jarFile); //$NON-NLS-1$
+							}
+							
+							// Rename temp directory to the bundle file location
+							if (!tempExtractDir.renameTo(jarFile)) {
+								throw new IOException("Could not rename extracted directory: " + tempExtractDir); //$NON-NLS-1$
+							}
+							
+							// Update the content reference to point to the directory
+							this.content = jarFile;
+							this.isDirectory = true;
+							setLastModified(jarFile);
+							
+							// Create new BundleFile for the directory
+							bundleFile = getStorage().createBundleFile(jarFile, this, true, true);
+							return bundleFile;
+						} catch (IOException e) {
+							// Clean up temp directory if it exists
+							if (tempExtractDir.exists()) {
+								StorageUtil.rm(tempExtractDir, getStorage().getConfiguration().getDebug());
+							}
+							throw new BundleException("Error extracting bundle to directory", BundleException.READ_ERROR, e); //$NON-NLS-1$
+						}
+					}
+				} catch (IOException e) {
+					try {
+						initialBundleFile.close();
+					} catch (IOException closeException) {
+						// ignore
+					}
+					throw new BundleException("Error checking bundle shape", BundleException.READ_ERROR, e); //$NON-NLS-1$
+				}
+			}
+			
+			// No extraction needed, use the initial bundle file
+			bundleFile = initialBundleFile;
+			return bundleFile;
 		}
 
 		private void setLastModified(File content) {

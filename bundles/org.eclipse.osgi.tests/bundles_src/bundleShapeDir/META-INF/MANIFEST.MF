@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: BundleShape Dir Test Bundle
+Bundle-SymbolicName: test.bundleshape.dir
+Bundle-Version: 1.0.0
+Bundle-Activator: test.bundleshape.Activator
+Eclipse-BundleShape: dir
+Import-Package: org.osgi.framework
