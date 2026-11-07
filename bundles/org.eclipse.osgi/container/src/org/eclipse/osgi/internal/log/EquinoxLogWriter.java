@@ -118,7 +118,7 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 	int maxLogFiles = DEFAULT_LOG_FILES;
 	int backupIdx = 0;
 
-	private int logLevel = FrameworkLogEntry.OK;
+	private int logLevel = FrameworkLogEntry.INFO;
 	private boolean includeCommandLine = true;
 
 	private LoggerAdmin loggerAdmin = null;
