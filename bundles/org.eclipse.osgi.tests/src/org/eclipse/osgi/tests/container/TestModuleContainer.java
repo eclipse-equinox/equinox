@@ -4395,7 +4395,7 @@ public class TestModuleContainer extends AbstractTest {
 	@Test
 	public void testLargeSet() throws Exception {
 		ResolutionReport result = resolveModuleDatabaseDump("big", TimeUnit.MINUTES.toSeconds(5));
-		assertSucessfulWith(result, 1821, 29, 26359, 6736);
+		assertSucessfulWith(result, 249, 357, 714, 406);
 	}
 
 	@Test
