@@ -144,38 +144,47 @@ void * findSymbol( void * handle, char * symbol ){
 }
 
 char * resolveSymlinks( char * path ) {
-	char * result = 0;
+	char * result = NULL;
 	CFURLRef url, resolved;
-	CFStringRef string;
+	CFStringRef string, fileSystemPath;
 
 	if(path == NULL)
-		return path;
+		return result;
 
 	string = CFStringCreateWithCString(kCFAllocatorDefault, path, kCFStringEncodingUTF8);
+	if (string == NULL) {
+		return result;
+	}
 	url = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, string, kCFURLPOSIXPathStyle, false);
 	CFRelease(string);
-	if(url == NULL)
-		return path;
-
+	if(url == NULL) {
+		result = path; //for sake of backward compatibility
+		return result;
+	}
 	UInt8 fsPath[PATH_MAX];
 	if (CFURLGetFileSystemRepresentation(url, true, fsPath, sizeof(fsPath))) {
+		NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 		NSError *error = nil;
-		NSURL *resolvedURL = [NSURL URLByResolvingAliasFileAtURL:(NSURL *)url options:NSURLBookmarkResolutionWithSecurityScope error:&error];
-		if (resolvedURL) {
-			resolved = CFURLCopyAbsoluteURL(url);
-			if(resolved != NULL) {
-				string = CFURLCopyFileSystemPath(resolved, kCFURLPOSIXPathStyle);
-				CFIndex length = CFStringGetMaximumSizeForEncoding(CFStringGetLength(string), kCFStringEncodingUTF8);
-				char *s = malloc(length);
-				if (CFStringGetCString(string, s, length, kCFStringEncodingUTF8)) {
-					result = s;
-				} else {
-					free(s);
+		NSURL *resolvedURL = [NSURL URLByResolvingAliasFileAtURL:(__bridge NSURL *)url options:NSURLBookmarkResolutionWithSecurityScope error:&error];
+		if (resolvedURL != nil) {
+			resolved = CFURLCopyAbsoluteURL((__bridge CFURLRef)resolvedURL);
+			if (resolved) {
+				fileSystemPath = CFURLCopyFileSystemPath(resolved, kCFURLPOSIXPathStyle);
+				if (fileSystemPath) {
+					CFIndex length = CFStringGetMaximumSizeForEncoding(CFStringGetLength(fileSystemPath), kCFStringEncodingUTF8) + 1;
+					result = malloc(length);
+					if (result) {
+						if (CFStringGetCString(fileSystemPath, result, length, kCFStringEncodingUTF8) == false) {
+							free(result);
+							result = NULL;
+						}
+					}
+					CFRelease(fileSystemPath);
 				}
-				CFRelease(string);
 				CFRelease(resolved);
-			}
+			} //Release resolvedURL
 		}
+		[pool release];
 	}
 	CFRelease(url);
 	return result;
