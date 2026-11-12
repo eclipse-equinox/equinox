@@ -53,14 +53,15 @@ int main( int argc, char* argv[] ) {
 		perror("Unable to open log");
 	}
 
-	NSOperatingSystemVersion version = [[NSProcessInfo processInfo] operatingSystemVersion];
-	if ((version.majorVersion < 10) || ((version.majorVersion == 10) && (version.minorVersion < 10))) {
-		displayMessage("Error", "This application requires Mac OS 10.10 or greater.");
-		if (fgConsoleLog) {
-			fclose(fgConsoleLog);
-		}
-		return 0;
-	}
+    
+    NSOperatingSystemVersion version = [[NSProcessInfo processInfo] operatingSystemVersion];
+    if (version.majorVersion < 11) {
+        displayMessage("Error", "This application requires Mac OS 11.0 or greater.");
+		    if (fgConsoleLog) {
+		      	fclose(fgConsoleLog);
+    		}
+        return 0;
+    }
 
 	fgPid= getpid();
 

@@ -29,6 +29,8 @@
 		<true/>
 	<key>CFBundleDevelopmentRegion</key>
 		<string>English</string>		
+	<key>LSMinimumSystemVersion</key>
+		<string>11.0</string>
 	<key>Eclipse</key>
 		<array>
 			<!-- To use a specific Java version (instead of the default) uncomment the following option and 
