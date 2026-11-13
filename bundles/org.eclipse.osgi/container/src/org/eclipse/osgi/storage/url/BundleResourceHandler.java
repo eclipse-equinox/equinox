@@ -22,12 +22,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Objects;
-import org.eclipse.equinox.plurl.PlurlStreamHandlerBase;
 import org.eclipse.osgi.container.Module;
 import org.eclipse.osgi.container.ModuleContainer;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.osgitech.plurl.PlurlStreamHandlerBase;
 import org.osgi.framework.AdminPermission;
 import org.osgi.framework.Bundle;
 
