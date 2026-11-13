@@ -4404,6 +4404,12 @@ public class TestModuleContainer extends AbstractTest {
 		assertSucessfulWith(result, 9, 18, 1, 42);
 	}
 
+	@Test
+	public void testKotlinSpringWiremockSet() throws Exception {
+		ResolutionReport result = resolveModuleDatabaseDump("kotlinSpringWiremock", TimeUnit.MINUTES.toSeconds(5));
+		assertSucessfulWith(result, 10214, 0, 50261, 4861);
+	}
+
 	private ResolutionReport resolveModuleDatabaseDump(String testSetName, long batchTimeoutSeconds) throws Exception {
 		URL entry = getBundle().getEntry("/test_files/containerTests/" + testSetName + ".state");
 		assertNotNull("can't find test set: " + testSetName, entry);
