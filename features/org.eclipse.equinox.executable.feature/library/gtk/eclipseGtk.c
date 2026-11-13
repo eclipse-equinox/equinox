@@ -345,47 +345,61 @@ char** getArgVM( char* vm ) {
 
 JavaResults* launchJavaVM( char* args[] ) {
 	JavaResults* jvmResults = NULL;
-  	pid_t   jvmProcess, finishedProcess = 0;
-  	int     exitCode;
-  	
+	pid_t   jvmProcess, finishedProcess = 0;
+	int     exitCode;
+
+	jvmResults = malloc(sizeof(JavaResults));
+	memset(jvmResults, 0, sizeof(JavaResults));
+
 	jvmProcess = fork();
-  	if (jvmProcess == 0) 
-    {
-    	/* Child process ... start the JVM */
-      	execv(args[0], args);
+	if (jvmProcess == 0) {
+		/* Child process ... start the JVM */
+		execv(args[0], args);
 
-      	/* The JVM would not start ... return error code to parent process. */
-      	/* TODO, how to distinguish this as a launch problem to the other process? */
-      	_exit(errno);
-    }
-
-  	jvmResults = malloc(sizeof(JavaResults));
-  	memset(jvmResults, 0, sizeof(JavaResults));
-  	
+		/* The JVM would not start ... return error code to parent process. */
+		/* TODO, how to distinguish this as a launch problem to the other process? */
+		_exit(errno);
+	} else if (jvmProcess == -1) {
+		jvmResults->launchResult = errno;
+		return jvmResults;
+	}
 	/* If the JVM is still running, wait for it to terminate. */
-	if (jvmProcess != 0)
-	{
+	if (jvmProcess > 0) {
 		/* When attempting a file open, we need to spin the event loop
-		 * for setAppWindowTimerProc to run.  When that succeeds or times out, 
+		 * for setAppWindowTimerProc to run.  When that succeeds or times out,
 		 * we can stop the event loop and just wait on the child process.
 		 */
 		if (openFilePath != NULL) {
 			struct timespec sleepTime;
 			sleepTime.tv_sec = 0;
 			sleepTime.tv_nsec = 5e+8; // 500 milliseconds
-			
+
 			// Ensure we don't quit the launcher until gdbus_FileOpen_TimerProc() finished or timed out.
 			// If making any changes to this loop, ensure "./eclipse /myFile" still works.
-			while(openFileTimeout > 0 && !filesPassedToSWT && (finishedProcess = waitpid(jvmProcess, &exitCode, WNOHANG)) == 0) {
+			while(openFileTimeout > 0 && !filesPassedToSWT) {
+				finishedProcess = waitpid(jvmProcess, &exitCode, WNOHANG);
+				/* Retry if a signal interrupted the wait. */
+				if (finishedProcess == -1 && errno == EINTR)
+					continue;
+				if (finishedProcess != 0)
+					break;
 				dispatchMessages();
 				nanosleep(&sleepTime, NULL);
 			}
 		}
-		if (finishedProcess == 0)
-			waitpid(jvmProcess, &exitCode, 0);
-      	if (WIFEXITED(exitCode))
-      		/* TODO, this should really be a runResult if we could distinguish the launch problem above */
+		if (finishedProcess == 0) {
+			do {
+				finishedProcess = waitpid(jvmProcess, &exitCode, 0);
+			} while (finishedProcess == -1 && errno == EINTR);
+		}
+		if (finishedProcess == -1)
+			jvmResults->launchResult = errno;
+		else if (WIFEXITED(exitCode))
+			/* TODO, this should really be a runResult if we could distinguish the launch problem above */
 			jvmResults->launchResult = WEXITSTATUS(exitCode);
-    }
+		else if (WIFSIGNALED(exitCode))
+			/* Match the shell convention for a process terminated by a signal. */
+			jvmResults->runResult = 128 + WTERMSIG(exitCode);
+	}
 	return jvmResults;
 }

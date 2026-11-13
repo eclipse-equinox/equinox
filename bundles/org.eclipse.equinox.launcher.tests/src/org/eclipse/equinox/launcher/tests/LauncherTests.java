@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 Eclipse Foundation, Inc. and others.
+ * Copyright (c) 2023, 2026 Eclipse Foundation, Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -25,6 +25,7 @@ import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -46,6 +47,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 
 public class LauncherTests {
@@ -185,6 +188,68 @@ public class LauncherTests {
 		if (server != null) {
 			server.close();
 			server = null;
+		}
+	}
+
+	@Test
+	@EnabledOnOs(OS.LINUX)
+	void test_separateJavaProcessExitsWithZero() throws IOException, InterruptedException {
+		test_separateJavaProcess(0, false);
+	}
+
+	@Test
+	@EnabledOnOs(OS.LINUX)
+	void test_separateJavaProcessExitsWithNonzeroStatus() throws IOException, InterruptedException {
+		test_separateJavaProcess(100, false);
+	}
+
+	@Test
+	@EnabledOnOs(OS.LINUX)
+	void test_separateJavaProcessKilledBySIGKILL() throws IOException, InterruptedException {
+		test_separateJavaProcess(137, true);
+	}
+
+	@Test
+	@EnabledOnOs(OS.LINUX)
+	void test_separateJavaProcessKilledBySIGTERM() throws IOException, InterruptedException {
+		test_separateJavaProcess(143, true);
+	}
+
+	private void test_separateJavaProcess(int expectedExitCode, boolean terminateBySignal)
+			throws IOException, InterruptedException {
+		writeEclipseIni(DEFAULT_ECLIPSE_INI_CONTENT);
+		Path java = Path.of(System.getProperty("java.home"), "bin", "java").toRealPath();
+		// -Xrs leaves SIGTERM to the OS instead of the JVM's shutdown handler.
+		Process launcher = startEclipseLauncher(List.of("-vm", java.toString(), "-nosplash", "--launcher.suppressErrors",
+				"-vmargs", "-Xrs"));
+		try (Socket socket = server.accept()) {
+			socket.setSoTimeout(10000);
+			DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+			out.writeBytes(TestLauncherApp.PID_PARAMETER + "\n");
+			out.flush();
+			BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			long javaPid = Long.parseLong(in.readLine());
+			List<ProcessHandle> children = launcher.children().toList();
+			assertEquals(1, children.size(), "The launcher must start a separate Java process");
+			ProcessHandle child = children.get(0);
+			assertEquals(javaPid, child.pid(), "The Java application must run in the launcher's child");
+			if (terminateBySignal) {
+				// On Linux these send SIGKILL and SIGTERM respectively. The socket keeps
+				// the test application alive until we terminate this specific Java child.
+				assertTrue(expectedExitCode == 137 ? child.destroyForcibly() : child.destroy());
+			} else {
+				analyzeLaunchedTestApp(socket, new ArrayList<>(), null, expectedExitCode);
+			}
+			assertTrue(launcher.waitFor(10, TimeUnit.SECONDS), "The launcher did not terminate after Java exited");
+			assertEquals(expectedExitCode, launcher.exitValue(), "The outer caller must observe Java's exit status");
+			if (terminateBySignal) {
+				String error = new String(launcher.getErrorStream().readAllBytes(), StandardCharsets.UTF_8);
+				assertTrue(error.contains("Java was started but returned exit code=" + expectedExitCode), error);
+			}
+		} finally {
+			launcher.descendants().forEach(ProcessHandle::destroyForcibly);
+			launcher.destroyForcibly();
+			launcher.waitFor(5, TimeUnit.SECONDS);
 		}
 	}
 
