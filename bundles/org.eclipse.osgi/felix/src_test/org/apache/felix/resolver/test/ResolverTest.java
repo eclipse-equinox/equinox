@@ -31,10 +31,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import org.apache.felix.resolver.Logger;
 import org.apache.felix.resolver.PackageSpaces;
 import org.apache.felix.resolver.Packages;
 import org.apache.felix.resolver.ResolverImpl;
+import org.apache.felix.resolver.Util;
 import org.apache.felix.resolver.test.util.BundleCapability;
 import org.apache.felix.resolver.test.util.BundleRequirement;
 import org.apache.felix.resolver.test.util.GenericCapability;
@@ -66,7 +68,7 @@ public class ResolverTest
     @Test
     public void testScenario1() throws Exception
     {
-        Resolver resolver = new ResolverImpl(new Logger(Logger.LOG_DEBUG));
+        Resolver resolver = new ResolverImpl(getLogger());
 
         Map<Resource, Wiring> wirings = new HashMap<Resource, Wiring>();
         Map<Requirement, List<Capability>> candMap = new HashMap<Requirement, List<Capability>>();
@@ -104,7 +106,7 @@ public class ResolverTest
     @Test
     public void testScenario2() throws Exception
     {
-        Resolver resolver = new ResolverImpl(new Logger(Logger.LOG_DEBUG));
+        Resolver resolver = new ResolverImpl(getLogger());
 
         Map<Resource, Wiring> wirings = new HashMap<Resource, Wiring>();
         Map<Requirement, List<Capability>> candMap = new HashMap<Requirement, List<Capability>>();
@@ -154,7 +156,7 @@ public class ResolverTest
     @Test
     public void testScenario3() throws Exception
     {
-        Resolver resolver = new ResolverImpl(new Logger(Logger.LOG_DEBUG));
+        Resolver resolver = new ResolverImpl(getLogger());
 
         Map<Resource, Wiring> wirings = new HashMap<Resource, Wiring>();
         Map<Requirement, List<Capability>> candMap = new HashMap<Requirement, List<Capability>>();
@@ -229,7 +231,7 @@ public class ResolverTest
     @Test
     public void testScenario4() throws Exception
     {
-        Resolver resolver = new ResolverImpl(new Logger(Logger.LOG_DEBUG));
+        Resolver resolver = new ResolverImpl(getLogger());
 
         Map<Resource, Wiring> wirings = new HashMap<Resource, Wiring>();
         Map<Requirement, List<Capability>> candMap = new HashMap<Requirement, List<Capability>>();
@@ -250,7 +252,7 @@ public class ResolverTest
     @Test
     public void testScenario5() throws Exception
     {
-        Resolver resolver = new ResolverImpl(new Logger(Logger.LOG_DEBUG));
+        Resolver resolver = new ResolverImpl(getLogger());
 
         Map<Resource, Wiring> wirings = new HashMap<Resource, Wiring>();
         Map<Requirement, List<Capability>> candMap = new HashMap<Requirement, List<Capability>>();
@@ -271,7 +273,7 @@ public class ResolverTest
     @Test
     public void testScenario6() throws Exception
     {
-        Resolver resolver = new ResolverImpl(new Logger(Logger.LOG_DEBUG));
+        Resolver resolver = new ResolverImpl(getLogger());
 
         Map<Resource, Wiring> wirings = new HashMap<Resource, Wiring>();
         Map<Requirement, List<Capability>> candMap = new HashMap<Requirement, List<Capability>>();
@@ -304,7 +306,7 @@ public class ResolverTest
     @Test
     public void testScenario7() throws Exception
     {
-        Resolver resolver = new ResolverImpl(new Logger(Logger.LOG_DEBUG));
+        Resolver resolver = new ResolverImpl(getLogger());
 
         Map<Resource, Wiring> wirings = new HashMap<Resource, Wiring>();
         Map<Requirement, List<Capability>> candMap = new HashMap<Requirement, List<Capability>>();
@@ -373,7 +375,7 @@ public class ResolverTest
     @Test
     public void testScenario8() throws Exception
     {
-        Resolver resolver = new ResolverImpl(new Logger(Logger.LOG_DEBUG));
+        Resolver resolver = new ResolverImpl(getLogger());
 
         Map<Resource, Wiring> wirings = new HashMap<Resource, Wiring>();
         Map<Requirement, List<Capability>> candMap = new HashMap<Requirement, List<Capability>>();
@@ -408,7 +410,7 @@ public class ResolverTest
     @Test
     public void testScenario9() throws Exception
     {
-        Resolver resolver = new ResolverImpl(new Logger(Logger.LOG_DEBUG), 1);
+        Resolver resolver = new ResolverImpl(getLogger(), 1);
 
         Map<Resource, Wiring> wirings = new HashMap<Resource, Wiring>();
         Map<Requirement, List<Capability>> candMap = new HashMap<Requirement, List<Capability>>();
@@ -439,7 +441,7 @@ public class ResolverTest
     @Test
     public void testScenario10() throws Exception
     {
-        ResolverImpl resolver = new ResolverImpl(new Logger(Logger.LOG_DEBUG), 1);
+        ResolverImpl resolver = new ResolverImpl(getLogger(), 1);
 
         Map<Resource, Wiring> wirings = new HashMap<Resource, Wiring>();
         Map<Requirement, List<Capability>> candMap = new HashMap<Requirement, List<Capability>>();
@@ -493,7 +495,7 @@ public class ResolverTest
     @Test
     public void testScenario11() throws Exception
     {
-        ResolverImpl resolver = new ResolverImpl(new Logger(Logger.LOG_DEBUG), 1);
+        ResolverImpl resolver = new ResolverImpl(getLogger(), 1);
 
         Map<Resource, Wiring> wirings = new HashMap<Resource, Wiring>();
         Map<Requirement, List<Capability>> candMap = new HashMap<Requirement, List<Capability>>();
@@ -555,7 +557,7 @@ public class ResolverTest
     @Test(expected = ResolutionException.class)
     public void testScenario12() throws Exception
     {
-        ResolverImpl resolver = new ResolverImpl(new Logger(Logger.LOG_DEBUG), 1);
+        ResolverImpl resolver = new ResolverImpl(getLogger(), 1);
 
         Map<Resource, Wiring> wirings = new HashMap<Resource, Wiring>();
         Map<Requirement, List<Capability>> candMap = new HashMap<Requirement, List<Capability>>();
@@ -597,7 +599,7 @@ public class ResolverTest
     @Test
     public void testScenario13() throws Exception
     {
-        ResolverImpl resolver = new ResolverImpl(new Logger(Logger.LOG_DEBUG), 1);
+        ResolverImpl resolver = new ResolverImpl(getLogger(), 1);
 
         Map<Resource, Wiring> wirings = new HashMap<Resource, Wiring>();
         Map<Requirement, List<Capability>> candMap = new HashMap<Requirement, List<Capability>>();
@@ -632,7 +634,7 @@ public class ResolverTest
     @Test
     public void testScenario14() throws Exception
     {
-        ResolverImpl resolver = new ResolverImpl(new Logger(Logger.LOG_DEBUG), 1);
+        ResolverImpl resolver = new ResolverImpl(getLogger(), 1);
 
         Map<Resource, Wiring> wirings = new HashMap<Resource, Wiring>();
         Map<Requirement, List<Capability>> candMap = new HashMap<Requirement, List<Capability>>();
@@ -689,7 +691,7 @@ public class ResolverTest
     @Test
     public void testScenario15() throws Exception
     {
-        ResolverImpl resolver = new ResolverImpl(new Logger(Logger.LOG_DEBUG), 1);
+        ResolverImpl resolver = new ResolverImpl(getLogger(), 1);
 
         Map<Requirement, List<Capability>> candMap = new HashMap<Requirement, List<Capability>>();
 
@@ -770,7 +772,7 @@ public class ResolverTest
     @Test
     public void testScenario16() throws Exception
     {
-        ResolverImpl resolver = new ResolverImpl(new Logger(Logger.LOG_DEBUG), 1);
+        ResolverImpl resolver = new ResolverImpl(getLogger(), 1);
 
         Map<Requirement, List<Capability>> candMap = new HashMap<Requirement, List<Capability>>();
 
@@ -830,14 +832,14 @@ public class ResolverTest
     public void testPackageSources() throws Exception {
         Capability cap = Mockito.mock(Capability.class);
         assertEquals(Collections.emptySet(),
-				PackageSpaces.getPackageSources(cap, new HashMap<Resource, Packages>()));
+                PackageSpaces.getPackageSources(cap, new HashMap<Resource, Packages>()));
 
         Capability cap2 = Mockito.mock(Capability.class);
         Resource res2 = Mockito.mock(Resource.class);
         Mockito.when(cap2.getResource()).thenReturn(res2);
         Map<Resource, Packages> map2 = new HashMap<Resource, Packages>();
         map2.put(res2, new Packages(res2));
-		assertEquals(Collections.emptySet(), PackageSpaces.getPackageSources(cap2, map2));
+        assertEquals(Collections.emptySet(), PackageSpaces.getPackageSources(cap2, map2));
 
         Capability cap3 = Mockito.mock(Capability.class);
         Resource res3 = Mockito.mock(Resource.class);
@@ -849,7 +851,7 @@ public class ResolverTest
                 cap3, srcCaps3);
         pkgs3.m_sources.putAll(srcMap3);
         map3.put(res3, pkgs3);
-		assertEquals(srcCaps3, PackageSpaces.getPackageSources(cap3, map3));
+        assertEquals(srcCaps3, PackageSpaces.getPackageSources(cap3, map3));
 
     }
 
@@ -857,7 +859,7 @@ public class ResolverTest
     public void testScenario17_1() throws Exception
     {
         ResolveContext rci = populateScenario17(false, false, false);
-        ResolverImpl resolver = new ResolverImpl(new Logger(Logger.LOG_DEBUG), 1);
+        ResolverImpl resolver = new ResolverImpl(getLogger(), 1);
         resolver.resolve(rci);
     }
 
@@ -865,7 +867,7 @@ public class ResolverTest
     public void testScenario17_2() throws Exception
     {
         ResolveContext rci = populateScenario17(false, false, true);
-        ResolverImpl resolver = new ResolverImpl(new Logger(Logger.LOG_DEBUG), 1);
+        ResolverImpl resolver = new ResolverImpl(getLogger(), 1);
         resolver.resolve(rci);
     }
 
@@ -873,7 +875,7 @@ public class ResolverTest
     public void testScenario17_3() throws Exception
     {
         ResolveContext rci = populateScenario17(true, false, false);
-        ResolverImpl resolver = new ResolverImpl(new Logger(Logger.LOG_DEBUG), 1);
+        ResolverImpl resolver = new ResolverImpl(getLogger(), 1);
         resolver.resolve(rci);
     }
 
@@ -881,7 +883,7 @@ public class ResolverTest
     public void testScenario17_4() throws Exception
     {
         ResolveContext rci = populateScenario17(true, false, true);
-        ResolverImpl resolver = new ResolverImpl(new Logger(Logger.LOG_DEBUG), 1);
+        ResolverImpl resolver = new ResolverImpl(getLogger(), 1);
         resolver.resolve(rci);
     }
 
@@ -889,7 +891,7 @@ public class ResolverTest
     public void testScenario17_5() throws Exception
     {
         ResolveContext rci = populateScenario17(false, true, true);
-        ResolverImpl resolver = new ResolverImpl(new Logger(Logger.LOG_DEBUG), 1);
+        ResolverImpl resolver = new ResolverImpl(getLogger(), 1);
         resolver.resolve(rci);
     }
 
@@ -897,7 +899,7 @@ public class ResolverTest
     public void testScenario17_6() throws Exception
     {
         ResolveContext rci = populateScenario17(true, true, true);
-        ResolverImpl resolver = new ResolverImpl(new Logger(Logger.LOG_DEBUG), 1);
+        ResolverImpl resolver = new ResolverImpl(getLogger(), 1);
         resolver.resolve(rci);
     }
 
@@ -905,7 +907,7 @@ public class ResolverTest
     public void testScenario18() throws Exception
     {
         ResolveContext rci = populateScenario18();
-        ResolverImpl resolver = new ResolverImpl(new Logger(Logger.LOG_DEBUG), 1);
+        ResolverImpl resolver = new ResolverImpl(getLogger(), 1);
         resolver.resolve(rci);
     }
 
@@ -913,7 +915,7 @@ public class ResolverTest
     public void testScenario19() throws Exception
     {
         ResolveContext rci = populateScenario19();
-        ResolverImpl resolver = new ResolverImpl(new Logger(Logger.LOG_DEBUG), 1);
+        ResolverImpl resolver = new ResolverImpl(getLogger(), 1);
         Map<Resource, List<Wire>> result = resolver.resolve(rci);
 
         assertEquals("Wrong number of resolved bundles", 9, result.size());
@@ -1710,6 +1712,34 @@ public class ResolverTest
         public Resource getResource() {
             return resource;
         }
+    }
+
+    private static Logger getLogger() {
+        return new Logger(Logger.LOG_DEBUG) {
+            @Override
+            public void logCandidates(Resource resource, Function<Requirement, List<Capability>> candidateLookup) {
+                debug("-- " + Util.getSymbolicName(resource) + " --");
+                for (Requirement requirement : resource.getRequirements(null)) {
+                    debug(" Require " + requirement + ":");
+                    List<Capability> list = candidateLookup.apply(requirement);
+                    for (Capability capability : list) {
+                        Resource r2 = capability.getResource();
+                        debug("  provided by " + Util.getSymbolicName(r2) + " | "
+                                + capability
+                                + " | uses = " + Util.getUses(capability));
+                        for (Requirement sub_r : r2.getRequirements(null)) {
+                            debug("     R: " + sub_r);
+                        }
+                        for (Capability sub_c : r2.getCapabilities(null)) {
+                            debug("     P: " + sub_c);
+                        }
+                    }
+                }
+                for (Capability capability : resource.getCapabilities(null)) {
+                    debug(" Provide " + capability);
+                }
+            }
+        };
     }
 }
 
