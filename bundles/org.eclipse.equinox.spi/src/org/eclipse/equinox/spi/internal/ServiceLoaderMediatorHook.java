@@ -305,10 +305,10 @@ public class ServiceLoaderMediatorHook extends ClassLoaderHook implements Bundle
 
 	@Override
 	public Class<?> preFindClass(String classname, ModuleClassLoader classLoader) throws ClassNotFoundException {
-		Set<String> potentialServiceTypes = new HashSet<>(3);
 		if (!isConsumer(classLoader.getBundle())) {
 			return null;
 		}
+		Set<String> potentialServiceTypes = new HashSet<>(3);
 		List<Bundle> providerBundles = List.of();
 		try (RuntimeCloseable locked = lock(lock.readLock())) {
 			Set<BundleServices> services = allProvidedServices.get(classname); // set is mutable
