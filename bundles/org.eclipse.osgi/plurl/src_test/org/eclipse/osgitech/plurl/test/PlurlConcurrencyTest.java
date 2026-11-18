@@ -1,0 +1,105 @@
+/*******************************************************************************
+ * Copyright (c) Contributors to the Eclipse Foundation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *******************************************************************************/
+package org.eclipse.osgitech.plurl.test;
+
+import static org.eclipse.osgitech.plurl.test.PlurlContentHandlerFactoryTest.checkContent;
+import static org.eclipse.osgitech.plurl.test.PlurlStreamHandlerFactoryTest.checkProtocol;
+import static org.eclipse.osgitech.plurl.test.PlurlTestHandlers.createTestContentHandlerFactory;
+import static org.eclipse.osgitech.plurl.test.PlurlTestHandlers.createTestURLStreamHandlerFactory;
+import static org.eclipse.osgitech.plurl.test.PlurlTestHandlers.TestFactoryType.PLURL_FACTORY;
+import static org.junit.Assert.assertNull;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+import org.eclipse.osgitech.plurl.test.PlurlTestHandlers.TestContentHandlerFactory;
+import org.eclipse.osgitech.plurl.test.PlurlTestHandlers.TestURLStreamHandlerFactory;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.Test;
+
+public class PlurlConcurrencyTest {
+	private static PlurlTestHandlers plurlTestHandlers;
+
+	@Before
+	public synchronized void installPlurl() {
+		if (plurlTestHandlers == null) {
+			plurlTestHandlers = new PlurlTestHandlers();
+		}
+	}
+
+	@After
+	public void cleanupHandlers() {
+		plurlTestHandlers.cleanupHandlers();
+	}
+
+	@AfterClass
+	public static void uninstallPlurl() {
+		plurlTestHandlers.uninstall(true);
+		plurlTestHandlers = null;
+	}
+
+
+	private static final int CONCURRENT_THREAD_COUNT = 10;
+	private static final String TEST_PROTOCOL_CONTENT_TYPE = "concurrent-get-content"; //$NON-NLS-1$
+
+	@Test
+	public void testConcurrentGetContentCalls() throws InterruptedException, IOException {
+		// install the URL handler, unique to this test
+		TestURLStreamHandlerFactory testPlurlFactory = createTestURLStreamHandlerFactory(PLURL_FACTORY,
+				TEST_PROTOCOL_CONTENT_TYPE);
+		testPlurlFactory.shouldHandle.set(true);
+		plurlTestHandlers.add(PLURL_FACTORY, testPlurlFactory);
+		checkProtocol(testPlurlFactory.TYPES, true);
+
+		// install the content factory, unique to this test
+		TestContentHandlerFactory testContentFactory = createTestContentHandlerFactory(PLURL_FACTORY,
+				TEST_PROTOCOL_CONTENT_TYPE);
+		testContentFactory.shouldHandle.set(true);
+		plurlTestHandlers.add(PLURL_FACTORY, testContentFactory);
+
+		List<Thread> threads = new ArrayList<>();
+		List<AtomicReference<Throwable>> errors = new ArrayList<>();
+
+		for (int i = 0; i < CONCURRENT_THREAD_COUNT; i++) {
+			AtomicReference<Throwable> error = new AtomicReference<>();
+			errors.add(error);
+
+			Thread thread = new Thread(() -> {
+				try {
+					checkContent(testContentFactory.TYPES, true);
+				} catch (Throwable t) {
+					error.set(t);
+				}
+			});
+			threads.add(thread);
+			thread.start();
+		}
+
+		for (Thread thread : threads) {
+			thread.join();
+		}
+
+		for (int i = 0; i < errors.size(); i++) {
+			Throwable t = errors.get(i).get();
+			assertNull("Thread threw an error: " + i, t); //$NON-NLS-1$
+		}
+	}
+}

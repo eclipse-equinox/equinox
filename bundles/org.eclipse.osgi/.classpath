@@ -8,6 +8,11 @@
 			<attribute name="ignore_optional_problems" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="src" path="plurl/src">
+		<attributes>
+			<attribute name="ignore_optional_problems" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="src" path="felix/src">
 		<attributes>
 			<attribute name="ignore_optional_problems" value="true"/>
@@ -15,14 +20,15 @@
 	</classpathentry>
 	<classpathentry kind="src" path="supplement/src"/>
 	<classpathentry kind="src" path="container/src"/>
-	<classpathentry kind="src" output="bin_test" path="felix/src_test">
+	<classpathentry kind="src" output="bin_test" path="plurl/src_test">
 		<attributes>
-			<attribute name="test" value="true"/>
 			<attribute name="ignore_optional_problems" value="true"/>
+			<attribute name="test" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" output="bin_test" path="container/src_test">
+	<classpathentry kind="src" output="bin_test" path="felix/src_test">
 		<attributes>
+			<attribute name="ignore_optional_problems" value="true"/>
 			<attribute name="test" value="true"/>
 		</attributes>
 	</classpathentry>

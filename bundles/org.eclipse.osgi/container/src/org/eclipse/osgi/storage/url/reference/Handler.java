@@ -17,7 +17,7 @@ package org.eclipse.osgi.storage.url.reference;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
-import org.eclipse.equinox.plurl.PlurlStreamHandlerBase;
+import org.eclipse.osgitech.plurl.PlurlStreamHandlerBase;
 
 /**
  * URLStreamHandler for reference protocol. A reference URL is used to hold a
