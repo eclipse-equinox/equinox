@@ -98,9 +98,8 @@ final class BundleServices { // This class is designed to become a record when p
 			// See chapter 133.4 -- Service Provider Bundles
 			// https://docs.osgi.org/specification/osgi.cmpn/8.0.0/service.loader.html#d0e80557
 
-			Map<String, List<String>> provided = getAdvertisedServiceProviders(bundleRevision);
 			Map<String, List<ServicePublication>> published = getPublishedServices(bundleRevision);
-			provided.keySet().retainAll(published.keySet());
+			Map<String, List<String>> provided = getAdvertisedServiceProviders(bundleRevision, published.keySet());
 
 			if (!hasOSGiExtenderRequirement(hostingWiring, "(osgi.extender=osgi.serviceloader.registrar)")) { //$NON-NLS-1$
 				published = mapOf(); // Skip registration as OSGi services
@@ -137,9 +136,14 @@ final class BundleServices { // This class is designed to become a record when p
 				.collect(Collectors.groupingBy(ServicePublication::serviceType));
 	}
 
-	private static Map<String, List<String>> getAdvertisedServiceProviders(BundleRevision resource) {
+	private static Map<String, List<String>> getAdvertisedServiceProviders(BundleRevision resource,
+			Set<String> publishedServiceTypes) {
 		// See chapter 133.4.1 -- Advertising
 		// https://docs.osgi.org/specification/osgi.cmpn/8.0.0/service.loader.html#d0e80542
+		// Only providers of published service types are used, so avoid opening the jar of every other bundle
+		if (publishedServiceTypes.isEmpty()) {
+			return mapOf();
+		}
 		Map<String, List<String>> advertisedServiceProviders = new HashMap<>();
 		Bundle bundle = resource.getBundle();
 		Enumeration<String> providerConfigurationFiles = bundle
@@ -150,8 +154,8 @@ final class BundleServices { // This class is designed to become a record when p
 		while (providerConfigurationFiles.hasMoreElements()) {
 			String path = providerConfigurationFiles.nextElement();
 			String service = ServiceLoaderMediatorHook.serviceNameFromPath(path);
-			if (service == null) {
-				continue; // Not a service provider-configuration file in services directory
+			if (service == null || !publishedServiceTypes.contains(service)) {
+				continue; // Not a service provider-configuration file of a published service
 			}
 			List<String> serviceProviders = readServiceFile(bundle, path);
 			if (!serviceProviders.isEmpty() && advertisedServiceProviders.put(service, serviceProviders) != null) {
