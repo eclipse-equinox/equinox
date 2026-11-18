@@ -30,10 +30,12 @@ int createSharedData(_TCHAR** id, int size) {
 	HANDLE mapHandle = CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, size, NULL);
 	if (mapHandle == 0) return -1;
 	if (id != NULL) {
-		*id = malloc(18 * sizeof(_TCHAR));
 #ifdef WIN64
+		/* "%lx_%I64x" is up to 8 + 1 + 16 _TCHARs plus the terminating nul */
+		*id = malloc(26 * sizeof(_TCHAR));
 		_stprintf(*id, _T_ECLIPSE("%lx_%I64x"), GetCurrentProcessId(), (DWORDLONG) mapHandle);
 #else
+		*id = malloc(18 * sizeof(_TCHAR));
 		_stprintf(*id, _T_ECLIPSE("%lx_%lx"), GetCurrentProcessId(), (DWORD) mapHandle);
 #endif
 	}
