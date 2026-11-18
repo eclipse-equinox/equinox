@@ -20,6 +20,7 @@ package org.apache.felix.resolver;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.felix.resolver.Candidates.FaultyResourcesReport;
@@ -57,7 +58,8 @@ public class Backlog {
     public Candidates getNext() {
         Candidates candidates;
         while ((candidates = session.getNextPermutation()) != null) {
-            ResolutionError substituteError = candidates.checkSubstitutes();
+            List<Candidates> alternatives = candidates.process(session.getLogger());
+            alternatives.forEach(alt -> session.addPermutation(PermutationType.SUBSTITUTE, alt));
             FaultyResourcesReport report = candidates.getFaultyResources(Collections.emptyMap());
             if (!report.isMissing() || session.isCancelled()) {
                 return candidates;
