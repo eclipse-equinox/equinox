@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
 import org.eclipse.osgi.container.ModuleRevisionBuilder.GenericInfo;
@@ -70,6 +71,9 @@ public final class ModuleWiring implements BundleWiring {
 	private volatile NamespaceList<ModuleWire> providedWires;
 	private volatile NamespaceList<ModuleWire> requiredWires;
 	volatile boolean isValid = true;
+	// wirings that got classes from this wiring through a DelegationHook; weak so
+	// the asking class loaders are not pinned
+	private final Set<ModuleWiring> delegationDependents = Collections.newSetFromMap(new WeakHashMap<>());
 	private final AtomicReference<Set<String>> dynamicMissRef = new AtomicReference<>();
 
 	ModuleWiring(ModuleRevision revision, NamespaceList<ModuleCapability> capabilities,
@@ -82,6 +86,27 @@ public final class ModuleWiring implements BundleWiring {
 		this.providedWires = providedWires;
 		this.requiredWires = requiredWires;
 		this.substitutedPkgNames = substitutedPkgNames.isEmpty() ? Collections.emptyList() : substitutedPkgNames;
+	}
+
+	/**
+	 * Records that the given wiring uses classes of this wiring without a wire,
+	 * so it is part of the dependency closure of this wiring.
+	 *
+	 * @param dependent the wiring that got a class of this wiring
+	 */
+	public void addDelegationDependent(ModuleWiring dependent) {
+		if (dependent == this) {
+			return;
+		}
+		synchronized (delegationDependents) {
+			delegationDependents.add(dependent);
+		}
+	}
+
+	List<ModuleWiring> getDelegationDependents() {
+		synchronized (delegationDependents) {
+			return new ArrayList<>(delegationDependents);
+		}
 	}
 
 	@Override
