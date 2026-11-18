@@ -118,5 +118,11 @@ extern int reuseWorkbench(_TCHAR** filePath, int timeout);
 
 extern _TCHAR* getFolderForApplicationData();
 
+extern _TCHAR* getOSUserDataDirectory();
+
+extern _TCHAR* getOSUserDataSharedDirectory();
+
+extern _TCHAR* getOSUserDocumentsDirectory();
+
 #endif /* ECLIPSE_OS_H */
 
