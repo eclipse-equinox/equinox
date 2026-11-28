@@ -29,6 +29,7 @@
 #include <string.h>
 #include <errno.h>
 #include <sys/stat.h>
+#include <shlobj.h>
 
 #ifdef __MINGW32__
 #include <stdlib.h>
@@ -740,4 +741,28 @@ void processVMArgs(_TCHAR **vmargs[] ) {
 JavaResults* startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[], _TCHAR* jarFile )
 {
 	return startJavaJNI(libPath, vmArgs, progArgs, jarFile);
+}
+
+_TCHAR* getOSUserDataDirectory() {
+	_TCHAR path[MAX_PATH];
+	if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, SHGFP_TYPE_CURRENT, path))) {
+		return _tcsdup(path);
+	}
+	return NULL;
+}
+
+_TCHAR* getOSUserDataSharedDirectory() {
+	_TCHAR path[MAX_PATH];
+	if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_COMMON_APPDATA, NULL, SHGFP_TYPE_CURRENT, path))) {
+		return _tcsdup(path);
+	}
+	return NULL;
+}
+
+_TCHAR* getOSUserDocumentsDirectory() {
+	_TCHAR path[MAX_PATH];
+	if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, path))) {
+		return _tcsdup(path);
+	}
+	return NULL;
 }
