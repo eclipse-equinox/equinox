@@ -2050,6 +2050,7 @@ public class TestModuleContainer extends AbstractTest {
 		// use the number of processors - 1 because we use the current thread when
 		// rejected
 		int maxThreads = Math.max(Runtime.getRuntime().availableProcessors() - 1, 1);
+		System.out.println("testUsesTimeout starting with thread count: " + maxThreads);
 		// idle timeout; make it short to get rid of threads quickly after resolve
 		int idleTimeout = 5;
 		// use sync queue to force thread creation
