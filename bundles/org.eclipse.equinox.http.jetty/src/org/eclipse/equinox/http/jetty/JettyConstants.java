@@ -81,28 +81,28 @@ public interface JettyConstants {
 	 * @deprecated
 	 * @since 1.3
 	 */
-	@Deprecated
+	@Deprecated(forRemoval = true, since = "2026-03")
 	public static final String MULTIPART_FILESIZETHRESHOLD = "multipart.fileSizeThreshold"; //$NON-NLS-1$
 
 	/**
 	 * @deprecated
 	 * @since 1.3
 	 */
-	@Deprecated
+	@Deprecated(forRemoval = true, since = "2026-03")
 	public static final String MULTIPART_LOCATION = "multipart.location"; //$NON-NLS-1$
 
 	/**
 	 * @deprecated
 	 * @since 1.3
 	 */
-	@Deprecated
+	@Deprecated(forRemoval = true, since = "2026-03")
 	public static final String MULTIPART_MAXFILESIZE = "multipart.maxFileSize"; //$NON-NLS-1$
 
 	/**
 	 * @deprecated
 	 * @since 1.3
 	 */
-	@Deprecated
+	@Deprecated(forRemoval = true, since = "2026-03")
 	public static final String MULTIPART_MAXREQUESTSIZE = "multipart.maxRequestSize"; //$NON-NLS-1$
 
 	/**
