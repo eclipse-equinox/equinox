@@ -26,7 +26,10 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -4404,6 +4407,12 @@ public class TestModuleContainer extends AbstractTest {
 		assertSucessfulWith(result, 9, 18, 1, 42);
 	}
 
+	@Test
+	public void testBcSet() throws Exception {
+		ResolutionReport result = resolveModuleDatabaseDump("bc", TimeUnit.MINUTES.toSeconds(5));
+		assertSucessfulWith(result, Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
+	}
+
 	private ResolutionReport resolveModuleDatabaseDump(String testSetName, long batchTimeoutSeconds) throws Exception {
 		URL entry = getBundle().getEntry("/test_files/containerTests/" + testSetName + ".state");
 		assertNotNull("can't find test set: " + testSetName, entry);
@@ -4553,5 +4562,30 @@ public class TestModuleContainer extends AbstractTest {
 			}
 		}
 		return result;
+	}
+
+	/**
+	 * The main class takes a module database and compress/anonymous it by replace
+	 * all locations with a running number
+	 * 
+	 * @param args
+	 * @throws Exception
+	 */
+	public static void main(String[] args) throws Exception {
+		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(new DummyCollisionHook(false), null);
+		DummyModuleDatabase moduleDatabase = adaptor.getDatabase();
+		try (DataInputStream stream = new DataInputStream(new FileInputStream(args[0]))) {
+			moduleDatabase.load(stream);
+		}
+		List<Module> modules = adaptor.getContainer().getModules();
+		Field field = Module.class.getDeclaredField("location");
+		field.setAccessible(true);
+		int cnt = 0;
+		for (Module module : modules) {
+			field.set(module, Integer.toString(cnt++));
+		}
+		try (DataOutputStream out = new DataOutputStream(new FileOutputStream(args[0] + ".compressed"))) {
+			moduleDatabase.store(out, false);
+		}
 	}
 }
