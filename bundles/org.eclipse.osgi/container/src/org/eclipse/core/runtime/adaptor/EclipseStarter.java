@@ -56,6 +56,7 @@ import org.eclipse.osgi.report.resolution.ResolutionReport;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
 import org.eclipse.osgi.service.runnable.ApplicationLauncher;
+import org.eclipse.osgi.service.runnable.NoApplicationException;
 import org.eclipse.osgi.service.runnable.StartupMonitor;
 import org.eclipse.osgi.storage.url.reference.Handler;
 import org.eclipse.osgi.util.ManifestElement;
@@ -290,6 +291,10 @@ public class EclipseStarter {
 		if (running)
 			throw new IllegalStateException(Msg.ECLIPSE_STARTUP_ALREADY_RUNNING);
 		boolean startupFailed = true;
+		// set when no application could be found/launched but a console is available;
+		// in that case we keep the framework (and console) running instead of
+		// shutting down so the situation can be diagnosed/fixed interactively
+		boolean keepRunningForConsole = false;
 		try {
 			startup(args, endSplashHandler);
 			startupFailed = false;
@@ -300,15 +305,28 @@ public class EclipseStarter {
 			// ensure the splash screen is down
 			if (endSplashHandler != null)
 				endSplashHandler.run();
-			// may use startupFailed to understand where the error happened
-			FrameworkLogEntry logEntry = new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0,
-					startupFailed ? Msg.ECLIPSE_STARTUP_STARTUP_ERROR : Msg.ECLIPSE_STARTUP_APP_ERROR, 1, e, null);
-			if (log != null)
-				log.log(logEntry);
-			else
-				// TODO desperate measure - ideally, we should write this to disk (a la
-				// Main.log)
-				e.printStackTrace();
+			NoApplicationException noApplication = startupFailed ? null : findNoApplicationException(e);
+			if (noApplication != null && isConsoleEnabled()) {
+				keepRunningForConsole = true;
+				FrameworkLogEntry logEntry = new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.WARNING,
+						0, NLS.bind(Msg.ECLIPSE_STARTUP_NO_APPLICATION_CONSOLE, noApplication.getMessage()), 0, null,
+						null);
+				if (log != null)
+					log.log(logEntry);
+				else
+					System.err.println(logEntry.getMessage());
+			} else {
+				// may use startupFailed to understand where the error happened
+				FrameworkLogEntry logEntry = new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0,
+						startupFailed ? Msg.ECLIPSE_STARTUP_STARTUP_ERROR : Msg.ECLIPSE_STARTUP_APP_ERROR, 1, e,
+						null);
+				if (log != null)
+					log.log(logEntry);
+				else
+					// TODO desperate measure - ideally, we should write this to disk (a la
+					// Main.log)
+					e.printStackTrace();
+			}
 		} finally {
 			try {
 				// The application typically sets the exit code however the framework can
@@ -317,7 +335,11 @@ public class EclipseStarter {
 				// code.
 				if (isForcedRestart())
 					setProperty(PROP_EXITCODE, "23"); //$NON-NLS-1$
-				if (!Boolean.valueOf(getProperty(PROP_NOSHUTDOWN)).booleanValue())
+				if (keepRunningForConsole)
+					// do not shut down the framework; wait until it is stopped explicitly
+					// (e.g. via the console) so it remains usable for diagnostics
+					waitForShutdown();
+				else if (!Boolean.valueOf(getProperty(PROP_NOSHUTDOWN)).booleanValue())
 					shutdown();
 			} catch (Throwable e) {
 				FrameworkLogEntry logEntry = new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0,
@@ -330,11 +352,39 @@ public class EclipseStarter {
 					e.printStackTrace();
 			}
 		}
+		if (keepRunningForConsole)
+			// the framework was kept running on purpose; treat this as a normal exit
+			// once it is eventually stopped instead of reporting a startup error
+			return null;
 		// we only get here if an error happened
 		if (getProperty(PROP_EXITCODE) == null) {
 			setProperty(PROP_EXITCODE, "13"); //$NON-NLS-1$
 			setProperty(PROP_EXITDATA,
 					NLS.bind(Msg.ECLIPSE_STARTUP_ERROR_CHECK_LOG, log == null ? null : log.getFile().getPath()));
+		}
+		return null;
+	}
+
+	/*
+	 * Returns whether an OSGi console was requested on the command line (i.e.
+	 * -console was specified with something other than "none").
+	 */
+	private static boolean isConsoleEnabled() {
+		String consoleProp = getProperty(PROP_CONSOLE);
+		return consoleProp != null && !"none".equals(consoleProp); //$NON-NLS-1$
+	}
+
+	/*
+	 * Walks the cause chain of the given throwable looking for a
+	 * NoApplicationException, which indicates that no application could be found
+	 * or launched.
+	 */
+	private static NoApplicationException findNoApplicationException(Throwable e) {
+		for (Throwable t = e; t != null; t = t.getCause()) {
+			if (t instanceof NoApplicationException)
+				return (NoApplicationException) t;
+			if (t.getCause() == t)
+				break; // avoid infinite loop for self-referencing causes
 		}
 		return null;
 	}

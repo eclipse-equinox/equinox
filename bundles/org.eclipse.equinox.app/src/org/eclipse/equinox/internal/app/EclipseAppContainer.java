@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.*;
 import org.eclipse.equinox.app.IApplicationContext;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.service.runnable.ApplicationLauncher;
+import org.eclipse.osgi.service.runnable.NoApplicationException;
 import org.eclipse.osgi.service.runnable.ParameterizedRunnable;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
@@ -259,14 +260,14 @@ public class EclipseAppContainer
 		args.put(EclipseAppDescriptor.APP_DEFAULT, Boolean.TRUE);
 		if (applicationId == null && !delayError) {
 			// the application id is not set; use a descriptor that will throw an exception
-			args.put(ErrorApplication.ERROR_EXCEPTION, new RuntimeException(Messages.application_noIdFound));
+			args.put(ErrorApplication.ERROR_EXCEPTION, new NoApplicationException(Messages.application_noIdFound));
 			defaultDesc = getAppDescriptor(EXT_ERROR_APP);
 		} else {
 			defaultDesc = getAppDescriptor(applicationId);
 			if (defaultDesc == null && !delayError) {
 				// the application id is not available in the registry; use a descriptor that
 				// will throw an exception
-				args.put(ErrorApplication.ERROR_EXCEPTION, new RuntimeException(
+				args.put(ErrorApplication.ERROR_EXCEPTION, new NoApplicationException(
 						NLS.bind(Messages.application_notFound, applicationId, getAvailableAppsMsg())));
 				defaultDesc = getAppDescriptor(EXT_ERROR_APP);
 			}
