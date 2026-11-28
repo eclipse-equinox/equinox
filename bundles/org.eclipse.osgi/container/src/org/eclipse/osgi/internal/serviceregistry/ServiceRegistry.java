@@ -42,6 +42,7 @@ import org.eclipse.osgi.framework.eventmgr.ListenerQueue;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.BundleContextImpl;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
+import org.eclipse.osgi.internal.loader.DelegationHookSupport;
 import org.eclipse.osgi.internal.framework.FilterImpl;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.internal.serviceregistry.ServiceRegistrationImpl.FrameworkHookRegistration;
@@ -120,6 +121,7 @@ public class ServiceRegistry {
 	private static final int initialSubCapacity = 10;
 	/** container which created this service registry */
 	private final EquinoxContainer container;
+	private final DelegationHookSupport delegationHooks;
 	private final BundleContextImpl systemBundleContext;
 	final Debug debug;
 
@@ -136,6 +138,7 @@ public class ServiceRegistry {
 				org.osgi.framework.hooks.bundle.CollisionHook.class, //
 				org.osgi.framework.hooks.bundle.EventHook.class, //
 				org.osgi.framework.hooks.bundle.FindHook.class, //
+				org.osgi.framework.hooks.delegation.DelegationHook.class, //
 				org.osgi.framework.hooks.service.EventHook.class, //
 				org.osgi.framework.hooks.service.EventListenerHook.class, //
 				org.osgi.framework.hooks.service.FindHook.class, //
@@ -175,6 +178,7 @@ public class ServiceRegistry {
 	 */
 	public ServiceRegistry(EquinoxContainer container) {
 		this.container = container;
+		this.delegationHooks = new DelegationHookSupport(this, container);
 		this.debug = container.getConfiguration().getDebug();
 		serviceid = 1;
 		publishedServicesByClass = new HashMap<>(initialCapacity);
@@ -1395,6 +1399,20 @@ public class ServiceRegistry {
 					+ result + ")"); //$NON-NLS-1$
 		}
 		notifyHooksPrivileged(EventListenerHook.class, "event", (hook, r) -> hook.event(event, result)); //$NON-NLS-1$
+	}
+
+	public DelegationHookSupport getDelegationHooks() {
+		return delegationHooks;
+	}
+
+	/**
+	 * Returns true if at least one hook service of the given type is registered.
+	 *
+	 * @param hookType the hook type
+	 * @return true if a hook is registered
+	 */
+	public boolean hasHooks(Class<?> hookType) {
+		return !getHookRegistrations(hookType.getName()).isEmpty();
 	}
 
 	/**
